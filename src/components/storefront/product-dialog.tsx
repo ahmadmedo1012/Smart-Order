@@ -171,7 +171,7 @@ export function ProductDialog({
                         key={o.id}
                         type="button"
                         onClick={() => toggleOption(g.id, o.id, g.maxSelect)}
-                        aria-pressed={isSelected}
+                        aria-checked={isSelected}
                         role={g.maxSelect > 1 ? "checkbox" : "radio"}
                         className={`w-full flex items-center gap-3 rounded-xl border px-3.5 h-11 text-start transition-colors ${
                           isSelected ? "border-primary bg-primary/10" : "border-border hover:bg-muted/60"
