@@ -33,6 +33,11 @@ if (typeof setInterval !== "undefined") {
 
 export function clientIp(req: Request): string {
   const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
+  if (fwd) {
+    // Behind a trusted proxy (Render), the LAST entry is the proxy-appended client IP.
+    // Earlier entries can be spoofed by the client — never trust them for limiting.
+    const parts = fwd.split(",").map((s) => s.trim()).filter(Boolean);
+    if (parts.length > 0) return parts[parts.length - 1];
+  }
   return req.headers.get("x-real-ip") ?? "unknown";
 }
