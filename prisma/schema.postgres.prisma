@@ -1,0 +1,336 @@
+// Smart Order — Prisma schema (SQLite dev variant)
+// PostgreSQL production variant lives in prisma/schema.postgres.prisma (identical models, provider = postgresql)
+// Money convention: ALL amounts stored as Int millimes (1 LYD = 1000 millimes, 3-decimal precision). Never floats.
+// Enums unsupported on SQLite → String fields validated in lib/constants.ts. JSON → String fields via helpers.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Business {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  name           String
+  description    String?
+  logoUrl        String?
+  coverUrl       String?
+  city           String?
+  phone          String?
+  whatsappNumber String? // E.164 digits, Libyan normalization applied
+  address        String?
+  receiptFooter  String?
+  currency       String   @default("LYD")
+  isActive       Boolean  @default(true)
+  isPublished    Boolean  @default(false)
+  onboardingStep Int      @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  members        BusinessMember[]
+  categories     Category[]
+  products       Product[]
+  deliveryZones  DeliveryZone[]
+  paymentMethods PaymentMethod[]
+  customers      Customer[]
+  orders         Order[]
+  media          Media[]
+  auditLogs      AuditLog[]
+}
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String
+  passwordHash    String
+  phone           String?
+  isPlatformAdmin Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sessions    Session[]
+  memberships BusinessMember[]
+}
+
+model BusinessMember {
+  id          String   @id @default(cuid())
+  businessId  String
+  userId      String
+  role        String   @default("STAFF") // OWNER | ADMIN | STAFF
+  extraPerms  String   @default("") // comma-separated permissions beyond role defaults
+  createdAt   DateTime @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, userId])
+  @@index([userId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  ip        String?
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  businessId  String
+  name        String
+  description String?
+  imageUrl    String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  isArchived  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@index([businessId, sortOrder])
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  businessId       String
+  categoryId       String?
+  name             String
+  description      String?
+  imageUrl         String?
+  price            Int // millimes
+  isAvailable      Boolean  @default(true)
+  isFeatured       Boolean  @default(false)
+  sortOrder        Int      @default(0)
+  isArchived       Boolean  @default(false)
+  trackInventory   Boolean  @default(false)
+  stockQuantity    Int      @default(0)
+  lowStockAlert    Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  business     Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  category     Category?         @relation(fields: [categoryId], references: [id])
+  variants     ProductVariant[]
+  optionGroups OptionGroup[]
+
+  @@index([businessId, isArchived])
+  @@index([businessId, categoryId])
+}
+
+model ProductVariant {
+  id         String  @id @default(cuid())
+  productId  String
+  name       String
+  priceDelta Int     @default(0) // millimes added to product price
+  sortOrder  Int     @default(0)
+  isActive   Boolean @default(true)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+}
+
+model OptionGroup {
+  id        String  @id @default(cuid())
+  productId String
+  name      String
+  minSelect Int     @default(0)
+  maxSelect Int     @default(1)
+  required  Boolean @default(false)
+  sortOrder Int     @default(0)
+
+  product Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  options OptionItem[]
+
+  @@index([productId, sortOrder])
+}
+
+model OptionItem {
+  id         String  @id @default(cuid())
+  groupId    String
+  name       String
+  priceDelta Int     @default(0)
+  isActive   Boolean @default(true)
+  sortOrder  Int     @default(0)
+
+  group OptionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, sortOrder])
+}
+
+model DeliveryZone {
+  id         String   @id @default(cuid())
+  businessId String
+  name       String
+  fee        Int      @default(0) // millimes
+  minOrder   Int      @default(0) // millimes; 0 = no minimum
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, sortOrder])
+}
+
+model PaymentMethod {
+  id           String   @id @default(cuid())
+  businessId   String
+  type         String // CASH | COD | MANUAL | WHATSAPP | MADAR | LIBYANA
+  name         String // Arabic display name
+  instructions String? // shown to customer at checkout
+  config       String? // JSON string { number?: string }
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, type])
+}
+
+model Customer {
+  id         String   @id @default(cuid())
+  businessId String
+  name       String
+  phone      String // normalized Libyan digits
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  business  Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  addresses CustomerAddress[]
+  orders    Order[]
+
+  @@unique([businessId, phone])
+  @@index([businessId, createdAt])
+}
+
+model CustomerAddress {
+  id          String  @id @default(cuid())
+  customerId  String
+  label       String?
+  city        String
+  area        String?
+  addressLine String
+  isDefault   Boolean @default(false)
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+}
+
+model Order {
+  id               String   @id @default(cuid())
+  businessId       String
+  customerId       String?
+  orderNumber      String // public identifier e.g. SO-20260917-0042
+  publicToken      String   @unique // unguessable token for public tracking
+  status           String   @default("NEW")
+  fulfillmentType  String // DELIVERY | PICKUP
+  subtotal         Int
+  discount         Int      @default(0)
+  deliveryFee      Int      @default(0)
+  total            Int
+  paymentMethodId  String?
+  paymentMethodName String?
+  paymentType      String?
+  paymentStatus    String   @default("UNPAID")
+  customerName     String
+  customerPhone    String
+  city             String?
+  area             String?
+  addressLine      String?
+  customerNote     String?
+  internalNote     String?
+  idempotencyKey   String?
+  source           String   @default("STOREFRONT") // STOREFRONT | WHATSAPP | SMARTBOT
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  business Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer Customer?           @relation(fields: [customerId], references: [id])
+  items    OrderItem[]
+  history  OrderStatusHistory[]
+
+  @@unique([businessId, orderNumber])
+  @@unique([businessId, idempotencyKey])
+  @@index([businessId, status, createdAt])
+  @@index([businessId, customerPhone, createdAt])
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String?
+  productName String // snapshot
+  variantId   String?
+  variantName String?
+  unitPrice   Int // millimes incl. variant + options deltas
+  quantity    Int
+  lineTotal   Int
+  note        String?
+  optionsJson String? // snapshot [{ name, priceDelta }]
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model OrderStatusHistory {
+  id            String    @id @default(cuid())
+  orderId       String
+  fromStatus    String?
+  toStatus      String
+  note          String?
+  changedById   String?
+  changedByName String?
+  createdAt     DateTime  @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  businessId String?
+  mimeType  String
+  size      Int
+  data      String // base64 payload (validated, size-capped)
+  createdAt DateTime @default(now())
+
+  business Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+
+  @@index([businessId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  businessId String?
+  userId     String?
+  action     String
+  entity     String
+  entityId   String?
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  business Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, createdAt])
+}
