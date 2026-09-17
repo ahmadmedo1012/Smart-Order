@@ -1,2 +1,49 @@
-skills/
+# dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+build/
+dist/
+
+# env & secrets
+.env
+.env.local
+.env.*.local
+.env.local.db
+*.pem
+
+# databases (dev artifacts)
+db/
+*.db
+*.db-journal
+
+# logs
+dev.log
+server.log
+*.log
+npm-debug.log*
+
+# sandbox / non-product directories
+refs/
+tool-results/
+skills/
+examples/
+mini-services/
+.zscripts/
+upload/
+download/
+agent-ctx/
+
+# misc
+.DS_Store
+*.pids
+.vercel
+tsconfig.tsbuildinfo
+next-env.d.ts
+Caddyfile
+worklog.md
+tests/
