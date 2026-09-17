@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Output standalone only off-Vercel (Render self-host uses default + next start)
+  // Self-host (Render/Docker) sets NEXT_OUTPUT=standalone; Vercel uses default output
+  ...(process.env.NEXT_OUTPUT === "standalone" ? { output: "standalone" as const } : {}),
   outputFileTracingRoot: process.cwd(),
   // Disable dev indicator for clean captures
   devIndicators: false,

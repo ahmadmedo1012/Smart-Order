@@ -5,6 +5,8 @@
 
 generator client {
   provider = "prisma-client-js"
+  // native: dev machines · linux-musl/openssl-3: Vercel serverless · debian-openssl-3: Render/Docker
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {

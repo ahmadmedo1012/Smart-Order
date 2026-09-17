@@ -1,0 +1,11 @@
+# Vercel deployment manifest — Smart Order
+# Deploys Next.js 16 (App Router) with API routes as serverless functions.
+# Prisma uses the PostgreSQL schema (prisma/schema.postgres.prisma) via PRISMA_SCHEMA env below.
+#
+# Required environment variables (set via Vercel dashboard or CLI — see DEPLOYMENT.md):
+#   DATABASE_URL            PostgreSQL (Neon) connection string with ?sslmode=require
+#   NEXT_PUBLIC_SITE_URL    https://order.smart-link.ly (production canonical URL)
+#   PRISMA_SCHEMA           prisma/schema.postgres.prisma
+
+buildCommand: npx prisma generate --schema=prisma/schema.postgres.prisma && npm run build
+framework: nextjs

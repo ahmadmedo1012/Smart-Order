@@ -43,13 +43,16 @@ npx prisma db push          # create local schema
 npm run dev                 # http://localhost:3000
 ```
 
-## Deployment (Render + Neon PostgreSQL)
+## Deployment (Vercel + Neon PostgreSQL)
 
-The app deploys as a Render web service backed by any PostgreSQL (Neon used in production):
+Primary production path — same architecture as the Smart ecosystem siblings (Smart Menu, Smart Bot): **Vercel + Neon PostgreSQL**. `vercel.json` is included; the full runbook (env vars, DB setup, custom domain `order.smart-link.ly`, post-deploy checklist) lives in [DEPLOYMENT.md](./DEPLOYMENT.md).
 
-```
-Build: npm install && npx prisma generate --schema=prisma/schema.postgres.prisma && npx prisma db push --schema=prisma/schema.postgres.prisma && npx next build
-Start: npx next start -p $PORT
+```bash
+vercel link
+vercel env add DATABASE_URL production        # Neon PostgreSQL connection string
+vercel env add NEXT_PUBLIC_SITE_URL production
+DATABASE_URL="<neon-url>" npx prisma db push --schema=prisma/schema.postgres.prisma
+vercel --prod
 ```
 
 Environment variables (see `.env.example`):
@@ -59,7 +62,18 @@ Environment variables (see `.env.example`):
 | `DATABASE_URL` | PostgreSQL connection string (prod) / SQLite file (dev) |
 | `NEXT_PUBLIC_SITE_URL` | Canonical site URL for SEO/OG metadata |
 
-A `render.yaml` is included for one-click blueprint deploys.
+A `render.yaml` is also included for self-hosted (Render) deploys as a fallback — it uses `NEXT_OUTPUT=standalone`.
+
+## Testing
+
+```bash
+npm run dev                     # start dev server
+npm run test:e2e                # 30-check API E2E suite (auth, tenant isolation,
+                                # order lifecycle, money re-pricing, rate limits)
+```
+
+The suite runs against any base URL — pass a production deployment to verify it live:
+`node tests/e2e/api-e2e.js https://your-deployment.vercel.app`
 
 ## Project Structure
 
