@@ -210,15 +210,15 @@ export default function SettingsPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <label htmlFor="b-name" className="text-sm font-medium">اسم العمل *</label>
-            <input id="b-name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} maxLength={100} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            <input id="b-name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} maxLength={100} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <label htmlFor="b-desc" className="text-sm font-medium">وصف المتجر</label>
-            <textarea id="b-desc" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={2} maxLength={300} placeholder="يظهر في أعلى متجرك وفي نتائج البحث" className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            <textarea id="b-desc" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={2} maxLength={300} placeholder="يظهر في أعلى متجرك وفي نتائج البحث" className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
           </div>
           <div className="space-y-2">
             <label htmlFor="b-city" className="text-sm font-medium">المدينة</label>
-            <select id="b-city" value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+            <select id="b-city" value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange">
               {LIBYA_CITIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
@@ -226,20 +226,20 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-2">
             <label htmlFor="b-phone" className="text-sm font-medium">هاتف العمل</label>
-            <input id="b-phone" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} inputMode="tel" dir="ltr" placeholder="0912345678" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring" />
+            <input id="b-phone" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} inputMode="tel" dir="ltr" placeholder="0912345678" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
           </div>
           <div className="space-y-2">
             <label htmlFor="b-wa" className="text-sm font-medium">رقم واتساب لاستقبال الطلبات</label>
-            <input id="b-wa" value={form.whatsappNumber} onChange={(e) => setForm((f) => ({ ...f, whatsappNumber: e.target.value }))} inputMode="tel" dir="ltr" placeholder="0912345678" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring" />
+            <input id="b-wa" value={form.whatsappNumber} onChange={(e) => setForm((f) => ({ ...f, whatsappNumber: e.target.value }))} inputMode="tel" dir="ltr" placeholder="0912345678" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
             <p className="text-[11px] text-muted-foreground">يظهر كزر «إرسال الطلب عبر واتساب» بعد كل طلب</p>
           </div>
           <div className="space-y-2">
             <label htmlFor="b-address" className="text-sm font-medium">عنوان الفرع</label>
-            <input id="b-address" value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} maxLength={200} placeholder="الشارع، المعلم القريب..." className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            <input id="b-address" value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} maxLength={200} placeholder="الشارع، المعلم القريب..." className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <label htmlFor="b-footer" className="text-sm font-medium">تذييل صفحة الطلب</label>
-            <input id="b-footer" value={form.receiptFooter} onChange={(e) => setForm((f) => ({ ...f, receiptFooter: e.target.value }))} maxLength={200} placeholder="مثال: شكراً لثقتكم — نتشرف بخدمتكم" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            <input id="b-footer" value={form.receiptFooter} onChange={(e) => setForm((f) => ({ ...f, receiptFooter: e.target.value }))} maxLength={200} placeholder="مثال: شكراً لثقتكم — نتشرف بخدمتكم" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
           </div>
         </div>
 

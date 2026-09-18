@@ -155,7 +155,7 @@ export function Storefront({
                 >
                   <ShoppingBag className="size-5" aria-hidden="true" />
                   {count > 0 && (
-                    <span className="absolute -top-1.5 -end-1.5 min-w-5 h-5 rounded-full bg-saffron text-black text-[10px] font-bold flex items-center justify-center px-1 tabular">
+                    <span className="absolute -top-1.5 -end-1.5 min-w-5 h-5 rounded-full bg-saffron text-espresso text-[10px] font-bold flex items-center justify-center px-1 tabular">
                       {count}
                     </span>
                   )}
@@ -181,7 +181,7 @@ export function Storefront({
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="ابحث في المنتجات..."
                 aria-label="ابحث في المنتجات"
-                className="w-full h-10 rounded-xl border border-input bg-card ps-9 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full h-10 rounded-xl border border-input bg-card ps-9 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
               />
               {q && (
                 <button onClick={() => setQ("")} className="absolute end-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted" aria-label="مسح البحث">

@@ -90,13 +90,13 @@ export function DashboardShell({
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 h-10 text-sm font-medium transition-colors",
+              "group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 py-2 text-sm font-medium transition-[color,background-color,box-shadow] duration-200 focus-visible:ring-2 focus-visible:ring-orange/60 outline-none",
               active
-                ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                ? "bg-orange/12 text-foreground shadow-xs"
+                : "text-muted-foreground hover:bg-orange/8 hover:text-foreground"
             )}
           >
-            <Icon className="size-4.5 shrink-0" aria-hidden="true" />
+            <Icon className={cn("size-4.5 shrink-0", active ? "text-orange" : "")} aria-hidden="true" />
             {label}
           </Link>
         );
@@ -181,7 +181,7 @@ export function DashboardShell({
                   setBiz(businesses.find((b) => b.id === e.target.value) ?? null);
                   router.refresh();
                 }}
-                className="h-9 rounded-lg border border-input bg-card px-2.5 text-sm max-w-40 sm:max-w-52 truncate focus:outline-none focus:ring-2 focus:ring-ring"
+                className="h-10 rounded-lg border border-input bg-card px-3 text-sm max-w-40 sm:max-w-52 truncate focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange/20"
               >
                 {businesses.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -245,8 +245,8 @@ export function DashboardShell({
                     key={href}
                     href={href}
                     className={cn(
-                      "flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors",
-                      active ? "text-primary" : "text-muted-foreground"
+                      "flex flex-col items-center justify-center gap-1 min-h-11 text-[10px] font-medium transition-colors",
+                      active ? "text-orange" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <Icon className="size-5" aria-hidden="true" />

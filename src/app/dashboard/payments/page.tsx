@@ -238,7 +238,7 @@ function MethodDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={60}
-              className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
             />
           </div>
           {NEEDS_NUMBER.includes(type) && (
@@ -251,7 +251,7 @@ function MethodDialog({
                 placeholder="0912345678"
                 inputMode="tel"
                 dir="ltr"
-                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
               />
               <p className="text-[11px] text-muted-foreground">
                 {type === "MADAR" ? "مثال لأرقام مدار: 091 / 093" : type === "LIBYANA" ? "مثال لأرقام ليبيانا: 092 / 094" : "يظهر للعميل ليرسل إليه التحويل"}
@@ -267,7 +267,7 @@ function MethodDialog({
               placeholder={PAYMENT_TYPE_DESCRIPTIONS[type]}
               rows={2}
               maxLength={300}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
             />
           </div>
         </div>

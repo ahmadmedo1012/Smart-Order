@@ -163,7 +163,7 @@ export default function CustomerDetailPage() {
             placeholder="ملاحظاتك عن هذا العميل (تفضيلات، تاريخ تعامل...)"
             maxLength={500}
             rows={4}
-            className="mt-3 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="mt-3 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
           />
           <button
             onClick={saveNotes}

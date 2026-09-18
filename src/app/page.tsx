@@ -57,20 +57,20 @@ export default function LandingPage() {
             </Badge>
             <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.15] tracking-tight max-w-3xl mx-auto">
               متجرك الرقمي الجاهز
-              <span className="text-primary"> لاستقبال الطلبات</span> في دقائق
+              <span className="text-gradient-flame"> لاستقبال الطلبات</span> في دقائق
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
               قائمة منتجات أنيقة، سلة وطلب بضغطة واحدة، توصيل بمناطق ورسوم تحددها أنت،
               ومدفوعات مدار وليبيانا ونقداً — كل ذلك من لوحة تحكم واحدة تعمل على هاتفك.
             </p>
             <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Button asChild size="lg" className="h-12 px-8 text-base font-semibold">
+              <Button asChild variant="flame" size="lg">
                 <Link href="/register">
                   ابدأ مجاناً — أنشئ متجرك
                   <ArrowLeft className="size-5 ms-2" aria-hidden="true" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-12 px-8 text-base">
+              <Button asChild size="lg" variant="outline">
                 <Link href="/login">لدي حساب — دخول</Link>
               </Button>
             </div>
@@ -146,7 +146,7 @@ export default function LandingPage() {
                 },
               ].map(({ icon: Icon, title, desc }) => (
                 <div key={title} className="group rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-lg hover:shadow-black/5">
-                  <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                  <span className="flex size-11 items-center justify-center rounded-xl bg-orange/10 text-orange transition-colors group-hover:bg-orange group-hover:text-orange-foreground">
                     <Icon className="size-5.5" aria-hidden="true" />
                   </span>
                   <h3 className="mt-4 font-heading font-semibold text-lg">{title}</h3>
@@ -246,7 +246,7 @@ export default function LandingPage() {
         <section className="mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-24 text-center">
           <h2 className="font-heading text-3xl sm:text-4xl font-bold">جاهز تستقبل طلبك الأول الليلة؟</h2>
           <p className="mt-4 text-lg text-muted-foreground">التسجيل يستغرق أقل من دقيقتين — ومتجرك يجهز في نفس الجلسة.</p>
-          <Button asChild size="lg" className="mt-8 h-12 px-10 text-base font-semibold">
+          <Button asChild variant="flame" size="lg" className="mt-8">
             <Link href="/register">
               أنشئ متجرك الآن
               <ArrowLeft className="size-5 ms-2" aria-hidden="true" />

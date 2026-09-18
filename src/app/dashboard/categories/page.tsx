@@ -213,7 +213,7 @@ function CategoryDialog({
               onChange={(e) => setName(e.target.value)}
               placeholder="مثال: مشروبات ساخنة"
               maxLength={60}
-              className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
             />
           </div>
           <div className="space-y-2">
@@ -225,7 +225,7 @@ function CategoryDialog({
               placeholder="اختياري"
               maxLength={200}
               rows={2}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
             />
           </div>
           <div className="space-y-2">

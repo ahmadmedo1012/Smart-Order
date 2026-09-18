@@ -216,7 +216,7 @@ export function ProductDialog({
               placeholder="مثال: بدون بصل، صوص زيادة..."
               maxLength={200}
               rows={2}
-              className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
             />
           </div>
         </div>

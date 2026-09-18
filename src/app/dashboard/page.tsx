@@ -98,7 +98,7 @@ export default function DashboardOverview() {
 
   const cards = [
     { label: "طلبات اليوم", value: String(stats.todayOrders), icon: ClipboardList, tone: "text-primary" },
-    { label: "بانتظار الإجراء", value: String(stats.pendingCount), icon: Bell, tone: stats.pendingCount > 0 ? "text-warning-foreground" : "text-muted-foreground" },
+    { label: "بانتظار الإجراء", value: String(stats.pendingCount), icon: Bell, tone: stats.pendingCount > 0 ? "text-warning" : "text-muted-foreground" },
     { label: "إيراد اليوم", value: formatLyd(stats.todayRevenue), icon: Coins, tone: "text-success" },
     { label: "متوسط الطلب", value: formatLyd(stats.avgOrder), icon: TrendingUp, tone: "text-chart-3" },
   ];
@@ -108,7 +108,7 @@ export default function DashboardOverview() {
     alerts.push({
       text: `لديك ${stats.pendingCount} ${stats.pendingCount === 1 ? "طلب جديد" : "طلبات"} بانتظار المعالجة`,
       href: "/dashboard/orders?status=NEW",
-      tone: "bg-warning/10 border-warning/30 text-warning-foreground",
+      tone: "bg-warning/10 border-warning/30 text-warning",
     });
   if (data.lowStock.length > 0)
     alerts.push({

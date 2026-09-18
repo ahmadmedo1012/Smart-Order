@@ -8,26 +8,26 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
-  NEW: "bg-primary/10 text-primary border-primary/25",
-  CONFIRMED: "bg-chart-3/10 text-chart-3 border-chart-3/25",
-  PREPARING: "bg-warning/15 text-warning-foreground border-warning/40",
-  READY: "bg-saffron/15 text-accent-foreground border-saffron/40",
-  OUT_FOR_DELIVERY: "bg-chart-3/10 text-chart-3 border-chart-3/25",
-  DELIVERED: "bg-success/10 text-success border-success/25",
+  NEW: "bg-orange/15 text-orange border-orange/25",
+  CONFIRMED: "bg-info/15 text-info border-info/25",
+  PREPARING: "bg-warning/15 text-warning border-warning/25",
+  READY: "bg-saffron/15 text-ember dark:text-saffron border-saffron/25",
+  OUT_FOR_DELIVERY: "bg-info/15 text-info border-info/25",
+  DELIVERED: "bg-success/15 text-success border-success/25",
   CANCELLED: "bg-muted text-muted-foreground border-border",
-  REJECTED: "bg-destructive/10 text-destructive border-destructive/25",
+  REJECTED: "bg-destructive/15 text-destructive border-destructive/25",
 };
 
 const STATUS_DOTS: Record<OrderStatus, string> = {
-  NEW: "bg-primary",
-  CONFIRMED: "bg-chart-3",
+  NEW: "bg-orange",
+  CONFIRMED: "bg-info",
   PREPARING: "bg-warning",
   READY: "bg-saffron",
-  OUT_FOR_DELIVERY: "bg-chart-3",
+  OUT_FOR_DELIVERY: "bg-info",
   DELIVERED: "bg-success",
   CANCELLED: "bg-muted-foreground",
   REJECTED: "bg-destructive",
-};
+};;
 
 export function OrderStatusBadge({
   status,
@@ -51,8 +51,8 @@ export function OrderStatusBadge({
 
 const PAYMENT_STYLES: Record<PaymentStatus, string> = {
   UNPAID: "bg-muted text-muted-foreground border-border",
-  PAID: "bg-success/10 text-success border-success/25",
-  REFUNDED: "bg-destructive/10 text-destructive border-destructive/25",
+  PAID: "bg-success/15 text-success border-success/25",
+  REFUNDED: "bg-destructive/15 text-destructive border-destructive/25",
 };
 
 export function PaymentStatusBadge({ status, className }: { status: PaymentStatus; className?: string }) {

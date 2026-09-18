@@ -25,6 +25,7 @@ import {
   MessageCircle,
   ClipboardList,
   PartyPopper,
+  StickyNote,
 } from "lucide-react";
 
 interface StoreData {
@@ -145,7 +146,7 @@ export function CheckoutClient({
           <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-success/15 text-success">
             <CheckCircle2 className="size-10" aria-hidden="true" />
           </div>
-          <h1 className="mt-6 font-heading text-2xl font-bold">تم استلام طلبك! 🎉</h1>
+          <h1 className="mt-6 font-heading text-2xl font-bold">تم استلام طلبك!</h1>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
             رقم طلبك هو
           </p>
@@ -275,7 +276,7 @@ export function CheckoutClient({
                 autoComplete="name"
                 maxLength={80}
                 placeholder="اسمك"
-                className="w-full h-11 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
               />
             </div>
             <div className="space-y-1.5">
@@ -292,7 +293,7 @@ export function CheckoutClient({
                 dir="ltr"
                 maxLength={20}
                 placeholder="0912345678"
-                className="w-full h-11 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
               />
             </div>
           </div>
@@ -312,7 +313,7 @@ export function CheckoutClient({
                   id="c-city"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full h-11 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
                 >
                   {LIBYA_CITIES.map((c) => (
                     <option key={c} value={c}>{c}</option>
@@ -327,7 +328,7 @@ export function CheckoutClient({
                   onChange={(e) => setArea(e.target.value)}
                   maxLength={60}
                   placeholder="مثال: تاجوراء"
-                  className="w-full h-11 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
                 />
               </div>
             </div>
@@ -373,7 +374,7 @@ export function CheckoutClient({
                 rows={2}
                 maxLength={200}
                 placeholder="الشارع، أقرب معلم، رقم المنزل..."
-                className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
               />
             </div>
           </section>
@@ -444,7 +445,7 @@ export function CheckoutClient({
             rows={2}
             maxLength={300}
             placeholder="أي تفاصيل إضافية تريد إخبار المتجر بها..."
-            className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full rounded-lg border border-input bg-transparent px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange/20 focus:border-orange"
           />
         </section>
 
@@ -463,7 +464,12 @@ export function CheckoutClient({
                   {i.options.length > 0 && (
                     <div className="text-[11px] text-muted-foreground mt-0.5">{i.options.map((o) => o.name).join("، ")}</div>
                   )}
-                  {i.note && <div className="text-[11px] text-warning-foreground mt-0.5">📝 {i.note}</div>}
+                  {i.note && (
+                    <div className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                      <StickyNote className="size-3 shrink-0" aria-hidden="true" />
+                      {i.note}
+                    </div>
+                  )}
                 </div>
                 <span className="tabular nums font-medium shrink-0">{formatLyd(i.unitPrice * i.quantity)}</span>
               </li>

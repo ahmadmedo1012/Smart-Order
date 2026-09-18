@@ -91,7 +91,7 @@ export default function StaffPage() {
                         toast.error(err instanceof Error ? err.message : "تعذر التحديث");
                       }
                     }}
-                    className="rounded-lg border border-input bg-card h-8 px-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="rounded-lg border border-input bg-card h-8 px-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
                     aria-label={`دور ${s.user.name}`}
                   >
                     {ROLES.filter((r) => r !== "OWNER").map((r) => (
@@ -180,15 +180,15 @@ function StaffDialog({ businessId, onClose }: { businessId: string; onClose: (ch
         <div className="mt-4 space-y-4">
           <div className="space-y-2">
             <label htmlFor="s-name" className="text-sm font-medium">الاسم *</label>
-            <input id="s-name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+            <input id="s-name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
           </div>
           <div className="space-y-2">
             <label htmlFor="s-email" className="text-sm font-medium">البريد الإلكتروني *</label>
-            <input id="s-email" type="email" dir="ltr" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start focus:outline-none focus:ring-2 focus:ring-ring" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input id="s-email" type="email" dir="ltr" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="space-y-2">
             <label htmlFor="s-pass" className="text-sm font-medium">كلمة المرور المؤقتة *</label>
-            <input id="s-pass" type="text" dir="ltr" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start focus:outline-none focus:ring-2 focus:ring-ring" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8 أحرف على الأقل" />
+            <input id="s-pass" type="text" dir="ltr" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8 أحرف على الأقل" />
           </div>
           <div className="space-y-2">
             <span className="text-sm font-medium">الدور</span>

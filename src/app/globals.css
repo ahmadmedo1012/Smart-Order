@@ -13,179 +13,346 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * ════════════════════════════════════════════════════════════════
+ * SMART ECOSYSTEM DESIGN LANGUAGE — IDENTITY LOCK
+ * ════════════════════════════════════════════════════════════════
+ * Smart Order is the third product of the Smart family
+ * (Smart Menu → https://menu.smart-link.ly, SmartBot →
+ * https://bot.smart-link.ly). The token values below are extracted
+ * verbatim from the family design system so Smart Order renders as
+ * a sibling, not a stranger: flame-orange primary, warm near-black
+ * dark theme (default), warm paper light theme, Cairo body +
+ * Readex Pro headings, WhatsApp green reserved for WhatsApp only.
+ * ════════════════════════════════════════════════════════════════
+ */
+
 @theme inline {
+  /* ── Font system — premium Arabic-first (family standard) ── */
+  --font-sans: "Cairo", "Noto Sans Arabic", system-ui, sans-serif;
+  --font-heading: "Readex Pro", "Cairo", "Noto Sans Arabic", system-ui, sans-serif;
+  --font-mono: "Cairo", ui-monospace, "Courier New", monospace;
+
+  /* ── Core surface / text ── */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Cairo", "Noto Sans Arabic", ui-sans-serif, system-ui, sans-serif;
-  --font-heading: "Readex Pro", "Cairo", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", monospace;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-placeholder-text: var(--placeholder-text);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  /* ── Brand / action ── */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* ── Flame system (ecosystem signature) ── */
+  --color-orange: var(--orange);
+  --color-orange-foreground: var(--orange-foreground);
+  --color-flame: var(--c-flame);
+  --color-ember: var(--c-ember);
+  --color-saffron: var(--c-saffron);
+  --color-saffron-ink: var(--c-saffron-ink);
+  --color-espresso: var(--c-espresso);
+  --color-ash: var(--c-ash);
+  --color-night: var(--c-night);
+
+  /* ── Semantic status + soft tints (family spec) ── */
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
-  --color-saffron: var(--saffron);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-warning-soft: var(--warning-soft);
+  --color-info-soft: var(--info-soft);
+  --color-destructive-soft: var(--destructive-soft);
+
+  /* ── External brand (reserved usage only) ── */
+  --color-whatsapp: var(--whatsapp);
+  --color-whatsapp-deep: var(--whatsapp-deep);
+
+  /* ── Charts + sidebar (mapped onto family palette) ── */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ── Radius scale — family literals (8/12/18/28) ── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 28px;
+
+  /* ── Easing (family motion language: smooth, intentional) ── */
+  --ease-smooth: cubic-bezier(0.16, 1, 0.2, 1);
+  --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-/* ============ LIGHT (default) — clean commercial daylight ============ */
+/* ════════════════════════════════════════════════════════════════
+   DARK — default (family standard: deep warm near-black)
+   ════════════════════════════════════════════════════════════════ */
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.985 0.004 160); /* near-white with faint green cast */
-  --foreground: oklch(0.24 0.02 170); /* deep ink */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.24 0.02 170);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.24 0.02 170);
-  --primary: oklch(0.51 0.1 168); /* emerald #0e7c5b ≈ */
-  --primary-foreground: oklch(0.985 0.005 160);
-  --secondary: oklch(0.955 0.008 160);
-  --secondary-foreground: oklch(0.33 0.03 168);
-  --muted: oklch(0.955 0.006 160);
-  --muted-foreground: oklch(0.5 0.015 168);
-  --accent: oklch(0.93 0.04 85); /* soft saffron tint */
-  --accent-foreground: oklch(0.42 0.09 70);
-  --destructive: oklch(0.55 0.21 25);
-  --destructive-foreground: oklch(0.99 0 0);
-  --success: oklch(0.55 0.13 150);
-  --success-foreground: oklch(0.985 0.01 160);
-  --warning: oklch(0.68 0.14 75);
-  --warning-foreground: oklch(0.28 0.06 70);
-  --saffron: oklch(0.78 0.15 80);
-  --border: oklch(0.9 0.008 160);
-  --input: oklch(0.9 0.008 160);
-  --ring: oklch(0.51 0.1 168);
-  --chart-1: oklch(0.51 0.1 168);
-  --chart-2: oklch(0.78 0.15 80);
-  --chart-3: oklch(0.6 0.09 230);
-  --chart-4: oklch(0.55 0.13 150);
-  --chart-5: oklch(0.65 0.18 30);
-  --sidebar: oklch(0.995 0.003 160);
-  --sidebar-foreground: oklch(0.24 0.02 170);
-  --sidebar-primary: oklch(0.51 0.1 168);
-  --sidebar-primary-foreground: oklch(0.985 0.005 160);
-  --sidebar-accent: oklch(0.94 0.02 165);
-  --sidebar-accent-foreground: oklch(0.33 0.03 168);
-  --sidebar-border: oklch(0.9 0.008 160);
-  --sidebar-ring: oklch(0.51 0.1 168);
+  color-scheme: dark;
+
+  /* Surfaces — SmartBot twin literals */
+  --background: #010000;
+  --foreground: #ebe7e2;
+  --card: #070503;
+  --card-foreground: #ebe7e2;
+  --popover: #060403;
+  --popover-foreground: #ebe7e2;
+  --muted: #0c0806;
+  --muted-foreground: #8c857d; /* AA 5.59:1 on #070503 cards */
+  --placeholder-text: #a59d95;
+
+  /* Brand flame — AA on white text (4.98:1) */
+  --primary: #bc4700;
+  --primary-foreground: #f8f8f8;
+  --secondary: #0c0806;
+  --secondary-foreground: #a9a49e;
+  --accent: #bc470026;
+  --accent-foreground: #df5a00; /* bright flame text — 5.42:1 on cards */
+  --border: #211c18;
+  --input: #625c58;
+  --ring: #bc4700;
+
+  /* Flame family */
+  --orange: #bc4700;
+  --orange-foreground: #f8f8f8;
+  --c-flame: #bc4700;
+  --c-ember: #863800;
+  --c-saffron: #f0a646;
+  --c-saffron-ink: #f0a646;
+  --c-espresso: #1a130b;
+  --c-ash: #b3ada6;
+  --c-night: #140b06;
+
+  /* Status — family literals */
+  --success: #23a136;
+  --success-foreground: #f8f8f8;
+  --warning: #ce9200;
+  --warning-foreground: #14100a;
+  --info: #348dcf;
+  --info-foreground: #f8f8f8;
+  --destructive: #e62b34;
+  --destructive-foreground: #f8f8f8;
+
+  /* Soft tints — 14% wash behind solid status text */
+  --success-soft: #23a13624;
+  --warning-soft: #ce920024;
+  --info-soft: #348dcf24;
+  --destructive-soft: #e62b3424;
+
+  /* External brand */
+  --whatsapp: #25d366;
+  --whatsapp-deep: #20bd5a;
+
+  /* Charts — flame-led family palette */
+  --chart-1: #bc4700;
+  --chart-2: #f0a646;
+  --chart-3: #348dcf;
+  --chart-4: #23a136;
+  --chart-5: #cf284b;
+
+  /* Sidebar — warm dark */
+  --sidebar: #050302;
+  --sidebar-foreground: #ebe7e2;
+  --sidebar-primary: #bc4700;
+  --sidebar-primary-foreground: #f8f8f8;
+  --sidebar-accent: #bc47001a;
+  --sidebar-accent-foreground: #df5a00;
+  --sidebar-border: #211c18;
+  --sidebar-ring: #bc4700;
+
+  /* 4-tier shadow system — dark */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.45), 0 8px 16px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 8px 24px #bc470024;
 }
 
-/* ============ DARK — intentional night palette, not an inversion ============ */
-.dark {
-  --background: oklch(0.19 0.012 175); /* deep green-tinted night */
-  --foreground: oklch(0.92 0.008 165);
-  --card: oklch(0.235 0.014 175);
-  --card-foreground: oklch(0.92 0.008 165);
-  --popover: oklch(0.235 0.014 175);
-  --popover-foreground: oklch(0.92 0.008 165);
-  --primary: oklch(0.72 0.12 163); /* luminous emerald for dark surfaces */
-  --primary-foreground: oklch(0.2 0.04 170);
-  --secondary: oklch(0.27 0.016 172);
-  --secondary-foreground: oklch(0.88 0.01 165);
-  --muted: oklch(0.27 0.014 172);
-  --muted-foreground: oklch(0.66 0.012 168);
-  --accent: oklch(0.33 0.05 80);
-  --accent-foreground: oklch(0.85 0.1 80);
-  --destructive: oklch(0.63 0.19 25);
-  --destructive-foreground: oklch(0.98 0.01 25);
-  --success: oklch(0.68 0.13 152);
-  --success-foreground: oklch(0.2 0.04 160);
-  --warning: oklch(0.75 0.13 78);
-  --warning-foreground: oklch(0.82 0.12 80);
-  --saffron: oklch(0.8 0.14 82);
-  --border: oklch(0.34 0.014 172);
-  --input: oklch(0.34 0.014 172);
-  --ring: oklch(0.72 0.12 163);
-  --chart-1: oklch(0.72 0.12 163);
-  --chart-2: oklch(0.8 0.14 82);
-  --chart-3: oklch(0.68 0.1 230);
-  --chart-4: oklch(0.68 0.13 152);
-  --chart-5: oklch(0.68 0.17 30);
-  --sidebar: oklch(0.22 0.013 175);
-  --sidebar-foreground: oklch(0.9 0.008 165);
-  --sidebar-primary: oklch(0.72 0.12 163);
-  --sidebar-primary-foreground: oklch(0.2 0.04 170);
-  --sidebar-accent: oklch(0.28 0.016 172);
-  --sidebar-accent-foreground: oklch(0.88 0.01 165);
-  --sidebar-border: oklch(0.31 0.014 172);
-  --sidebar-ring: oklch(0.72 0.12 163);
+/* ════════════════════════════════════════════════════════════════
+   LIGHT — warm paper (family light philosophy)
+   ════════════════════════════════════════════════════════════════ */
+.light {
+  color-scheme: light;
+
+  --background: oklch(0.985 0.004 70); /* warm paper */
+  --foreground: oklch(0.12 0.008 70); /* warm ink */
+  --card: oklch(1 0.002 70);
+  --card-foreground: oklch(0.12 0.008 70);
+  --popover: oklch(1 0.002 70);
+  --popover-foreground: oklch(0.12 0.008 70);
+  --muted: oklch(0.94 0.006 70);
+  --muted-foreground: oklch(0.48 0.015 70);
+  --placeholder-text: oklch(0.52 0.015 70);
+
+  --primary: oklch(0.4 0.19 45); /* dark flame for AA on paper */
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.92 0.008 70);
+  --secondary-foreground: oklch(0.2 0.01 70);
+  --accent: oklch(0.55 0.19 45 / 0.12);
+  --accent-foreground: oklch(0.55 0.19 45);
+  --border: oklch(0.86 0.008 70);
+  --input: oklch(0.86 0.008 70);
+  --ring: oklch(0.55 0.19 45);
+
+  /* Flame family — light */
+  --orange: oklch(0.55 0.19 45);
+  --orange-foreground: oklch(0.98 0 0);
+  --c-flame: oklch(0.42 0.17 48);
+  --c-ember: oklch(0.5 0.15 52);
+  --c-saffron: oklch(0.78 0.14 70); /* decorative glow only */
+  --c-saffron-ink: oklch(0.5 0.13 70); /* AA amber text 6.14:1 */
+  --c-espresso: oklch(0.28 0.02 30);
+  --c-ash: oklch(0.36 0.012 70);
+  --c-night: oklch(0.24 0.02 50);
+
+  /* Status — darker for AA text on paper */
+  --success: oklch(0.48 0.15 150);
+  --success-foreground: oklch(0.98 0 0);
+  --warning: oklch(0.52 0.13 60);
+  --warning-foreground: oklch(0.1 0 0);
+  --info: oklch(0.48 0.13 245);
+  --info-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.58 0.2 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Soft tints — lighter wash on paper */
+  --success-soft: oklch(0.48 0.15 150 / 0.12);
+  --warning-soft: oklch(0.52 0.13 60 / 0.12);
+  --info-soft: oklch(0.48 0.13 245 / 0.12);
+  --destructive-soft: oklch(0.58 0.2 25 / 0.12);
+
+  /* External brand (unchanged by definition) */
+  --whatsapp: #25d366;
+  --whatsapp-deep: #20bd5a;
+
+  /* Charts — light family palette */
+  --chart-1: oklch(0.55 0.19 45);
+  --chart-2: oklch(0.68 0.14 70);
+  --chart-3: oklch(0.52 0.13 245);
+  --chart-4: oklch(0.48 0.15 150);
+  --chart-5: oklch(0.55 0.17 0);
+
+  /* Sidebar — warm paper */
+  --sidebar: oklch(0.975 0.004 70);
+  --sidebar-foreground: oklch(0.12 0.008 70);
+  --sidebar-primary: oklch(0.55 0.19 45);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.55 0.19 45 / 0.1);
+  --sidebar-accent-foreground: oklch(0.45 0.17 45);
+  --sidebar-border: oklch(0.86 0.008 70);
+  --sidebar-ring: oklch(0.55 0.19 45);
+
+  /* 4-tier shadow system — light */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.09), 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.14), 0 8px 16px rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 8px 24px oklch(0.55 0.19 45 / 0.1);
 }
 
-/* Dark mode surface elevation: keep alert banners readable on tinted surfaces */
-.dark {
-  --card: oklch(0.26 0.015 175);
-  --popover: oklch(0.26 0.015 175);
-}
-
+/* ════════════════════════════════════════════════════════════════
+   Base layer
+   ════════════════════════════════════════════════════════════════ */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   html {
     scroll-behavior: smooth;
+    overflow-x: clip;
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "ss01";
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "tnum" 1;
+    font-variant-numeric: lining-nums tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
-  /* Headings use Readex Pro — distinct commercial voice */
-  h1, h2, h3, h4, h5 {
+  /* Headings — Readex Pro, the family heading voice */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
     font-family: var(--font-heading);
     letter-spacing: -0.01em;
   }
   /* Tabular numerals for money & stats everywhere */
-  .tabular, table, .nums {
+  .tabular,
+  table,
+  .nums {
     font-variant-numeric: tabular-nums;
   }
   ::selection {
-    background: color-mix(in oklch, var(--primary) 25%, transparent);
+    background: color-mix(in oklch, var(--orange) 30%, transparent);
   }
-  /* Focus visibility — accessibility */
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   Component-level family language
+   ════════════════════════════════════════════════════════════════ */
 
 /* WhatsApp brand green — reserved for WhatsApp actions only */
 .whatsapp-btn {
-  background-color: #25d366;
+  background-color: var(--whatsapp);
   color: #07361d;
 }
 .whatsapp-btn:hover {
-  background-color: #1fc15a;
+  background-color: var(--whatsapp-deep);
+}
+
+/* Flame gradient text — hero/decorative (family signature) */
+.text-gradient-flame {
+  background: linear-gradient(135deg, var(--c-saffron), var(--c-flame));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.light .text-gradient-flame {
+  background: linear-gradient(135deg, oklch(0.62 0.16 55), oklch(0.4 0.19 45));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Skeleton shimmer */

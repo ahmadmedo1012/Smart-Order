@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { EmptyState } from "@/components/shared/states";
 import { toast } from "sonner";
-import { ShoppingBag, Minus, Plus, Trash2, ArrowLeft, Store } from "lucide-react";
+import { ShoppingBag, Minus, Plus, Trash2, ArrowLeft, Store, StickyNote } from "lucide-react";
 
 // listen for external "open cart" events (e.g., toast action)
 if (typeof window !== "undefined") {
@@ -48,12 +48,11 @@ export function CartDrawer({
 
   return (
     <SheetContent side="left" className="w-full sm:max-w-md p-0 flex flex-col" dir="rtl">
-      <SheetTitle className="sr-only">سلة الطلب</SheetTitle>
       <SheetDescription className="sr-only">راجع منتجاتك وأكمل الطلب</SheetDescription>
       <div className="h-16 flex items-center gap-3 px-5 border-b border-border shrink-0">
         <ShoppingBag className="size-5 text-primary" aria-hidden="true" />
         <div className="flex-1">
-          <h2 className="font-heading font-bold">سلة الطلب</h2>
+          <SheetTitle className="font-heading font-bold">سلة الطلب</SheetTitle>
           <p className="text-[11px] text-muted-foreground tabular">{count} عنصر</p>
         </div>
       </div>
@@ -90,7 +89,7 @@ export function CartDrawer({
                       </div>
                     )}
                     {item.note && (
-                      <div className="text-[11px] text-warning-foreground mt-0.5">📝 {item.note}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1"><StickyNote className="size-3 shrink-0" aria-hidden="true" />{item.note}</div>
                     )}
                   </div>
                   <div className="text-end shrink-0">
@@ -137,7 +136,7 @@ export function CartDrawer({
                       placeholder={`ملاحظة: ${i.productName}`}
                       maxLength={200}
                       onBlur={(e) => updateNote(i.key, e.target.value.trim())}
-                      className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+                      className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
                     />
                   ))}
                 </div>

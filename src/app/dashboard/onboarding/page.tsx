@@ -95,7 +95,7 @@ export default function OnboardingPage() {
         toast.error((r.data as { reason?: string }).reason ?? "أكمل الخطوات الأساسية أولاً");
       } else {
         setPublished(true);
-        toast.success("تم نشر متجرك! 🎉 شارك الرابط مع عملائك");
+        toast.success("تم نشر متجرك! شارك الرابط مع عملائك");
       }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "تعذر النشر — أكمل الخطوات أولاً");
@@ -161,8 +161,8 @@ export default function OnboardingPage() {
 
       <Step n={1} icon={Store} title="بيانات العمل" desc="الاسم والرقم الذي يستقبل طلبات واتساب" done={!!whatsapp}>
         <div className="grid gap-3 sm:grid-cols-2">
-          <input value={bizName} onChange={(e) => setBizName(e.target.value)} placeholder="اسم العمل" aria-label="اسم العمل" className="h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-          <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="واتساب: 0912345678" inputMode="tel" dir="ltr" aria-label="رقم واتساب" className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring" />
+          <input value={bizName} onChange={(e) => setBizName(e.target.value)} placeholder="اسم العمل" aria-label="اسم العمل" className="h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
+          <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="واتساب: 0912345678" inputMode="tel" dir="ltr" aria-label="رقم واتساب" className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
           <button onClick={saveBasics} className="sm:col-span-2 justify-self-start rounded-lg border border-border h-9 px-4 text-sm font-medium hover:bg-muted transition-colors">
             حفظ البيانات
           </button>
@@ -177,7 +177,7 @@ export default function OnboardingPage() {
             onKeyDown={(e) => e.key === "Enter" && addCategory()}
             placeholder="اسم القسم الجديد"
             aria-label="اسم القسم"
-            className="flex-1 h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="flex-1 h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
           />
           <button onClick={addCategory} className="rounded-lg bg-primary text-primary-foreground h-10 px-4 text-sm font-semibold hover:bg-primary/90 transition-colors inline-flex items-center gap-1.5">
             <Plus className="size-4" aria-hidden="true" />
@@ -215,8 +215,8 @@ export default function OnboardingPage() {
 
       <Step n={3} icon={Truck} title="مناطق التوصيل" desc="أضف منطقة واحدة على الأقل لتفعيل خيار التوصيل (اختياري إن كان الاستلام فقط)" done={zones.length > 0}>
         <div className="flex gap-2">
-          <input value={zoneName} onChange={(e) => setZoneName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addZone()} placeholder="مثال: تاجوراء" aria-label="اسم المنطقة" className="flex-1 h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-          <input value={zoneFee} onChange={(e) => setZoneFee(e.target.value)} placeholder="5" inputMode="decimal" dir="ltr" aria-label="رسوم التوصيل" className="w-24 h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring" />
+          <input value={zoneName} onChange={(e) => setZoneName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addZone()} placeholder="مثال: تاجوراء" aria-label="اسم المنطقة" className="flex-1 h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
+          <input value={zoneFee} onChange={(e) => setZoneFee(e.target.value)} placeholder="5" inputMode="decimal" dir="ltr" aria-label="رسوم التوصيل" className="w-24 h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
           <button onClick={addZone} className="rounded-lg bg-primary text-primary-foreground h-10 px-4 text-sm font-semibold hover:bg-primary/90 transition-colors inline-flex items-center gap-1.5">
             <Plus className="size-4" aria-hidden="true" />
             إضافة

@@ -125,7 +125,7 @@ export default function ProductsPage() {
           onChange={(e) => setQ(e.target.value)}
           placeholder="ابحث عن منتج..."
           aria-label="بحث في المنتجات"
-          className="w-full h-10 rounded-lg border border-input bg-card ps-9 pe-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full h-10 rounded-lg border border-input bg-card ps-9 pe-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
         />
       </div>
 

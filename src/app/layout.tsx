@@ -32,8 +32,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#0e7c5b" },
-    { media: "(prefers-color-scheme: dark)", color: "#132e26" },
+    { media: "(prefers-color-scheme: light)", color: "#bc4700" },
+    { media: "(prefers-color-scheme: dark)", color: "#010000" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -46,10 +46,11 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
-        {/* Pre-paint theme boot — no flash, respects stored preference */}
+        {/* Pre-paint theme boot — no flash. Family standard: DARK default,
+            light only when explicitly stored (mirrors Smart Menu/SmartBot). */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('smart-order-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&d)){document.documentElement.classList.add('dark')}}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('smart-order-theme');if(t==='light'){document.documentElement.classList.add('light')}else{document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}})();`,
           }}
         />
         <link rel="preload" href="/fonts/cairo-arabic.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />

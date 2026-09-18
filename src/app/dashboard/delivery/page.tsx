@@ -222,7 +222,7 @@ function ZoneDialog({
               onChange={(e) => setName(e.target.value)}
               placeholder="مثال: تاجوراء"
               maxLength={60}
-              className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -235,7 +235,7 @@ function ZoneDialog({
                 inputMode="decimal"
                 placeholder="8"
                 dir="ltr"
-                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
               />
             </div>
             <div className="space-y-2">
@@ -247,7 +247,7 @@ function ZoneDialog({
                 inputMode="decimal"
                 placeholder="اختياري"
                 dir="ltr"
-                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
               />
             </div>
           </div>
