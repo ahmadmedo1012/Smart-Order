@@ -6,7 +6,7 @@ import { useCart, cartEstimatedSubtotal, cartCount } from "@/hooks/use-cart";
 import { formatLyd } from "@/lib/money";
 import type { StoreData } from "@/components/storefront/storefront";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { EmptyState } from "@/components/shared/states";
 import { toast } from "sonner";
 import { ShoppingBag, Minus, Plus, Trash2, ArrowLeft, Store } from "lucide-react";
@@ -48,6 +48,8 @@ export function CartDrawer({
 
   return (
     <SheetContent side="left" className="w-full sm:max-w-md p-0 flex flex-col" dir="rtl">
+      <SheetTitle className="sr-only">سلة الطلب</SheetTitle>
+      <SheetDescription className="sr-only">راجع منتجاتك وأكمل الطلب</SheetDescription>
       <div className="h-16 flex items-center gap-3 px-5 border-b border-border shrink-0">
         <ShoppingBag className="size-5 text-primary" aria-hidden="true" />
         <div className="flex-1">

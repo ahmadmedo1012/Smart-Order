@@ -15,7 +15,7 @@ import { toE164 } from "@/lib/phone";
 import { waLink } from "@/lib/whatsapp";
 import { normalizeArabic } from "@/lib/arabic";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
@@ -161,7 +161,6 @@ export function Storefront({
                   )}
                 </button>
               </SheetTrigger>
-              <SheetTitle className="sr-only">سلة الطلب</SheetTitle>
               <CartDrawer
                 slug={slug}
                 data={data}
