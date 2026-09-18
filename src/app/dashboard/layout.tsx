@@ -16,7 +16,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <DashboardShell
-      user={{ name: user.name, email: user.email }}
+      user={{ name: user.name, email: user.email, isPlatformAdmin: user.isPlatformAdmin }}
       businesses={user.memberships.map((m) => m.business)}
     >
       {children}

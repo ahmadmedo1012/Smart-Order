@@ -45,12 +45,16 @@ const NAV = [
   { href: "/dashboard/settings", label: "الإعدادات", icon: Settings },
 ];
 
+const ADMIN_NAV = [
+  { href: "/dashboard/admin/payments", label: "موافقات الاشتراكات", icon: CreditCard, exact: true },
+];
+
 export function DashboardShell({
   user,
   businesses,
   children,
 }: {
-  user: { name: string; email: string };
+  user: { name: string; email: string; isPlatformAdmin?: boolean };
   businesses: Biz[];
   children: React.ReactNode;
 }) {
@@ -79,7 +83,7 @@ export function DashboardShell({
     }
   }
 
-  const NavLinks = ({ onNavigate }: { onNavigate?: () => void }) => (
+  const NavLinks = ({ onNavigate, showAdmin }: { onNavigate?: () => void; showAdmin?: boolean }) => (
     <nav aria-label="التنقل في اللوحة" className="flex flex-col gap-1 px-3">
       {NAV.map(({ href, label, icon: Icon, exact }) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
@@ -101,6 +105,33 @@ export function DashboardShell({
           </Link>
         );
       })}
+      {showAdmin && (
+        <>
+          <div className="mt-4 px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+            إدارة المنصة
+          </div>
+          {ADMIN_NAV.map(({ href, label, icon: Icon }) => {
+            const active = pathname === href;
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={onNavigate}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 py-2 text-sm font-medium transition-[color,background-color,box-shadow] duration-200 focus-visible:ring-2 focus-visible:ring-orange/60 outline-none",
+                  active
+                    ? "bg-orange/12 text-foreground shadow-xs"
+                    : "text-muted-foreground hover:bg-orange/8 hover:text-foreground"
+                )}
+              >
+                <Icon className={cn("size-4.5 shrink-0", active && "text-orange")} aria-hidden="true" />
+                {label}
+              </Link>
+            );
+          })}
+        </>
+      )}
     </nav>
   );
 
@@ -117,7 +148,7 @@ export function DashboardShell({
             </div>
           </div>
           <div className="py-4 overflow-y-auto flex-1">
-            <NavLinks />
+            <NavLinks showAdmin={user.isPlatformAdmin} />
           </div>
           <div className="p-3 border-t border-border/60">
             {biz && (
@@ -158,7 +189,7 @@ export function DashboardShell({
                   <span className="font-heading font-bold text-sm">لوحة التحكم</span>
                 </div>
                 <div className="py-4">
-                  <NavLinks onNavigate={() => setMenuOpen(false)} />
+                  <NavLinks onNavigate={() => setMenuOpen(false)} showAdmin={user.isPlatformAdmin} />
                 </div>
                 <div className="absolute bottom-0 inset-x-0 p-3 border-t border-border/60">
                   <button

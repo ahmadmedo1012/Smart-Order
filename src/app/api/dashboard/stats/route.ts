@@ -18,9 +18,15 @@ export async function GET(req: NextRequest) {
     const dayStart = new Date();
     dayStart.setHours(0, 0, 0, 0);
 
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+
     const [
       todayOrders,
       pendingCount,
+      monthOrders,
+      planInfo,
       todayCompleted,
       todayCancelled,
       todayRevenueAgg,
@@ -33,6 +39,15 @@ export async function GET(req: NextRequest) {
     ] = await Promise.all([
       db.order.count({ where: { businessId, createdAt: { gte: dayStart } } }),
       db.order.count({ where: { businessId, status: { in: ["NEW", "CONFIRMED", "PREPARING", "READY", "OUT_FOR_DELIVERY"] } } }),
+      db.order.count({ where: { businessId, status: { notIn: ["CANCELLED", "REJECTED"] }, createdAt: { gte: monthStart } } }),
+      db.business.findUnique({
+        where: { id: businessId },
+        select: {
+          plan: {
+            select: { name: true, nameAr: true, price: true, maxProducts: true, maxOrders: true },
+          },
+        },
+      }),
       db.order.count({ where: { businessId, status: "DELIVERED", createdAt: { gte: dayStart } } }),
       db.order.count({ where: { businessId, status: { in: ["CANCELLED", "REJECTED"] }, createdAt: { gte: dayStart } } }),
       db.order.aggregate({
@@ -84,6 +99,8 @@ export async function GET(req: NextRequest) {
     }
 
     return ok({
+      plan: planInfo?.plan ?? null,
+      monthOrders,
       stats: {
         todayOrders,
         pendingCount,

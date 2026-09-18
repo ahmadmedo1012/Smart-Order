@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/states";
 import { toast } from "sonner";
 import { randomUUID } from "@/lib/uuid";
+import { AnimatedCopy } from "@/components/ui/animated-icons";
+import { libyanaUssdCode, madarUssdCode } from "@/lib/payment-constants";
 import {
   ArrowRight,
   ShoppingBag,
@@ -27,7 +29,17 @@ import {
   ClipboardList,
   PartyPopper,
   StickyNote,
+  Banknote,
+  Landmark,
 } from "lucide-react";
+
+/** Family ProviderPicker tile geometry: icon + label, mapped per payment type. */
+function paymentIcon(type: string) {
+  if (type === "CASH" || type === "COD") return Banknote;
+  if (type === "WHATSAPP") return MessageCircle;
+  if (type === "MADAR" || type === "LIBYANA") return Phone;
+  return Landmark;
+}
 
 interface StoreData {
   deliveryZones: Array<{ id: string; name: string; fee: number; minOrder: number }>;
@@ -381,55 +393,95 @@ export function CheckoutClient({
           </section>
         )}
 
-        {/* Payment */}
-        <section className="mt-3 rounded-xl border border-border bg-card p-4 space-y-3">
-          <h2 className="font-semibold text-sm flex items-center gap-2">
+        {/* Payment — family ProviderPicker geometry: icon+label border-2 tiles */}
+        <section className="mt-3 space-y-3 rounded-xl border border-border bg-card p-4">
+          <h2 className="flex items-center gap-2 text-sm font-semibold">
             <Coins className="size-4 text-primary" aria-hidden="true" />
             طريقة الدفع
           </h2>
-          <div className="space-y-2">
+          <div role="group" aria-label="طرق الدفع" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {data?.paymentMethods.map((p) => {
               const selected = paymentMethodId === p.id;
+              const Icon = paymentIcon(p.type);
               return (
-                <div key={p.id}>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethodId(p.id)}
-                    aria-pressed={selected}
-                    className={`w-full flex items-center gap-3 rounded-xl border p-3.5 text-start transition-colors ${
-                      selected ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50"
-                    }`}
-                  >
-                    <span className={`flex size-5 rounded-full border-2 shrink-0 items-center justify-center ${selected ? "border-primary" : "border-border"}`} aria-hidden="true">
-                      {selected && <span className="size-2.5 rounded-full bg-primary" />}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold">{p.name}</div>
-                      {p.instructions && (
-                        <div className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{p.instructions}</div>
-                      )}
-                    </div>
-                  </button>
-                  {selected && paymentConfig?.number && (
-                    <div className="mt-1.5 mx-1 rounded-lg bg-muted/60 border border-border/60 px-3.5 py-2.5 text-xs flex items-center justify-between gap-2">
-                      <span className="text-muted-foreground">حوّل إلى الرقم:</span>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(paymentConfig.number!);
-                          toast.success("تم نسخ الرقم");
-                        }}
-                        className="font-bold tabular hover:text-primary transition-colors"
-                        dir="ltr"
-                      >
-                        {formatPhoneDisplay(paymentConfig.number)}
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setPaymentMethodId(p.id)}
+                  aria-pressed={selected}
+                  className={`flex h-14 flex-col items-center justify-center gap-1 rounded-xl border-2 text-[13px] font-medium transition-[border-color,box-shadow,color,background-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/50 ${
+                    selected
+                      ? "border-orange bg-orange/10 shadow-sm"
+                      : "border-border/30 text-muted-foreground hover:border-orange/30"
+                  }`}
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                  {p.name}
+                </button>
               );
             })}
           </div>
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
+          {paymentMethod?.instructions && (
+            <p className="text-[11px] leading-relaxed text-muted-foreground">{paymentMethod.instructions}</p>
+          )}
+          {paymentMethod && paymentConfig?.number && (
+            <>
+              {/* Transfer target — family number row with copy */}
+              <div className="rounded-xl border border-border/20 bg-muted/30 p-3">
+                <p className="mb-1 text-xs text-muted-foreground">حوّل المبلغ إلى الرقم</p>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-lg font-bold tracking-wide" dir="ltr">
+                    {formatPhoneDisplay(paymentConfig.number)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(paymentConfig.number!);
+                      toast.success("تم نسخ الرقم");
+                    }}
+                    className="flex size-10 items-center justify-center rounded-lg border border-border/30 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/60"
+                    title="نسخ الرقم"
+                    aria-label="نسخ الرقم"
+                  >
+                    <AnimatedCopy className="size-3.5" />
+                  </button>
+                </div>
+              </div>
+              {/* Quick transfer code — family USSD quick-code row */}
+              <div className="rounded-xl border border-success/25 bg-success/10 p-3">
+                <p className="mb-1.5 text-xs font-medium text-success">رمز التحويل السريع</p>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate font-mono text-sm font-bold text-orange" dir="ltr">
+                    {paymentMethod.type === "LIBYANA"
+                      ? libyanaUssdCode(paymentConfig.number, total / 1000)
+                      : madarUssdCode(paymentConfig.number, total / 1000)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const code =
+                        paymentMethod.type === "LIBYANA"
+                          ? libyanaUssdCode(paymentConfig.number!, total / 1000)
+                          : madarUssdCode(paymentConfig.number!, total / 1000);
+                      try {
+                        await navigator.clipboard.writeText(code);
+                        toast.success("تم نسخ الرمز");
+                      } catch {
+                        toast.error("فشل النسخ");
+                      }
+                    }}
+                    className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-success px-3 text-xs font-medium text-white transition-colors hover:bg-success/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/60"
+                    title="نسخ رمز التحويل السريع"
+                    aria-label="نسخ رمز التحويل السريع"
+                  >
+                    <AnimatedCopy className="size-3.5" />
+                    نسخ
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
             {paymentMethod?.type === "COD" || paymentMethod?.type === "CASH"
               ? "الدفع نقداً عند وصول طلبك — لا حاجة لأي تحويل مسبق."
               : "بعد إرسال الطلب، تواصل مع المتجر عبر واتساب لتأكيد تحويلك. يُؤكد المتجر الدفع يدوياً."}

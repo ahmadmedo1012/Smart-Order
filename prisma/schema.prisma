@@ -13,33 +13,37 @@ datasource db {
 }
 
 model Business {
-  id             String   @id @default(cuid())
-  slug           String   @unique
-  name           String
-  description    String?
-  logoUrl        String?
-  coverUrl       String?
-  city           String?
-  phone          String?
-  whatsappNumber String? // E.164 digits, Libyan normalization applied
-  address        String?
-  receiptFooter  String?
-  currency       String   @default("LYD")
-  isActive       Boolean  @default(true)
-  isPublished    Boolean  @default(false)
-  onboardingStep Int      @default(1)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id               String    @id @default(cuid())
+  slug             String    @unique
+  name             String
+  description      String?
+  logoUrl          String?
+  coverUrl         String?
+  city             String?
+  phone            String?
+  whatsappNumber   String? // E.164 digits, Libyan normalization applied
+  address          String?
+  receiptFooter    String?
+  currency         String    @default("LYD")
+  isActive         Boolean   @default(true)
+  isPublished      Boolean   @default(false)
+  onboardingStep   Int       @default(1)
+  planId           String?
+  subscriptionEnds DateTime? // null = free/lifetime; set on paid approval
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  members        BusinessMember[]
-  categories     Category[]
-  products       Product[]
-  deliveryZones  DeliveryZone[]
-  paymentMethods PaymentMethod[]
-  customers      Customer[]
-  orders         Order[]
-  media          Media[]
-  auditLogs      AuditLog[]
+  plan                 Plan?                 @relation(fields: [planId], references: [id])
+  subscriptionPayments SubscriptionPayment[]
+  members              BusinessMember[]
+  categories           Category[]
+  products             Product[]
+  deliveryZones        DeliveryZone[]
+  paymentMethods       PaymentMethod[]
+  customers            Customer[]
+  orders               Order[]
+  media                Media[]
+  auditLogs            AuditLog[]
 }
 
 model User {
@@ -52,17 +56,63 @@ model User {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  sessions    Session[]
-  memberships BusinessMember[]
+  sessions             Session[]
+  memberships          BusinessMember[]
+  subscriptionPayments SubscriptionPayment[] @relation("PaymentReviewer")
+}
+
+/**
+ * ── Family subscription system (Smart Menu / SmartBot twin) ──
+ */
+
+model Plan {
+  id          String   @id @default(cuid())
+  name        String   @unique // Free | Basic | Premium | Pro
+  nameAr      String
+  price       Int      @default(0) // LYD whole dinars per period (family convention)
+  periodDays  Int      @default(30)
+  features    String   @default("[]") // JSON string[]
+  maxProducts Int      @default(15)
+  maxOrders   Int      @default(100) // per month
+  sortOrder   Int      @default(1)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  businesses Business[]
+  payments   SubscriptionPayment[]
+}
+
+model SubscriptionPayment {
+  id                  String    @id @default(cuid())
+  planId              String
+  businessId          String? // null until the merchant registers (pre-registration payment)
+  planName            String
+  amount              Int // LYD whole dinars
+  provider            String // LIBYANA | MADAR | BANK
+  status              String    @default("PENDING") // PENDING | APPROVED | REJECTED
+  phone               String? // sender phone (wallet flow)
+  senderAccountName   String? // bank flow
+  senderAccountNumber String?
+  receiptImageUrl     String?
+  reviewedById        String?
+  reviewNote          String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  reviewedAt          DateTime?
+
+  plan       Plan      @relation(fields: [planId], references: [id])
+  business   Business? @relation(fields: [businessId], references: [id])
+  reviewedBy User?     @relation("PaymentReviewer", fields: [reviewedById], references: [id])
 }
 
 model BusinessMember {
-  id          String   @id @default(cuid())
-  businessId  String
-  userId      String
-  role        String   @default("STAFF") // OWNER | ADMIN | STAFF
-  extraPerms  String   @default("") // comma-separated permissions beyond role defaults
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  businessId String
+  userId     String
+  role       String   @default("STAFF") // OWNER | ADMIN | STAFF
+  extraPerms String   @default("") // comma-separated permissions beyond role defaults
+  createdAt  DateTime @default(now())
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -97,32 +147,32 @@ model Category {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   products Product[]
 
   @@index([businessId, sortOrder])
 }
 
 model Product {
-  id               String   @id @default(cuid())
-  businessId       String
-  categoryId       String?
-  name             String
-  description      String?
-  imageUrl         String?
-  price            Int // millimes
-  isAvailable      Boolean  @default(true)
-  isFeatured       Boolean  @default(false)
-  sortOrder        Int      @default(0)
-  isArchived       Boolean  @default(false)
-  trackInventory   Boolean  @default(false)
-  stockQuantity    Int      @default(0)
-  lowStockAlert    Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id             String   @id @default(cuid())
+  businessId     String
+  categoryId     String?
+  name           String
+  description    String?
+  imageUrl       String?
+  price          Int // millimes
+  isAvailable    Boolean  @default(true)
+  isFeatured     Boolean  @default(false)
+  sortOrder      Int      @default(0)
+  isArchived     Boolean  @default(false)
+  trackInventory Boolean  @default(false)
+  stockQuantity  Int      @default(0)
+  lowStockAlert  Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  business     Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  category     Category?         @relation(fields: [categoryId], references: [id])
+  business     Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  category     Category?        @relation(fields: [categoryId], references: [id])
   variants     ProductVariant[]
   optionGroups OptionGroup[]
 
@@ -152,7 +202,7 @@ model OptionGroup {
   required  Boolean @default(false)
   sortOrder Int     @default(0)
 
-  product Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   options OptionItem[]
 
   @@index([productId, sortOrder])
@@ -213,7 +263,7 @@ model Customer {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  business  Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business  Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
   addresses CustomerAddress[]
   orders    Order[]
 
@@ -236,35 +286,35 @@ model CustomerAddress {
 }
 
 model Order {
-  id               String   @id @default(cuid())
-  businessId       String
-  customerId       String?
-  orderNumber      String // public identifier e.g. SO-20260917-0042
-  publicToken      String   @unique // unguessable token for public tracking
-  status           String   @default("NEW")
-  fulfillmentType  String // DELIVERY | PICKUP
-  subtotal         Int
-  discount         Int      @default(0)
-  deliveryFee      Int      @default(0)
-  total            Int
-  paymentMethodId  String?
+  id                String   @id @default(cuid())
+  businessId        String
+  customerId        String?
+  orderNumber       String // public identifier e.g. SO-20260917-0042
+  publicToken       String   @unique // unguessable token for public tracking
+  status            String   @default("NEW")
+  fulfillmentType   String // DELIVERY | PICKUP
+  subtotal          Int
+  discount          Int      @default(0)
+  deliveryFee       Int      @default(0)
+  total             Int
+  paymentMethodId   String?
   paymentMethodName String?
-  paymentType      String?
-  paymentStatus    String   @default("UNPAID")
-  customerName     String
-  customerPhone    String
-  city             String?
-  area             String?
-  addressLine      String?
-  customerNote     String?
-  internalNote     String?
-  idempotencyKey   String?
-  source           String   @default("STOREFRONT") // STOREFRONT | WHATSAPP | SMARTBOT
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  paymentType       String?
+  paymentStatus     String   @default("UNPAID")
+  customerName      String
+  customerPhone     String
+  city              String?
+  area              String?
+  addressLine       String?
+  customerNote      String?
+  internalNote      String?
+  idempotencyKey    String?
+  source            String   @default("STOREFRONT") // STOREFRONT | WHATSAPP | SMARTBOT
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  business Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  customer Customer?           @relation(fields: [customerId], references: [id])
+  business Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer Customer?            @relation(fields: [customerId], references: [id])
   items    OrderItem[]
   history  OrderStatusHistory[]
 
@@ -293,14 +343,14 @@ model OrderItem {
 }
 
 model OrderStatusHistory {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   orderId       String
   fromStatus    String?
   toStatus      String
   note          String?
   changedById   String?
   changedByName String?
-  createdAt     DateTime  @default(now())
+  createdAt     DateTime @default(now())
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
@@ -308,12 +358,12 @@ model OrderStatusHistory {
 }
 
 model Media {
-  id        String   @id @default(cuid())
+  id         String   @id @default(cuid())
   businessId String?
-  mimeType  String
-  size      Int
-  data      String // base64 payload (validated, size-capped)
-  createdAt DateTime @default(now())
+  mimeType   String
+  size       Int
+  data       String // base64 payload (validated, size-capped)
+  createdAt  DateTime @default(now())
 
   business Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
 

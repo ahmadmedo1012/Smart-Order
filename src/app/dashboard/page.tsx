@@ -8,6 +8,7 @@ import { OrderStatusBadge, PaymentStatusBadge } from "@/components/shared/status
 import { EmptyState, ErrorState } from "@/components/shared/states";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { PlanUsageBadge } from "@/components/dashboard/plan-usage-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatLyd } from "@/lib/money";
 import { timeAgoAr, formatArabicTime } from "@/lib/arabic";
@@ -50,7 +51,16 @@ interface RecentOrder {
   createdAt: string;
   paymentStatus: PaymentStatus;
 }
+interface PlanInfo {
+  name: string;
+  nameAr: string;
+  price: number;
+  maxProducts: number;
+  maxOrders: number;
+}
 interface Data {
+  plan: PlanInfo | null;
+  monthOrders: number;
   stats: Stats;
   recentOrders: RecentOrder[];
   lowStock: Array<{ id: string; name: string; stockQuantity: number }>;
@@ -128,6 +138,9 @@ export default function DashboardOverview() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-heading text-2xl font-bold">نظرة عامة</h1>
+          <div className="mt-2">
+            <PlanUsageBadge plan={data.plan} productCount={stats.productCount} monthOrders={data.monthOrders} />
+          </div>
           <p className="text-sm text-muted-foreground mt-1">ملخص يومك وما يحتاج انتباهك الآن</p>
         </div>
         <Button asChild size="default" className="h-10">

@@ -20,6 +20,8 @@ const schema = z.object({
   businessName: z.string().trim().min(2, "أدخل اسم العمل").max(100),
   city: z.string().trim().max(60).optional().default(""),
   phone: z.string().trim().max(20).optional().default(""),
+  /** Optional plan preselection from the pricing wizard (must be a free plan — paid plans activate after payment approval). */
+  planId: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -44,6 +46,14 @@ export async function POST(req: NextRequest) {
       return !!(await db.business.findUnique({ where: { slug: candidate }, select: { id: true } }));
     });
 
+    // Resolve the plan preselection (free plans only attach instantly;
+    // paid plans attach on payment approval by the platform admin).
+    let planId: string | null = null;
+    if (input.planId) {
+      const plan = await db.plan.findUnique({ where: { id: input.planId } });
+      if (plan && plan.isActive && plan.price === 0) planId = plan.id;
+    }
+
     const [user] = await db.$transaction([
       db.user.create({
         data: {
@@ -62,6 +72,7 @@ export async function POST(req: NextRequest) {
         city: input.city || null,
         phone: input.phone || null,
         onboardingStep: 2,
+        planId,
         members: {
           create: { userId: user.id, role: "OWNER" },
         },
