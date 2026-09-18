@@ -155,7 +155,7 @@ export function Storefront({
                 >
                   <ShoppingBag className="size-5" aria-hidden="true" />
                   {count > 0 && (
-                    <span className="absolute -top-1.5 -end-1.5 min-w-5 h-5 rounded-full bg-saffron text-espresso text-[10px] font-bold flex items-center justify-center px-1 tabular">
+                    <span className="absolute -top-1.5 -end-1.5 min-w-5 h-5 rounded-full bg-saffron text-espresso text-[11px] font-bold flex items-center justify-center px-1 tabular">
                       {count}
                     </span>
                   )}
@@ -240,7 +240,7 @@ export function Storefront({
               <section aria-label="منتجات مميزة" className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
                   <h2 className="font-heading font-bold text-sm">مميز</h2>
-                  <Badge className="bg-saffron/15 text-accent-foreground border-saffron/30 text-[10px]">اختيار المتجر</Badge>
+                  <Badge className="bg-saffron/15 text-accent-foreground border-saffron/30 text-[11px]">اختيار المتجر</Badge>
                 </div>
                 <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
                   {featured.map((p) => (
@@ -250,7 +250,7 @@ export function Storefront({
               </section>
             )}
             <section aria-label="قائمة المنتجات">
-              {regular.length > 0 && featured.length > 0 && (
+              {regular.length > 0 && (
                 <h2 className="font-heading font-bold text-sm mb-3">كل المنتجات</h2>
               )}
               <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
@@ -265,7 +265,7 @@ export function Storefront({
         {data.business.receiptFooter && (
           <p className="mt-10 text-center text-xs text-muted-foreground">{data.business.receiptFooter}</p>
         )}
-        <p className="mt-3 text-center text-[10px] text-muted-foreground">
+        <p className="mt-3 text-center text-xs text-muted-foreground">
           متجر رقمي بواسطة <a href="/" className="hover:text-primary">سمارت أوردر</a>
         </p>
       </main>

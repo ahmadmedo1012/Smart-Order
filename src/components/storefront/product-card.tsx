@@ -65,7 +65,7 @@ export function ProductCard({
             </span>
           )}
           {product.isFeatured && (
-            <span className="absolute top-2 start-2 rounded-full bg-saffron/95 px-2 py-0.5 text-[10px] font-bold text-black/80 shadow">
+            <span className="absolute top-2 start-2 rounded-full bg-saffron/95 px-2 py-0.5 text-[11px] font-bold text-black/80 shadow">
               مميز
             </span>
           )}
@@ -99,7 +99,7 @@ export function ProductCard({
           {(product.variants.length > 0 || product.optionGroups.length > 0) && product.isAvailable && (
             <button
               onClick={() => setOpen(true)}
-              className="mt-1.5 text-[10px] text-primary font-medium hover:underline"
+              className="mt-1.5 text-[11px] text-primary font-medium hover:underline"
             >
               {product.variants.length > 0 && `${product.variants.length} أحجام · `}
               {product.optionGroups.length > 0 && `${product.optionGroups.length} إضافات`}
@@ -108,14 +108,13 @@ export function ProductCard({
         </div>
       </article>
 
-      {open && (
-        <ProductDialog
-          product={product}
-          slug={slug}
-          businessName={businessName}
-          onClose={() => setOpen(false)}
-        />
-      )}
+      <ProductDialog
+        product={product}
+        slug={slug}
+        businessName={businessName}
+        open={open}
+        onClose={() => setOpen(false)}
+      />
     </>
   );
 }

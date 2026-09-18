@@ -6,17 +6,20 @@ import { formatLyd } from "@/lib/money";
 import type { StoreProduct } from "@/components/storefront/storefront";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Minus, Plus, Package, ShoppingBag } from "lucide-react";
+import { Minus, Plus, Package, ShoppingBag, X, Check } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export function ProductDialog({
   product,
   slug,
   businessName,
+  open,
   onClose,
 }: {
   product: StoreProduct;
   slug: string;
   businessName: string;
+  open: boolean;
   onClose: () => void;
 }) {
   const addItem = useCart((s) => s.addItem);
@@ -87,11 +90,19 @@ export function ProductDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4" role="dialog" aria-modal="true" aria-label={product.name}>
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
-      <div className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-border bg-card shadow-2xl max-h-[92vh] flex flex-col">
-        {/* Product header */}
-        <div className="relative h-40 sm:h-44 bg-muted shrink-0">
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
+      <DialogContent
+        showCloseButton={false}
+        aria-label={product.name}
+        className="top-auto bottom-0 left-0 right-0 mx-auto flex max-h-[92vh] w-full translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-t-2xl border p-0 pb-0 max-w-[calc(100%-1.5rem)] sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:max-w-md sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl data-[state=open]:slide-in-from-bottom-4 data-[state=open]:zoom-in-100 sm:data-[state=open]:slide-in-from-bottom-2 sm:data-[state=open]:zoom-in-95"
+      >
+      {/* Product header */}
+      <div className="relative h-40 shrink-0 rounded-t-2xl bg-muted sm:h-44">
           {product.imageUrl ? (
              
             <img src={product.imageUrl} alt={product.name} className="size-full object-cover rounded-t-2xl" />
@@ -105,9 +116,7 @@ export function ProductDialog({
             className="absolute top-3 end-3 rounded-full bg-background/90 shadow p-2 hover:bg-background"
             aria-label="إغلاق"
           >
-            <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-              <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
-            </svg>
+            <X className="size-4" aria-hidden="true" />
           </button>
         </div>
 
@@ -184,9 +193,7 @@ export function ProductDialog({
                           aria-hidden="true"
                         >
                           {isSelected && (
-                            <svg viewBox="0 0 24 24" className="size-3" fill="none" stroke="currentColor" strokeWidth="3.5">
-                              <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
+                            <Check className="size-3" strokeWidth={3.5} aria-hidden="true" />
                           )}
                         </span>
                         <span className="text-sm font-medium flex-1">{o.name}</span>
@@ -247,7 +254,7 @@ export function ProductDialog({
             </Button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
  * Pure-CSS effects (no JS handlers) so it stays Server-Component-safe.
  */
 const buttonVariants = cva(
-  "group/btn relative inline-flex shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-transparent font-sans text-sm font-bold whitespace-nowrap outline-none select-none transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.2,1)] focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 isolate before:pointer-events-none before:absolute before:inset-0 before:-translate-x-full before:rounded-[inherit] before:bg-[linear-gradient(105deg,transparent_30%,oklch(1_0_0/0.22)_50%,transparent_70%)] before:transition-transform before:duration-700 before:ease-out hover:before:translate-x-full after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:bg-[radial-gradient(circle_at_50%_50%,oklch(1_0_0/0.16),transparent_45%)] after:opacity-0 after:transition-opacity after:duration-500 hover:after:opacity-100 [&>*]:relative",
+  "group/btn relative inline-flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-transparent font-sans text-sm font-bold whitespace-nowrap outline-none select-none transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.2,1)] focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 isolate before:pointer-events-none before:absolute before:inset-0 before:-translate-x-full before:rounded-[inherit] before:bg-[linear-gradient(105deg,transparent_30%,oklch(1_0_0/0.22)_50%,transparent_70%)] before:transition-transform before:duration-700 before:ease-out hover:before:translate-x-full after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:bg-[radial-gradient(circle_at_50%_50%,oklch(1_0_0/0.16),transparent_45%)] after:opacity-0 after:transition-opacity after:duration-500 hover:after:opacity-100 [&>*]:relative",
   {
     variants: {
       variant: {
@@ -35,9 +35,9 @@ const buttonVariants = cva(
           "bg-transparent text-primary underline-offset-4 hover:underline active:scale-100",
       },
       size: {
-        sm: "h-10 gap-1.5 px-3.5 text-xs",
-        default: "h-12 gap-2 px-5 text-sm",
-        lg: "h-14 gap-2.5 px-7 text-sm sm:text-base",
+        sm: "h-10 gap-1.5 px-3.5 py-2.5 text-xs",
+        default: "h-12 gap-2 px-5 py-2.5 text-sm",
+        lg: "h-14 gap-2.5 px-7 py-3.5 text-sm sm:text-base",
         icon: "size-12",
         "icon-sm": "size-10",
       },

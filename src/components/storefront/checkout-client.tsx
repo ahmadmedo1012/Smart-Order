@@ -9,6 +9,7 @@ import { formatLyd } from "@/lib/money";
 import { normalizeLibyanPhone, formatPhoneDisplay, toE164 } from "@/lib/phone";
 import { FULFILLMENT_AR, PAYMENT_TYPE_AR, LIBYA_CITIES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/shared/states";
 import { toast } from "sonner";
 import { randomUUID } from "@/lib/uuid";
 import {
@@ -198,20 +199,20 @@ export function CheckoutClient({
   // ===== EMPTY CART =====
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-muted/30 flex items-center justify-center px-4">
-        <div className="text-center max-w-sm">
-          <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-muted border border-border">
-            <ShoppingBag className="size-7 text-muted-foreground" aria-hidden="true" />
-          </div>
-          <h1 className="mt-4 font-heading font-bold text-xl">سلتك فارغة</h1>
-          <p className="mt-2 text-sm text-muted-foreground">أضف منتجات من المتجر لتتمكن من إتمام الطلب</p>
-          <Button asChild className="mt-5 h-11 px-6 font-semibold">
-            <Link href={`/store/${slug}`}>
-              <ArrowRight className="size-4 me-2 rotate-180" aria-hidden="true" />
-              العودة للمتجر
-            </Link>
-          </Button>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
+        <EmptyState
+          icon={ShoppingBag}
+          title="سلتك فارغة"
+          description="أضف منتجات من المتجر لتتمكن من إتمام الطلب"
+          action={
+            <Button asChild className="px-6">
+              <Link href={`/store/${slug}`}>
+                <ArrowRight className="size-4 me-2 rotate-180" aria-hidden="true" />
+                العودة للمتجر
+              </Link>
+            </Button>
+          }
+        />
       </div>
     );
   }

@@ -44,7 +44,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         {/* Pre-paint theme boot — no flash. Family standard: DARK default,
             light only when explicitly stored (mirrors Smart Menu/SmartBot). */}

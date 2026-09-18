@@ -65,7 +65,7 @@ export function BrandLogo({
           <span className={cn("font-heading font-bold text-foreground", textClass)}>
             سمارت أوردر
           </span>
-          <span className="text-[10px] text-muted-foreground mt-1 tracking-[0.18em] uppercase">
+          <span className="text-[11px] text-muted-foreground mt-1 tracking-[0.18em] uppercase">
             Smart Order
           </span>
         </span>
