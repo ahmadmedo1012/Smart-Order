@@ -37,3 +37,28 @@ Work Log:
 Stage Summary:
 - الهوية الآن على مستوى المنتج كاملاً (شريط/أزرار/باقات/دفع/تحقق/مؤثرات) لا الألوان فقط
 - TODO: commit+push, deploy Vercel, db push prod, seed prod, production QA
+
+---
+Task ID: deep-round-2-deploy
+Agent: main (Super Z)
+Task: نشر الإنتاج + التحقق النهائي
+
+Work Log:
+- أصلح gitignore (كان .next/.env/refs تتسرب) + نظّف الفهرس
+- commit 57559f0 + 8604174 → GitHub main
+- اكتشف أن render.yaml كان يفسّر كـ services بواسطة Vercel CLI → أُزيل من المستودع
+- vercel.json: build يطبّق prisma db push (additive) قبل التوليد → الجداول الجديدة تُنشأ عند النشر
+- نشر إنتاجي ×3 → order.smart-link.ly
+- env: SEED_SECRET + NEXT_PUBLIC_SUPPORT_WHATSAPP أُضيفا عبر API
+- بذر إنتاجي: POST /api/seed → {store:true, products:6, paymentMethods:3, zones:2}
+- التحقق الإنتاجي:
+  * /api/plans → 4 خطط ✓
+  * /pricing → بطاقات + كبسولة سنوي/شهري (وفّر 17%) ✓
+  * المتجر التجريبي يعمل ✓
+  * E2E إنتاجي 30/30 PASS ✓
+  * لقطات PROD-* + مقارنات COMPARE-* في download/qa-2026-09-18/
+- VLM توأم التقييم: 8/10 — الفروق المتبقية فروق منتج مقصودة (نصوص/محتوى الهاتف/العلامة) لا فروق هوية
+
+Stage Summary:
+- الإنتاج live بالهوية العائلية الكاملة: شريط tubelight، بطل منقسم + هاتف + بطاقات زجاجية، bento، بااقات، دفع عائلي (USSD/بنكي/محفظة)، تحقق بالموافقة، footer رباعي
+- جاهز للمستخدم؛ الخطوة التالية المقترحة: جلسة تلميع صغيرة إذا طلب المستخدم (نسخ نصية أو تعديل أسعار الخطط من قاعدة البيانات مباشرة)
