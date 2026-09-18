@@ -22,27 +22,32 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const business = await getBusiness(slug);
-  if (!business || !business.isPublished) {
-    return { title: "المتجر غير متاح", robots: { index: false, follow: false } };
-  }
-  const title = `${business.name} — اطلب أونلاين`;
-  const description =
-    business.description ??
-    `اطلب من ${business.name}${business.city ? ` في ${business.city}` : ""} — تصفح المنتجات واطلب توصيلاً أو استلاماً عبر سمارت أوردر`;
-  return {
-    title,
-    description,
-    alternates: { canonical: `/store/${business.slug}` },
-    openGraph: {
+  try {
+    const business = await getBusiness(slug);
+    if (!business || !business.isPublished) {
+      return { title: "المتجر غير متاح", robots: { index: false, follow: false } };
+    }
+    const title = `${business.name} — اطلب أونلاين`;
+    const description =
+      business.description ??
+      `اطلب من ${business.name}${business.city ? ` في ${business.city}` : ""} — تصفح المنتجات واطلب توصيلاً أو استلاماً عبر سمارت أوردر`;
+    return {
       title,
       description,
-      type: "website",
-      locale: "ar_LY",
-      images: business.coverUrl ?? business.logoUrl ?? undefined,
-    },
-    twitter: { card: "summary_large_image", title, description },
-  };
+      alternates: { canonical: `/store/${business.slug}` },
+      openGraph: {
+        title,
+        description,
+        type: "website",
+        locale: "ar_LY",
+        images: business.coverUrl ?? business.logoUrl ?? undefined,
+      },
+      twitter: { card: "summary_large_image", title, description },
+    };
+  } catch {
+    // DB/metadata failure must not 500 the document — fallback metadata only
+    return { title: "المتجر غير متاح", robots: { index: false, follow: false } };
+  }
 }
 
 export default async function StorePage({ params }: { params: Promise<{ slug: string }> }) {

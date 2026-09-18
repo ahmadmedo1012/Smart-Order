@@ -46,3 +46,4 @@ tsconfig.tsbuildinfo
 next-env.d.ts
 Caddyfile
 worklog.md
+.env*
