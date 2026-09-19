@@ -22,6 +22,10 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
 
   return (
     <section className="relative overflow-clip">
+      {/* Family LCP-safe hero settle (r92) — hoisted keyframe, h1 starts VISIBLE */}
+      <style href="r92-hero-entrance" precedence="high">
+        {'@keyframes r92-hero-settle{from{transform:translateY(12px)}to{transform:translateY(0)}}.r92-hero-settle{animation:r92-hero-settle .6s var(--ease-out-quart,ease-out) both}'}
+      </style>
       {/* Family warmth layer — one restrained flame glow stack with parallax */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-clip" aria-hidden="true">
         <ScrollParallax rate={-0.15} maxTravel={30} className="absolute inset-0">
@@ -74,8 +78,8 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
               <Eyebrow>متجر رقمي، طلب مباشر على هاتفك</Eyebrow>
             </div>
 
-            {/* h1 — CSS settle, visible in SSR HTML on first paint */}
-            <h1 className="text-balance text-4xl font-extrabold leading-[1.15] tracking-tighter sm:text-5xl lg:text-6xl xl:text-[4.25rem]">
+            {/* h1 — CSS settle (family r92), visible in SSR HTML on first paint */}
+            <h1 className="r92-hero-settle text-balance text-4xl font-extrabold leading-[1.15] tracking-tighter sm:text-5xl lg:text-6xl xl:text-[4.25rem]">
               <span className="block">متجر رقمي لمتجرك</span>
               <span className="block">
                 <span className="text-gradient-orange">الطلبات تصلك</span> في لوحة واحدة
@@ -100,9 +104,9 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
                   ابدأ مجاناً <MotionArrowRight className="size-4 rtl:rotate-180 sm:size-5" />
                 </Button>
               </Link>
-              <Link href="/pricing">
+              <Link href="/login">
                 <Button variant="outline" size="lg" className="text-sm sm:text-base">
-                  شاهد الخطط
+                  تسجيل الدخول
                 </Button>
               </Link>
             </div>
@@ -114,7 +118,7 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
                 style={{ animationDelay: "0.51s" }}
               >
                 <span className="size-1.5 animate-pulse-dot rounded-full bg-primary" />
-                أكثر من {trustCount.toLocaleString("en-US")} متجر يثقون بنا
+                أكثر من {trustCount.toLocaleString("en-US").replace(/,/g, "")} متجر يثقون بنا
               </div>
             )}
           </div>

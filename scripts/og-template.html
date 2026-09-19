@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<style>
+  @font-face { font-family: "Readex Pro"; src: url("/fonts/readex-pro.woff2") format("woff2"); font-weight: 400 700; }
+  @font-face { font-family: "Cairo"; src: url("/fonts/cairo-arabic.woff2") format("woff2"); }
+  @font-face { font-family: "Cairo"; src: url("/fonts/cairo-latin.woff2") format("woff2"); unicode-range: U+0000-00FF; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1200px; height: 630px; overflow: hidden; position: relative; background: #010000; font-family: "Cairo", "Readex Pro"; }
+  .glow-main { position: absolute; inset-inline-end: -160px; top: 60px; width: 860px; height: 560px;
+    background: radial-gradient(ellipse at center, rgba(188,71,0,0.38) 0%, rgba(188,71,0,0.10) 45%, transparent 72%);
+    filter: blur(40px); }
+  .glow-amber { position: absolute; inset-inline-start: 100px; bottom: -120px; width: 520px; height: 380px;
+    background: radial-gradient(ellipse at center, rgba(240,166,70,0.20) 0%, transparent 70%);
+    filter: blur(50px); }
+  .content { position: absolute; inset: 0; padding: 56px 64px; display: flex; flex-direction: column; align-items: flex-end; }
+  .brand-row { display: flex; align-items: center; gap: 16px; direction: ltr; }
+  .brand-row img { width: 72px; height: 72px; }
+  .brand-name { font-family: "Readex Pro"; font-size: 44px; font-weight: 600; color: #ebe7e2; letter-spacing: -0.01em; }
+  h1 { font-family: "Readex Pro", "Cairo"; font-size: 74px; font-weight: 700; line-height: 1.18; text-align: right; margin-top: 48px;
+       background: linear-gradient(180deg, #fde3b9 0%, #f0a646 55%, #e59500 100%);
+       -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { margin-top: 26px; font-size: 33px; color: #b0a9a0; text-align: right; }
+  .url-pill { margin-top: 40px; direction: ltr; font-family: "Readex Pro"; font-size: 28px; color: #f0a646;
+    border: 2px solid #bc4700; border-radius: 999px; padding: 12px 26px; }
+</style>
+</head>
+<body>
+  <div class="glow-main"></div>
+  <div class="glow-amber"></div>
+  <div class="content">
+    <div class="brand-row">
+      <span class="brand-name">Smart Order</span>
+      <img src="/brand-icon.png" alt="">
+    </div>
+    <h1>متجر رقمي لمتجرك<br>والطلبات تصلك منظمة</h1>
+    <div class="sub">أنشئ متجرك بصور وأسعار، واستقبل الطلبات فوراً من عملائك</div>
+    <div class="url-pill">order.smart-link.ly</div>
+  </div>
+</body>
+</html>

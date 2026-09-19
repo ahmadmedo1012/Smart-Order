@@ -1,7 +1,7 @@
 "use client";
 
 import { m, useAnimate, type HTMLMotionProps } from "motion/react";
-import { Copy, X, Eye, EyeOff, MessageCircle, Sparkles, Upload, Zap } from "lucide-react";
+import { Copy, X, Eye, EyeOff, MessageCircle, Sparkles, Upload, Zap, Star, Quote } from "lucide-react";
 
 /**
  * Animated icons — family pattern (Smart Menu animated icon family):
@@ -62,3 +62,7 @@ export const AnimatedSparkles = makeAnimatedIcon(Sparkles, "Sparkles", { scale: 
 export const AnimatedUpload = makeAnimatedIcon(Upload, "Upload", { y: -2 });
 /** Zap — popular badge bolt, quick jitter. */
 export const AnimatedZap = makeAnimatedIcon(Zap, "Zap", { rotate: -12, scale: 1.2 });
+
+export const AnimatedStar = makeAnimatedIcon(Star, "Star", { scale: 1.2, rotate: 12 });
+
+export const AnimatedQuote = makeAnimatedIcon(Quote, "Quote", { y: -2 });

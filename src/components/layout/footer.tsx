@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { m, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { AnimatedMessageCircle } from "@/components/ui/animated-icons";
-import { BrandMark } from "@/components/shared/brand";
 
 /** Canonical family support WhatsApp number (env-overridable). */
 const SUPPORT_WHATSAPP = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "218910089975";
@@ -18,7 +18,7 @@ const QUICK_LINKS = [
   { href: "/pricing", label: "الخطط" },
   { href: "/store/demo-store", label: "متجر تجريبي" },
   { href: "/login", label: "تسجيل الدخول" },
-  { href: "/register", label: "أنشئ متجرك" },
+  { href: "/register", label: "اشترك الآن" },
 ];
 
 /**
@@ -39,9 +39,8 @@ export function Footer({ className }: FooterProps) {
       <div className="max-w-[1220px] mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 mb-10 sm:mb-12">
           <div className="col-span-2 sm:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-2.5 mb-4" aria-label="سمارت أوردر — الرئيسية">
-              <BrandMark size={28} />
-              <span className="font-heading font-bold text-sm text-foreground">Smart Order</span>
+            <Link href="/" className="inline-flex mb-4" aria-label="سمارت أوردر — الرئيسية">
+              <Image src="/brand-icon.png" alt="الربط الذكي" width={160} height={160} className="h-7 w-auto" loading="lazy" />
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               منصة رقمية لإدارة متاجر ومطاعم ليبيا — متجر إلكتروني، طلبات، توصيل، ومدفوعات محلية من لوحة واحدة

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/components/shared/theme-provider";
+import { LazyMotionProvider } from "@/components/motion/lazy-motion-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -14,18 +15,34 @@ export const metadata: Metadata = {
   description:
     "أنشئ متجرك الرقمي واستقبل الطلبات عبر الويب وواتساب. لوحة تحكم كاملة للطلبات والمنتجات والتوصيل والمدفوعات — مصممة للأعمال الليبية.",
   keywords: ["طلبات", "متجر رقمي", "ليبيا", "توصيل", "طلب أونلاين", "سمارت أوردر", "Smart Order"],
-  applicationName: "سمارت أوردر",
   openGraph: {
     type: "website",
     locale: "ar_LY",
     siteName: "سمارت أوردر",
     title: "سمارت أوردر — منصة الطلبات الرقمية",
     description: "أنشئ متجرك الرقمي واستقبل الطلبات عبر الويب وواتساب — مصممة للأعمال الليبية.",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "الربط الذكي — سمارت أوردر" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "سمارت أوردر — منصة الطلبات الرقمية",
     description: "أنشئ متجرك الرقمي واستقبل الطلبات عبر الويب وواتساب.",
+    images: ["/og-default.png"],
+  },
+  manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  applicationName: "Smart Order",
+  appleWebApp: {
+    capable: true,
+    title: "Smart Order",
+    statusBarStyle: "default",
   },
   robots: { index: true, follow: true },
 };
@@ -57,9 +74,12 @@ export default function RootLayout({
         <link rel="preload" href="/fonts/readex-pro.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="stylesheet" href="/fonts/fonts.css" />
       </head>
-      <body className="font-sans antialiased bg-background text-foreground min-h-screen flex flex-col">
+      <body
+        className="font-sans antialiased bg-background text-foreground min-h-screen flex flex-col"
+        style={{ background: "var(--background-radial), var(--background)" }}
+      >
         <ThemeProvider>
-          {children}
+          <LazyMotionProvider>{children}</LazyMotionProvider>
           <Toaster position="top-center" richColors closeButton dir="rtl" />
         </ThemeProvider>
       </body>

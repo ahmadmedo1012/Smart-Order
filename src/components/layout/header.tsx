@@ -1,13 +1,14 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { m, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 import { AnimatedX } from "@/components/ui/animated-icons";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
-import { BrandMark } from "@/components/shared/brand";
+import { LayoutMotion } from "@/components/motion/lazy-motion-provider";
 import { springDefault } from "@/lib/motion";
 
 interface HeaderProps {
@@ -137,7 +138,7 @@ function MobileMenu({ open, onClose, pathname }: { open: boolean; onClose: () =>
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
               <Link href="/" className="flex items-center gap-2" aria-label="سمارت أوردر — الرئيسية">
-                <BrandMark size={36} />
+                <Image src="/brand-icon.png" alt="الربط الذكي" width={160} height={160} className="h-9 w-auto" priority />
                 <span className="text-base font-bold tracking-normal text-foreground/90" style={{ fontFamily: "var(--font-heading)" }}>
                   Smart Order
                 </span>
@@ -179,21 +180,6 @@ function MobileMenu({ open, onClose, pathname }: { open: boolean; onClose: () =>
                   </m.div>
                 );
               })}
-              <m.div
-                custom={landingLinks.length}
-                variants={mobileLinkVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-              >
-                <Link
-                  href="/register"
-                  onClick={onClose}
-                  className="flex items-center justify-center gap-2 mt-3 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-orange/25"
-                >
-                  أنشئ متجرك مجاناً
-                </Link>
-              </m.div>
             </nav>
           </m.div>
         </>
@@ -256,7 +242,7 @@ export function Header({ className }: HeaderProps) {
             {/* Family r113-F118: brand text hides below 420px (icon-only) so the
                 44px hamburger + toggle keep breathing room on 320px screens. */}
             <Link href="/" className="flex items-center gap-2 group" aria-label="سمارت أوردر — الرئيسية">
-              <BrandMark size={36} />
+              <Image src="/brand-icon.png" alt="الربط الذكي" width={160} height={160} className="h-9 w-auto shrink-0" priority />
               <span
                 className="text-base font-bold tracking-normal text-foreground/90 group-hover:text-accent-foreground transition-colors duration-200 max-[420px]:hidden"
                 style={{ fontFamily: "var(--font-heading)" }}
@@ -286,16 +272,18 @@ export function Header({ className }: HeaderProps) {
                     >
                       {link.label}
                       {linkActive && (
-                        <m.div
-                          layoutId="tubelight"
-                          className="absolute inset-0 -z-10 rounded-full bg-primary shadow-lg"
-                          style={{
-                            boxShadow:
-                              "0 0 18px 3px color-mix(in oklab, var(--primary) 35%, transparent), 0 0 6px color-mix(in oklab, var(--primary) 15%, transparent)",
-                            willChange: "transform, opacity",
-                          }}
-                          transition={{ type: "spring", stiffness: 420, damping: 28 }}
-                        />
+                        <LayoutMotion>
+                          <m.div
+                            layoutId="tubelight"
+                            className="absolute inset-0 -z-10 rounded-full bg-primary shadow-lg"
+                            style={{
+                              boxShadow:
+                                "0 0 18px 3px color-mix(in oklab, var(--primary) 35%, transparent), 0 0 6px color-mix(in oklab, var(--primary) 15%, transparent)",
+                              willChange: "transform, opacity",
+                            }}
+                            transition={{ type: "spring", stiffness: 420, damping: 28 }}
+                          />
+                        </LayoutMotion>
                       )}
                     </Link>
                   </div>
@@ -304,15 +292,10 @@ export function Header({ className }: HeaderProps) {
             </div>
           </div>
 
-          {/* Actions — family: theme toggle on the end side + compact CTA */}
+          {/* Actions — family pattern: theme toggle ONLY (no header CTA;
+              the family CTAs live in the hero and final-CTA sections) */}
           <div className="flex items-center justify-end gap-2 flex-1">
             <ThemeToggle />
-            <Link
-              href="/register"
-              className="hidden lg:inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground shadow-md shadow-orange/25 transition-[transform,box-shadow,background-color] duration-300 hover:bg-orange/95 hover:shadow-lg hover:shadow-orange/40 active:scale-[0.97]"
-            >
-              أنشئ متجرك
-            </Link>
           </div>
         </nav>
       </header>

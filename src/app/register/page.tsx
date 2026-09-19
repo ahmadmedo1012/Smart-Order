@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BrandLogo } from "@/components/shared/brand";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -153,7 +153,9 @@ function RegisterWizard() {
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center px-4 pb-16 pt-24 sm:px-6">
         {/* Logo + title */}
         <div className="mb-6 flex flex-col items-center text-center">
-          <BrandLogo size={40} />
+          <div className="flex h-10 w-10 items-center justify-center">
+            <Image src="/brand-icon.png" alt="الربط الذكي" width={160} height={160} className="h-full w-full object-contain" priority />
+          </div>
           <h1 className="mt-4 font-heading text-2xl font-bold sm:text-3xl">
             {step === "plan" ? "أنشئ متجرك" : "بيانات الحساب"}
           </h1>

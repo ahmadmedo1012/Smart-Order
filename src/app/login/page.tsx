@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { BrandMark } from "@/components/shared/brand";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,7 +90,14 @@ export default function LoginPage() {
         {/* Logo area */}
         <div className="pb-2 pt-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center">
-            <BrandMark size={64} />
+            <Image
+              src="/brand-icon.png"
+              alt="الربط الذكي"
+              width={160}
+              height={160}
+              className="h-full w-full object-contain"
+              priority
+            />
           </div>
           <h1 className="font-heading text-2xl font-bold leading-snug">الربط الذكي</h1>
           <p className="mt-1 text-base text-muted-foreground/80">لوحة تحكم المتاجر</p>

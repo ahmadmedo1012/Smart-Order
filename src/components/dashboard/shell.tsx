@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BrandMark } from "@/components/shared/brand";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -141,7 +141,7 @@ export function DashboardShell({
       <div className="flex flex-1">
         <aside className="hidden lg:flex w-60 xl:w-64 shrink-0 flex-col border-e border-border bg-card sticky top-0 h-screen">
           <div className="h-16 flex items-center gap-2.5 px-5 border-b border-border/60">
-            <BrandMark size={32} />
+            <Image src="/brand-icon.png" alt="الربط الذكي" width={160} height={160} className="h-8 w-auto" priority />
             <div className="leading-none">
               <div className="font-heading font-bold text-sm">سمارت أوردر</div>
               <div className="text-[10px] text-muted-foreground mt-1">لوحة التحكم</div>
@@ -185,7 +185,7 @@ export function DashboardShell({
               <SheetContent side="right" className="w-72 p-0">
                 <SheetTitle className="sr-only">قائمة التنقل</SheetTitle>
                 <div className="h-16 flex items-center gap-2.5 px-5 border-b border-border/60">
-                  <BrandMark size={32} />
+                  <Image src="/brand-icon.png" alt="الربط الذكي" width={160} height={160} className="h-8 w-auto" priority />
                   <span className="font-heading font-bold text-sm">لوحة التحكم</span>
                 </div>
                 <div className="py-4">

@@ -138,6 +138,8 @@
 
   /* Surfaces — SmartBot twin literals */
   --background: #010000;
+  /* Family top page radial glow (SmartBot mechanism: layered onto body inline) */
+  --background-radial: radial-gradient(ellipse 80% 50% at 50% -10%, #f3680f14, transparent 70%);
   --foreground: #ebe7e2;
   --card: #070503;
   --card-foreground: #ebe7e2;
@@ -253,6 +255,8 @@
   color-scheme: light;
 
   --background: oklch(0.985 0.004 70); /* warm paper */
+  /* Family light-mode warm halo (3% — resolves with the active theme) */
+  --background-radial: radial-gradient(ellipse 80% 50% at 50% -10%, #bc470014, transparent 70%);
   --foreground: oklch(0.12 0.008 70); /* warm ink */
   --card: oklch(1 0.002 70);
   --card-foreground: oklch(0.12 0.008 70);
