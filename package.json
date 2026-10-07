@@ -9,6 +9,7 @@
     "start": "next start -p ${PORT:-3000}",
     "start:selfhost": "NODE_ENV=production node .next/standalone/server.js",
     "test:e2e": "node tests/e2e/api-e2e.js http://localhost:3000",
+    "test:parity": "node tests/parity.mjs",
     "lint": "eslint .",
     "db:push": "prisma db push --accept-data-loss",
     "db:generate": "prisma generate",
