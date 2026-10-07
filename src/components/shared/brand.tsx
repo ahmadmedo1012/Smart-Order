@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Smart Order brand mark — shopping bag + check rendered in the Smart family
- * flame gradient (ember → saffron → ember, espresso glyph), matching the
- * Smart Menu / SmartBot brand treatment (flame tile + warm glyph).
+ * Smart Order brand mark — shopping bag + check rendered in the Madarek
+ * gold metal gradient (ember → gold → ember, night glyph), matching the
+ * family accent treatment (gold on night / copper on cream).
  */
 export function BrandMark({ className, size = 36 }: { className?: string; size?: number }) {
   return (
@@ -18,26 +18,26 @@ export function BrandMark({ className, size = 36 }: { className?: string; size?:
     >
       <defs>
         <linearGradient id="so-flame-tile" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#863800" />
-          <stop offset="0.5" stopColor="#f0a646" />
-          <stop offset="1" stopColor="#863800" />
+          <stop offset="0" stopColor="#C9962F" />
+          <stop offset="0.5" stopColor="#E9B44C" />
+          <stop offset="1" stopColor="#C9962F" />
         </linearGradient>
       </defs>
       <rect width="48" height="48" rx="12" fill="url(#so-flame-tile)" />
       <path
         d="M15 19h18l-1.5 14.5a3 3 0 0 1-3 2.5h-9a3 3 0 0 1-3-2.5L15 19Z"
-        fill="#1a130b"
+        fill="#05070F"
         fillOpacity="0.88"
       />
       <path
         d="M19 19v-2a5 5 0 0 1 10 0v2"
-        stroke="#1a130b"
+        stroke="#05070F"
         strokeWidth="2.6"
         strokeLinecap="round"
       />
       <path
         d="M20.2 26.4l2.2 2.2 4.6-4.8"
-        stroke="#f0a646"
+        stroke="#E9B44C"
         strokeWidth="2.8"
         strokeLinecap="round"
         strokeLinejoin="round"

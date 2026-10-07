@@ -49,8 +49,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#bc4700" },
-    { media: "(prefers-color-scheme: dark)", color: "#010000" },
+    { media: "(prefers-color-scheme: light)", color: "#FBFAF9" },
+    { media: "(prefers-color-scheme: dark)", color: "#070B16" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -70,8 +70,11 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('smart-order-theme');if(t==='light'){document.documentElement.classList.add('light')}else{document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}})();`,
           }}
         />
-        <link rel="preload" href="/fonts/cairo-arabic.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/readex-pro.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        {/* Madarek parity: preload the two FIRST-PAINT arabic subsets
+            (400 + 700, ~86KB) — fonts.css uses font-display: swap; preloading
+            moves the font swap ahead of the first contentful paint. */}
+        <link rel="preload" href="/fonts/plex-sans-arabic-400-normal-arabic.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/plex-sans-arabic-700-normal-arabic.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="stylesheet" href="/fonts/fonts.css" />
       </head>
       <body

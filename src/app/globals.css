@@ -7,7 +7,7 @@
 @source not "../../skills";
 @source not "../../examples";
 @source not "../../mini-services";
-@source not "../../.zscripts";
+@source not "../../zscripts";
 @source not "../../download";
 @source not "../../upload";
 
@@ -15,23 +15,50 @@
 
 /*
  * ════════════════════════════════════════════════════════════════
- * SMART ECOSYSTEM DESIGN LANGUAGE — IDENTITY LOCK
+ * MADAREK DESIGN SYSTEM — PARITY LOCK (Smart Order / Smart Menu)
  * ════════════════════════════════════════════════════════════════
  * Smart Order is the third product of the Smart family
- * (Smart Menu → https://menu.smart-link.ly, SmartBot →
- * https://bot.smart-link.ly). The token values below are extracted
- * verbatim from the family design system so Smart Order renders as
- * a sibling, not a stranger: flame-orange primary, warm near-black
- * dark theme (default), warm paper light theme, Cairo body +
- * Readex Pro headings, WhatsApp green reserved for WhatsApp only.
+ * (Smart Link → https://smart-link.ly, SmartBot →
+ * https://bot.smart-link.ly). The token values below are the
+ * MADAREK canonical set (madarek/frontend/src/styles/tokens.css),
+ * the single source of truth for the whole family:
+ *   · DARK (default) — the مدارك night: indigo ground #070B16,
+ *     sand ink #F2EFE6, luminous gold accent #E9B44C
+ *     (10.39:1 as text on the night ground).
+ *   · LIGHT — the Notion-warm cream: ground #FBFAF9, ink #191918,
+ *     copper accent #B57438 (copper-deep #5C3416 as text, 10.29:1).
+ *   · Type: IBM Plex Sans Arabic 400-700 self-hosted (one family,
+ *     weight 700 carries display — no true 800 exists), IBM Plex
+ *     Mono for codes/IDs, Plex Serif italic latin-only.
+ *   · Radius: the Notion-soft ladder 6/8/10/12/16/20/28.
+ *   · Elevation: --elev-1..5 (dark fill-led + inset top highlight,
+ *     light soft two-layer). Motion: --t-micro…--t-cinema ladder.
+ * WhatsApp green remains reserved for WhatsApp only.
+ * Mirrors the prod-verified bridges in SmartBot (fb_dashboard) and
+ * Smart-Link — token NAMES kept (150+ consumers), VALUES flipped
+ * to Madarek.
  * ════════════════════════════════════════════════════════════════
  */
 
 @theme inline {
-  /* ── Font system — premium Arabic-first (family standard) ── */
-  --font-sans: "Cairo", "Noto Sans Arabic", system-ui, sans-serif;
-  --font-heading: "Readex Pro", "Cairo", "Noto Sans Arabic", system-ui, sans-serif;
-  --font-mono: "Cairo", ui-monospace, "Courier New", monospace;
+  /* ── Font system — Arabic-first, IBM Plex Sans Arabic local-first
+     (Madarek parity). --font-cairo comes from /fonts/fonts.css
+     @font-face "IBM Plex Sans Arabic" (arabic + latin subsets,
+     400-700 — the var NAME is kept as the load-bearing shim
+     contract: a var() with no fallback that resolves to an
+     undefined custom property invalidates the whole font-family
+     declaration and the body fell back to Times New Roman in prod
+     once; fonts.css defines it FIRST, before this sheet). The
+     literal "IBM Plex Sans Arabic" fallback keeps every stack
+     resolvable even when the var is absent. --font-heading is the
+     SAME display face as body (Madarek §2.1: --font-display =
+     Plex Sans Arabic — one family, weight 700 carries display).
+     --font-mono is Madarek's mixed-script stack: Latin/digits in
+     IBM Plex Mono, Arabic runs continue in Plex Sans Arabic. ── */
+  --font-sans: var(--font-cairo), "IBM Plex Sans Arabic", "Tajawal", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", "IBM Plex Sans Arabic", ui-monospace, "SFMono-Regular", monospace;
+  --font-arabic: var(--font-cairo), "IBM Plex Sans Arabic", "Tajawal", system-ui, sans-serif;
+  --font-heading: var(--font-cairo), "IBM Plex Sans Arabic", "Tajawal", system-ui, sans-serif;
 
   /* ── Core surface / text ── */
   --color-background: var(--background);
@@ -55,7 +82,8 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* ── Flame system (ecosystem signature) ── */
+  /* ── Accent metal ramp (Madarek: gold on night / copper on cream;
+     legacy flame names kept for consumers) ── */
   --color-orange: var(--orange);
   --color-orange-foreground: var(--orange-foreground);
   --color-flame: var(--c-flame);
@@ -66,7 +94,7 @@
   --color-ash: var(--c-ash);
   --color-night: var(--c-night);
 
-  /* ── Semantic status + soft tints (family spec) ── */
+  /* ── Semantic status + soft tints (Madarek -ink / -bg pairs) ── */
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
@@ -84,7 +112,7 @@
   --color-whatsapp: var(--whatsapp);
   --color-whatsapp-deep: var(--whatsapp-deep);
 
-  /* ── Charts + sidebar (mapped onto family palette) ── */
+  /* ── Charts + sidebar (mapped onto the Madarek palette) ── */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -99,14 +127,24 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* ── Radius scale — family literals (8/12/18/28) ── */
+  /* ── Radius scale — Madarek "Notion-soft" ladder (tokens.css §1.2):
+     xs 6 · sm 8 · md 10 · lg 12 · xl 16 · 2xl 20 · 3xl 28.
+     Consumers: buttons/inputs ride rounded-md (10 = r-md), cards
+     ride rounded-lg (16 = Madarek .card r-xl), dialogs/sheets ride
+     rounded-2xl (20 = r-2xl), hero panels ride rounded-xl (28 =
+     r-3xl). ── */
+  --radius-xs: 6px;
   --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
   --radius-xl: 28px;
+  --radius-2xl: 20px;
+  --radius-3xl: 28px;
 
-  /* ── Easing (family motion language: smooth, intentional) ── */
-  --ease-smooth: cubic-bezier(0.16, 1, 0.2, 1);
+  /* ── Easing — Madarek canonical curves (tokens.css §4.2):
+     --ease-smooth = Madarek --ease-out, the exponential settle
+     cubic-bezier(0.16, 1, 0.3, 1) — exact. ── */
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
   --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
   --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
@@ -131,237 +169,291 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   DARK — default (family standard: deep warm near-black)
+   DARK — default (Madarek night: indigo ground, sand ink, gold)
    ════════════════════════════════════════════════════════════════ */
 :root {
   color-scheme: dark;
 
-  /* Surfaces — SmartBot twin literals */
-  --background: #010000;
-  /* Family top page radial glow (SmartBot mechanism: layered onto body inline) */
-  --background-radial: radial-gradient(ellipse 80% 50% at 50% -10%, #f3680f14, transparent 70%);
-  --foreground: #ebe7e2;
-  --card: #070503;
-  --card-foreground: #ebe7e2;
-  --popover: #060403;
-  --popover-foreground: #ebe7e2;
-  --muted: #0c0806;
-  --muted-foreground: #8c857d; /* AA 5.59:1 on #070503 cards */
-  --placeholder-text: #a59d95;
+  /* ── Madarek motion ladder (tokens.css §4.1/§4.3, exact) ── */
+  --t-micro: 80ms;
+  --t-fast: 160ms;
+  --t-base: 240ms;
+  --t-slow: 380ms;
+  --t-slower: 520ms;
+  --t-cinema: 720ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring-soft: cubic-bezier(0.34, 1.18, 0.64, 1);
+  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-direction: 1; /* flips to -1 under [dir=rtl] at file end */
+  --press-scale: 0.97;
+  --state-focus-ring-color: #C9962F; /* Madarek --accent-strong (7.87:1) */
 
-  /* Brand flame — AA on white text (4.98:1) */
-  --primary: #bc4700;
-  --primary-foreground: #f8f8f8;
-  --secondary: #0c0806;
-  --secondary-foreground: #a9a49e;
-  --accent: #bc470026;
-  --accent-foreground: #df5a00; /* bright flame text — 5.42:1 on cards */
-  --border: #211c18;
-  --input: #625c58;
-  --ring: #bc4700;
+  /* ── Surfaces — Madarek night-indigo ramp (tokens.css §1.3):
+     ground #070B16 (neutral-50), surface #0D1428 (neutral-0),
+     surface-2 #121A36 (neutral-100), ink #F2EFE6 (neutral-900) ── */
+  --background: #070B16;
+  /* De-glow (Madarek ground is FLAT — no body radial; the painted
+     skies live in --menu-glow hero washes). Token kept for the
+     inline-style contract, value neutralized. */
+  --background-radial: none;
+  --foreground: #F2EFE6;
+  --card: #0D1428;
+  --card-foreground: #F2EFE6;
+  --popover: #0D1428;
+  --popover-foreground: #F2EFE6;
+  --muted: #121A36;
+  --muted-foreground: #C3C8DC; /* Madarek --text-secondary dark: 11.8:1 */
+  --placeholder-text: #8E97B8; /* Madarek neutral-500 dark: 6.8:1 */
 
-  /* Flame family */
-  --orange: #bc4700;
-  --orange-foreground: #f8f8f8;
-  --c-flame: #bc4700;
-  --c-ember: #863800;
-  --c-saffron: #f0a646;
-  --c-saffron-ink: #f0a646;
-  --c-espresso: #1a130b;
-  --c-ash: #b3ada6;
-  --c-night: #140b06;
+  /* ── Brand solid — Madarek dark accent = luminous gold #E9B44C;
+       text on gold = --accent-fg #05070F (10.6:1, measured) ── */
+  --primary: #E9B44C;
+  --primary-foreground: #05070F;
+  --secondary: #121A36;
+  --secondary-foreground: #C3C8DC;
+  --accent: rgb(233 180 76 / 0.15); /* 15% gold wash (hover tints) */
+  --accent-foreground: #E9B44C; /* gold as text — 10.39:1 on cards */
+  --border: #1B2444; /* Madarek hairline: neutral-200 dark */
+  --input: #7A83A0; /* Madarek neutral-400: 4.86:1 vs card (1.4.11) */
+  --ring: #E9B44C;
 
-  /* Status — family literals */
-  --success: #23a136;
-  --success-foreground: #f8f8f8;
-  --warning: #ce9200;
-  --warning-foreground: #14100a;
-  --info: #348dcf;
-  --info-foreground: #f8f8f8;
-  --destructive: #e62b34;
-  --destructive-foreground: #f8f8f8;
+  /* ── Accent metal ramp (dark) — Madarek gold CTA family:
+     flame/saffron = --accent #E9B44C, ember = --accent-strong
+     #C9962F, espresso = --accent-fg #05070F. Legacy names kept. ── */
+  --orange: #E9B44C;
+  --orange-foreground: #05070F;
+  --c-flame: #E9B44C;
+  --c-ember: #C9962F;
+  --c-saffron: #E9B44C;
+  --c-saffron-ink: #F5D48A;
+  --c-espresso: #05070F;
+  --c-ash: #C3C8DC;
+  --c-night: #070B16;
 
-  /* Soft tints — 14% wash behind solid status text */
-  --success-soft: #23a13624;
-  --warning-soft: #ce920024;
-  --info-soft: #348dcf24;
-  --destructive-soft: #e62b3424;
+  /* ── Status (dark) — Madarek dark -ink values (§1.6) ── */
+  --success: #7FD39A;
+  --success-foreground: #191918;
+  --warning: #ECC97D;
+  --warning-foreground: #191918;
+  --info: #8FBBF2;
+  --info-foreground: #191918;
+  --destructive: #F0938F;
+  --destructive-foreground: #05070F;
 
-  /* External brand */
+  /* ── Status soft grounds (dark) — Madarek deep pastel -bg fills ── */
+  --success-soft: #0F241C;
+  --warning-soft: #2C2410;
+  --info-soft: #14213A;
+  --destructive-soft: #2C1620;
+
+  /* ── External brand (unchanged by definition) ── */
   --whatsapp: #25d366;
   --whatsapp-deep: #20bd5a;
 
-  /* Charts — flame-led family palette */
-  --chart-1: #bc4700;
-  --chart-2: #f0a646;
-  --chart-3: #348dcf;
-  --chart-4: #23a136;
-  --chart-5: #cf284b;
+  /* ── Charts — Madarek dark series (copper/gold-led, §1.14) ── */
+  --chart-1: #E9B44C; /* copper/gold-ink */
+  --chart-2: #7FD39A; /* mint-ink */
+  --chart-3: #8FBBF2; /* sky-ink */
+  --chart-4: #F0938F; /* rose-ink */
+  --chart-5: #B7A0F4; /* lavender-ink */
 
-  /* Sidebar — warm dark */
-  --sidebar: #050302;
-  --sidebar-foreground: #ebe7e2;
-  --sidebar-primary: #bc4700;
-  --sidebar-primary-foreground: #f8f8f8;
-  --sidebar-accent: #bc47001a;
-  --sidebar-accent-foreground: #df5a00;
-  --sidebar-border: #211c18;
-  --sidebar-ring: #bc4700;
+  /* ── Sidebar — Madarek night (§1.11): gold wash active state ── */
+  --sidebar: #070B16;
+  --sidebar-foreground: #F2EFE6;
+  --sidebar-primary: #E9B44C;
+  --sidebar-primary-foreground: #05070F;
+  --sidebar-accent: rgb(233 180 76 / 0.10); /* Madarek §5.5 gold wash */
+  --sidebar-accent-foreground: #E9B44C;
+  --sidebar-border: #1B2444;
+  --sidebar-ring: #E9B44C;
 
-  /* 4-tier shadow system — dark */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.22);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.25);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.3);
-  --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.45), 0 8px 16px rgba(0, 0, 0, 0.35);
-  --shadow-glow: 0 8px 24px #bc470024;
-  --shadow-glass: 0 10px 40px rgba(0, 0, 0, 0.478), inset 0 1px 0 rgba(255, 255, 255, 0.059);
-  --shadow-glass-lg: 0 16px 56px rgba(0, 0, 0, 0.522), inset 0 1px 0 rgba(255, 255, 255, 0.078);
+  /* ── Elevation ladder — Madarek §1.9 dark recipes: fill-led with
+       the 1px inset top-edge highlight. 4-tier shadow system maps
+       onto the 5-step ladder (sm=elev-1 … xl=elev-4). ── */
+  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --elev-2: 0 4px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --elev-3: 0 8px 16px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --elev-4: 0 16px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --elev-5: 0 32px 64px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --shadow-sm: var(--elev-1);
+  --shadow-md: var(--elev-2);
+  --shadow-lg: var(--elev-3);
+  --shadow-xl: var(--elev-4);
+  --shadow-card: var(--elev-1);
+  --shadow-card-h: 0 1px 2px rgba(2, 4, 12, 0.50), 0 8px 22px rgba(2, 4, 12, 0.55), 0 0 0 1px rgba(142, 151, 184, 0.08);
+  --shadow-pop: 0 2px 4px rgba(2, 4, 12, 0.55), 0 10px 28px rgba(2, 4, 12, 0.62), 0 0 0 1px rgba(142, 151, 184, 0.10);
+  --shadow-modal: 0 12px 32px rgba(2, 4, 12, 0.66), 0 32px 80px rgba(2, 4, 12, 0.70), 0 0 0 1px rgba(142, 151, 184, 0.12);
+  --shadow-glow: 0 8px 24px rgb(233 180 76 / 0.16); /* gold halo */
+  --shadow-glass: 0 1px 2px rgba(2, 4, 12, 0.50), 0 8px 22px rgba(2, 4, 12, 0.55), 0 0 0 1px rgba(142, 151, 184, 0.08);
+  --shadow-glass-lg: 0 12px 32px rgba(2, 4, 12, 0.66), 0 32px 80px rgba(2, 4, 12, 0.70), 0 0 0 1px rgba(142, 151, 184, 0.12);
 
-  /* Surface variants — richer depth (family: raised > overlay > sunken) */
-  --surface-raised: #0c0806;
-  --surface-overlay: #070503;
-  --surface-sunken: #020101;
+  /* ── Surface variants — Madarek night surfaces (§1.3/§1.7) ── */
+  --surface-raised: #121A36;
+  --surface-overlay: #0D1428;
+  --surface-sunken: #070B16;
 
-  /* Glass — dark, oxide-tinted edge (family literal) */
-  --glass-bg: #06040285;
-  --glass-bg-strong: #0d0805ad;
-  --glass-border: #bc47001a;
-  --glass-border-strong: #bc470038;
+  /* ── Glass — Madarek §1.8 dark: rgba(11,16,32,0.78) + 16px blur +
+       neutral hairline; strong = the 94% topbar surface. ── */
+  --glass-bg: rgba(11, 16, 32, 0.78);
+  --glass-bg-strong: rgba(11, 16, 32, 0.94);
+  --glass-border: rgba(142, 151, 184, 0.12);
+  --glass-border-strong: rgba(142, 151, 184, 0.28);
 
-  /* Overlay backdrop (family: SmartBot #0000008c) */
-  --overlay: #0000008c;
+  /* ── Overlay backdrop — Madarek modal scrim (dark 0.62, §5.10) ── */
+  --overlay: rgba(15, 15, 15, 0.62);
 
-  /* Grid pattern colors (family flame alphas) */
-  --grid-line: #bc47001f;
-  --grid-fill: #bc47000f;
-  --grid-square: #bc47001f;
+  /* ── Grid pattern — mist hairline alphas (Madarek night) ── */
+  --grid-line: rgba(142, 151, 184, 0.10);
+  --grid-fill: rgba(142, 151, 184, 0.05);
+  --grid-square: rgba(142, 151, 184, 0.10);
 
-  /* Family gradients */
-  --gradient-orange: linear-gradient(135deg, #bc47001f, #bc47000f);
+  /* ── Accent gradients — gold at the original wash alphas ── */
+  --gradient-orange: linear-gradient(135deg, rgb(233 180 76 / 0.12), rgb(233 180 76 / 0.06));
   --gradient-shine: linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.06) 50%, transparent 100%);
 
-  /* Page glow — fixed backdrop + hero sheen (family) */
-  --menu-glow: radial-gradient(ellipse_at_50%_0%, #bc470014, transparent 70%);
-  --menu-glow-strong: radial-gradient(ellipse 80% 50% at 50% -10%, #bc470026, transparent 70%);
+  /* ── Page glow — gold hero washes (Madarek ambient hero glow) ── */
+  --menu-glow: radial-gradient(ellipse_at_50%_0%, rgb(233 180 76 / 0.08), transparent 70%);
+  --menu-glow-strong: radial-gradient(ellipse 80% 50% at 50% -10%, rgb(233 180 76 / 0.15), transparent 70%);
 
-  /* Image placeholder shimmer (theme-aware) */
-  --image-shimmer: #16161626;
+  /* ── Image placeholder shimmer (theme-aware) ── */
+  --image-shimmer: rgba(0, 0, 0, 0.30);
 }
 
 /* ════════════════════════════════════════════════════════════════
-   LIGHT — warm paper (family light philosophy)
+   LIGHT — Madarek cream (Notion-warm paper, copper accent)
    ════════════════════════════════════════════════════════════════ */
 .light {
   color-scheme: light;
 
-  --background: oklch(0.985 0.004 70); /* warm paper */
-  /* Family light-mode warm halo (3% — resolves with the active theme) */
-  --background-radial: radial-gradient(ellipse 80% 50% at 50% -10%, #bc470014, transparent 70%);
-  --foreground: oklch(0.12 0.008 70); /* warm ink */
-  --card: oklch(1 0.002 70);
-  --card-foreground: oklch(0.12 0.008 70);
-  --popover: oklch(1 0.002 70);
-  --popover-foreground: oklch(0.12 0.008 70);
-  --muted: oklch(0.94 0.006 70);
-  --muted-foreground: oklch(0.48 0.015 70);
-  --placeholder-text: oklch(0.52 0.015 70);
+  /* ── Core palette — Madarek cream (§1.3/§1.7 light):
+     ground #FBFAF9, surface #FFFFFF, surface-2 #F7F6F3, ink #191918 ── */
+  --background: #FBFAF9;
+  /* Copper halo at the family wash (resolves with the active theme) */
+  --background-radial: radial-gradient(ellipse 80% 50% at 50% -10%, rgb(181 116 56 / 0.08), transparent 70%);
+  --foreground: #191918;
+  --card: #FFFFFF;
+  --card-foreground: #191918;
+  --popover: #FFFFFF;
+  --popover-foreground: #191918;
+  --muted: #F1EFEC;
+  --muted-foreground: #4F4D48; /* Madarek --text-secondary light: 8.1:1 */
+  --placeholder-text: #6E6C65; /* Madarek --text-muted light: 5.04:1 */
 
-  --primary: oklch(0.4 0.19 45); /* dark flame for AA on paper */
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.92 0.008 70);
-  --secondary-foreground: oklch(0.2 0.01 70);
-  --accent: oklch(0.55 0.19 45 / 0.12);
-  --accent-foreground: oklch(0.55 0.19 45);
-  --border: oklch(0.86 0.008 70);
-  --input: oklch(0.86 0.008 70);
-  --ring: oklch(0.55 0.19 45);
+  /* ── Brand solid — Madarek light accent = copper #B57438; text on
+       copper = --accent-fg #1A0F06 (4.95:1, Madarek's own .btn.accent
+       light pairing). ── */
+  --primary: #B57438;
+  --primary-foreground: #1A0F06;
+  --secondary: #F7F6F3;
+  --secondary-foreground: #191918;
+  --accent: rgb(181 116 56 / 0.12); /* 12% copper wash */
+  --accent-foreground: #5C3416; /* copper-deep as text — 10.29:1 */
+  --border: #E9E7E2; /* Madarek hairline: neutral-200 light */
+  --input: #6E6C65; /* 5.26:1 vs card (WCAG 1.4.11) */
+  --ring: #B57438;
 
-  /* Flame family — light */
-  --orange: oklch(0.55 0.19 45);
-  --orange-foreground: oklch(0.98 0 0);
-  --c-flame: oklch(0.42 0.17 48);
-  --c-ember: oklch(0.5 0.15 52);
-  --c-saffron: oklch(0.78 0.14 70); /* decorative glow only */
-  --c-saffron-ink: oklch(0.5 0.13 70); /* AA amber text 6.14:1 */
-  --c-espresso: oklch(0.28 0.02 30);
-  --c-ash: oklch(0.36 0.012 70);
-  --c-night: oklch(0.24 0.02 50);
+  /* ── Accent metal ramp (light) — copper #B57438 → gold #D6A330,
+       espresso #1A0F06 (Madarek light --accent-fg). ── */
+  --orange: #B57438;
+  --orange-foreground: #1A0F06;
+  --c-flame: #B57438;
+  --c-ember: #B57438;
+  --c-saffron: #D6A330;
+  --c-saffron-ink: #6B4C0B; /* Madarek gold-ink light: 7.56:1 */
+  --c-espresso: #1A0F06;
+  --c-ash: #4F4D48;
+  --c-night: #191918;
 
-  /* Status — darker for AA text on paper */
-  --success: oklch(0.48 0.15 150);
-  --success-foreground: oklch(0.98 0 0);
-  --warning: oklch(0.52 0.13 60);
-  --warning-foreground: oklch(0.1 0 0);
-  --info: oklch(0.48 0.13 245);
-  --info-foreground: oklch(0.98 0 0);
-  --destructive: oklch(0.58 0.2 25);
-  --destructive-foreground: oklch(0.98 0 0);
+  /* ── Status (light) — Madarek light -ink text-safe deep variants ── */
+  --success: #1F4F30;
+  --success-foreground: #FFFFFF;
+  --warning: #6B4C0B;
+  --warning-foreground: #FFFFFF;
+  --info: #1F3D63;
+  --info-foreground: #FFFFFF;
+  --destructive: #6B2128;
+  --destructive-foreground: #FFFFFF;
 
-  /* Soft tints — lighter wash on paper */
-  --success-soft: oklch(0.48 0.15 150 / 0.12);
-  --warning-soft: oklch(0.52 0.13 60 / 0.12);
-  --info-soft: oklch(0.48 0.13 245 / 0.12);
-  --destructive-soft: oklch(0.58 0.2 25 / 0.12);
+  /* ── Status soft grounds (light) — Madarek pastel -bg fills ── */
+  --success-soft: #DCF1E2;
+  --warning-soft: #FCF1CD;
+  --info-soft: #DDEBF7;
+  --destructive-soft: #FCE0E2;
 
-  /* External brand (unchanged by definition) */
+  /* ── External brand (unchanged by definition) ── */
   --whatsapp: #25d366;
   --whatsapp-deep: #20bd5a;
 
-  /* Charts — light family palette */
-  --chart-1: oklch(0.55 0.19 45);
-  --chart-2: oklch(0.68 0.14 70);
-  --chart-3: oklch(0.52 0.13 245);
-  --chart-4: oklch(0.48 0.15 150);
-  --chart-5: oklch(0.55 0.17 0);
+  /* ── Charts — Madarek light series (copper-led, §1.14) ── */
+  --chart-1: #B57438; /* copper-ink */
+  --chart-2: #4FA66D; /* mint-ink */
+  --chart-3: #5C8FCE; /* sky-ink */
+  --chart-4: #DD6E78; /* rose-ink */
+  --chart-5: #8A6FE0; /* lavender-ink */
 
-  /* Sidebar — warm paper */
-  --sidebar: oklch(0.975 0.004 70);
-  --sidebar-foreground: oklch(0.12 0.008 70);
-  --sidebar-primary: oklch(0.55 0.19 45);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.55 0.19 45 / 0.1);
-  --sidebar-accent-foreground: oklch(0.45 0.17 45);
-  --sidebar-border: oklch(0.86 0.008 70);
-  --sidebar-ring: oklch(0.55 0.19 45);
+  /* ── Sidebar — Madarek cream (§1.11): neutral-150 flat active ── */
+  --sidebar: #FBFAF9;
+  --sidebar-foreground: #191918;
+  --sidebar-primary: #B57438;
+  --sidebar-primary-foreground: #1A0F06;
+  --sidebar-accent: #F1EFEC; /* Madarek light active bg (neutral-150) */
+  --sidebar-accent-foreground: #5C3416;
+  --sidebar-border: #E9E7E2;
+  --sidebar-ring: #B57438;
 
-  /* 4-tier shadow system — light (family) */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.09), 0 2px 4px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
-  --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.14), 0 8px 16px rgba(0, 0, 0, 0.08);
-  --shadow-glow: 0 8px 24px oklch(0.55 0.19 45 / 0.1);
-  --shadow-glass: 0 8px 36px rgba(0, 0, 0, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.72);
-  --shadow-glass-lg: 0 16px 56px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  /* ── Elevation ladder — Madarek §1.9 light recipes (soft
+       two-layer); 4-tier system maps sm=elev-1 … xl=elev-4. ── */
+  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.06);
+  --elev-2: 0 4px 8px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --elev-3: 0 8px 16px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.05);
+  --elev-4: 0 16px 32px rgba(0, 0, 0, 0.10), 0 8px 16px rgba(0, 0, 0, 0.06);
+  --elev-5: 0 32px 64px rgba(0, 0, 0, 0.12), 0 16px 32px rgba(0, 0, 0, 0.08);
+  --shadow-sm: var(--elev-1);
+  --shadow-md: var(--elev-2);
+  --shadow-lg: var(--elev-3);
+  --shadow-xl: var(--elev-4);
+  --shadow-card: var(--elev-1);
+  --shadow-card-h: 0 1px 2px rgba(15, 15, 15, 0.04), 0 6px 18px rgba(15, 15, 15, 0.06);
+  --shadow-pop: 0 1px 2px rgba(15, 15, 15, 0.04), 0 8px 24px rgba(15, 15, 15, 0.08);
+  --shadow-modal: 0 12px 36px rgba(15, 15, 15, 0.10), 0 32px 80px rgba(15, 15, 15, 0.14);
+  --shadow-glow: 0 8px 24px rgb(181 116 56 / 0.10); /* copper halo */
+  --shadow-glass: 0 1px 2px rgba(15, 15, 15, 0.04), 0 6px 18px rgba(15, 15, 15, 0.06);
+  --shadow-glass-lg: 0 12px 36px rgba(15, 15, 15, 0.10), 0 32px 80px rgba(15, 15, 15, 0.14);
 
-  /* Surface trio — light (family ordering: raised > overlay > sunken) */
-  --surface-raised: oklch(1 0.002 70);
-  --surface-overlay: oklch(1 0.002 70);
-  --surface-sunken: oklch(0.94 0.006 70);
+  /* ── Surface trio — Madarek light surfaces ── */
+  --surface-raised: #FFFFFF;
+  --surface-overlay: #FFFFFF;
+  --surface-sunken: #F7F6F3;
 
-  /* Glass — light (family) */
-  --glass-bg: oklch(1 0.002 70 / 0.72);
-  --glass-bg-strong: oklch(1 0.002 70 / 0.88);
-  --glass-border: oklch(0.86 0.008 70 / 0.55);
-  --glass-border-strong: oklch(0.55 0.19 45 / 0.18);
+  /* ── Glass — Madarek §1.8 light: rgba(251,250,249,0.78) + 16px
+       blur + warm hairline rgba(25,25,24,0.06). ── */
+  --glass-bg: rgba(251, 250, 249, 0.78);
+  --glass-bg-strong: rgba(251, 250, 249, 0.92);
+  --glass-border: rgba(25, 25, 24, 0.06);
+  --glass-border-strong: rgba(25, 25, 24, 0.18);
 
-  /* Overlay backdrop — light */
-  --overlay: rgba(20, 16, 12, 0.4);
+  /* ── Overlay backdrop — Madarek modal scrim (light 0.40) ── */
+  --overlay: rgba(15, 15, 15, 0.40);
 
-  /* Grid pattern — light flame alphas */
-  --grid-line: oklch(0.55 0.19 45 / 0.12);
-  --grid-fill: oklch(0.55 0.19 45 / 0.06);
-  --grid-square: oklch(0.55 0.19 45 / 0.12);
+  /* ── Grid pattern — warm ink hairline alphas ── */
+  --grid-line: rgba(25, 25, 24, 0.08);
+  --grid-fill: rgba(25, 25, 24, 0.04);
+  --grid-square: rgba(25, 25, 24, 0.08);
 
-  /* Family gradients — light */
-  --gradient-orange: linear-gradient(135deg, oklch(0.55 0.19 45 / 0.12), oklch(0.55 0.19 45 / 0.06));
+  /* ── Accent gradients — copper at the family wash alphas ── */
+  --gradient-orange: linear-gradient(135deg, rgb(181 116 56 / 0.12), rgb(181 116 56 / 0.06));
   --gradient-shine: linear-gradient(90deg, transparent 0%, oklch(0 0 0 / 0.04) 50%, transparent 100%);
 
-  /* Page glow — light */
-  --menu-glow: radial-gradient(ellipse_at_50%_0%, oklch(0.55 0.19 45 / 0.08), transparent 70%);
-  --menu-glow-strong: radial-gradient(ellipse 80% 50% at 50% -10%, oklch(0.55 0.19 45 / 0.15), transparent 70%);
+  /* ── Page glow — copper hero washes ── */
+  --menu-glow: radial-gradient(ellipse_at_50%_0%, rgb(181 116 56 / 0.08), transparent 70%);
+  --menu-glow-strong: radial-gradient(ellipse 80% 50% at 50% -10%, rgb(181 116 56 / 0.15), transparent 70%);
 
-  /* Image placeholder shimmer — light */
-  --image-shimmer: rgba(0, 0, 0, 0.05);
+  /* ── Image placeholder shimmer — light ── */
+  --image-shimmer: rgba(25, 25, 24, 0.10);
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -383,14 +475,17 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
-  /* Headings — Readex Pro, the family heading voice */
+  /* Headings — one family with the body (Madarek §2.1: --font-display
+     = Plex Sans Arabic; weight 700 carries display). Letter-spacing
+     is 0: tracking breaks Arabic cursive joins (Madarek ruling #2 —
+     the old -0.01em was Latin-tuned and clipped the script). */
   h1,
   h2,
   h3,
   h4,
   h5 {
     font-family: var(--font-heading);
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
   }
   /* Tabular numerals for money & stats everywhere */
   .tabular,
@@ -405,9 +500,9 @@
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
-  /* Noto Naskh Arabic — family: editorial/quote text only (RTL) */
+  /* Noto Naskh Arabic — editorial/quote text only (RTL) */
   [dir="rtl"] .font-naskh {
-    font-family: "Noto Naskh Arabic", "Cairo", system-ui, sans-serif;
+    font-family: "Noto Naskh Arabic", "IBM Plex Sans Arabic", system-ui, sans-serif;
   }
   /*
    * Family reduced-motion policy: preserve state change and hierarchy —
@@ -435,6 +530,22 @@
   }
 }
 
+/* RTL motion flip (Madarek tokens.css §4.3): multiply every X
+   translation by --motion-direction so logical motion expressions
+   work in both directions. */
+[dir="rtl"] {
+  --motion-direction: -1;
+}
+/* RTL typography guard — never track Arabic cursive (Madarek ruling #2) */
+[dir="rtl"] :lang(ar),
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] h4,
+[dir="rtl"] h5 {
+  letter-spacing: var(--ls-normal, 0);
+}
+
 /* ════════════════════════════════════════════════════════════════
    Component-level family language
    ════════════════════════════════════════════════════════════════ */
@@ -448,15 +559,16 @@
   background-color: var(--whatsapp-deep);
 }
 
-/* Flame gradient text — family .text-gradient-orange utility, verbatim */
+/* Accent gradient text — Madarek gradient-text recipe (dark: gold →
+   hover-gold 10.3:1+; light: copper → copper-deep, large-text AA) */
 .text-gradient-orange {
-  background: linear-gradient(135deg, oklch(0.58 0.19 45), oklch(0.65 0.18 50));
+  background: linear-gradient(135deg, #E9B44C, #F5D48A);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .light .text-gradient-orange {
-  background: linear-gradient(135deg, oklch(0.44 0.18 45), oklch(0.38 0.16 50));
+  background: linear-gradient(135deg, #B57438, #9A5F25);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -475,6 +587,7 @@
 
 /* ════════════════════════════════════════════════════════════════
    Family keyframes — verbatim from the ecosystem motion library
+   (glow literals re-tinted to the Madarek gold accent)
    ════════════════════════════════════════════════════════════════ */
 @keyframes fade-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slide-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
@@ -484,8 +597,8 @@
 @keyframes breath { 0%, 100% { opacity: 0.6; } 50% { opacity: 0.3; } }
 @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 0.8; } }
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 8px #bc470026; }
-  50% { box-shadow: 0 0 25px #bc470059; }
+  0%, 100% { box-shadow: 0 0 8px rgb(233 180 76 / 0.15); }
+  50% { box-shadow: 0 0 25px rgb(233 180 76 / 0.35); }
 }
 @keyframes hero-glow-pulse {
   0%, 100% { opacity: 0.6; transform: scale(1); }
@@ -532,7 +645,7 @@
   60% { opacity: 1; transform: translateY(3px) scaleY(1); }
   100% { opacity: 1; transform: translateY(0) scaleY(1); }
 }
-@keyframes scale-glow { 0%, 100% { box-shadow: 0 0 20px #bc470033; } 50% { box-shadow: 0 0 50px #bc470066; } }
+@keyframes scale-glow { 0%, 100% { box-shadow: 0 0 20px rgb(233 180 76 / 0.20); } 50% { box-shadow: 0 0 50px rgb(233 180 76 / 0.40); } }
 
 /* ════════════════════════════════════════════════════════════════
    Family animation utilities
@@ -651,7 +764,7 @@
 }
 .light .grain-overlay::before { opacity: 0.012; }
 
-/* Empty-state icon ring — family flame-tinted */
+/* Empty-state icon ring — accent-tinted (gold/copper via --orange) */
 .empty-state-icon {
   width: 3.5rem;
   height: 3.5rem;

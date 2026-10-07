@@ -56,3 +56,4 @@ coverage/
 tests-results/
 playwright-report/
 download/
+package-lock.json

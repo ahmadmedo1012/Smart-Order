@@ -87,3 +87,21 @@ Work Log:
 Stage Summary:
 - الهوية الآن على مستوى العلامة الحرفية (ش quaternion العائلة نفسه) + كل الحركات حية (كانت ميتة) + بنية الصفحة الكاملة مطابقة للعائلة
 - المثالية المطلوبة: تحقيقها يتطلب من المستخدم تقديم عدد المتاجر الحقيقي/شهادات حقيقية إن أراد أرقامًا غير صفرية في الإنتاج
+
+---
+Task ID: madarek-parity-lock
+Agent: main (Super Z)
+Task: MADAREK DESIGN SYSTEM PARITY — the authoritative family source (madarek repo) replaces the interim flame-orange ecosystem language
+
+Work Log:
+- Forensic audit of madarek/frontend/src/styles/: tokens.css (1095 lines, canonical), fonts.css (12-file IBM Plex set), shared-design-system.css + unified-smart-parity.css (cc03c2e "unified design system parity layer for all Smart projects"), MASTER.md superseded-notice
+- Studied sibling precedents (prod-verified): SmartBot cfe6aea (same shadcn/Tailwind v4 architecture) + Smart-Link ee68324 (curated token bridge after the 25K-line mega-paste revert 195b05e)
+- public/fonts/: +12 IBM Plex woff2 (Sans Arabic 400-700 ar/la, Serif italic 400/500 la, Mono 400/500 la), removed Cairo×3/Readex×2; fonts.css rewritten with --font-cairo shim repointed to "IBM Plex Sans Arabic"; Naskh/Noto blocks kept (.font-naskh consumer)
+- globals.css: full Madarek token bridge — dark night #070B16 / sand #F2EFE6 / gold #E9B44C (accent-fg #05070F); light cream #FBFAF9 / ink #191918 / copper #B57438 (accent-ink #5C3416, accent-fg #1A0F06); Madarek -ink/-bg status pairs; charts series; sidebar gold-wash active; glass §1.8; scrim §5.10; grid/glow re-tinted; radius ladder 6/8/10/12/16/20/28 (lg=16 .card, md=10, xl=28, +2xl=20); elev-1..5 both modes; motion ladder --t-micro…--t-cinema + easings + --motion-direction; headings letter-spacing 0 (Arabic cursive ruling #2); [dir=rtl] flip + guards
+- layout.tsx: preloads → plex-sans-arabic-400/700-arabic.woff2; themeColor → #FBFAF9/#070B16
+- brand.tsx: flame gradient → Madarek gold metal (C9962F→E9B44C→C9962F, night glyph #05070F)
+- manifest.json: theme_color #E9B44C, background_color #070B16
+- QA: next build clean (all 30+ routes); live probe dark bg rgb(7,11,22)/ink rgb(242,239,230), light bg rgb(251,250,249)/ink rgb(25,25,24); font-family resolves IBM Plex Sans Arabic; login CTA rgb(233,180,76) on rgb(5,7,15); VLM screenshot review confirms night-indigo + gold identity; screenshots download/menu-home-{dark,light}.png, menu-login-dark.png, menu-pricing-dark.png
+
+Stage Summary:
+- Smart Order now renders on the Madarek canonical system, mirroring SmartBot + Smart-Link bridges. Commit 383cf50 (local). PUSH PENDING: PAT in ecosystem doc is revoked (401) — needs fresh token from owner to push origin/main.
