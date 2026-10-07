@@ -18,11 +18,11 @@ Part of the Smart ecosystem (smart-link.ly): sibling of [Smart Menu](https://men
 ## Tech Stack
 
 - **Next.js 16** (App Router) + React 19 + TypeScript
-- **Tailwind CSS 4** + shadcn/ui (Radix) — custom emerald/saffron design system, light & dark themes
+- **Tailwind CSS 4** + shadcn/ui (Radix) — Madarek design system (night/gold dark + cream/copper light), light & dark themes
 - **Prisma ORM** — SQLite for local dev, PostgreSQL (Neon) in production
 - **Custom session auth** — PBKDF2-SHA512 (600k iterations), hashed session tokens, httpOnly cookies
 - **Money** — integer millimes everywhere (1 LYD = 1000 dirham), zero floating-point math
-- Self-hosted **Cairo + Readex Pro** Arabic font subsets (fast, no external requests)
+- Self-hosted **IBM Plex Sans Arabic** subsets (400-700, arabic + latin — Madarek parity, no external requests)
 
 ## Architecture Notes
 

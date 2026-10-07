@@ -98,7 +98,7 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
           <p className="mt-1 text-xs text-muted-foreground">{formatArabicDateTime(order.createdAt)}</p>
           {isCancelled ? (
             <div className="mt-4 rounded-xl bg-destructive/10 border border-destructive/25 px-4 py-3">
-              <div className="font-bold text-destructive">
+              <div className="font-bold text-destructive-ink">
                 {status === "REJECTED" ? "لم يتم قبول الطلب" : "تم إلغاء الطلب"}
               </div>
               <p className="text-xs text-muted-foreground mt-1">تواصل مع المتجر لمعرفة المزيد</p>

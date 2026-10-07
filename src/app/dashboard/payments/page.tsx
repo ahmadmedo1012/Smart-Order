@@ -101,7 +101,7 @@ export default function PaymentsPage() {
                         }
                       }}
                       className={`rounded-lg px-3 h-8 text-xs font-medium border transition-colors ${
-                        m.isActive ? "border-success/40 text-success hover:bg-success/10" : "border-border text-muted-foreground hover:bg-muted"
+                        m.isActive ? "border-success/40 text-success-ink hover:bg-success/10" : "border-border text-muted-foreground hover:bg-muted"
                       }`}
                     >
                       {m.isActive ? "مفعّلة" : "معطلة"}
@@ -120,7 +120,7 @@ export default function PaymentsPage() {
                       className="rounded-lg p-2 hover:bg-destructive/10 transition-colors"
                       aria-label={`حذف ${m.name}`}
                     >
-                      <Trash2 className="size-4 text-destructive" aria-hidden="true" />
+                      <Trash2 className="size-4 text-destructive-ink" aria-hidden="true" />
                     </button>
                   </div>
                 </div>

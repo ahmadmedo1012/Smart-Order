@@ -317,7 +317,7 @@ export function ProductEditor({
                         />
                       </div>
                       <Button type="button" variant="ghost" size="icon" onClick={() => setVariants((vs) => vs.filter((x) => x.key !== v.key))} aria-label="حذف الحجم">
-                        <Trash2 className="size-4 text-destructive" aria-hidden="true" />
+                        <Trash2 className="size-4 text-destructive-ink" aria-hidden="true" />
                       </Button>
                     </li>
                   ))}
@@ -358,7 +358,7 @@ export function ProductEditor({
                       maxLength={60}
                     />
                     <Button type="button" variant="ghost" size="icon" onClick={() => setGroups((gs) => gs.filter((x) => x.key !== g.key))} aria-label="حذف المجموعة">
-                      <Trash2 className="size-4 text-destructive" aria-hidden="true" />
+                      <Trash2 className="size-4 text-destructive-ink" aria-hidden="true" />
                     </Button>
                   </div>
                   <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -422,7 +422,7 @@ export function ProductEditor({
                           onClick={() => setGroups((gs) => gs.map((x) => (x.key === g.key ? { ...x, options: x.options.filter((y) => y.key !== o.key) } : x)))}
                           aria-label="حذف الإضافة"
                         >
-                          <Trash2 className="size-4 text-destructive" aria-hidden="true" />
+                          <Trash2 className="size-4 text-destructive-ink" aria-hidden="true" />
                         </Button>
                       </li>
                     ))}
@@ -447,7 +447,7 @@ export function ProductEditor({
 
         <div className="p-4 border-t flex items-center gap-2">
           {product && (
-            <Button variant="outline" onClick={archive} disabled={saving} className="text-destructive hover:bg-destructive/10">
+            <Button variant="outline" onClick={archive} disabled={saving} className="text-destructive-ink hover:bg-destructive/10">
               أرشفة
             </Button>
           )}

@@ -149,7 +149,7 @@ export default function SettingsPage() {
                 className="rounded-lg border border-border p-2 hover:bg-muted transition-colors"
                 aria-label="نسخ الرابط"
               >
-                {copied ? <Check className="size-3.5 text-success" aria-hidden="true" /> : <Copy className="size-3.5" aria-hidden="true" />}
+                {copied ? <Check className="size-3.5 text-success-ink" aria-hidden="true" /> : <Copy className="size-3.5" aria-hidden="true" />}
               </button>
               <a
                 href={`/store/${settings.slug}`}
@@ -163,7 +163,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${settings.isPublished ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${settings.isPublished ? "bg-success/10 text-success-ink" : "bg-muted text-muted-foreground"}`}>
               {settings.isPublished ? "المتجر منشور ومتاح للعملاء" : "المتجر مسودة — غير منشور"}
             </span>
             <button

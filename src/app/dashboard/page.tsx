@@ -108,8 +108,8 @@ export default function DashboardOverview() {
 
   const cards = [
     { label: "طلبات اليوم", value: String(stats.todayOrders), icon: ClipboardList, tone: "text-primary" },
-    { label: "بانتظار الإجراء", value: String(stats.pendingCount), icon: Bell, tone: stats.pendingCount > 0 ? "text-warning" : "text-muted-foreground" },
-    { label: "إيراد اليوم", value: formatLyd(stats.todayRevenue), icon: Coins, tone: "text-success" },
+    { label: "بانتظار الإجراء", value: String(stats.pendingCount), icon: Bell, tone: stats.pendingCount > 0 ? "text-warning-ink" : "text-muted-foreground" },
+    { label: "إيراد اليوم", value: formatLyd(stats.todayRevenue), icon: Coins, tone: "text-success-ink" },
     { label: "متوسط الطلب", value: formatLyd(stats.avgOrder), icon: TrendingUp, tone: "text-chart-3" },
   ];
 
@@ -118,13 +118,13 @@ export default function DashboardOverview() {
     alerts.push({
       text: `لديك ${stats.pendingCount} ${stats.pendingCount === 1 ? "طلب جديد" : "طلبات"} بانتظار المعالجة`,
       href: "/dashboard/orders?status=NEW",
-      tone: "bg-warning/10 border-warning/30 text-warning",
+      tone: "bg-warning/10 border-warning/30 text-warning-ink",
     });
   if (data.lowStock.length > 0)
     alerts.push({
       text: `${data.lowStock.length} ${data.lowStock.length === 1 ? "منتج يقترب" : "منتجات تقترب"} من النفاد — ${data.lowStock[0].name}`,
       href: "/dashboard/products",
-      tone: "bg-destructive/10 border-destructive/25 text-destructive",
+      tone: "bg-destructive/10 border-destructive/25 text-destructive-ink",
     });
   if (stats.zoneCount === 0)
     alerts.push({
@@ -274,21 +274,21 @@ export default function DashboardOverview() {
         <CardContent className="p-5">
           <div className="grid gap-3 sm:grid-cols-3 text-sm">
             <div className="flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3">
-              <Package className={`size-5 shrink-0 ${stats.productCount > 0 ? "text-success" : "text-muted-foreground"}`} aria-hidden="true" />
+              <Package className={`size-5 shrink-0 ${stats.productCount > 0 ? "text-success-ink" : "text-muted-foreground"}`} aria-hidden="true" />
               <div>
                 <div className="font-medium tabular">{stats.productCount} منتج</div>
                 <div className="text-xs text-muted-foreground mt-0.5">{stats.categoryCount} قسم</div>
               </div>
             </div>
             <div className="flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3">
-              <Truck className={`size-5 shrink-0 ${stats.zoneCount > 0 ? "text-success" : "text-muted-foreground"}`} aria-hidden="true" />
+              <Truck className={`size-5 shrink-0 ${stats.zoneCount > 0 ? "text-success-ink" : "text-muted-foreground"}`} aria-hidden="true" />
               <div>
                 <div className="font-medium tabular">{stats.zoneCount} منطقة توصيل</div>
                 <div className="text-xs text-muted-foreground mt-0.5">نشطة</div>
               </div>
             </div>
             <div className="flex items-center gap-3 rounded-lg border border-border/60 px-4 py-3">
-              <XCircle className={`size-5 shrink-0 ${stats.todayCancelled === 0 ? "text-muted-foreground" : "text-destructive"}`} aria-hidden="true" />
+              <XCircle className={`size-5 shrink-0 ${stats.todayCancelled === 0 ? "text-muted-foreground" : "text-destructive-ink"}`} aria-hidden="true" />
               <div>
                 <div className="font-medium tabular">{stats.todayCancelled} ملغي/مرفوض اليوم</div>
                 <div className="text-xs text-muted-foreground mt-0.5">{stats.todayCompleted} مكتمل بنجاح</div>

@@ -119,7 +119,7 @@ export function CartDrawer({
                     className="rounded-lg p-2 hover:bg-destructive/10 transition-colors"
                     aria-label={`إزالة ${item.productName} من السلة`}
                   >
-                    <Trash2 className="size-4 text-destructive" aria-hidden="true" />
+                    <Trash2 className="size-4 text-destructive-ink" aria-hidden="true" />
                   </button>
                 </div>
               </div>

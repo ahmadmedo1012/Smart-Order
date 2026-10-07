@@ -51,7 +51,7 @@ export function ErrorState({
   return (
     <div className={cn("flex flex-col items-center justify-center gap-2 px-4 py-12 text-center", className)}>
       <span
-        className="flex size-16 items-center justify-center rounded-2xl border border-destructive/20 bg-destructive/10 text-destructive shadow-sm"
+        className="flex size-16 items-center justify-center rounded-2xl border border-destructive/20 bg-destructive/10 text-destructive-ink shadow-sm"
         aria-hidden="true"
       >
         <TriangleAlert className="size-7" aria-hidden="true" />

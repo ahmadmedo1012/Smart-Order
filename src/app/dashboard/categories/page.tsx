@@ -113,7 +113,7 @@ export default function CategoriesPage() {
                   className="rounded-lg p-2 hover:bg-destructive/10 transition-colors"
                   aria-label={`حذف ${c.name}`}
                 >
-                  <Trash2 className="size-4 text-destructive" aria-hidden="true" />
+                  <Trash2 className="size-4 text-destructive-ink" aria-hidden="true" />
                 </button>
               </div>
             </li>

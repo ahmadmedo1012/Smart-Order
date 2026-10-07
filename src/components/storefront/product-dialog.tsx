@@ -165,7 +165,7 @@ export function ProductDialog({
                 <legend className="text-sm font-semibold mb-1 flex items-center gap-2 flex-wrap">
                   {g.name}
                   {g.required ? (
-                    <span className="text-[10px] font-medium text-destructive">إلزامي</span>
+                    <span className="text-[10px] font-medium text-destructive-ink">إلزامي</span>
                   ) : (
                     <span className="text-[10px] text-muted-foreground">
                       {g.maxSelect > 1 ? `حتى ${g.maxSelect} خيارات` : "اختياري"}

@@ -187,7 +187,7 @@ export default function AdminPaymentsPage() {
               {p.status === "PENDING" && (
                 <div className="mt-4 flex gap-2">
                   <Button
-                    className="flex-1 bg-success text-white hover:bg-success/90 sm:flex-none sm:px-8"
+                    className="flex-1 bg-success text-success-foreground hover:bg-success/90 sm:flex-none sm:px-8"
                     disabled={busyId === p.id}
                     onClick={() => review(p.id, "APPROVE")}
                   >
@@ -196,7 +196,7 @@ export default function AdminPaymentsPage() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="flex-1 border-destructive/40 text-destructive hover:bg-destructive/10 sm:flex-none sm:px-8"
+                    className="flex-1 border-destructive/40 text-destructive-ink hover:bg-destructive/10 sm:flex-none sm:px-8"
                     disabled={busyId === p.id}
                     onClick={() => review(p.id, "REJECT")}
                   >

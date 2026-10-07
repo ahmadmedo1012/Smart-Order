@@ -114,7 +114,7 @@ export default function StaffPage() {
                     className="rounded-lg p-2 hover:bg-destructive/10 transition-colors shrink-0"
                     aria-label={`إزالة ${s.user.name}`}
                   >
-                    <Trash2 className="size-4 text-destructive" aria-hidden="true" />
+                    <Trash2 className="size-4 text-destructive-ink" aria-hidden="true" />
                   </button>
                 )}
               </div>

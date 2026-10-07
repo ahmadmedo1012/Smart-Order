@@ -261,7 +261,7 @@ export function PaymentDialog({
 
                   {/* Quick transfer code — USSD with copy + dial */}
                   <div className="rounded-xl border border-success/25 bg-success/10 p-3">
-                    <p className="mb-1.5 text-xs font-medium text-success">رمز التحويل السريع</p>
+                    <p className="mb-1.5 text-xs font-medium text-success-ink">رمز التحويل السريع</p>
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate font-mono text-sm font-bold text-orange" dir="ltr">
                         {quickTransferCode}
@@ -277,7 +277,7 @@ export function PaymentDialog({
                               window.location.href = `tel:${encodedUSSD}`;
                             }, 150);
                           }}
-                          className="flex h-9 items-center gap-1.5 rounded-lg bg-success px-3 text-xs font-medium text-white transition-colors hover:bg-success/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/60"
+                          className="flex h-9 items-center gap-1.5 rounded-lg bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/60"
                           title="نسخ الرمز وفتح الاتصال"
                         >
                           <AnimatedCopy className="size-3.5" />
@@ -449,7 +449,7 @@ export function PaymentDialog({
                 </div>
               </m.div>
               <div className="space-y-2 text-center">
-                <m.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-lg font-bold text-success">
+                <m.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-lg font-bold text-success-ink">
                   تم الموافقة على الاشتراك
                 </m.p>
                 <m.p
@@ -463,7 +463,7 @@ export function PaymentDialog({
               </div>
               <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="w-full">
                 <Button
-                  className="h-11 w-full rounded-xl bg-success text-white hover:bg-success/90"
+                  className="h-11 w-full rounded-xl bg-success text-success-foreground hover:bg-success/90"
                   onClick={() => {
                     onOpenChange(false);
                     onSuccess?.();
@@ -487,7 +487,7 @@ export function PaymentDialog({
                 </div>
               </m.div>
               <div className="space-y-2 text-center">
-                <m.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-lg font-bold text-destructive">
+                <m.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-lg font-bold text-destructive-ink">
                   تم رفض طلب الاشتراك
                 </m.p>
                 <m.p

@@ -203,7 +203,7 @@ export default function ProductsPage() {
                     onClick={() => toggleAvailability(p)}
                     className={`rounded-lg h-8 px-3 text-xs font-medium border transition-colors ${
                       p.isAvailable
-                        ? "border-success/40 text-success hover:bg-success/10"
+                        ? "border-success/40 text-success-ink hover:bg-success/10"
                         : "border-muted-foreground/40 text-muted-foreground hover:bg-muted"
                     }`}
                   >

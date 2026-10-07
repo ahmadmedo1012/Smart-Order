@@ -28,7 +28,7 @@ const buttonVariants = cva(
         ghost:
           "bg-transparent text-muted-foreground hover:bg-foreground/10 hover:text-foreground dark:hover:bg-foreground/15",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 dark:bg-destructive/15 dark:hover:bg-destructive/25",
+          "bg-destructive/10 text-destructive-ink hover:bg-destructive/20 dark:bg-destructive/15 dark:hover:bg-destructive/25",
         whatsapp:
           "bg-whatsapp text-[#07361d] shadow-md shadow-whatsapp/25 hover:bg-whatsapp-deep hover:shadow-lg hover:shadow-whatsapp/40",
         link:

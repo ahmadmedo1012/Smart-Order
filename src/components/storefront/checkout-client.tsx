@@ -156,7 +156,7 @@ export function CheckoutClient({
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-md text-center">
-          <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-success/15 text-success">
+          <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-success/15 text-success-ink">
             <CheckCircle2 className="size-10" aria-hidden="true" />
           </div>
           <h1 className="mt-6 font-heading text-2xl font-bold">تم استلام طلبك!</h1>
@@ -372,7 +372,7 @@ export function CheckoutClient({
                 })}
               </div>
               {minOrderUnmet && (
-                <p className="text-xs text-destructive rounded-lg bg-destructive/10 border border-destructive/25 px-3 py-2">
+                <p className="text-xs text-destructive-ink rounded-lg bg-destructive/10 border border-destructive/25 px-3 py-2">
                   الحد الأدنى للطلب في {zone?.name} هو {formatLyd(zone!.minOrder)} — أضف منتجات بقيمة{" "}
                   <span className="font-bold tabular">{formatLyd(zone!.minOrder - subtotal)}</span> أخرى
                 </p>
@@ -449,7 +449,7 @@ export function CheckoutClient({
               </div>
               {/* Quick transfer code — family USSD quick-code row */}
               <div className="rounded-xl border border-success/25 bg-success/10 p-3">
-                <p className="mb-1.5 text-xs font-medium text-success">رمز التحويل السريع</p>
+                <p className="mb-1.5 text-xs font-medium text-success-ink">رمز التحويل السريع</p>
                 <div className="flex items-center justify-between gap-2">
                   <span className="truncate font-mono text-sm font-bold text-orange" dir="ltr">
                     {paymentMethod.type === "LIBYANA"
@@ -470,7 +470,7 @@ export function CheckoutClient({
                         toast.error("فشل النسخ");
                       }
                     }}
-                    className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-success px-3 text-xs font-medium text-white transition-colors hover:bg-success/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/60"
+                    className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/60"
                     title="نسخ رمز التحويل السريع"
                     aria-label="نسخ رمز التحويل السريع"
                   >

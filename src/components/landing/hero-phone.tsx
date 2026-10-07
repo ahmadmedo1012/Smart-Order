@@ -24,7 +24,7 @@ function StorefrontMiniUI() {
           <div className="truncate text-[11px] font-bold text-foreground">مخبز الواحة</div>
           <div className="text-[9px] text-muted-foreground">طرابلس · توصيل</div>
         </div>
-        <span className="rounded-full bg-success/15 px-1.5 py-0.5 text-[8px] font-bold text-success">مفتوح</span>
+        <span className="rounded-full bg-success/15 px-1.5 py-0.5 text-[8px] font-bold text-success-ink">مفتوح</span>
       </div>
 
       {/* Category strip */}
@@ -180,7 +180,7 @@ export function HeroPhone() {
         <div className="animate-float-slow [animation-delay:2.5s]">
           <div className="glass-strong flex items-center gap-2 rounded-full px-3 py-1.5 shadow-lg">
             <span className="flex size-6 items-center justify-center rounded-full bg-success/20">
-              <Check className="size-3.5 text-success" aria-hidden="true" />
+              <Check className="size-3.5 text-success-ink" aria-hidden="true" />
             </span>
             <span className="text-[10px] font-bold text-foreground">تم تأكيد الدفع · ليبيانا</span>
           </div>

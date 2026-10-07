@@ -344,7 +344,7 @@ function RegisterWizard() {
                 </div>
 
                 {error && (
-                  <p role="alert" className="rounded-lg border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                  <p role="alert" className="rounded-lg border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive-ink">
                     {error}
                   </p>
                 )}

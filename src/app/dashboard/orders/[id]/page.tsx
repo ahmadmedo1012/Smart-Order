@@ -242,7 +242,7 @@ export default function OrderDetailPage() {
                             <DropdownMenuItem
                               key={t.to}
                               onClick={() => setConfirmAction({ to: t.to, label: t.label })}
-                              className="text-destructive focus:text-destructive"
+                              className="text-destructive-ink focus:text-destructive-ink"
                             >
                               <Ban className="size-4 me-2" aria-hidden="true" />
                               {t.label}
@@ -317,7 +317,7 @@ export default function OrderDetailPage() {
                           </div>
                         )}
                         {item.note && (
-                          <div className="mt-1 text-xs text-warning-foreground flex items-center gap-1">
+                          <div className="mt-1 text-xs text-warning-ink flex items-center gap-1">
                             <StickyNote className="size-3" aria-hidden="true" />
                             {item.note}
                           </div>
@@ -430,7 +430,7 @@ export default function OrderDetailPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-4 w-full text-success border-success/40 hover:bg-success/10"
+                className="mt-4 w-full text-success-ink border-success/40 hover:bg-success/10"
                 onClick={() => setPaymentStatus("PAID")}
                 disabled={busy}
               >
@@ -444,7 +444,7 @@ export default function OrderDetailPage() {
           {order.customerNote && (
             <Card className="border-warning/30 bg-warning/5 rounded-xl p-5">
               <h2 className="font-heading font-semibold text-sm flex items-center gap-2">
-                <StickyNote className="size-4 text-warning-foreground" aria-hidden="true" />
+                <StickyNote className="size-4 text-warning-ink" aria-hidden="true" />
                 ملاحظة العميل
               </h2>
               <p className="mt-2 text-sm leading-relaxed">{order.customerNote}</p>

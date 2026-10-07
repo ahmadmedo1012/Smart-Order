@@ -72,7 +72,7 @@ export function ReceiptUpload({
           <button
             type="button"
             onClick={() => onReceiptChange("")}
-            className="shrink-0 text-xs text-destructive transition-colors hover:underline"
+            className="shrink-0 text-xs text-destructive-ink transition-colors hover:underline"
           >
             حذف الصورة
           </button>

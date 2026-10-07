@@ -151,7 +151,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <p role="alert" className="rounded-lg border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              <p role="alert" className="rounded-lg border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive-ink">
                 {error}
               </p>
             )}
@@ -200,7 +200,7 @@ export default function LoginPage() {
                   href={`https://wa.me/${SUPPORT_WHATSAPP}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-xl border border-success/30 bg-success/10 px-4 py-2.5 text-sm font-medium text-success transition-colors hover:bg-success/15"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-success/30 bg-success/10 px-4 py-2.5 text-sm font-medium text-success-ink transition-colors hover:bg-success/15"
                 >
                   <AnimatedMessageCircle className="size-4" />
                   تواصل عبر واتساب

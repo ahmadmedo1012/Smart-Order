@@ -164,7 +164,7 @@ export function DashboardShell({
             )}
             <button
               onClick={logout}
-              className="mt-1 w-full flex items-center gap-2 rounded-lg px-3 h-9 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
+              className="mt-1 w-full flex items-center gap-2 rounded-lg px-3 h-9 text-xs text-muted-foreground hover:text-destructive-ink hover:bg-destructive/5 transition-colors"
             >
               <LogOut className="size-3.5" aria-hidden="true" />
               تسجيل الخروج
@@ -194,7 +194,7 @@ export function DashboardShell({
                 <div className="absolute bottom-0 inset-x-0 p-3 border-t border-border/60">
                   <button
                     onClick={logout}
-                    className="w-full flex items-center gap-2 rounded-lg px-3 h-9 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                    className="w-full flex items-center gap-2 rounded-lg px-3 h-9 text-xs text-muted-foreground hover:text-destructive-ink transition-colors"
                   >
                     <LogOut className="size-3.5" aria-hidden="true" />
                     تسجيل الخروج
@@ -228,7 +228,7 @@ export function DashboardShell({
                 <span
                   className={cn(
                     "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium",
-                    biz.isPublished ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
+                    biz.isPublished ? "bg-success/10 text-success-ink" : "bg-muted text-muted-foreground"
                   )}
                 >
                   {biz.isPublished ? "منشور" : "مسودة"}

@@ -132,13 +132,13 @@ export default function OnboardingPage() {
   }) => (
     <section className={`rounded-xl border p-5 transition-colors ${done ? "border-success/40 bg-success/[0.04]" : "border-border bg-card"}`}>
       <div className="flex items-start gap-4">
-        <span className={`flex size-10 items-center justify-center rounded-xl shrink-0 ${done ? "bg-success/15 text-success" : "bg-primary/10 text-primary"}`}>
+        <span className={`flex size-10 items-center justify-center rounded-xl shrink-0 ${done ? "bg-success/15 text-success-ink" : "bg-primary/10 text-primary"}`}>
           {done ? <Check className="size-5" aria-hidden="true" /> : <Icon className="size-5" aria-hidden="true" />}
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground tabular">خطوة {n}</span>
-            {done && <span className="text-xs text-success font-medium">مكتملة</span>}
+            {done && <span className="text-xs text-success-ink font-medium">مكتملة</span>}
           </div>
           <h2 className="font-heading font-semibold mt-0.5">{title}</h2>
           <p className="text-sm text-muted-foreground mt-1">{desc}</p>
@@ -199,7 +199,7 @@ export default function OnboardingPage() {
                     }
                   }}
                   aria-label={`حذف ${c.name}`}
-                  className="text-muted-foreground hover:text-destructive"
+                  className="text-muted-foreground hover:text-destructive-ink"
                 >
                   <Trash2 className="size-3" aria-hidden="true" />
                 </button>
@@ -227,7 +227,7 @@ export default function OnboardingPage() {
             {zones.map((z) => (
               <li key={z.id} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 h-8 text-xs font-medium">
                 {z.name} — <span className="tabular">{formatLyd(z.fee)}</span>
-                <button onClick={async () => { try { await api.delete(`/api/delivery-zones/${z.id}?businessId=${businessId}`); setZones((zs) => zs.filter((x) => x.id !== z.id)); } catch { toast.error("تعذر الحذف"); } }} aria-label={`حذف ${z.name}`} className="text-muted-foreground hover:text-destructive">
+                <button onClick={async () => { try { await api.delete(`/api/delivery-zones/${z.id}?businessId=${businessId}`); setZones((zs) => zs.filter((x) => x.id !== z.id)); } catch { toast.error("تعذر الحذف"); } }} aria-label={`حذف ${z.name}`} className="text-muted-foreground hover:text-destructive-ink">
                   <Trash2 className="size-3" aria-hidden="true" />
                 </button>
               </li>

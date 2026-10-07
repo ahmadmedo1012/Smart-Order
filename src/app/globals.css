@@ -42,8 +42,10 @@
 
 @theme inline {
   /* ── Font system — Arabic-first, IBM Plex Sans Arabic local-first
-     (Madarek parity). --font-cairo comes from /fonts/fonts.css
-     @font-face "IBM Plex Sans Arabic" (arabic + latin subsets,
+     (Madarek parity). --font-cairo is the documented legacy SHIM
+     name — its VALUE is defined in public/fonts/fonts.css
+     (`:root { --font-cairo: "IBM Plex Sans Arabic" }`, currently
+     line 38) as "IBM Plex Sans Arabic" (arabic + latin subsets,
      400-700 — the var NAME is kept as the load-bearing shim
      contract: a var() with no fallback that resolves to an
      undefined custom property invalidates the whole font-family
@@ -96,12 +98,16 @@
 
   /* ── Semantic status + soft tints (Madarek -ink / -bg pairs) ── */
   --color-success: var(--success);
+  --color-success-ink: var(--success-ink);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
+  --color-warning-ink: var(--warning-ink);
   --color-warning-foreground: var(--warning-foreground);
   --color-info: var(--info);
+  --color-info-ink: var(--info-ink);
   --color-info-foreground: var(--info-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-ink: var(--destructive-ink);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success-soft: var(--success-soft);
   --color-warning-soft: var(--warning-soft);
@@ -234,14 +240,22 @@
   --c-ash: #C3C8DC;
   --c-night: #070B16;
 
-  /* ── Status (dark) — Madarek dark -ink values (§1.6) ── */
+  /* ── Status (dark) — Madarek dark split (§1.6): base = the luminous
+       family ink (fill/stroke/TEXT — dark ink == base, the canonical
+       identity), -ink = the text slot (same luminous ink here),
+       -foreground = void/dark ink on the luminous fills (canonical
+       --danger-fg dark pattern; never white on the luminous mids). ── */
   --success: #7FD39A;
+  --success-ink: #7FD39A;
   --success-foreground: #191918;
   --warning: #ECC97D;
+  --warning-ink: #ECC97D;
   --warning-foreground: #191918;
   --info: #8FBBF2;
+  --info-ink: #8FBBF2;
   --info-foreground: #191918;
   --destructive: #F0938F;
+  --destructive-ink: #F0938F;
   --destructive-foreground: #05070F;
 
   /* ── Status soft grounds (dark) — Madarek deep pastel -bg fills
@@ -387,15 +401,26 @@
   --c-ash: #4F4D48;
   --c-night: #191918;
 
-  /* ── Status (light) — Madarek light -ink text-safe deep variants ── */
-  --success: #1F4F30;
-  --success-foreground: #FFFFFF;
-  --warning: #6B4C0B;
-  --warning-foreground: #FFFFFF;
-  --info: #1F3D63;
-  --info-foreground: #FFFFFF;
-  --destructive: #6B2128;
-  --destructive-foreground: #FFFFFF;
+  /* ── Status (light) — canonical Madarek three-way split (§2.6),
+       restored r125 (was: deep-collapse "WCAG collapse"). base = the
+       family -ink (fill/stroke role: dots, usage bars, soft-tint
+       borders — vivid mint #4FA66D / yellow #D6A330 / sky #5C8FCE /
+       rose #DD6E78); -ink = the family -deep for TEXT (7.9-11.2:1 on
+       cards and soft tints — the slot text consumers must ride);
+       -foreground = #191918 ink on the mid fills (Madarek --danger-fg
+       light pattern, 5.3-7.7:1 — white on the mids fails AA). ── */
+  --success: #4FA66D;
+  --success-ink: #1F4F30;
+  --success-foreground: #191918;
+  --warning: #D6A330;
+  --warning-ink: #6B4C0B;
+  --warning-foreground: #191918;
+  --info: #5C8FCE;
+  --info-ink: #1F3D63;
+  --info-foreground: #191918;
+  --destructive: #DD6E78;
+  --destructive-ink: #6B2128;
+  --destructive-foreground: #191918;
 
   /* ── Status soft grounds (light) — Madarek pastel -bg fills
        (the mint/yellow/sky/rose entries of the family set below) ── */
@@ -406,9 +431,9 @@
 
   /* ── 9 pastel families (light) — Madarek tokens.css :453-461 exact:
        pastel bg / readable ink / deep text per family. Status -soft
-       grounds above are these families' -bg slots; light status
-       tokens use the -deep values (mint #1F4F30, yellow #6B4C0B,
-       sky #1F3D63, rose #6B2128) for AA text on cream. ── */
+       grounds above are these families' -bg slots; status base =
+       mint/yellow/sky/rose -ink and status -ink = their -deep
+       (mint #1F4F30, yellow #6B4C0B, sky #1F3D63, rose #6B2128). ── */
   --c-peach-bg: #FFE9DC;     --c-peach-ink: #E07856;     --c-peach-deep: #6B2D1A;
   --c-mint-bg: #DCF1E2;      --c-mint-ink: #4FA66D;      --c-mint-deep: #1F4F30;
   --c-lavender-bg: #ECE6FA;  --c-lavender-ink: #8A6FE0;  --c-lavender-deep: #3F2D7A;
