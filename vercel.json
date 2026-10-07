@@ -1,4 +1,4 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npx prisma db push --schema=prisma/schema.postgres.prisma --skip-generate && npx prisma generate --schema=prisma/schema.postgres.prisma && npm run build"
+  "buildCommand": "node scripts/vercel-db-sync.mjs && npx prisma generate --schema=prisma/schema.postgres.prisma && npm run build"
 }
