@@ -127,17 +127,17 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* ── Radius scale — Madarek "Notion-soft" ladder (tokens.css §1.2):
-     xs 6 · sm 8 · md 10 · lg 12 · xl 16 · 2xl 20 · 3xl 28.
+  /* ── Radius scale — Madarek "Notion-soft" ladder (tokens.css §1.2),
+     exact: xs 6 · sm 8 · md 10 · lg 12 · xl 16 · 2xl 20 · 3xl 28.
      Consumers: buttons/inputs ride rounded-md (10 = r-md), cards
-     ride rounded-lg (16 = Madarek .card r-xl), dialogs/sheets ride
-     rounded-2xl (20 = r-2xl), hero panels ride rounded-xl (28 =
-     r-3xl). ── */
+     ride rounded-xl (16 = Madarek .card border-radius r-xl),
+     dialogs/sheets ride rounded-2xl (20 = r-2xl), hero panels ride
+     rounded-3xl (28 = r-3xl). ── */
   --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 28px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-2xl: 20px;
   --radius-3xl: 28px;
 
@@ -244,11 +244,27 @@
   --destructive: #F0938F;
   --destructive-foreground: #05070F;
 
-  /* ── Status soft grounds (dark) — Madarek deep pastel -bg fills ── */
+  /* ── Status soft grounds (dark) — Madarek deep pastel -bg fills
+       (the mint/yellow/sky/rose entries of the family set below) ── */
   --success-soft: #0F241C;
   --warning-soft: #2C2410;
   --info-soft: #14213A;
   --destructive-soft: #2C1620;
+
+  /* ── 9 pastel families (dark) — Madarek tokens.css :698-706 exact:
+       space-tinted deep bg / luminous ink / pale tint per family.
+       Status -soft grounds above are these families' -bg slots
+       (mint/yellow/sky/rose); charts pick their -ink values. Triads
+       follow the Madarek naming --c-<family>-bg/-ink/-deep. ── */
+  --c-peach-bg: #2C1A16;     --c-peach-ink: #F2A07F;     --c-peach-deep: #FCD9C4;
+  --c-mint-bg: #0F241C;      --c-mint-ink: #7FD39A;      --c-mint-deep: #C9EAD3;
+  --c-lavender-bg: #221B3A;  --c-lavender-ink: #B7A0F4;  --c-lavender-deep: #DCD2F9;
+  --c-sky-bg: #14213A;       --c-sky-ink: #8FBBF2;       --c-sky-deep: #C9DCEE;
+  --c-yellow-bg: #2C2410;    --c-yellow-ink: #ECC97D;    --c-yellow-deep: #F8E5B5;
+  --c-rose-bg: #2C1620;      --c-rose-ink: #F0938F;      --c-rose-deep: #FACDD2;
+  --c-sand-bg: #241F14;      --c-sand-ink: #D9C18C;      --c-sand-deep: #EFE2C5;
+  --c-grey-bg: #161D33;      --c-grey-ink: #A9B0C8;      --c-grey-deep: #D5DAE8;
+  --c-copper-bg: #2C2312;    --c-copper-ink: #E9B44C;    --c-copper-deep: #F5D48A;
 
   /* ── External brand (unchanged by definition) ── */
   --whatsapp: #25d366;
@@ -332,8 +348,11 @@
   /* ── Core palette — Madarek cream (§1.3/§1.7 light):
      ground #FBFAF9, surface #FFFFFF, surface-2 #F7F6F3, ink #191918 ── */
   --background: #FBFAF9;
-  /* Copper halo at the family wash (resolves with the active theme) */
-  --background-radial: radial-gradient(ellipse 80% 50% at 50% -10%, rgb(181 116 56 / 0.08), transparent 70%);
+  /* Flat cream ground — the Madarek light ground is FLAT (no body
+     radial; painted washes live in --menu-glow hero scopes). Token
+     kept for the layout inline-style contract, value neutralized
+     exactly like the dark side. */
+  --background-radial: none;
   --foreground: #191918;
   --card: #FFFFFF;
   --card-foreground: #191918;
@@ -378,11 +397,27 @@
   --destructive: #6B2128;
   --destructive-foreground: #FFFFFF;
 
-  /* ── Status soft grounds (light) — Madarek pastel -bg fills ── */
+  /* ── Status soft grounds (light) — Madarek pastel -bg fills
+       (the mint/yellow/sky/rose entries of the family set below) ── */
   --success-soft: #DCF1E2;
   --warning-soft: #FCF1CD;
   --info-soft: #DDEBF7;
   --destructive-soft: #FCE0E2;
+
+  /* ── 9 pastel families (light) — Madarek tokens.css :453-461 exact:
+       pastel bg / readable ink / deep text per family. Status -soft
+       grounds above are these families' -bg slots; light status
+       tokens use the -deep values (mint #1F4F30, yellow #6B4C0B,
+       sky #1F3D63, rose #6B2128) for AA text on cream. ── */
+  --c-peach-bg: #FFE9DC;     --c-peach-ink: #E07856;     --c-peach-deep: #6B2D1A;
+  --c-mint-bg: #DCF1E2;      --c-mint-ink: #4FA66D;      --c-mint-deep: #1F4F30;
+  --c-lavender-bg: #ECE6FA;  --c-lavender-ink: #8A6FE0;  --c-lavender-deep: #3F2D7A;
+  --c-sky-bg: #DDEBF7;       --c-sky-ink: #5C8FCE;       --c-sky-deep: #1F3D63;
+  --c-yellow-bg: #FCF1CD;    --c-yellow-ink: #D6A330;    --c-yellow-deep: #6B4C0B;
+  --c-rose-bg: #FCE0E2;      --c-rose-ink: #DD6E78;      --c-rose-deep: #6B2128;
+  --c-sand-bg: #F1ECDF;      --c-sand-ink: #B59868;      --c-sand-deep: #5A4623;
+  --c-grey-bg: #EFECE7;      --c-grey-ink: #6B665E;      --c-grey-deep: #2D2A24;
+  --c-copper-bg: #F4E4D2;    --c-copper-ink: #B57438;    --c-copper-deep: #5C3416;
 
   /* ── External brand (unchanged by definition) ── */
   --whatsapp: #25d366;
@@ -456,6 +491,37 @@
   --image-shimmer: rgba(25, 25, 24, 0.10);
 }
 
+/* ═════════════════════════════════════════════════════════════
+   prefers-contrast: more — ported from Madarek tokens.css :964-1005
+   (012 theme-tokens contract §8). Elevation collapses to solid
+   focus-style rings, glass de-blurs to a flat surface, borders
+   strengthen. Dark rides :root:not(.light) (this app toggles a
+   .light class on <html>; dark is the default), light rides .light
+   — declared after so it wins at equal specificity.
+   ═════════════════════════════════════════════════════════════ */
+@media (prefers-contrast: more) {
+  :root:not(.light) {
+    --elev-1: 0 0 0 1px rgba(255, 255, 255, 0.36);
+    --elev-2: 0 0 0 1.5px rgba(255, 255, 255, 0.44);
+    --elev-3: 0 0 0 2px rgba(255, 255, 255, 0.52);
+    --elev-4: 0 0 0 2.5px rgba(255, 255, 255, 0.60);
+    --elev-5: 0 0 0 3px rgba(255, 255, 255, 0.68);
+    --glass-bg: var(--card);
+    --glass-border: rgba(255, 255, 255, 0.36);
+    --border: rgba(255, 255, 255, 0.48);
+  }
+  .light {
+    --elev-1: 0 0 0 1px rgba(0, 0, 0, 0.32);
+    --elev-2: 0 0 0 1.5px rgba(0, 0, 0, 0.40);
+    --elev-3: 0 0 0 2px rgba(0, 0, 0, 0.48);
+    --elev-4: 0 0 0 2.5px rgba(0, 0, 0, 0.56);
+    --elev-5: 0 0 0 3px rgba(0, 0, 0, 0.64);
+    --glass-bg: var(--card);
+    --glass-border: rgba(0, 0, 0, 0.32);
+    --border: rgba(0, 0, 0, 0.42);
+  }
+}
+
 /* ════════════════════════════════════════════════════════════════
    Base layer
    ════════════════════════════════════════════════════════════════ */
@@ -504,29 +570,48 @@
   [dir="rtl"] .font-naskh {
     font-family: "Noto Naskh Arabic", "IBM Plex Sans Arabic", system-ui, sans-serif;
   }
-  /*
-   * Family reduced-motion policy: preserve state change and hierarchy —
-   * clamp motion to 0.2s and stop infinite loops instead of the 0.01ms
-   * kill that destroys useful feedback.
-   */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.2s !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.2s !important;
-      scroll-behavior: auto !important;
-    }
-    .card-premium {
-      transition: none !important;
-    }
-    .card-premium:hover {
-      transform: none !important;
-    }
-    .grain-overlay::before {
-      animation: none !important;
-    }
+}
+
+/*
+ * Reduced motion — Madarek canonical ZEROING pattern
+ * (tokens.css :844-849 + wave 2-a :1074): every --t-* duration
+ * token drops to 0ms so token-driven motion completes instantly
+ * (state changes and final frames are preserved — nothing is
+ * left mid-air). The universal guard below carries the OFF-ladder
+ * animations (raw keyframe durations, utilities) to ~0ms the same
+ * way; iteration-count 1 stops the infinite loops.
+ *
+ * UNLAYERED on purpose: the --t-* ladder lives on an unlayered
+ * :root at the top of this sheet — a redefinition inside
+ * @layer base would LOSE the cascade to it (unlayered normal
+ * declarations beat layered ones). Madarek's own block sits on a
+ * plain unlayered :root for the same reason.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-micro: 0ms;
+    --t-fast: 0ms;
+    --t-base: 0ms;
+    --t-slow: 0ms;
+    --t-slower: 0ms;
+    --t-cinema: 0ms;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .card-premium {
+    transition: none !important;
+  }
+  .card-premium:hover {
+    transform: none !important;
+  }
+  .grain-overlay::before {
+    animation: none !important;
   }
 }
 
