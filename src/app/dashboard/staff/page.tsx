@@ -5,10 +5,21 @@ import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { EmptyState, ErrorState } from "@/components/shared/states";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { pillClasses } from "@/components/dashboard/filter-pills";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ROLE_AR, ROLES, ROLE_PERMISSIONS, type Role } from "@/lib/constants";
 import { formatArabicDate } from "@/lib/arabic";
 import { toast } from "sonner";
-import { UserCog, Plus, Trash2, Loader2, ShieldCheck } from "lucide-react";
+import { UserCog, Plus, Trash2, Loader2, ShieldCheck, X } from "lucide-react";
 
 interface StaffRow {
   id: string;
@@ -47,22 +58,29 @@ export default function StaffPage() {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="font-heading text-2xl font-bold">فريق العمل</h1>
-          <p className="text-sm text-muted-foreground mt-1">أضف حسابات لموظفيك بصلاحيات محددة</p>
-        </div>
-        <button
-          onClick={() => setCreating(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground h-10 px-4 text-sm font-semibold hover:bg-primary/90 transition-colors"
-        >
-          <Plus className="size-4.5" aria-hidden="true" />
-          عضو جديد
-        </button>
-      </div>
+      <PageHeader
+        title="فريق العمل"
+        subtitle="أضف حسابات لموظفيك بصلاحيات محددة"
+        actions={
+          <Button onClick={() => setCreating(true)}>
+            <Plus className="size-4.5" aria-hidden="true" />
+            عضو جديد
+          </Button>
+        }
+      />
 
       {staff.length === 0 ? (
-        <EmptyState icon={UserCog} title="لا أعضاء" description="أضف موظفين ليتابعوا الطلبات والمنتجات بصلاحيات محددة" />
+        <EmptyState
+          icon={UserCog}
+          title="لا أعضاء"
+          description="أضف موظفين ليتابعوا الطلبات والمنتجات بصلاحيات محددة"
+          action={
+            <Button variant="outline" onClick={() => setCreating(true)}>
+              <Plus className="size-4.5" aria-hidden="true" />
+              أضف أول عضو
+            </Button>
+          }
+        />
       ) : (
         <ul className="space-y-2.5">
           {staff.map((s) => (
@@ -76,7 +94,7 @@ export default function StaffPage() {
                   <div className="text-xs text-muted-foreground truncate" dir="ltr">{s.user.email}</div>
                 </div>
                 {s.role === "OWNER" ? (
-                  <span className="rounded-full bg-primary/10 text-accent-foreground px-3 py-1 text-xs font-semibold shrink-0">
+                  <span className="inline-flex items-center rounded-full bg-(--c-copper-bg) px-2.5 py-1 text-[11px] font-semibold text-(--c-copper-deep) shrink-0">
                     {ROLE_AR[s.role]}
                   </span>
                 ) : (
@@ -172,35 +190,49 @@ function StaffDialog({ businessId, onClose }: { businessId: string; onClose: (ch
   }
 
   return (
-    <div className="fixed inset-0 z-(--z-modal) flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="عضو جديد">
-      <div className="absolute inset-0 bg-black/50" onClick={() => onClose(false)} aria-hidden="true" />
-      <div className="relative w-full max-w-sm rounded-2xl border border-border bg-card shadow-2xl p-5">
-        <h2 className="font-heading font-semibold text-lg">عضو فريق جديد</h2>
-        <p className="text-xs text-muted-foreground mt-1">أنشئ حساباً لموظفك — يملك صلاحيات دوره فقط</p>
-        <div className="mt-4 space-y-4">
+    <Dialog open onOpenChange={(v) => !v && onClose(false)}>
+      <DialogContent
+        dir="rtl"
+        showCloseButton={false}
+        className="max-w-sm gap-0 overflow-hidden rounded-xl border-border bg-card p-0 shadow-xl"
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-border/60 p-5">
+          <div>
+            <DialogTitle className="font-heading text-lg font-semibold text-foreground">عضو فريق جديد</DialogTitle>
+            <DialogDescription className="mt-1 text-[13px] text-muted-foreground">
+              أنشئ حساباً لموظفك — يملك صلاحيات دوره فقط
+            </DialogDescription>
+          </div>
+          <DialogClose
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+            aria-label="إغلاق"
+          >
+            <X className="size-4.5" aria-hidden="true" />
+          </DialogClose>
+        </div>
+        <div className="space-y-4 p-5">
           <div className="space-y-2">
             <label htmlFor="s-name" className="text-sm font-medium">الاسم *</label>
-            <input id="s-name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
+            <Input id="s-name" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
           </div>
           <div className="space-y-2">
             <label htmlFor="s-email" className="text-sm font-medium">البريد الإلكتروني *</label>
-            <input id="s-email" type="email" dir="ltr" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input id="s-email" type="email" dir="ltr" className="text-start" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="space-y-2">
             <label htmlFor="s-pass" className="text-sm font-medium">كلمة المرور المؤقتة *</label>
-            <input id="s-pass" type="text" dir="ltr" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8 أحرف على الأقل" />
+            <Input id="s-pass" type="text" dir="ltr" className="text-start" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="8 أحرف على الأقل" />
           </div>
           <div className="space-y-2">
-            <span className="text-sm font-medium">الدور</span>
-            <div className="grid grid-cols-2 gap-2">
+            <span className="text-sm font-medium" id="s-role-label">الدور</span>
+            <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="s-role-label">
               {ROLES.filter((r) => r !== "OWNER").map((r) => (
                 <button
                   key={r}
                   type="button"
                   onClick={() => setRole(r)}
-                  className={`rounded-lg border h-10 text-xs font-medium transition-colors ${
-                    role === r ? "border-primary bg-primary/10 text-accent-foreground" : "border-border hover:bg-muted"
-                  }`}
+                  aria-pressed={role === r}
+                  className={pillClasses(role === r, "h-10")}
                 >
                   {ROLE_AR[r]}
                 </button>
@@ -208,14 +240,16 @@ function StaffDialog({ businessId, onClose }: { businessId: string; onClose: (ch
             </div>
           </div>
         </div>
-        <div className="mt-5 flex gap-2 justify-end">
-          <button onClick={() => onClose(false)} className="h-9 px-4 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">إلغاء</button>
-          <button onClick={save} disabled={saving} className="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 inline-flex items-center gap-2">
+        <div className="flex justify-end gap-2 border-t border-border/60 p-4">
+          <DialogClose asChild>
+            <Button variant="outline">إلغاء</Button>
+          </DialogClose>
+          <Button onClick={save} disabled={saving} className="inline-flex items-center gap-2">
             {saving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
             إضافة
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

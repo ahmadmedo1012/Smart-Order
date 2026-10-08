@@ -6,6 +6,20 @@ import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/*
+ * r130 (W2-1, fix 2 + W1-F P1-8) — re-based on the canonical Madarek
+ * .modal-overlay/.modal-card recipe (components.css:1471-1516):
+ *   · RTL: DialogHeader aligns `text-start` (logical) — the stock
+ *     shadcn header anchored Arabic titles to the physical LEFT edge
+ *     on ≥sm; the close button rides `end-4` (inset-inline-end).
+ *   · Card: surface ground (bg-card — dark #0D1428 / light #FFFFFF,
+ *     never the page ground), r-xl 16px (rounded-xl), width cap
+ *     min(560px,100%), --shadow-modal, and the signature 3px accent
+ *     top-sheen ::before (inset-inline 30%).
+ *   · Scrim: 4px blur (--scrim-blur; was blur-md/12px — Madarek keeps
+ *     dimming scrims light).
+ */
+
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
@@ -38,7 +52,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-(--z-modal) bg-[var(--overlay)] backdrop-blur-md duration-(--t-base) ease-smooth",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-(--z-modal) bg-[var(--overlay)] backdrop-blur-[4px] duration-(--t-base) ease-smooth",
         className
       )}
       {...props}
@@ -60,7 +74,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-bottom-2 data-[state=closed]:slide-out-to-bottom-1 fixed top-[50%] left-[50%] z-(--z-modal) grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-(--t-base) ease-smooth data-[state=closed]:duration-(--t-fast) sm:max-w-lg",
+          "bg-card text-card-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-bottom-2 data-[state=closed]:slide-out-to-bottom-1 fixed top-[50%] left-[50%] z-(--z-modal) grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-xl border p-6 shadow-(--shadow-modal) duration-(--t-base) ease-smooth data-[state=closed]:duration-(--t-fast) sm:max-w-[560px] before:pointer-events-none before:absolute before:top-0 before:inset-x-[30%] before:z-[1] before:h-[3px] before:rounded-b-[3px] before:bg-[linear-gradient(90deg,transparent,var(--primary),transparent)]",
           className
         )}
         {...props}
@@ -69,7 +83,7 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 end-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
             <span className="sr-only">Close</span>
@@ -84,7 +98,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      className={cn("flex flex-col gap-2 text-start", className)}
       {...props}
     />
   )

@@ -5,9 +5,21 @@ import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { EmptyState, ErrorState } from "@/components/shared/states";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { pillClasses } from "@/components/dashboard/filter-pills";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { PAYMENT_TYPES, PAYMENT_TYPE_AR, PAYMENT_TYPE_DESCRIPTIONS, type PaymentType } from "@/lib/constants";
 import { toast } from "sonner";
-import { CreditCard, Plus, Trash2, Loader2, Phone } from "lucide-react";
+import { CreditCard, Plus, Trash2, Loader2, Phone, X } from "lucide-react";
 
 interface Method {
   id: string;
@@ -53,15 +65,25 @@ export default function PaymentsPage() {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <div>
-        <h1 className="font-heading text-2xl font-bold">طرق الدفع</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          اختر ما يظهر للعملاء في صفحة الدفع. طرق التحويل تحتاج رقم الهاتف الذي يستقبل الحوالات.
-        </p>
-      </div>
+      <PageHeader
+        title="طرق الدفع"
+        subtitle="اختر ما يظهر للعملاء في صفحة الدفع. طرق التحويل تحتاج رقم الهاتف الذي يستقبل الحوالات."
+      />
 
       {methods.length === 0 ? (
-        <EmptyState icon={CreditCard} title="لا طرق دفع مفعّلة" description="أضف طريقة واحدة على الأقل ليتمكن العملاء من إتمام الطلب" />
+        <EmptyState
+          icon={CreditCard}
+          title="لا طرق دفع مفعّلة"
+          description="أضف طريقة واحدة على الأقل ليتمكن العملاء من إتمام الطلب"
+          action={
+            available.length > 0 ? (
+              <Button variant="outline" onClick={() => setCreating(true)}>
+                <Plus className="size-4.5" aria-hidden="true" />
+                إضافة طريقة دفع
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <ul className="space-y-2.5">
           {methods.map((m) => {
@@ -75,11 +97,11 @@ export default function PaymentsPage() {
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold text-sm flex items-center gap-2 flex-wrap">
                       {m.name}
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                      <span className="inline-flex items-center rounded-full bg-(--c-grey-bg) px-2.5 py-1 text-[11px] font-semibold text-(--c-grey-deep)">
                         {PAYMENT_TYPE_AR[m.type]}
                       </span>
                       {!m.isActive && (
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">معطلة</span>
+                        <span className="inline-flex items-center rounded-full bg-(--c-grey-bg) px-2.5 py-1 text-[11px] font-semibold text-(--c-grey-deep)">معطلة</span>
                       )}
                     </div>
                     {config?.number && (
@@ -100,8 +122,10 @@ export default function PaymentsPage() {
                           toast.error(e instanceof Error ? e.message : "تعذر التحديث");
                         }
                       }}
-                      className={`rounded-lg px-3 h-8 text-xs font-medium border transition-colors ${
-                        m.isActive ? "border-success/40 text-success-ink hover:bg-success/10" : "border-border text-muted-foreground hover:bg-muted"
+                      className={`inline-flex h-8 items-center rounded-full border border-transparent px-3 text-xs font-semibold transition-colors duration-(--t-fast) active:scale-[0.97] ${
+                        m.isActive
+                          ? "bg-(--c-mint-bg) text-(--c-mint-deep)"
+                          : "bg-(--c-grey-bg) text-(--c-grey-deep)"
                       }`}
                     >
                       {m.isActive ? "مفعّلة" : "معطلة"}
@@ -133,10 +157,10 @@ export default function PaymentsPage() {
       {available.length > 0 && (
         <button
           onClick={() => setCreating(true)}
-          className="w-full rounded-xl border border-dashed border-primary/40 bg-primary/5 h-11 text-sm font-semibold text-accent-foreground hover:bg-primary/10 transition-colors inline-flex items-center justify-center gap-2"
+          className="w-full rounded-xl border border-dashed border-border bg-card h-11 text-sm font-semibold text-muted-foreground hover:border-primary/40 hover:bg-muted hover:text-accent-foreground transition-[color,border-color,background-color] duration-(--t-fast) inline-flex items-center justify-center gap-2 active:scale-[0.995]"
         >
           <Plus className="size-4.5" aria-hidden="true" />
-          إضافة طريقة دفع ({available.length} متاحة)
+          إضافة طريقة دفع (<span className="tabular nums">{available.length}</span> متاحة)
         </button>
       )}
 
@@ -209,22 +233,37 @@ function MethodDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-(--z-modal) flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="طريقة دفع جديدة">
-      <div className="absolute inset-0 bg-black/50" onClick={() => onClose(false)} aria-hidden="true" />
-      <div className="relative w-full max-w-sm rounded-2xl border border-border bg-card shadow-2xl p-5">
-        <h2 className="font-heading font-semibold text-lg">طريقة دفع جديدة</h2>
-        <div className="mt-4 space-y-4">
+    <Dialog open onOpenChange={(v) => !v && onClose(false)}>
+      <DialogContent
+        dir="rtl"
+        showCloseButton={false}
+        className="max-w-sm gap-0 overflow-hidden rounded-xl border-border bg-card p-0 shadow-xl"
+      >
+        <div className="flex items-start justify-between gap-3 border-b border-border/60 p-5">
+          <div>
+            <DialogTitle className="font-heading text-lg font-semibold text-foreground">طريقة دفع جديدة</DialogTitle>
+            <DialogDescription className="mt-1 text-[13px] text-muted-foreground">
+              تظهر للعميل في صفحة الدفع
+            </DialogDescription>
+          </div>
+          <DialogClose
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+            aria-label="إغلاق"
+          >
+            <X className="size-4.5" aria-hidden="true" />
+          </DialogClose>
+        </div>
+        <div className="space-y-4 p-5">
           <div className="space-y-2">
-            <label className="text-sm font-medium">النوع</label>
-            <div className="grid grid-cols-2 gap-2">
+            <span className="text-sm font-medium" id="m-type-label">النوع</span>
+            <div className="grid grid-cols-2 gap-2" role="group" aria-labelledby="m-type-label">
               {available.map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => onTypeChange(t)}
-                  className={`rounded-lg border h-10 text-xs font-medium transition-colors ${
-                    type === t ? "border-primary bg-primary/10 text-accent-foreground" : "border-border hover:bg-muted"
-                  }`}
+                  aria-pressed={type === t}
+                  className={pillClasses(type === t, "h-10")}
                 >
                   {PAYMENT_TYPE_AR[t]}
                 </button>
@@ -233,25 +272,24 @@ function MethodDialog({
           </div>
           <div className="space-y-2">
             <label htmlFor="m-name" className="text-sm font-medium">الاسم الظاهر للعملاء *</label>
-            <input
+            <Input
               id="m-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={60}
-              className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
             />
           </div>
           {NEEDS_NUMBER.includes(type) && (
             <div className="space-y-2">
               <label htmlFor="m-number" className="text-sm font-medium">رقم الهاتف المستقبل *</label>
-              <input
+              <Input
                 id="m-number"
                 value={number}
                 onChange={(e) => setNumber(e.target.value)}
                 placeholder="0912345678"
                 inputMode="tel"
                 dir="ltr"
-                className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
+                className="text-start tabular"
               />
               <p className="text-[11px] text-muted-foreground">
                 {type === "MADAR" ? "مثال لأرقام مدار: 091 / 093" : type === "LIBYANA" ? "مثال لأرقام ليبيانا: 092 / 094" : "يظهر للعميل ليرسل إليه التحويل"}
@@ -260,27 +298,26 @@ function MethodDialog({
           )}
           <div className="space-y-2">
             <label htmlFor="m-inst" className="text-sm font-medium">تعليمات تظهر للعميل</label>
-            <textarea
+            <Textarea
               id="m-inst"
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
               placeholder={PAYMENT_TYPE_DESCRIPTIONS[type]}
               rows={2}
               maxLength={300}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
             />
           </div>
         </div>
-        <div className="mt-5 flex gap-2 justify-end">
-          <button onClick={() => onClose(false)} className="h-9 px-4 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">
-            إلغاء
-          </button>
-          <button onClick={save} disabled={saving} className="h-9 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 inline-flex items-center gap-2">
+        <div className="flex justify-end gap-2 border-t border-border/60 p-4">
+          <DialogClose asChild>
+            <Button variant="outline">إلغاء</Button>
+          </DialogClose>
+          <Button onClick={save} disabled={saving} className="inline-flex items-center gap-2">
             {saving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
             إضافة
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

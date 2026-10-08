@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { pageTitleClass } from "@/components/dashboard/page-header";
 import {
   Dialog,
   DialogContent,
@@ -200,7 +201,7 @@ export default function OrderDetailPage() {
             العودة للطلبات
           </Link>
           <div className="mt-2 flex items-center gap-3 flex-wrap">
-            <h1 className="font-heading text-2xl font-bold tabular">{order.orderNumber}</h1>
+            <h1 className={`${pageTitleClass} tabular`}>{order.orderNumber}</h1>
             <OrderStatusBadge status={order.status} />
             <PaymentStatusBadge status={order.paymentStatus} />
           </div>
@@ -440,11 +441,12 @@ export default function OrderDetailPage() {
             )}
           </Card>
 
-          {/* Customer note */}
+          {/* Customer note — canonical quiet alert: surface ground + hairline
+              + 8px pastel status dot inline-start (no tinted lift). */}
           {order.customerNote && (
-            <Card className="border-warning/30 bg-warning/5 rounded-xl p-5">
-              <h2 className="font-heading font-semibold text-sm flex items-center gap-2">
-                <StickyNote className="size-4 text-warning-ink" aria-hidden="true" />
+            <Card className="rounded-xl border-border/80 bg-card p-5">
+              <h2 className="font-heading font-semibold text-sm flex items-center gap-2.5">
+                <span className="size-2 shrink-0 rounded-full bg-warning" aria-hidden="true" />
                 ملاحظة العميل
               </h2>
               <p className="mt-2 text-sm leading-relaxed">{order.customerNote}</p>

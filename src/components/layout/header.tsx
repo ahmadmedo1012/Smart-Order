@@ -34,12 +34,12 @@ function HamburgerButton({ open, onClick }: { open: boolean; onClick: () => void
       aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
       /* Family r113-F118: shrink-0 keeps the 44px touch target intact when
          the brand link would otherwise squeeze it on 320px screens. */
-      className="lg:hidden relative size-11 shrink-0 rounded-xl border border-border/60 bg-card/40 backdrop-blur-sm flex items-center justify-center hover:bg-accent-foreground/15 hover:border-accent-foreground/30 transition-[color,background-color,border-color,transform] duration-200 active:scale-90 focus-visible:ring-2 focus-visible:ring-accent-foreground/60"
+      className="lg:hidden relative size-11 shrink-0 rounded-xl border border-border/60 bg-card/40 backdrop-blur-sm flex items-center justify-center hover:bg-accent-foreground/15 hover:border-accent-foreground/30 transition-[color,background-color,border-color,transform] duration-(--t-fast) active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-accent-foreground/60"
     >
       <span className="relative size-3.5">
-        <span className={cn("absolute inset-x-0 top-[2px] h-[2px] rounded-full bg-foreground transition-[transform,translate,scale,rotate,top,opacity,bottom] duration-300 origin-center", open && "rotate-45 top-[6px]")} />
-        <span className={cn("absolute inset-x-0 top-[6px] h-[2px] rounded-full bg-foreground transition-[transform,translate,scale,rotate,top,opacity,bottom] duration-300", open && "opacity-0")} />
-        <span className={cn("absolute inset-x-0 bottom-[2px] h-[2px] rounded-full bg-foreground transition-[transform,translate,scale,rotate,top,opacity,bottom] duration-300 origin-center", open && "-rotate-45 bottom-[6px]")} />
+        <span className={cn("absolute inset-x-0 top-[2px] h-[2px] rounded-full bg-foreground transition-[transform,translate,scale,rotate,top,opacity,bottom] duration-(--t-base) origin-center", open && "rotate-45 top-[6px]")} />
+        <span className={cn("absolute inset-x-0 top-[6px] h-[2px] rounded-full bg-foreground transition-[transform,translate,scale,rotate,top,opacity,bottom] duration-(--t-base)", open && "opacity-0")} />
+        <span className={cn("absolute inset-x-0 bottom-[2px] h-[2px] rounded-full bg-foreground transition-[transform,translate,scale,rotate,top,opacity,bottom] duration-(--t-base) origin-center", open && "-rotate-45 bottom-[6px]")} />
       </span>
     </button>
   );
@@ -118,7 +118,7 @@ function MobileMenu({ open, onClose, pathname }: { open: boolean; onClose: () =>
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-0 z-(--z-sheet) bg-background/60 backdrop-blur-sm"
             onClick={onClose}
           />
@@ -145,7 +145,7 @@ function MobileMenu({ open, onClose, pathname }: { open: boolean; onClose: () =>
               </Link>
               <button
                 onClick={onClose}
-                className="size-11 rounded-xl border border-border/40 flex items-center justify-center hover:bg-accent-foreground/15 hover:border-accent-foreground/30 transition-[background-color,border-color,transform] duration-200 active:scale-90 focus-visible:ring-2 focus-visible:ring-accent-foreground/60"
+                className="size-11 rounded-xl border border-border/40 flex items-center justify-center hover:bg-accent-foreground/15 hover:border-accent-foreground/30 transition-[background-color,border-color,transform] duration-(--t-fast) active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-accent-foreground/60"
                 aria-label="إغلاق"
               >
                 <AnimatedX className="size-4" />
@@ -169,7 +169,7 @@ function MobileMenu({ open, onClose, pathname }: { open: boolean; onClose: () =>
                       onClick={onClose}
                       aria-current={isActive ? "page" : undefined}
                       className={cn(
-                        "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-[color,background-color] duration-200 focus-visible:ring-2 focus-visible:ring-accent-foreground/60",
+                        "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-[color,background-color] duration-(--t-fast) focus-visible:ring-2 focus-visible:ring-accent-foreground/60",
                         isActive
                           ? "bg-accent-foreground/15 text-accent-foreground shadow-sm"
                           : "text-muted-foreground hover:bg-accent-foreground/10 hover:text-foreground"
@@ -244,7 +244,7 @@ export function Header({ className }: HeaderProps) {
             <Link href="/" className="flex items-center gap-2 group" aria-label="سمارت أوردر — الرئيسية">
               <Image src="/brand-icon.png" alt="الربط الذكي" width={160} height={160} className="h-9 w-auto shrink-0" priority />
               <span
-                className="text-base font-bold tracking-normal text-foreground/90 group-hover:text-accent-foreground transition-colors duration-200 max-[420px]:hidden"
+                className="text-base font-bold tracking-normal text-foreground/90 group-hover:text-accent-foreground transition-colors duration-(--t-fast) max-[420px]:hidden"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
                 Smart Order

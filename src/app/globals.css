@@ -155,11 +155,13 @@
 
   /* ── Easing — Madarek canonical curves (tokens.css §4.2):
      --ease-smooth = Madarek --ease-out, the exponential settle
-     cubic-bezier(0.16, 1, 0.3, 1) — exact. ── */
+     cubic-bezier(0.16, 1, 0.3, 1) — exact.
+     r130 (W2-1, fix 7): the invented --ease-out-quart / --ease-out-expo /
+     --ease-in-out-quart @theme tokens were REMOVED (non-canonical curves;
+     the canonical settle is --ease-out). :root below remaps those NAMES
+     onto the canonical curves for the one inline-style consumer
+     (landing hero-settle) so no reference dangles. ── */
   --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
-  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
-  --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
 
   /* ── Default transition = the ladder (r126): every bare
      `transition-*` utility (no explicit duration) rides --t-fast +
@@ -168,12 +170,20 @@
   --default-transition-duration: 160ms;
   --default-transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* ── Font weight scale (family literals) ── */
-  --font-light: 300;
-  --font-regular: 400;
-  --font-medium: 500;
-  --font-semibold: 600;
-  --font-bold: 700;
+  /* ── Font weights (r130 W2-1, fix 1) ──
+     The custom --font-light/regular/medium/semibold/bold tokens were
+     REMOVED from @theme: in Tailwind v4 the --font-* namespace is
+     FONT-FAMILY, so they shadowed the built-in weight utilities and
+     emitted broken CSS (.font-bold { font-family: 700 } — the browser
+     drops the invalid declaration) — every font-medium/semibold/bold
+     site rendered weight 400 (356 TSX sites, W1-H SO-1, empirically
+     verified on Tailwind 4.1.18; smart-menu r120 made the identical
+     removal). Tailwind's built-in --font-weight-* utilities now
+     provide .font-medium/.font-semibold/.font-bold again. The
+     canonical --fw-* NAMES live on :root (below) for hand-written
+     CSS (the base heading block consumes them); they are NOT in
+     @theme, so they can never collide with the --font-* namespace
+     again. ── */
 
   /* ── Glass map (family glass tokens → theme colors) ── */
   --color-glass-bg: var(--glass-bg);
@@ -215,6 +225,71 @@
   --hover-lift-lg: -3px;
   --motion-direction: 1; /* flips to -1 under [dir=rtl] at file end */
   --press-scale: 0.97;
+  /* ── r130 (W2-1, fix 7): canonical semantic motion layer (tokens.css
+     §4.1 :177-209) — the --motion-duration-* names so canonical-named
+     code resolves; the raw --t-* ladder above stays the implementation.
+     page 320 · reveal 360 · stat 700 · skeleton 1200 (linear loops);
+     ambient bands 1.6/2.4/3.6/6/9/22s; stagger 60ms cap 6. ── */
+  --motion-duration-micro: var(--t-micro);   /*   80ms */
+  --motion-duration-short: var(--t-fast);    /*  160ms */
+  --motion-duration-medium: var(--t-base);   /*  240ms */
+  --motion-duration-long: var(--t-slow);     /*  380ms */
+  --motion-duration-page: 320ms;
+  --motion-duration-reveal: 360ms;
+  --motion-duration-stat: 700ms;
+  --motion-duration-skeleton: 1200ms;
+  --motion-duration-ambient-pulse: 1.6s;
+  --motion-duration-ambient: 2.4s;
+  --motion-duration-ambient-slow: 3.6s;
+  --motion-duration-ambient-drift: 6s;
+  --motion-duration-ambient-cinema: 9s;
+  --motion-duration-ambient-scene: 22s;
+  --motion-stagger-step: 60ms;
+  --motion-stagger-cap: 6;
+  /* Infinite loops (spinners/shimmer) MUST be linear (tokens.css §4.2) */
+  --ease-linear: linear;
+  /* r130 (fix 7): the invented curve NAMES remap onto the canonical
+     settle/standard so the one out-of-file var() consumer
+     (landing hero-settle) resolves canonically. */
+  --ease-out-quart: var(--ease-out);
+  --ease-out-expo: var(--ease-out);
+  --ease-in-out-quart: var(--ease);
+  /* ── Font weight ladder (r130 W2-1, fix 1/6) — canonical --fw-*
+     names for hand-written CSS (see the @theme note above for why
+     they can never be spelled --font-*). Plex ships 400/500/600/700
+     only; no true 800 exists (tokens.css:1052). ── */
+  --fw-light: 300;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  /* ── Type scale (r130 W2-1, fix 6; tokens.css §2 :53-98) — the
+     canonical rungs 11/12/13/15/17/22/30 + the display clamps + the
+     metric tabular sizes. Body pins 15px/1.65 in @layer base. ── */
+  --fs-xxs: 11px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-body: 15px;
+  --fs-body-lg: 17px;
+  --fs-h3: 18px;
+  --fs-h2: 22px;
+  --fs-h1: 30px;
+  --fs-display-md: clamp(28px, 3.6vw, 40px);
+  --fs-display-lg: clamp(34px, 4.8vw, 56px);
+  --fs-display-xl: clamp(40px, 6.0vw, 72px);
+  --fs-metric-md: 22px;
+  --fs-metric-lg: 30px;
+  --fs-metric-xl: 44px;
+  --lh-snug: 1.20;
+  --lh-base: 1.65;
+  /* legacy aliases (tokens.css :83-88) */
+  --fs-base: var(--fs-body);
+  --fs-md: var(--fs-body);
+  --fs-lg: var(--fs-h3);
+  --fs-xl: var(--fs-h2);
+  --fs-2xl: var(--fs-h1);
+  --fs-3xl: var(--fs-display-md);
+  --fs-4xl: var(--fs-display-lg);
   /* ── Radius ladder, canonical --r-* names (tokens.css §1.2) — r129
      (token-matrix: SO carried only the Tailwind --radius-* spellings;
      these bridges give non-Tailwind consumers the canonical names;
@@ -222,11 +297,15 @@
   --r-xs: 6px;   --r-sm: 8px;   --r-md: 10px;  --r-lg: 12px;
   --r-xl: 16px;  --r-2xl: 20px; --r-3xl: 28px; --r-full: 9999px;
   /* ── Focus contract (Madarek tokens.css §1.10 interaction tokens):
-     the ring MUST clear 4.5:1 against the ground. Dark = strong gold
-     #C9962F (7.87:1 on the night ground). Width/offset are the
+     the ring MUST clear 4.5:1 against the ground. r130 (W2-1, fix 5):
+     dark rides var(--accent) = the luminous gold #E9B44C (10.39:1 on
+     the night ground) — the TRUE canonical dark cascade (tokens.css:228
+     `--state-focus-ring-color: var(--accent)`); the former #C9962F was
+     the strong-gold demotion (W1-F P1-9 / FLEET-1). Light steps to
+     --accent-strong #5C3416 (see .light below). Width/offset are the
      canonical 2px/2px and are consumed by the global :focus-visible
      rule in @layer base below. ── */
-  --state-focus-ring-color: #C9962F; /* Madarek --accent-strong (7.87:1) */
+  --state-focus-ring-color: #E9B44C; /* Madarek dark --accent (10.39:1) */
   --state-focus-ring-width: 2px;
   --state-focus-ring-offset: 2px;
 
@@ -277,10 +356,11 @@
   --accent-hover: #F5D48A;
   --border: #1B2444; /* Madarek hairline: neutral-200 dark */
   --input: #7A83A0; /* Madarek neutral-400: 4.86:1 vs card (1.4.11) */
-  /* r129 (fleet reconciliation, r127-A6): --ring = the strong gold
-     #C9962F, matching --state-focus-ring-color and the SL/SM fleet
-     (the former #E9B44C was the raw accent — the one fleet outlier). */
-  --ring: #C9962F;
+  /* r130 (W2-1, fix 5): --ring = the dark accent gold #E9B44C — the
+     canonical dark cascade (tokens.css resolves the ring through
+     var(--accent)); matches --state-focus-ring-color above. The r129
+     #C9962F strong-gold pin was the fleet fork (W1-H FLEET-1). */
+  --ring: #E9B44C;
 
   /* ── Accent metal ramp (dark) — Madarek gold CTA family:
      flame/saffron = --accent #E9B44C, ember = --accent-strong
@@ -421,6 +501,23 @@
 
   /* ── Image placeholder shimmer (theme-aware) ── */
   --image-shimmer: rgba(0, 0, 0, 0.30);
+
+  /* ── Interaction state (r130 W2-1, fix 4; tokens.css :226-265): the
+     ONE sanctioned input focus halo — 3px at 22% of the SOLID accent.
+     --primary IS the solid accent in this bridge (gold #E9B44C dark /
+     copper #B57438 light — never #C9962F); var() substitution is
+     per-element, so this single definition serves both themes. ── */
+  --state-input-focus-halo: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
+  --state-input-focus-border: var(--primary);
+  --state-input-error-halo: 0 0 0 3px color-mix(in srgb, var(--destructive) 22%, transparent);
+  --state-button-disabled-opacity: 0.55;
+  --state-input-disabled-opacity: 0.6;
+
+  /* ── Scrollbar (r130 W2-1, fix 8; tokens.css :809-810 dark) —
+     consumed by the global thin-scrollbar block near the end of this
+     sheet (canonical polish.css :5197-5210). ── */
+  --scrollbar-thumb: rgba(142, 151, 184, 0.20);
+  --scrollbar-thumb-hover: rgba(142, 151, 184, 0.34);
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -606,6 +703,17 @@
 
   /* ── Image placeholder shimmer — light ── */
   --image-shimmer: rgba(25, 25, 24, 0.10);
+
+  /* ── Interaction state (r130 W2-1, fix 4) — light copy of the :root
+     halo pair (per-theme declaration per this sheet's chained-token
+     convention; --primary resolves to the copper #B57438 here). ── */
+  --state-input-focus-halo: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
+  --state-input-focus-border: var(--primary);
+  --state-input-error-halo: 0 0 0 3px color-mix(in srgb, var(--destructive) 22%, transparent);
+
+  /* ── Scrollbar (r130 W2-1, fix 8; tokens.css :621-622 light) ── */
+  --scrollbar-thumb: rgba(25, 25, 24, 0.16);
+  --scrollbar-thumb-hover: rgba(25, 25, 24, 0.28);
 }
 
 /* ═════════════════════════════════════════════════════════════
@@ -652,6 +760,10 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* r130 (W2-1, fix 6): canonical body rung — 15px / 1.65
+       (--fs-body / --lh-base, Madarek base.css:30-31; SO-3). */
+    font-size: 0.9375rem;
+    line-height: 1.65;
     font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "tnum" 1;
     font-variant-numeric: lining-nums tabular-nums;
     -webkit-font-smoothing: antialiased;
@@ -661,14 +773,45 @@
   /* Headings — one family with the body (Madarek §2.1: --font-display
      = Plex Sans Arabic; weight 700 carries display). Letter-spacing
      is 0: tracking breaks Arabic cursive joins (Madarek ruling #2 —
-     the old -0.01em was Latin-tuned and clipped the script). */
+     the old -0.01em was Latin-tuned and clipped the script).
+     r130 (W2-1, fix 6): canonical base rungs — h1 rides the display-md
+     clamp(28–40px)/700/1.2, h2 22px/700, h3 17px/600, h4 15px/600,
+     h5 13px/600 (SO-2: preflight resets h1-h6 to inherit, so bare
+     headings used to silently render 400/16px; pages with explicit
+     text-* utilities still override — element selectors never beat
+     utility classes). */
   h1,
   h2,
   h3,
   h4,
   h5 {
     font-family: var(--font-heading);
+    font-weight: var(--fw-bold, 700);
     letter-spacing: 0;
+    text-wrap: balance;
+  }
+  h1 {
+    font-size: var(--fs-display-md);
+    line-height: 1.2;
+  }
+  h2 {
+    font-size: var(--fs-h2);
+    line-height: 1.2;
+  }
+  h3 {
+    font-size: var(--fs-body-lg);
+    font-weight: var(--fw-semibold, 600);
+    line-height: 1.3;
+  }
+  h4 {
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold, 600);
+    line-height: 1.4;
+  }
+  h5 {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold, 600);
+    line-height: 1.5;
   }
   /* Tabular numerals for money & stats everywhere */
   .tabular,
@@ -676,8 +819,12 @@
   .nums {
     font-variant-numeric: tabular-nums;
   }
+  /* r130 (W2-1, fix 8): canonical selection — 28% srgb wash of the
+     SOLID accent (polish.css:5192; the old 30% oklch mix drifted) +
+     explicit text color so ink stays readable over the gold. */
   ::selection {
-    background: color-mix(in oklch, var(--orange) 30%, transparent);
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
+    color: var(--foreground);
   }
   /* The ONE focus language (Madarek 001 interaction rule): a 2px/2px
      outline ring whose color clears 4.5:1 in BOTH themes. Consumes the
@@ -711,6 +858,12 @@
  * @layer base would LOSE the cascade to it (unlayered normal
  * declarations beat layered ones). Madarek's own block sits on a
  * plain unlayered :root for the same reason.
+ *
+ * r130 (W2-1, fix 7) — MotionConfig note: FRAMER-MOTION consumers
+ * (page-level <motion.*>, useSpring, W1-G) must ALSO ride this gate
+ * via a top-level <MotionConfig reducedMotion="user"> wrapper — CSS
+ * cannot zero JS-driven tweens. The provider file itself is W2-2
+ * scope; this sheet only owns the token ladder above.
  */
 @media (prefers-reduced-motion: reduce) {
   :root {
@@ -720,6 +873,13 @@
     --t-slow: 0ms;
     --t-slower: 0ms;
     --t-cinema: 0ms;
+    /* r130 (W2-1, fix 7): the semantic layer zeroes with the raw
+       ladder (canonical tokens.css :1074-1077 pattern) so canonical-
+       named consumers complete instantly too. */
+    --motion-duration-page: 0ms;
+    --motion-duration-reveal: 0ms;
+    --motion-duration-stat: 0ms;
+    --motion-duration-skeleton: 0ms;
   }
   *,
   *::before,
@@ -778,30 +938,25 @@
   z-index: var(--z-toast) !important;
 }
 
-/* Accent gradient text — Madarek gradient-text recipe (dark: gold →
-   hover-gold 10.3:1+; light: copper → copper-deep, large-text AA) */
-.text-gradient-orange {
-  background: linear-gradient(135deg, #E9B44C, #F5D48A);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.light .text-gradient-orange {
-  background: linear-gradient(135deg, #B57438, #9A5F25);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* r130 (W2-1, fix 9): .text-gradient-orange DELETED — zero consumers
+   (rg-verified) and it bypassed the token layer with raw hex
+   (#E9B44C/#F5D48A/#B57438/#9A5F25 — W1-F P3-7). Any future gradient
+   text must ride --primary/--accent-hover tokens. */
 
-/* Skeleton shimmer — family shimmer direction */
+/* Skeleton shimmer — family shimmer direction.
+   r130 (W2-1, fix 7): 1200ms LINEAR per the canonical skeleton token
+   (--motion-duration-skeleton; W1-F P2-15 — was 1.6s) — infinite
+   sweeps ride constant speed (the linear-loop doctrine, tokens.css
+   §4.2); an eased loop pulses its velocity every iteration. Stops
+   at 0/50/100 mirror the canonical gradient (polish.css:3185-3213). */
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 .skeleton-shimmer {
-  background: linear-gradient(90deg, var(--muted) 25%, color-mix(in oklch, var(--muted) 40%, var(--card)) 50%, var(--muted) 75%);
+  background: linear-gradient(90deg, var(--muted) 0%, color-mix(in oklch, var(--muted) 40%, var(--card)) 50%, var(--muted) 100%);
   background-size: 200% 100%;
-  animation: shimmer 1.6s infinite linear;
+  animation: shimmer var(--motion-duration-skeleton, 1200ms) var(--ease-linear, linear) infinite;
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -849,13 +1004,8 @@
   25% { transform: rotate(-6deg); }
   75% { transform: rotate(6deg); }
 }
-@keyframes upload-fly {
-  0% { transform: translateY(0); opacity: 1; }
-  35% { transform: translateY(-12px); opacity: 0; }
-  36% { transform: translateY(12px); opacity: 0; }
-  70% { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(0); opacity: 1; }
-}
+/* r130 (W2-1, fix 9): @keyframes upload-fly DELETED — zero consumers
+   (rg-verified) and its 1s duration had no canonical rung. */
 @keyframes orb-float {
   0%, 100% { transform: translate(0, 0) rotate(0deg); }
   25% { transform: translate(18px, -24px) rotate(2deg); }
@@ -872,13 +1022,19 @@
 @keyframes scale-glow { 0%, 100% { box-shadow: 0 0 20px rgb(233 180 76 / 0.20); } 50% { box-shadow: 0 0 50px rgb(233 180 76 / 0.40); } }
 
 /* ════════════════════════════════════════════════════════════════
-   Family animation utilities
+   Family animation utilities — r130 (W2-1, fix 7): every raw duration
+   snapped to the canonical ladder / semantic layer, and the invented
+   --ease-out-quart/-expo curves replaced by the canonical settle
+   (--ease-out, 0.16 1 0.3 1). Mapping (smart-menu r126 parity):
+   0.35s→reveal 360 · 0.4s→page 320 / 380 · 0.5s/0.55s→slower 520 ·
+   0.6s→cinema 720; ambient loops snap to the Madarek bands
+   (pulse 1.6 · ambient 2.4 · slow 3.6 · drift 6 · scene 22).
    ════════════════════════════════════════════════════════════════ */
-.animate-scale-in { animation: scale-in 0.5s var(--ease-out-quart) both; }
-.animate-fade-in { animation: fade-in 0.5s var(--ease-out-quart) both; }
-.animate-slide-up { animation: slide-up 0.6s var(--ease-out-quart) both; }
-.animate-page-enter { animation: fade-in 0.4s var(--ease-out-quart) both; }
-.animate-reveal { animation: scale-in 0.5s var(--ease-out-quart) both; }
+.animate-scale-in { animation: scale-in var(--t-slower, 520ms) var(--ease-out) both; }
+.animate-fade-in { animation: fade-in var(--t-slower, 520ms) var(--ease-out) both; }
+.animate-slide-up { animation: slide-up var(--t-cinema, 720ms) var(--ease-out) both; }
+.animate-page-enter { animation: fade-in var(--motion-duration-page, 320ms) var(--ease-out) both; }
+.animate-reveal { animation: scale-in var(--motion-duration-reveal, 360ms) var(--ease-out) both; }
 
 /* Reveal primitive — armed state (added by JS only for below-fold content;
    content without JS stays fully visible) */
@@ -887,33 +1043,38 @@
   transform: translateY(var(--reveal-y, 20px));
 }
 
-.animate-float { animation: float 3s var(--ease-smooth) infinite; }
-.animate-float-delayed { animation: float 3.5s var(--ease-smooth) infinite 1s; }
-.animate-magnetic-float { animation: magnetic-float 4s var(--ease-smooth) infinite; }
+.animate-float { animation: float var(--motion-duration-ambient, 2.4s) var(--ease-smooth) infinite; }
+.animate-float-delayed { animation: float var(--motion-duration-ambient-slow, 3.6s) var(--ease-smooth) infinite 1s; }
+/* r130 (W2-1): .animate-float-slow was referenced by hero-phone.tsx (×3)
+   since r9x but never defined — the class silently no-oped (same bug
+   class as the r128-F8 pulse-soft fix). Defined here on the drift band. */
+.animate-float-slow { animation: float-slow var(--motion-duration-ambient-drift, 6s) ease-in-out infinite; }
+.animate-magnetic-float { animation: magnetic-float var(--motion-duration-ambient-slow, 3.6s) var(--ease-smooth) infinite; }
 
-.animate-breath { animation: breath 1.5s ease-in-out infinite; }
+.animate-breath { animation: breath var(--motion-duration-ambient-pulse, 1.6s) ease-in-out infinite; }
 
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
+/* r130 (W2-1, fix 9): .delay-100..500 DELETED — zero consumers
+   (rg-verified) AND the unlayered twins collided with Tailwind's
+   `delay-*` transition-delay namespace (unlayered beats layered
+   utilities — smart-menu r126 B3 found the same collision). Stagger
+   now rides --motion-stagger-step (60ms × n). */
 
-.animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
-.animate-hero-glow-pulse { animation: hero-glow-pulse 4s var(--ease-smooth) infinite; }
-.animate-orb-float { animation: orb-float 14s ease-in-out infinite; }
-.animate-orb-float-delayed { animation: orb-float 16s ease-in-out infinite 4s; }
-.animate-orb-float-slow { animation: orb-float 20s ease-in-out infinite 8s; }
-.animate-pulse-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow var(--motion-duration-ambient, 2.4s) ease-in-out infinite; }
+.animate-hero-glow-pulse { animation: hero-glow-pulse var(--motion-duration-ambient-slow, 3.6s) var(--ease-smooth) infinite; }
+.animate-orb-float { animation: orb-float var(--motion-duration-ambient-scene, 22s) ease-in-out infinite; }
+.animate-orb-float-delayed { animation: orb-float var(--motion-duration-ambient-scene, 22s) ease-in-out infinite 4s; }
+.animate-orb-float-slow { animation: orb-float var(--motion-duration-ambient-scene, 22s) ease-in-out infinite 8s; }
+.animate-pulse-dot { animation: pulse-dot var(--motion-duration-ambient-pulse, 1.6s) ease-in-out infinite; }
 /* r128-F8 (B22): the tracking page's active-node status light — the class was
    referenced by tracking-client.tsx since r9x but never defined; rides the
    ladder ease + the global reduced-motion belt (0.01ms / 1 iteration). */
-.animate-pulse-soft { animation: pulse-soft 1.6s var(--ease-soft) infinite; }
-.animate-price-swap-in { animation: price-swap-in 0.35s var(--ease-out-quart) both; }
-.animate-wipe-up { animation: wipe-up 0.6s var(--ease-smooth) both; }
-.animate-message-draw { animation: message-draw 0.4s var(--ease-smooth) both; }
-.animate-upload-fly { animation: upload-fly 1s ease-in-out infinite; }
-.animate-ticket-drop { animation: ticket-drop 0.55s var(--ease-out-expo) both; }
+.animate-pulse-soft { animation: pulse-soft var(--motion-duration-ambient-pulse, 1.6s) var(--ease-soft) infinite; }
+.animate-price-swap-in { animation: price-swap-in var(--motion-duration-reveal, 360ms) var(--ease-out) both; }
+.animate-wipe-up { animation: wipe-up var(--t-cinema, 720ms) var(--ease-smooth) both; }
+.animate-message-draw { animation: message-draw var(--t-slow, 380ms) var(--ease-smooth) both; }
+/* r130 (W2-1, fix 9): .animate-upload-fly DELETED with its keyframes —
+   zero consumers; its 1s duration had no canonical rung. */
+.animate-ticket-drop { animation: ticket-drop var(--t-slower, 520ms) var(--ease-out) both; }
 
 /* ════════════════════════════════════════════════════════════════
    Family component classes
@@ -926,11 +1087,14 @@
   box-shadow: var(--shadow-sm);
   transform: translateZ(0);
   transition:
-    background-color var(--t-base) var(--ease-out-quart),
-    color var(--t-base) var(--ease-out-quart),
-    border-color var(--t-base) var(--ease-out-quart),
-    box-shadow var(--t-base) var(--ease-out-quart),
-    transform var(--t-base) var(--ease-out-quart);
+    /* r130 (W2-1, fix 7): --ease-out-quart (invented) → the canonical
+       settle --ease-out; the :root alias makes this a no-op value-wise,
+       but the canonical name is the contract. */
+    background-color var(--t-base) var(--ease-out),
+    color var(--t-base) var(--ease-out),
+    border-color var(--t-base) var(--ease-out),
+    box-shadow var(--t-base) var(--ease-out),
+    transform var(--t-base) var(--ease-out);
 }
 .card-premium:hover {
   transform: translateY(-3px);
@@ -956,16 +1120,19 @@
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--muted) 25%, var(--border) 50%, var(--muted) 75%);
+  /* r130 (W2-1, fix 7): 1200ms LINEAR on the canonical skeleton token
+     (was 1.8s ease-in-out — W1-F P2-15); stops 0/50/100; gradient
+     colors aligned with .skeleton-shimmer (single spelling). */
+  background: linear-gradient(90deg, var(--muted) 0%, color-mix(in oklch, var(--muted) 40%, var(--card)) 50%, var(--muted) 100%);
   background-size: 200% 100%;
   border-radius: var(--radius-sm);
-  animation: shimmer 1.8s ease-in-out infinite;
+  animation: shimmer var(--motion-duration-skeleton, 1200ms) var(--ease-linear, linear) infinite;
 }
 .shimmer {
   background: linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.06) 50%, transparent 100%);
   background-size: 200% 100%;
   border-radius: var(--radius-sm);
-  animation: shimmer 2s ease-in-out infinite;
+  animation: shimmer var(--motion-duration-skeleton, 1200ms) var(--ease-linear, linear) infinite;
 }
 .light .shimmer {
   background: linear-gradient(90deg, transparent 0%, oklch(0 0 0 / 0.04) 50%, transparent 100%);
@@ -1013,19 +1180,30 @@
 }
 .light .grain-overlay::before { opacity: 0.012; }
 
-/* Empty-state icon ring — accent-tinted (gold/copper via --orange) */
-.empty-state-icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: var(--radius-md);
-  background: color-mix(in oklab, var(--orange) 8%, transparent);
-  border: 1px solid color-mix(in oklab, var(--orange) 20%, transparent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 0.75rem;
+/* r130 (W2-1, fix 9): .empty-state-icon DELETED — zero consumers
+   (rg-verified; W1-F P1-4) and the wrong recipe (56px/r-md/orange
+   accent-tinted vs the canonical grey-family 56px/r-xl state icon,
+   which components/shared/states.tsx implements inline). */
+
+/* ── Global thin scrollbar (r130 W2-1, fix 8) — canonical port of
+   polish.css:5197-5210: thin rail + 10px webkit thumb consuming the
+   per-theme --scrollbar-thumb tokens (declared in the :root/.light
+   token blocks above); the 2px padding-box inset keeps the thumb
+   calm inside the rail. The .scrollbar-none/.no-scrollbar hiders
+   below still win (class specificity beats the universal * rule). ── */
+* { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) transparent; }
+*::-webkit-scrollbar { inline-size: 10px; block-size: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--r-full);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
-.empty-state-icon svg { width: 1.75rem; height: 1.75rem; color: var(--accent-foreground); }
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
 
 .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }

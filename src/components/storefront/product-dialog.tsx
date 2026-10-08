@@ -100,7 +100,7 @@ export function ProductDialog({
       <DialogContent
         showCloseButton={false}
         aria-label={product.name}
-        className="top-auto bottom-0 left-0 right-0 mx-auto flex max-h-[92vh] w-full translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-t-2xl border p-0 pb-0 max-w-[calc(100%-1.5rem)] sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:max-w-md sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl data-[state=open]:slide-in-from-bottom-4 data-[state=open]:zoom-in-100 sm:data-[state=open]:slide-in-from-bottom-2 sm:data-[state=open]:zoom-in-95"
+        className="top-auto bottom-0 inset-x-0 mx-auto flex max-h-[92vh] w-full translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-t-2xl border p-0 pb-0 max-w-[calc(100%-1.5rem)] sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:max-w-md sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl data-[state=open]:slide-in-from-bottom-4 data-[state=open]:zoom-in-100 sm:data-[state=open]:slide-in-from-bottom-2 sm:data-[state=open]:zoom-in-95"
       >
       {/* Product header */}
       <div className="relative h-40 shrink-0 rounded-t-2xl bg-muted sm:h-44">

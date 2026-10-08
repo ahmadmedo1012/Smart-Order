@@ -8,6 +8,9 @@ import { useBusiness } from "@/components/dashboard/shell";
 import { OrderStatusBadge } from "@/components/shared/status-badges";
 import { ErrorState } from "@/components/shared/states";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { pageTitleClass } from "@/components/dashboard/page-header";
 import { formatLyd } from "@/lib/money";
 import { formatArabicDateTime } from "@/lib/arabic";
 import { formatPhoneDisplay, toE164 } from "@/lib/phone";
@@ -94,32 +97,28 @@ export default function CustomerDetailPage() {
             {customer.name.slice(0, 2)}
           </span>
           <div>
-            <h1 className="font-heading text-2xl font-bold">{customer.name}</h1>
+            <h1 className={pageTitleClass}>{customer.name}</h1>
             <p className="text-sm text-muted-foreground tabular mt-0.5" dir="ltr">{formatPhoneDisplay(customer.phone)}</p>
             <p className="text-xs text-muted-foreground mt-1">عميل منذ {formatArabicDateTime(customer.createdAt)}</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <a
-            href={`tel:${customer.phone}`}
-            className="inline-flex items-center gap-2 rounded-lg border border-border h-10 px-4 text-sm font-medium hover:bg-muted transition-colors"
-          >
-            <Phone className="size-4" aria-hidden="true" />
-            اتصال
-          </a>
-          <a
-            href={waLink(toE164(customer.phone))}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="whatsapp-btn inline-flex items-center gap-2 rounded-lg h-10 px-4 text-sm font-semibold"
-          >
-            <MessageCircle className="size-4" aria-hidden="true" />
-            واتساب
-          </a>
+          <Button asChild variant="outline" size="sm">
+            <a href={`tel:${customer.phone}`}>
+              <Phone className="size-4" aria-hidden="true" />
+              اتصال
+            </a>
+          </Button>
+          <Button asChild variant="whatsapp" size="sm" className="whatsapp-btn">
+            <a href={waLink(toE164(customer.phone))} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="size-4" aria-hidden="true" />
+              واتساب
+            </a>
+          </Button>
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Stats — compact metric tiles (22px tabular metric slot) */}
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "الطلبات", value: String(customer.stats.orderCount) },
@@ -127,8 +126,8 @@ export default function CustomerDetailPage() {
           { label: "متوسط الطلب", value: formatLyd(customer.stats.avgOrder) },
         ].map((s) => (
           <div key={s.label} className="rounded-xl border border-border bg-card p-4 text-center">
-            <div className="text-xs text-muted-foreground">{s.label}</div>
-            <div className="mt-1.5 font-heading font-bold text-lg tabular nums">{s.value}</div>
+            <div className="text-xs font-semibold text-muted-foreground">{s.label}</div>
+            <div className="mt-1.5 font-heading text-[22px] leading-[1.1] font-bold tabular nums">{s.value}</div>
           </div>
         ))}
       </div>
@@ -157,22 +156,18 @@ export default function CustomerDetailPage() {
             <StickyNote className="size-4 text-muted-foreground" aria-hidden="true" />
             ملاحظات داخلية
           </h2>
-          <textarea
+          <Textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="ملاحظاتك عن هذا العميل (تفضيلات، تاريخ تعامل...)"
             maxLength={500}
             rows={4}
-            className="mt-3 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
+            className="mt-3"
           />
-          <button
-            onClick={saveNotes}
-            disabled={saving}
-            className="mt-2 inline-flex items-center gap-2 rounded-lg border border-border h-9 px-4 text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50"
-          >
+          <Button variant="outline" size="sm" onClick={saveNotes} disabled={saving} className="mt-2">
             <Save className="size-4" aria-hidden="true" />
             حفظ
-          </button>
+          </Button>
         </div>
       </div>
 

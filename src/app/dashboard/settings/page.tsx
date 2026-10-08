@@ -6,6 +6,10 @@ import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/shared/states";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { compressImage } from "@/lib/compress";
 import { LIBYA_CITIES } from "@/lib/constants";
 import { toast } from "sonner";
@@ -124,10 +128,10 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <div>
-        <h1 className="font-heading text-2xl font-bold">إعدادات المتجر</h1>
-        <p className="text-sm text-muted-foreground mt-1">بيانات عملك كما تظهر للعملاء</p>
-      </div>
+      <PageHeader
+        title="إعدادات المتجر"
+        subtitle="بيانات عملك كما تظهر للعملاء"
+      />
 
       {/* Store link + publish */}
       <div className="rounded-xl border border-border bg-card p-5">
@@ -164,20 +168,23 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${settings.isPublished ? "bg-success/10 text-success-ink" : "bg-muted text-muted-foreground"}`}>
-              {settings.isPublished ? "المتجر منشور ومتاح للعملاء" : "المتجر مسودة — غير منشور"}
-            </span>
-            <button
-              onClick={() => save(!settings.isPublished)}
-              disabled={saving}
-              className={`rounded-lg h-9 px-4 text-sm font-semibold transition-colors disabled:opacity-50 ${
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                 settings.isPublished
-                  ? "border border-border text-muted-foreground hover:bg-muted"
-                  : "bg-primary text-primary-foreground hover:bg-primary/90"
+                  ? "bg-(--c-mint-bg) text-(--c-mint-deep)"
+                  : "bg-(--c-grey-bg) text-(--c-grey-deep)"
               }`}
             >
+              {settings.isPublished ? "المتجر منشور ومتاح للعملاء" : "المتجر مسودة — غير منشور"}
+            </span>
+            <Button
+              variant={settings.isPublished ? "outline" : "default"}
+              size="sm"
+              onClick={() => save(!settings.isPublished)}
+              disabled={saving}
+            >
               {settings.isPublished ? "إلغاء النشر" : "نشر المتجر"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -210,15 +217,15 @@ export default function SettingsPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <label htmlFor="b-name" className="text-sm font-medium">اسم العمل *</label>
-            <input id="b-name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} maxLength={100} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
+            <Input id="b-name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} maxLength={100} />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <label htmlFor="b-desc" className="text-sm font-medium">وصف المتجر</label>
-            <textarea id="b-desc" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={2} maxLength={300} placeholder="يظهر في أعلى متجرك وفي نتائج البحث" className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
+            <Textarea id="b-desc" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={2} maxLength={300} placeholder="يظهر في أعلى متجرك وفي نتائج البحث" />
           </div>
           <div className="space-y-2">
             <label htmlFor="b-city" className="text-sm font-medium">المدينة</label>
-            <select id="b-city" value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))} className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange">
+            <select id="b-city" value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))} className="flex h-12 w-full rounded-lg border border-input bg-transparent px-4 py-3 text-base shadow-xs transition-[color,box-shadow,border-color] outline-none duration-(--t-fast) focus-visible:border-orange focus-visible:ring-2 focus-visible:ring-ring/20 md:text-sm">
               {LIBYA_CITIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
@@ -226,31 +233,27 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-2">
             <label htmlFor="b-phone" className="text-sm font-medium">هاتف العمل</label>
-            <input id="b-phone" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} inputMode="tel" dir="ltr" placeholder="0912345678" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
+            <Input id="b-phone" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} inputMode="tel" dir="ltr" placeholder="0912345678" className="text-start tabular" />
           </div>
           <div className="space-y-2">
             <label htmlFor="b-wa" className="text-sm font-medium">رقم واتساب لاستقبال الطلبات</label>
-            <input id="b-wa" value={form.whatsappNumber} onChange={(e) => setForm((f) => ({ ...f, whatsappNumber: e.target.value }))} inputMode="tel" dir="ltr" placeholder="0912345678" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
+            <Input id="b-wa" value={form.whatsappNumber} onChange={(e) => setForm((f) => ({ ...f, whatsappNumber: e.target.value }))} inputMode="tel" dir="ltr" placeholder="0912345678" className="text-start tabular" />
             <p className="text-[11px] text-muted-foreground">يظهر كزر «إرسال الطلب عبر واتساب» بعد كل طلب</p>
           </div>
           <div className="space-y-2">
             <label htmlFor="b-address" className="text-sm font-medium">عنوان الفرع</label>
-            <input id="b-address" value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} maxLength={200} placeholder="الشارع، المعلم القريب..." className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
+            <Input id="b-address" value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} maxLength={200} placeholder="الشارع، المعلم القريب..." />
           </div>
           <div className="space-y-2 sm:col-span-2">
             <label htmlFor="b-footer" className="text-sm font-medium">تذييل صفحة الطلب</label>
-            <input id="b-footer" value={form.receiptFooter} onChange={(e) => setForm((f) => ({ ...f, receiptFooter: e.target.value }))} maxLength={200} placeholder="مثال: شكراً لثقتكم — نتشرف بخدمتكم" className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
+            <Input id="b-footer" value={form.receiptFooter} onChange={(e) => setForm((f) => ({ ...f, receiptFooter: e.target.value }))} maxLength={200} placeholder="مثال: شكراً لثقتكم — نتشرف بخدمتكم" />
           </div>
         </div>
 
-        <button
-          onClick={() => save()}
-          disabled={saving}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground h-10 px-6 text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50"
-        >
+        <Button onClick={() => save()} disabled={saving}>
           {saving ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Save className="size-4" aria-hidden="true" />}
           حفظ الإعدادات
-        </button>
+        </Button>
       </div>
     </div>
   );

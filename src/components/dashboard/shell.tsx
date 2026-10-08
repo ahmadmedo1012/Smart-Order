@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { m, MotionConfig } from "motion/react";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { SkipLink } from "@/components/shared/skip-link";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,30 @@ export function DashboardShell({
     }
   }
 
+  /* Canonical Madarek nav item (layout.css:121-174): --r-sm (8px) radius,
+     30px compact height, 13px/500, hover = surface-2, active = the
+     --sidebar-* token pair (gold wash dark / neutral-150 light) + ink text
+     + 3px inline-start accent bar with pop entrance + dark-mode gold halo.
+     The dead --sidebar-* tokens are wired here through the @theme color
+     bridges (bg-sidebar, bg-sidebar-accent, …) — no globals.css edits. */
+  const navLinkClass = (active: boolean) =>
+    cn(
+      "group relative flex min-h-[30px] items-center gap-2.5 overflow-hidden rounded-sm px-3 py-1 text-[13px] font-medium transition-[color,background-color,box-shadow] duration-(--t-fast) ease-smooth outline-none",
+      active
+        ? "bg-sidebar-accent font-semibold text-sidebar-foreground dark:shadow-[0_0_18px_-4px_rgb(233_180_76/0.16),inset_0_0_0_1px_rgb(233_180_76/0.10)]"
+        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+    );
+
+  const AccentBar = () => (
+    <m.span
+      aria-hidden="true"
+      className="absolute start-[-3px] top-[calc(50%-8px)] block h-4 w-[3px] rounded-e-[2px] bg-sidebar-primary"
+      initial={{ scaleY: 0.4, opacity: 0 }}
+      animate={{ scaleY: 1, opacity: 1 }}
+      transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+    />
+  );
+
   const NavLinks = ({ onNavigate, showAdmin }: { onNavigate?: () => void; showAdmin?: boolean }) => (
     <nav aria-label="التنقل في اللوحة" className="flex flex-col gap-1 px-3">
       {NAV.map(({ href, label, icon: Icon, exact }) => {
@@ -93,21 +118,20 @@ export function DashboardShell({
             href={href}
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
-            className={cn(
-              "group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 py-2 text-sm font-medium transition-[color,background-color,box-shadow] duration-(--t-fast) focus-visible:ring-2 focus-visible:ring-orange/60 outline-none",
-              active
-                ? "bg-orange/12 text-foreground shadow-xs"
-                : "text-muted-foreground hover:bg-orange/8 hover:text-foreground"
-            )}
+            className={navLinkClass(active)}
           >
-            <Icon className={cn("size-4.5 shrink-0", active ? "text-accent-foreground" : "")} aria-hidden="true" />
+            {active && <AccentBar />}
+            <Icon
+              className={cn("size-4 shrink-0", active ? "text-sidebar-primary" : "text-muted-foreground")}
+              aria-hidden="true"
+            />
             {label}
           </Link>
         );
       })}
       {showAdmin && (
         <>
-          <div className="mt-4 px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+          <div className="mt-4 px-3 pb-1 pt-2 text-[11px] font-semibold text-muted-foreground/70">
             إدارة المنصة
           </div>
           {ADMIN_NAV.map(({ href, label, icon: Icon }) => {
@@ -118,14 +142,13 @@ export function DashboardShell({
                 href={href}
                 onClick={onNavigate}
                 aria-current={active ? "page" : undefined}
-                className={cn(
-                  "group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 py-2 text-sm font-medium transition-[color,background-color,box-shadow] duration-(--t-fast) focus-visible:ring-2 focus-visible:ring-orange/60 outline-none",
-                  active
-                    ? "bg-orange/12 text-foreground shadow-xs"
-                    : "text-muted-foreground hover:bg-orange/8 hover:text-foreground"
-                )}
+                className={navLinkClass(active)}
               >
-                <Icon className={cn("size-4.5 shrink-0", active && "text-accent-foreground")} aria-hidden="true" />
+                {active && <AccentBar />}
+                <Icon
+                  className={cn("size-4 shrink-0", active ? "text-sidebar-primary" : "text-muted-foreground")}
+                  aria-hidden="true"
+                />
                 {label}
               </Link>
             );
@@ -136,22 +159,37 @@ export function DashboardShell({
   );
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="min-h-screen bg-muted/30 flex flex-col">
       <SkipLink />
-      {/* Desktop layout: sidebar start-side (right in RTL) */}
+      {/* Desktop layout: sidebar start-side (right in RTL) — night-shell
+          rail (Madarek layout.css v3 wave B): dark paints the سماء gradient
+          (gold aurora + indigo + sky ladder) with a constellation layer;
+          light stays the flat cream --sidebar ground. */}
       <div className="flex flex-1">
-        <aside className="hidden lg:flex w-60 xl:w-64 shrink-0 flex-col border-e border-border bg-card sticky top-0 h-screen">
-          <div className="h-16 flex items-center gap-2.5 px-5 border-b border-border/60">
+        <aside
+          className={cn(
+            "hidden lg:flex w-60 xl:w-64 shrink-0 flex-col border-e border-sidebar-border bg-sidebar sticky top-0 h-screen",
+            "dark:bg-[radial-gradient(340px_200px_at_82%_-60px,rgb(233_180_76/0.06),transparent_72%),radial-gradient(280px_220px_at_-20%_108%,rgb(111_168_255/0.05),transparent_70%),linear-gradient(180deg,var(--muted)_0%,var(--background)_34%,var(--background)_100%)]"
+          )}
+        >
+          {/* Constellation dots — paint-only, dark-only, ≤0.22α (never
+              competing with labels); physical coords, direction-agnostic. */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 hidden dark:block bg-no-repeat [background-image:radial-gradient(1.8px_1.8px_at_21%_12%,rgb(242_239_230/0.22),transparent_100%),radial-gradient(1px_1px_at_68%_7%,rgb(142_151_184/0.16),transparent_100%),radial-gradient(1.5px_1.5px_at_87%_21%,rgb(242_239_230/0.15),transparent_100%),radial-gradient(1px_1px_at_42%_30%,rgb(142_151_184/0.12),transparent_100%),radial-gradient(1.8px_1.8px_at_9%_44%,rgb(233_180_76/0.18),transparent_100%),radial-gradient(1px_1px_at_76%_58%,rgb(142_151_184/0.11),transparent_100%),radial-gradient(1.5px_1.5px_at_28%_74%,rgb(242_239_230/0.14),transparent_100%),radial-gradient(1.2px_1.2px_at_58%_88%,rgb(233_180_76/0.12),transparent_100%)]"
+          />
+          <div className="h-16 flex items-center gap-2.5 px-5 border-b border-sidebar-border">
             <Image src="/brand-icon.png" alt="الربط الذكي" width={160} height={160} className="h-8 w-auto" priority />
             <div className="leading-none">
-              <div className="font-heading font-bold text-sm">سمارت أوردر</div>
+              <div className="font-heading font-bold text-sm text-sidebar-foreground">سمارت أوردر</div>
               <div className="text-[10px] text-muted-foreground mt-1">لوحة التحكم</div>
             </div>
           </div>
           <div className="py-4 overflow-y-auto flex-1">
             <NavLinks showAdmin={user.isPlatformAdmin} />
           </div>
-          <div className="p-3 border-t border-border/60">
+          <div className="p-3 border-t border-sidebar-border">
             {biz && (
               <Link
                 href={`/store/${biz.slug}`}
@@ -277,7 +315,7 @@ export function DashboardShell({
                     key={href}
                     href={href}
                     className={cn(
-                      "flex flex-col items-center justify-center gap-1 min-h-11 text-[10px] font-medium transition-colors",
+                      "flex flex-col items-center justify-center gap-1 min-h-11 text-[10px] font-medium transition-[color,transform] duration-(--t-fast) ease-smooth active:scale-[0.93]",
                       active ? "text-accent-foreground" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
@@ -291,6 +329,7 @@ export function DashboardShell({
         </div>
       </div>
     </div>
+    </MotionConfig>
   );
 }
 

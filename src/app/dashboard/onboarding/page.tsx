@@ -6,6 +6,9 @@ import * as React from "react";
 import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { formatLyd } from "@/lib/money";
 import { toast } from "sonner";
 import { Check, Loader2, Plus, Trash2, Truck, Rocket, ExternalLink, Store, Package, CreditCard } from "lucide-react";
@@ -148,37 +151,41 @@ export default function OnboardingPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
-      <div>
-        <h1 className="font-heading text-2xl font-bold">إعداد متجرك</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {published ? "متجرك منشور — يمكنك تحسين هذه الإعدادات في أي وقت" : "أكمل الخطوات التالية لنشر متجرك للعملاء"}
-        </p>
-      </div>
+      <PageHeader
+        title="إعداد متجرك"
+        subtitle={
+          published
+            ? "متجرك منشور — يمكنك تحسين هذه الإعدادات في أي وقت"
+            : "أكمل الخطوات التالية لنشر متجرك للعملاء"
+        }
+      />
 
       <Step n={1} icon={Store} title="بيانات العمل" desc="الاسم والرقم الذي يستقبل طلبات واتساب" done={!!whatsapp}>
         <div className="grid gap-3 sm:grid-cols-2">
-          <input value={bizName} onChange={(e) => setBizName(e.target.value)} placeholder="اسم العمل" aria-label="اسم العمل" className="h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
-          <input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="واتساب: 0912345678" inputMode="tel" dir="ltr" aria-label="رقم واتساب" className="h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
-          <button onClick={saveBasics} className="sm:col-span-2 justify-self-start rounded-lg border border-border h-9 px-4 text-sm font-medium hover:bg-muted transition-colors">
-            حفظ البيانات
-          </button>
+          <Input value={bizName} onChange={(e) => setBizName(e.target.value)} placeholder="اسم العمل" aria-label="اسم العمل" />
+          <Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="واتساب: 0912345678" inputMode="tel" dir="ltr" aria-label="رقم واتساب" className="text-start tabular" />
+          <div className="sm:col-span-2 justify-self-start">
+            <Button variant="outline" size="sm" onClick={saveBasics}>
+              حفظ البيانات
+            </Button>
+          </div>
         </div>
       </Step>
 
       <Step n={2} icon={Package} title="أول قسم ومنتج" desc="أضف قسماً (مثال: مشروبات) ثم منتجاً من صفحة المنتجات" done={categories.length > 0}>
         <div className="flex gap-2">
-          <input
+          <Input
             value={newCat}
             onChange={(e) => setNewCat(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addCategory()}
             placeholder="اسم القسم الجديد"
             aria-label="اسم القسم"
-            className="flex-1 h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
+            className="flex-1"
           />
-          <button onClick={addCategory} className="rounded-lg bg-primary text-primary-foreground h-10 px-4 text-sm font-semibold hover:bg-primary/90 transition-colors inline-flex items-center gap-1.5">
+          <Button onClick={addCategory} size="sm" className="shrink-0">
             <Plus className="size-4" aria-hidden="true" />
             إضافة
-          </button>
+          </Button>
         </div>
         {categories.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">
@@ -211,12 +218,12 @@ export default function OnboardingPage() {
 
       <Step n={3} icon={Truck} title="مناطق التوصيل" desc="أضف منطقة واحدة على الأقل لتفعيل خيار التوصيل (اختياري إن كان الاستلام فقط)" done={zones.length > 0}>
         <div className="flex gap-2">
-          <input value={zoneName} onChange={(e) => setZoneName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addZone()} placeholder="مثال: تاجوراء" aria-label="اسم المنطقة" className="flex-1 h-10 rounded-lg border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
-          <input value={zoneFee} onChange={(e) => setZoneFee(e.target.value)} placeholder="5" inputMode="decimal" dir="ltr" aria-label="رسوم التوصيل" className="w-24 h-10 rounded-lg border border-input bg-background px-3 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange" />
-          <button onClick={addZone} className="rounded-lg bg-primary text-primary-foreground h-10 px-4 text-sm font-semibold hover:bg-primary/90 transition-colors inline-flex items-center gap-1.5">
+          <Input value={zoneName} onChange={(e) => setZoneName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addZone()} placeholder="مثال: تاجوراء" aria-label="اسم المنطقة" className="flex-1" />
+          <Input value={zoneFee} onChange={(e) => setZoneFee(e.target.value)} placeholder="5" inputMode="decimal" dir="ltr" aria-label="رسوم التوصيل" className="w-24 text-start tabular" />
+          <Button onClick={addZone} size="sm" className="shrink-0">
             <Plus className="size-4" aria-hidden="true" />
             إضافة
-          </button>
+          </Button>
         </div>
         {zones.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">
@@ -240,24 +247,17 @@ export default function OnboardingPage() {
 
       <Step n={5} icon={Rocket} title="انشر متجرك" desc="سيصبح رابط متجرك متاحاً للعملاء" done={published}>
         {!published ? (
-          <button
-            onClick={publish}
-            disabled={publishing}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground h-11 px-6 text-sm font-bold hover:bg-primary/90 transition-colors disabled:opacity-50"
-          >
+          <Button onClick={publish} disabled={publishing} size="lg">
             {publishing ? <Loader2 className="size-5 animate-spin" aria-hidden="true" /> : <Rocket className="size-5" aria-hidden="true" />}
             نشر المتجر الآن
-          </button>
+          </Button>
         ) : (
-          <a
-            href={`/store/${slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground h-11 px-6 text-sm font-bold hover:bg-primary/90 transition-colors"
-          >
-            <ExternalLink className="size-5" aria-hidden="true" />
-            افتح متجرك المنشور
-          </a>
+          <Button asChild size="lg">
+            <a href={`/store/${slug}`} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="size-5" aria-hidden="true" />
+              افتح متجرك المنشور
+            </a>
+          </Button>
         )}
         {slug && <p className="mt-2 text-xs text-muted-foreground" dir="ltr">/store/{slug}</p>}
       </Step>

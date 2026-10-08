@@ -7,30 +7,24 @@ import {
 } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
 
-/* Text slots ride the text-safe *-ink tokens (r125 wave-A) — copper as
-   raw text on its own /15 tint measured 3.21-3.39:1 in light (AA fail);
-   --accent-foreground is the canonical text slot in both themes
-   (dark gold #E9B44C 10.39:1, light copper-deep #5C3416 ~9:1 on tints). */
-const STATUS_STYLES: Record<OrderStatus, string> = {
-  NEW: "bg-orange/15 text-accent-foreground border-orange/25",
-  CONFIRMED: "bg-info/15 text-info-ink border-info/25",
-  PREPARING: "bg-warning/15 text-warning-ink border-warning/25",
-  READY: "bg-saffron/15 text-accent-foreground border-saffron/25",
-  OUT_FOR_DELIVERY: "bg-info/15 text-info-ink border-info/25",
-  DELIVERED: "bg-success/15 text-success-ink border-success/25",
-  CANCELLED: "bg-muted text-muted-foreground border-border",
-  REJECTED: "bg-destructive/15 text-destructive-ink border-destructive/25",
-};
-
-const STATUS_DOTS: Record<OrderStatus, string> = {
-  NEW: "bg-orange",
-  CONFIRMED: "bg-info",
-  PREPARING: "bg-warning",
-  READY: "bg-saffron",
-  OUT_FOR_DELIVERY: "bg-info",
-  DELIVERED: "bg-success",
-  CANCELLED: "bg-muted-foreground",
-  REJECTED: "bg-destructive",
+/**
+ * Solid pastel status chips — canonical Madarek `.badge` status family
+ * (components.css:490-527): solid `-bg` ground + `-deep` ink (no border,
+ * no alpha wash), 11px/600, 6px currentColor dot, quiet resting shadow.
+ * Mapping (W1-F P1-3): NEW→copper, CONFIRMED/OUT→sky, PREPARING→yellow,
+ * READY→copper, DELIVERED→mint, CANCELLED→grey, REJECTED→rose,
+ * PAID→mint, REFUNDED→rose, UNPAID→grey. The 9 families are tokenized
+ * in globals (`--c-<family>-bg/-ink/-deep`) and flip with the theme.
+ */
+export const ORDER_STATUS_CHIP: Record<OrderStatus, string> = {
+  NEW: "bg-(--c-copper-bg) text-(--c-copper-deep)",
+  CONFIRMED: "bg-(--c-sky-bg) text-(--c-sky-deep)",
+  PREPARING: "bg-(--c-yellow-bg) text-(--c-yellow-deep)",
+  READY: "bg-(--c-copper-bg) text-(--c-copper-deep)",
+  OUT_FOR_DELIVERY: "bg-(--c-sky-bg) text-(--c-sky-deep)",
+  DELIVERED: "bg-(--c-mint-bg) text-(--c-mint-deep)",
+  CANCELLED: "bg-(--c-grey-bg) text-(--c-grey-deep)",
+  REJECTED: "bg-(--c-rose-bg) text-(--c-rose-deep)",
 };
 
 export function OrderStatusBadge({
@@ -44,24 +38,33 @@ export function OrderStatusBadge({
 }) {
   return (
     <Badge
-      variant="outline"
-      className={cn("gap-1.5 font-medium border", STATUS_STYLES[status], className)}
+      className={cn(
+        "h-auto gap-1.5 border-0 px-2.5 py-1 text-[11px] font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.06)] transition-transform duration-(--t-fast) ease-smooth hover:-translate-y-px",
+        ORDER_STATUS_CHIP[status],
+        className
+      )}
     >
-      {dot && <span className={cn("size-1.5 rounded-full", STATUS_DOTS[status])} />}
+      {dot && <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />}
       {ORDER_STATUS_AR[status]}
     </Badge>
   );
 }
 
-const PAYMENT_STYLES: Record<PaymentStatus, string> = {
-  UNPAID: "bg-muted text-muted-foreground border-border",
-  PAID: "bg-success/15 text-success-ink border-success/25",
-  REFUNDED: "bg-destructive/15 text-destructive-ink border-destructive/25",
+const PAYMENT_CHIP: Record<PaymentStatus, string> = {
+  UNPAID: "bg-(--c-grey-bg) text-(--c-grey-deep)",
+  PAID: "bg-(--c-mint-bg) text-(--c-mint-deep)",
+  REFUNDED: "bg-(--c-rose-bg) text-(--c-rose-deep)",
 };
 
 export function PaymentStatusBadge({ status, className }: { status: PaymentStatus; className?: string }) {
   return (
-    <Badge variant="outline" className={cn("font-medium", PAYMENT_STYLES[status], className)}>
+    <Badge
+      className={cn(
+        "h-auto border-0 px-2.5 py-1 text-[11px] font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.06)] transition-transform duration-(--t-fast) ease-smooth hover:-translate-y-px",
+        PAYMENT_CHIP[status],
+        className
+      )}
+    >
       {PAYMENT_STATUS_AR[status]}
     </Badge>
   );

@@ -315,10 +315,13 @@ pinAll(light, 'elev-light', ELEV_LIGHT);
 // contract (rubric §B23) requires ≥4.5:1 in BOTH themes. The 2px/2px ring
 // rides --state-focus-ring-* tokens, mirrored by the shadcn --ring bridge.
 const FOCUS_DARK = {
-  // r129: #C9962F — the fleet reconciliation (r127-A6): SL/SM paint the
-  // strong gold; the former raw-accent #E9B44C was the one fleet outlier.
-  '--ring': '#C9962F',
-  '--state-focus-ring-color': '#C9962F', // Madarek dark --accent-strong (7.87:1)
+  // r130 (W2-1, fix 5): #E9B44C — the TRUE canonical dark cascade
+  // (tokens.css:228 resolves --state-focus-ring-color through
+  // var(--accent) = the luminous gold, 10.39:1). The r129 #C9962F
+  // strong-gold pin was the fleet fork (W1-H FLEET-1 / W1-F P1-9) —
+  // demoted the ring one shade darker than madarek's night UI.
+  '--ring': '#E9B44C',
+  '--state-focus-ring-color': '#E9B44C', // Madarek dark --accent (10.39:1)
   '--state-focus-ring-width': '2px',
   '--state-focus-ring-offset': '2px',
 };
@@ -379,10 +382,10 @@ const CONSUMPTION = [
   ['dropdown-menu consumes the z ladder + elevation bridge (z-(--z-dropdown) + rounded-md + shadow-md)',
     rawDropdown.includes('z-(--z-dropdown)') && rawDropdown.includes('rounded-md') &&
     rawDropdown.includes('shadow-md')],
-  ['input consumes the motion ladder + the token-based focus halo (duration-(--t-fast) + ring-ring/20 + accent color-mix halo)',
+  ['input consumes the motion ladder + the token-based focus halo (duration-(--t-fast) + --state-input-focus-halo + accent border)',
     rawInput.includes('duration-(--t-fast)') &&
-    rawInput.includes('focus-visible:ring-ring/20') &&
-    rawInput.includes('focus-visible:shadow-[0_0_0_3px_color-mix(in_srgb,var(--primary)_22%,transparent)]')],
+    rawInput.includes('focus-visible:shadow-(--state-input-focus-halo)') &&
+    rawInput.includes('focus-visible:border-primary')],
 ];
 for (const [name, okFlag] of CONSUMPTION) {
   if (okFlag) passed += 1;

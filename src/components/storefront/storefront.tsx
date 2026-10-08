@@ -20,6 +20,7 @@ import { normalizeArabic } from "@/lib/arabic";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { pillClasses } from "@/components/dashboard/filter-pills";
 import {
   Search,
   ShoppingBag,
@@ -203,9 +204,7 @@ export function Storefront({
                   role="tab"
                   aria-selected={activeCategory === "ALL"}
                   onClick={() => setActiveCategory("ALL")}
-                  className={`shrink-0 rounded-full h-10 px-4 text-xs font-semibold transition-colors ${
-                    activeCategory === "ALL" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
+                  className={pillClasses(activeCategory === "ALL", "h-10 shrink-0 px-4")}
                 >
                   الكل
                 </button>
@@ -215,9 +214,7 @@ export function Storefront({
                     role="tab"
                     aria-selected={activeCategory === c.id}
                     onClick={() => setActiveCategory(c.id)}
-                    className={`shrink-0 rounded-full h-10 px-4 text-xs font-semibold transition-colors ${
-                      activeCategory === c.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
-                    }`}
+                    className={pillClasses(activeCategory === c.id, "h-10 shrink-0 px-4")}
                   >
                     {c.name}
                   </button>

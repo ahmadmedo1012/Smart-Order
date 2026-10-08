@@ -149,7 +149,7 @@ function RegisterWizard() {
           <div className="flex h-10 w-10 items-center justify-center">
             <Image src="/brand-icon.png" alt="الربط الذكي" width={160} height={160} className="h-full w-full object-contain" priority />
           </div>
-          <h1 className="mt-4 font-heading text-2xl font-bold sm:text-3xl">
+          <h1 className="mt-4 font-heading text-[clamp(1.75rem,3.6vw,2.5rem)] leading-[1.2] font-bold">
             {step === "plan" ? "أنشئ متجرك" : "بيانات الحساب"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -197,7 +197,7 @@ function RegisterWizard() {
           <div className="w-full max-w-lg">
             {/* Selected plan chip (family summary) */}
             {selectedPlan && (
-              <div className="mb-5 flex items-center justify-between rounded-xl border border-orange/15 bg-orange/10 p-4">
+              <div className="mb-5 flex items-center justify-between rounded-xl border border-border bg-(--c-copper-bg) p-4">
                 <div className="flex items-center gap-3">
                   <span className="flex size-10 items-center justify-center rounded-xl bg-accent-foreground/10 text-accent-foreground">
                     {selectedPlan.name === "Free" ? (
@@ -227,7 +227,7 @@ function RegisterWizard() {
               </div>
             )}
 
-            <div className="animate-scale-in rounded-2xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
+            <div className="animate-scale-in rounded-xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
               <form onSubmit={onSubmit} className="space-y-4" noValidate>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2 sm:col-span-2">

@@ -40,11 +40,12 @@ export function PlanUsageBadge({
 
   if (!plan) {
     // No plan yet — the family "بدون خطة" state with an upgrade nudge
+    // (solid pastel copper chip — the canonical badge grammar)
     return (
       <a
         href="/pricing"
         className={cn(
-          "inline-flex items-center gap-2 rounded-full border border-accent-foreground/25 bg-accent-soft px-3 py-1 text-xs font-medium text-accent-foreground transition-colors hover:bg-accent-foreground/10",
+          "inline-flex items-center gap-2 rounded-full bg-(--c-copper-bg) px-3 py-1 text-xs font-semibold text-(--c-copper-deep) transition-[color,background-color,transform] duration-(--t-fast) hover:-translate-y-px",
           className
         )}
       >
@@ -60,10 +61,10 @@ export function PlanUsageBadge({
     <div className={cn("flex flex-wrap items-center gap-2.5", className)}>
       <span
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold",
+          "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
           isFree
-            ? "border border-border/50 bg-muted text-muted-foreground"
-            : "border border-accent-foreground/25 bg-accent-soft text-accent-foreground"
+            ? "bg-(--c-grey-bg) text-(--c-grey-deep)"
+            : "bg-(--c-copper-bg) text-(--c-copper-deep)"
         )}
       >
         <Sparkles className="size-3.5" aria-hidden="true" />
@@ -92,7 +93,7 @@ function UsageBar({ label, pct }: { label: string; pct: number }) {
       <span className="relative h-1.5 w-16 overflow-hidden rounded-full bg-muted">
         <span
           className={cn(
-            "absolute inset-y-0 start-0 rounded-full transition-[width] duration-500",
+            "absolute inset-y-0 start-0 rounded-full transition-[width] duration-(--t-slower) ease-smooth",
             warn ? "bg-warning" : "bg-primary"
           )}
           style={{ width: `${pct}%` }}

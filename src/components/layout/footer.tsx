@@ -33,7 +33,7 @@ export function Footer({ className }: FooterProps) {
       initial={reduceMotion ? false : { opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      transition={{ duration: 0.52, ease: [0.16, 1, 0.3, 1] }}
       className={cn("border-t border-border/40 bg-card/30 pt-12 sm:pt-16", className)}
     >
       <div className="max-w-[1220px] mx-auto px-4 sm:px-6">
@@ -50,7 +50,7 @@ export function Footer({ className }: FooterProps) {
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex size-11 items-center justify-center rounded-xl border border-border/60 bg-card transition-[color,background-color,border-color,box-shadow] duration-200 hover:border-accent-foreground/40 hover:bg-accent-foreground/10 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-accent-foreground/60"
+                className="flex size-11 items-center justify-center rounded-xl border border-border/60 bg-card transition-[color,background-color,border-color,box-shadow] duration-(--t-fast) hover:border-accent-foreground/40 hover:bg-accent-foreground/10 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-accent-foreground/60"
                 aria-label="واتساب"
               >
                 <AnimatedMessageCircle className="size-4" />

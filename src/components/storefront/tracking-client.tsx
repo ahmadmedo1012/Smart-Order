@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { SkipLink } from "@/components/shared/skip-link";
+import { ORDER_STATUS_CHIP } from "@/components/shared/status-badges";
 import {
   ClipboardList,
   Check,
@@ -95,21 +96,32 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
 
       <main id="main" className="mx-auto max-w-lg px-4 py-6 space-y-4">
         {/* Order header */}
-        <div className="rounded-2xl border border-border bg-card p-5 text-center">
+        <div className="rounded-xl border border-border bg-card p-5 text-center">
           {/* r128-F8 (B22): mono numerals — order number + receipt figures ride
               the mixed-script mono stack (Latin/digits mono, Arabic sans) */}
           <h1 className="font-heading text-xl font-bold tabular font-mono">{order.orderNumber}</h1>
           <p className="mt-1 text-xs text-muted-foreground">{formatArabicDateTime(order.createdAt)}</p>
           {isCancelled ? (
-            <div className="mt-4 rounded-xl bg-destructive/10 border border-destructive/25 px-4 py-3">
-              <div className="font-bold text-destructive-ink">
-                {status === "REJECTED" ? "لم يتم قبول الطلب" : "تم إلغاء الطلب"}
+            <div className="mt-4 flex items-start gap-3 rounded-xl border border-border bg-card px-4 py-3 text-start">
+              <span className="mt-1.5 size-2 shrink-0 rounded-full bg-destructive" aria-hidden="true" />
+              <div>
+                <div className="font-bold text-destructive-ink">
+                  {status === "REJECTED" ? "لم يتم قبول الطلب" : "تم إلغاء الطلب"}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">تواصل مع المتجر لمعرفة المزيد</p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">تواصل مع المتجر لمعرفة المزيد</p>
             </div>
           ) : (
             <div className="mt-3">
-              <span className="rounded-full bg-primary/10 text-accent-foreground px-4 py-1.5 text-sm font-bold">
+              {/* Solid pastel status chip — the canonical badge family
+                  (W1-F P2-16): -bg ground + -deep ink, no alpha wash. */}
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.06)]",
+                  ORDER_STATUS_CHIP[status]
+                )}
+              >
+                <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
                 {ORDER_STATUS_AR[status]}
               </span>
             </div>
@@ -122,7 +134,7 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
 
         {/* Progress flow */}
         {!isCancelled && (
-          <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="rounded-xl border border-border bg-card p-5">
             <h2 className="font-semibold text-sm mb-4">مسار الطلب</h2>
             <ol className="space-y-1">
               {flow.map((s, i) => {
@@ -170,7 +182,7 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
         )}
 
         {/* Items */}
-        <div className="rounded-2xl border border-border bg-card p-5">
+        <div className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-semibold text-sm mb-3">تفاصيل الطلب</h2>
           <ul className="space-y-2.5">
             {order.items.map((item, i) => (

@@ -1,11 +1,14 @@
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
-import { TriangleAlert } from "lucide-react";
+import { TriangleAlert, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 /**
- * EmptyState — family pattern: flame-tinted icon ring (orange/20 border,
- * orange/8 wash), centered Arabic copy, optional CTA. RTL-first by
- * construction (centered text, no physical margins).
+ * Canonical state family (Madarek components.css:1314-1342 / §3.13):
+ * centered column, 56px r-xl icon tile (grey family for empty, rose
+ * family for error), title 18px/600, description 13px max 42ch, and an
+ * always-actionable CTA — empty states must offer the next step.
  */
 export function EmptyState({
   icon: Icon,
@@ -17,20 +20,20 @@ export function EmptyState({
   icon: LucideIcon;
   title: string;
   description?: string;
-  action?: React.ReactNode;
+  action?: ReactNode;
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center gap-2 px-4 py-12 text-center", className)}>
+    <div className={cn("flex flex-col items-center justify-center gap-2 px-6 py-12 text-center", className)}>
       <span
-        className="flex size-16 items-center justify-center rounded-2xl border border-orange/20 bg-orange/8 text-accent-foreground shadow-sm"
+        className="flex size-14 items-center justify-center rounded-xl bg-(--c-grey-bg) text-(--c-grey-deep)"
         aria-hidden="true"
       >
-        <Icon className="size-7" />
+        <Icon className="size-4" aria-hidden="true" />
       </span>
-      <p className="mt-1 text-sm font-bold text-foreground">{title}</p>
+      <p className="mt-1 text-lg font-semibold text-foreground">{title}</p>
       {description && (
-        <p className="max-w-xs text-xs leading-relaxed text-muted-foreground">{description}</p>
+        <p className="max-w-[42ch] text-[13px] leading-relaxed text-muted-foreground">{description}</p>
       )}
       {action && <div className="mt-3">{action}</div>}
     </div>
@@ -49,22 +52,20 @@ export function ErrorState({
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center gap-2 px-4 py-12 text-center", className)}>
+    <div className={cn("flex flex-col items-center justify-center gap-2 px-6 py-12 text-center", className)}>
       <span
-        className="flex size-16 items-center justify-center rounded-2xl border border-destructive/20 bg-destructive/10 text-destructive-ink shadow-sm"
+        className="flex size-14 items-center justify-center rounded-xl bg-destructive-soft text-destructive-ink"
         aria-hidden="true"
       >
-        <TriangleAlert className="size-7" aria-hidden="true" />
+        <TriangleAlert className="size-4" aria-hidden="true" />
       </span>
-      <p className="mt-1 text-sm font-bold text-foreground">{title}</p>
-      <p className="max-w-xs text-xs leading-relaxed text-muted-foreground">{description}</p>
+      <p className="mt-1 text-lg font-semibold text-foreground">{title}</p>
+      <p className="max-w-[42ch] text-[13px] leading-relaxed text-muted-foreground">{description}</p>
       {retry && (
-        <button
-          onClick={retry}
-          className="mt-3 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium transition-colors hover:border-orange/40 hover:bg-foreground/5"
-        >
+        <Button variant="outline" size="sm" className="mt-3" onClick={retry}>
+          <RotateCcw className="size-3.5" aria-hidden="true" />
           إعادة المحاولة
-        </button>
+        </Button>
       )}
     </div>
   );

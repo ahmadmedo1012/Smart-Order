@@ -6,23 +6,37 @@ import { Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 /*
- * Smart ecosystem premium button — family language from Smart Menu/SmartBot:
- * h-12 default (48px touch target), font-bold, rounded-lg (18px token),
- * flame-orange default with soft glow + shine sweep hover + scale-press.
- * Signature "flame" variant: ember→saffron→ember gradient with espresso text.
- * Pure-CSS effects (no JS handlers) so it stays Server-Component-safe.
+ * r130 (W2-1, fix 3) — re-based on the canonical Madarek .btn recipe
+ * (components.css:258-415; W1-I §3.1; W1-F P0-3):
+ *   · height 40px default (h-10) · label 13px / weight 600 · radius
+ *     10px (rounded-md = --radius-md) · padding-inline 20px (px-5).
+ *   · hover (filled CTAs) = translateY(-2px) + the NEUTRAL premium
+ *     card shadow (hover:shadow-(--shadow-card-h), theme-aware) —
+ *     no colored glow on any variant; the radial ::after glow layer
+ *     is removed everywhere.
+ *   · sheen sweep (::before, 105° gradient, --t-cinema) on the
+ *     PRIMARY CTA family ONLY (default + flame — Madarek sheens
+ *     .primary/.accent); quiet variants stay flat.
+ *   · press = scale(0.97) @ --t-micro (80ms); disabled opacity .55.
+ *   · sizes: sm 32px/h-8/12px · default 40px/h-10/13px ·
+ *     lg 44px/h-11/14px · icon 40px · icon-sm 32px.
+ *   · focus = the ONE global :focus-visible outline ring
+ *     (globals.css, token-driven); the old double ring-offset
+ *     indicator is gone (W1-F P2-11).
+ * API unchanged (same variant/size keys) so page consumers don't
+ * break; Pure-CSS effects keep it Server-Component-safe.
  */
 const buttonVariants = cva(
-  "group/btn relative inline-flex min-h-11 min-w-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-transparent font-sans text-sm font-bold whitespace-nowrap outline-none select-none transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-(--t-fast) ease-smooth focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97] active:duration-(--t-micro) disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 isolate before:pointer-events-none before:absolute before:inset-0 before:-translate-x-full before:rounded-[inherit] before:bg-[linear-gradient(105deg,transparent_30%,oklch(1_0_0/0.22)_50%,transparent_70%)] before:transition-transform before:duration-(--t-cinema) before:ease-out hover:before:translate-x-full after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:bg-[radial-gradient(circle_at_50%_50%,oklch(1_0_0/0.16),transparent_45%)] after:opacity-0 after:transition-opacity after:duration-(--t-slower) hover:after:opacity-100 [&>*]:relative",
+  "group/btn relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-md border border-transparent font-sans text-[13px] font-semibold whitespace-nowrap select-none outline-none transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-(--t-fast) ease-smooth isolate active:scale-[0.97] active:duration-(--t-micro) disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-[0.55] aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&>*]:relative",
   {
     variants: {
       variant: {
         default:
-          "bg-orange text-orange-foreground shadow-md shadow-orange/25 hover:bg-orange/95 hover:shadow-xl hover:shadow-orange/40",
+          "bg-orange text-orange-foreground shadow-sm hover:-translate-y-[2px] hover:shadow-(--shadow-card-h) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-[linear-gradient(105deg,transparent_30%,oklch(1_0_0/0.22)_50%,transparent_70%)] before:-translate-x-full before:transition-transform before:duration-(--t-cinema) before:ease-out hover:before:translate-x-full",
         flame:
-          "bg-[linear-gradient(135deg,var(--c-ember),var(--c-saffron)_50%,var(--c-ember))] text-espresso shadow-md shadow-orange/30 hover:brightness-110 hover:shadow-2xl hover:shadow-orange/45",
+          "bg-[linear-gradient(135deg,var(--c-ember),var(--c-saffron)_50%,var(--c-ember))] text-espresso shadow-sm hover:-translate-y-[2px] hover:brightness-110 hover:shadow-(--shadow-card-h) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-[linear-gradient(105deg,transparent_30%,oklch(1_0_0/0.22)_50%,transparent_70%)] before:-translate-x-full before:transition-transform before:duration-(--t-cinema) before:ease-out hover:before:translate-x-full",
         outline:
-          "border-border/70 bg-transparent text-foreground hover:border-orange/40 hover:bg-foreground/5 hover:shadow-sm dark:hover:bg-foreground/10 dark:hover:border-orange/35",
+          "border-border/70 bg-transparent text-foreground hover:border-foreground/25 hover:bg-foreground/5 dark:hover:bg-foreground/10",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
@@ -30,16 +44,16 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive-ink hover:bg-destructive/20 dark:bg-destructive/15 dark:hover:bg-destructive/25",
         whatsapp:
-          "bg-whatsapp text-(--whatsapp-foreground) shadow-md shadow-whatsapp/25 hover:bg-whatsapp-deep hover:shadow-lg hover:shadow-whatsapp/40",
+          "bg-whatsapp text-(--whatsapp-foreground) shadow-sm hover:-translate-y-[2px] hover:shadow-(--shadow-card-h)",
         link:
           "bg-transparent text-accent-foreground underline-offset-4 hover:underline active:scale-100",
       },
       size: {
-        sm: "h-10 gap-1.5 px-3.5 py-2.5 text-xs",
-        default: "h-12 gap-2 px-5 py-2.5 text-sm",
-        lg: "h-14 gap-2.5 px-7 py-3.5 text-sm sm:text-base",
-        icon: "size-12",
-        "icon-sm": "size-10",
+        sm: "h-8 gap-1.5 px-3 text-xs",
+        default: "h-10 px-5",
+        lg: "h-11 gap-2.5 px-6 text-sm",
+        icon: "size-10",
+        "icon-sm": "size-8",
       },
     },
     defaultVariants: {

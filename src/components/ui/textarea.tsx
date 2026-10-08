@@ -2,12 +2,21 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/*
+ * r130 (W2-1, fix 4) — rides the same canonical input recipe as
+ * Input (44px family): radius 10 (rounded-md), 16px font floor,
+ * min-height 96px, block padding 12px, line-height 1.65, focus =
+ * accent border + the 3px halo (--state-input-focus-halo), error =
+ * destructive border + halo. Logical padding only.
+ */
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (
     <textarea
       data-slot="textarea"
       className={cn(
-        "border-input placeholder:text-placeholder-text focus-visible:border-orange focus-visible:ring-ring/20 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-24 w-full rounded-lg border bg-transparent px-4 py-3 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        "border-input placeholder:text-placeholder-text flex field-sizing-content min-h-24 w-full rounded-md border bg-transparent px-4 py-3 text-base leading-[1.65] transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none disabled:cursor-not-allowed disabled:opacity-60",
+        "focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)",
+        "aria-invalid:border-destructive aria-invalid:shadow-(--state-input-error-halo)",
         className
       )}
       {...props}

@@ -5,11 +5,16 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 /*
- * Smart ecosystem badge — pill (rounded-full) with soft-tint family variants
- * (gold/success/saffron use 15% wash + solid status text, like Smart Menu).
+ * Smart ecosystem badge — pill (rounded-full).
+ * r130 (W2-1): type snapped to the canonical badge role — 11px/600
+ * (W1-I §3.6: `.badge` 11px/600 tabular) and the transition duration
+ * rides the ladder --t-fast (was a raw duration-200; W1-F P1-12).
+ * The solid-pastel status mapping (bg = family -bg, text = family
+ * -deep, no border) is flagged W1-F P1-3 and lands with the
+ * status-badges.tsx sweep (W2-2 scope).
  */
 const badgeVariants = cva(
-  "inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-[color,background-color,border-color,box-shadow] duration-200 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3",
+  "inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-[11px] font-semibold tabular-nums whitespace-nowrap transition-[color,background-color,border-color,box-shadow] duration-(--t-fast) focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3",
   {
     variants: {
       variant: {

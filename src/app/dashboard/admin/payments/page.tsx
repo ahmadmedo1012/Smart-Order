@@ -6,10 +6,11 @@ import { api, ApiError } from "@/lib/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState, ErrorState } from "@/components/shared/states";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { FilterPills } from "@/components/dashboard/filter-pills";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { timeAgoAr } from "@/lib/arabic";
-import { CheckCircle2, XCircle, Smartphone, Landmark, Loader2, Receipt } from "lucide-react";
+import { CheckCircle2, XCircle, Smartphone, Landmark, Loader2, Receipt, RotateCcw } from "lucide-react";
 
 interface Payment {
   id: string;
@@ -86,28 +87,24 @@ export default function AdminPaymentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl font-bold">موافقات الاشتراكات</h1>
-        <p className="mt-1 text-sm text-muted-foreground">طلبات الدفع بانتظار التحقق — بالتحويل المؤكد فقط</p>
-      </div>
+      <PageHeader
+        title="موافقات الاشتراكات"
+        subtitle="طلبات الدفع بانتظار التحقق — بالتحويل المؤكد فقط"
+      />
 
-      {/* Status tabs — family pill switch */}
-      <div className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/60 p-1 backdrop-blur">
-        {(["PENDING", "APPROVED", "REJECTED"] as const).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => setTab(t)}
-            aria-pressed={tab === t}
-            className={cn(
-              "rounded-full px-4 py-2 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/60 sm:text-sm",
-              tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-            )}
-          >
-            {t === "PENDING" ? "بانتظار المراجعة" : t === "APPROVED" ? "مقبولة" : "مرفوضة"}
-          </button>
-        ))}
-      </div>
+      {/* Status filter — canonical pill family (surface + hairline,
+          .on = ink slab / gold + 4px accent halo; replaces the segmented
+          pill-switch grammar). */}
+      <FilterPills
+        label="فلترة حالة الطلب"
+        value={tab}
+        onChange={(t) => setTab(t as typeof tab)}
+        items={[
+          { value: "PENDING", label: "بانتظار المراجعة" },
+          { value: "APPROVED", label: "مقبولة" },
+          { value: "REJECTED", label: "مرفوضة" },
+        ]}
+      />
 
       {!payments ? (
         <div className="space-y-3">
@@ -120,11 +117,17 @@ export default function AdminPaymentsPage() {
           icon={Receipt}
           title={tab === "PENDING" ? "لا طلبات بانتظار المراجعة" : "لا نتائج في هذه الحالة"}
           description={tab === "PENDING" ? "ستظهر طلبات دفع الاشتراك هنا فور وصولها" : ""}
+          action={
+            <Button variant="outline" size="sm" onClick={load}>
+              <RotateCcw className="size-3.5" aria-hidden="true" />
+              تحديث
+            </Button>
+          }
         />
       ) : (
         <div className="space-y-3">
           {payments.map((p) => (
-            <div key={p.id} className="card-premium rounded-2xl p-5">
+            <div key={p.id} className="card-premium rounded-xl p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">

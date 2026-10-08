@@ -6,6 +6,9 @@ import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { EmptyState, ErrorState } from "@/components/shared/states";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/dashboard/page-header";
 import { ProductEditor } from "@/components/dashboard/product-editor";
 import { formatLyd } from "@/lib/money";
 import { toast } from "sonner";
@@ -101,30 +104,29 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="font-heading text-2xl font-bold">المنتجات</h1>
-          <p className="text-sm text-muted-foreground mt-1 tabular">
+      <PageHeader
+        title="المنتجات"
+        subtitle={
+          <span className="tabular nums">
             {products?.length ?? "…"} منتج · {categories.length} قسم
-          </p>
-        </div>
-        <button
-          onClick={() => setEditing("new")}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground h-10 px-4 text-sm font-semibold hover:bg-primary/90 transition-colors"
-        >
-          <Plus className="size-4.5" aria-hidden="true" />
-          منتج جديد
-        </button>
-      </div>
+          </span>
+        }
+        actions={
+          <Button onClick={() => setEditing("new")}>
+            <Plus className="size-4.5" aria-hidden="true" />
+            منتج جديد
+          </Button>
+        }
+      />
 
       <div className="relative max-w-72">
         <Search className="absolute start-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" aria-hidden="true" />
-        <input
+        <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="ابحث عن منتج..."
           aria-label="بحث في المنتجات"
-          className="w-full h-10 rounded-lg border border-input bg-card ps-9 pe-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
+          className="ps-9 bg-card"
         />
       </div>
 
@@ -141,13 +143,10 @@ export default function ProductsPage() {
           description={q ? "جرّب كلمة بحث مختلفة" : "أضف أول منتج ليظهر في متجرك — صورة، سعر، وقسم"}
           action={
             !q && (
-              <button
-                onClick={() => setEditing("new")}
-                className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground h-10 px-5 text-sm font-semibold"
-              >
+              <Button onClick={() => setEditing("new")} variant="outline">
                 <Plus className="size-4.5" aria-hidden="true" />
                 أضف منتجك الأول
-              </button>
+              </Button>
             )
           }
         />
@@ -156,7 +155,7 @@ export default function ProductsPage() {
           {filtered.map((p) => (
             <article
               key={p.id}
-              className="group rounded-xl border border-border bg-card overflow-hidden hover:shadow-lg hover:shadow-black/5 transition-shadow"
+              className="group rounded-xl border border-border bg-card overflow-hidden transition-[border-color,box-shadow,transform] duration-(--t-base) hover:-translate-y-px hover:border-foreground/25 hover:shadow-md"
             >
               <div className="relative h-32 bg-muted overflow-hidden">
                 {p.imageUrl ? (
