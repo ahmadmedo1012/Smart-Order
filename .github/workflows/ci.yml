@@ -1,0 +1,76 @@
+name: CI
+
+# r127 (F7): Smart-Order كان المستودع الوحيد في العائلة بلا CI —
+# 197 parity pin + lint + build تصبح ذاتية التحقق مع كل دفعة/PR إلى main.
+# البنية مرآة smart-link/.github/workflows/ci.yml مع فرقين مقصودين:
+#   1) لا Playwright — الـ e2e (tests/e2e/api-e2e.js) يحتاج خادماً حياً
+#      بقاعدة بيانات حقيقية؛ جودة التوكنات محمية هنا بواسطة test:parity.
+#   2) التثبيت عبر bun وليس `npm ci` — قفل المستودع هو bun.lock
+#      (package-lock.json مُجهَّل عمداً في .gitignore)، ولإثبات ذلك
+#      تجربة حية: `npm install` يجرّ eslint-config-next@16.4.0
+#      (eslint-plugin-react-hooks 7.1.1) فيولّد 26 خطأً من قواعد
+#      React-Compiler الجديدة، بينما القفل يثبّت 16.1.3/7.0.1 ونظيف.
+#      وإضافة package-lock.json كانت ستقلب كشف مدير الحزم على Vercel
+#      (ترتيب الكواشف في vercel CLI: npm ← pnpm ← bun ← yarn) وتحوّل
+#      تثبيت الإنتاج من bun إلى npm — سلسلة النشر التي شُفيت في
+#      fdd57ff لا تُقامر بها. bun --frozen-lockfile = نفس ما يثبّته
+#      الإنتاج، بالضبط.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# least privilege — الوظيفة قراءة وتشغيل اختبارات فقط
+permissions:
+  contents: read
+
+# push متتابع يلغي التشغيل القديم المتقادم
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: lint + parity + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Node 22 (وقت تشغيل أدوات البناء)
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      # bun 1.3.14 = الإصدار الذي اجتازت البوابات الثلاث عليه محلياً
+      # (r127-F7)؛ أي رفع لهذا الرقم يستوجب إعادة تشغيل البوابات.
+      # setup-bun يخزّن كاش bun مؤمّناً على بصمة bun.lock تلقائياً.
+      - name: Bun 1.3.14
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      # --frozen-lockfile: تثبيت حرفي من bun.lock (نفس ما يثبّته Vercel)
+      - name: Install dependencies (frozen)
+        run: bun install --frozen-lockfile
+
+      - name: Lint (ESLint صفر أخطاء)
+        run: npm run lint
+
+      # r126/r127: Madarek parity — 197 pins: القيم القانونية (ألوان/
+      # أنصاف أقواس/حركة/z/ارتفاعات) + بوابات الاستهلاك + أسلاك العائلات
+      # + حبر واتساب؛ أي انحراف يفشل الدفعة قبل البناء أصلاً.
+      - name: Madarek parity snapshot
+        run: npm run test:parity
+
+      # توليد عميل Prisma (مخطط SQLite التطويري — التوليد لا يحتاج
+      # قاعدة بيانات؛ يطابق سلسلة vercel.json: generate قبل build)
+      - name: Prisma generate
+        run: npx prisma generate
+
+      # البناء لا يحتاج قاعدة بيانات إطلاقاً — كل مسارات DB هي
+      # force-dynamic ومحمية بـ try/catch (DEPLOYMENT.md §2)
+      - name: Build (يضم tsc صارماً)
+        run: npm run build

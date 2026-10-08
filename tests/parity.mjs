@@ -63,6 +63,12 @@
  * (madarek/frontend/src/styles/tokens.css) at authoring time; the
  * P4-W3c chains are additionally pinned RAW (see FAMILY_WIRING below)
  * so the single-source shape itself is under test, not just values.
+ *
+ * r127 (F7): whatsapp-ink — the last raw-hex straggler (audit r127-A4:
+ * button.tsx painted its on-green ink as a literal text-[#07361d]
+ * beside the token-ridden bg-whatsapp) is tokenized: --whatsapp-foreground
+ * in BOTH theme blocks + the @theme bridge + a consumption/no-raw-hex gate.
+ * Suite: 197.
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -401,6 +407,27 @@ const FAMILY_WIRING = [
 for (const [name, okFlag] of FAMILY_WIRING) {
   if (okFlag) passed += 1;
   else failures.push(`family wiring gate FAILED: ${name}`);
+}
+
+// ── r127 (F7): whatsapp ink — the last raw-hex straggler, tokenized ─────────
+// The external brand block is theme-independent by definition (WhatsApp
+// green + its dark on-green ink are the same in dark and light), so BOTH
+// theme blocks carry the trio and the @theme bridge maps it into Tailwind
+// (text-whatsapp-foreground). The old spelling text-[#07361d] is banned:
+// a raw hex beside token-based utilities is exactly the drift the
+// 131→195 suite exists to prevent (audit r127-A4, systemic #1).
+const WHATSAPP_INK = [
+  ['whatsapp ink: --whatsapp-foreground == #07361d in BOTH themes + the @theme bridge --color-whatsapp-foreground',
+    norm(resolve(dark, dark['--whatsapp-foreground'] ?? '')) === '#07361D' &&
+    norm(resolve(light, light['--whatsapp-foreground'] ?? '')) === '#07361D' &&
+    norm(theme['--color-whatsapp-foreground'] ?? '') === 'var(--whatsapp-foreground)'],
+  ['button whatsapp variant consumes the token (text-(--whatsapp-foreground)) — zero raw hex in button.tsx',
+    rawButton.includes('text-(--whatsapp-foreground)') &&
+    !/#[0-9a-fA-F]{3,8}\b/.test(rawButton)],
+];
+for (const [name, okFlag] of WHATSAPP_INK) {
+  if (okFlag) passed += 1;
+  else failures.push(`whatsapp ink gate FAILED: ${name}`);
 }
 
 // ── P4-W3c (B1): the ≥1-consumer tripwire ────────────────────────────────────

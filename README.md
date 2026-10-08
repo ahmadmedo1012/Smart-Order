@@ -62,12 +62,14 @@ Environment variables (see `.env.example`):
 | `DATABASE_URL` | PostgreSQL connection string (prod) / SQLite file (dev) |
 | `NEXT_PUBLIC_SITE_URL` | Canonical site URL for SEO/OG metadata |
 
-A `render.yaml` is also included for self-hosted (Render) deploys as a fallback — it uses `NEXT_OUTPUT=standalone`.
+Self-host fallback: `npm run build:selfhost` + `start:selfhost` (standalone) — see DEPLOYMENT.md §5.
 
 ## Testing
 
 ```bash
 npm run dev                     # start dev server
+npm run test:parity             # 197 Madarek token pins (colors / radius /
+                                # motion / z / elev + consumption gates)
 npm run test:e2e                # 30-check API E2E suite (auth, tenant isolation,
                                 # order lifecycle, money re-pricing, rate limits)
 ```

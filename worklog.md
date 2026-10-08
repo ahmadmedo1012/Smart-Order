@@ -105,3 +105,37 @@ Work Log:
 
 Stage Summary:
 - Smart Order now renders on the Madarek canonical system, mirroring SmartBot + Smart-Link bridges. Commit 383cf50 (local). PUSH PENDING: PAT in ecosystem doc is revoked (401) — needs fresh token from owner to push origin/main.
+
+---
+Task ID: r127-F7 (worklog truth restoration)
+Agent: F7 (fix — Round 127, governance closure)
+Task: التوثيق الرجعي للسلسلة fdd57ff→c59a335 (موجات r126 كاملة) + إبطال ملاحظة "PUSH PENDING" المتقادمة — تدقيق r127-A4 أثبت أن هذا الملف توقف عند madarek-parity-lock بينما HEAD مدفوع ومنشور ويعمل
+
+Work Log:
+- المصدر: `git log fdd57ff..c59a335 --oneline` (+ `git show --stat` لكل التزام). السلسلة الحقيقية بعد آخر قيد هنا (10 التزامات، 2026-10-07/08):
+  * fdd57ff (10-07 23:26) fix(deploy) r125: scripts/vercel-db-sync.mjs — مزامنة مخطط مرنة (إعادة محاولة ×3 للفشل العابر لإيقاظ Neon البارد + انحدار رحيم بلافتات [DB-SYNC] من سطر واحد)؛ إصلاح تجميد النشر ٣ أسابيع (منذ أن أضاف 8604174 db-push إلى البناء لم ينجح أي نشر)؛ vercel.json يركب الغلاف
+  * 3bd3a13 (10-08 02:12) fix r126: تباين AA في الوضع الفاتح — عقد حلقة التركيز (state-focus-ring)، خانات نص الشارات، مسح accent-as-text، CTA توست ميت
+  * be368b7 (02:21) polish r126: تبنّي سلّم الحركة (--t-micro…--t-cinema) + نقل ترتيب-z المداركي + صقل a11y/UX
+  * 7a6dc19 (02:22) fix r126: مرونة الخروج/الدفع + next/image لكل صور الواجهة + SEO (JSON-LD/sitemap/robots/metadataBase)
+  * ba07b69 (03:18) chore r126: حمية التبعيات — 26 حزمة بلا مستهلك + 13 غلاف shadcn ميت (−3211 سطراً، bun.lock تقلّص 800 سطر)
+  * 1095e7d (03:18) fix r126: إعادة تسليح ESLint — استرجاع 25+ قاعدة معطَّلة جملةً واحدة + إصلاح المخالفات المتبقية (34 ملفاً)
+  * 956565f (03:18) test r126: parity 131→161 — عقد التركيز + سلّم z + حركة @theme + أولى بوابات الاستهلاك
+  * 5ff88ab (03:18) docs r126: docs-truth — DEPLOYMENT.md يركب سلسلة نشر fdd57ff؛ حذف نفايات download/
+  * 0e18ab8 (05:30) polish r126: العائلات الباستيلية تصبح المصدر الوحيد — سلاسل دلالية + أسطح -bg حقيقية + طبقة الضغط micro
+  * c59a335 (05:30) test r126: parity 161→195 — بوابات وصفات sheet/dropdown/input + مسلك ≥1-مستهلك + أسلاك العائلات (FAMILY_WIRING)
+- **إبطال "PUSH PENDING: PAT in ecosystem doc is revoked (401)"** (قيد madarek-parity-lock أعلاه — التجاوز صريح): مشكلة الـPAT كانت عابرة وحُلّت. الحقيقة المدققة حياً (r127-A4، قراءة فقط):
+  * HEAD c59a335 == origin/main، الشجرة نظيفة — مدفوع بالكامل.
+  * منشور Production على Vercel 2026-10-08T05:36:52Z → order.smart-link.ly.
+  * /api/health = {"status":"ok","db":"up"} (SELECT 1 حقيقي)؛ الخطط الأربع مثبتة حية عبر /api/plans؛ المتجر التجريبي «مخبز الواحة» 200 مع 3 تصنيفات ومنتجات — البذر الإنتاجي حي.
+  * 383cf50 (hash محلي في القيد أعلاه) لا وجود له في التاريخ المنشور؛ محتوى جولة madarek-parity-lock دُفع فعلياً ضمن السلسلة a4c62b7 (19:58) → b967ae2 (20:59) → 450991b (22:34) → 3a8e489 (131 pins، 23:20) — كلها على origin/main قبل fdd57ff مباشرة.
+- وما تُنفّذه هذه الدفعة نفسها (r127-F7 — إغلاق فجوات الحوكمة من تدقيق r127-A4):
+  * `.github/workflows/ci.yml` — أول CI للمستودع (lint ← parity ← build على كل push/PR إلى main)، مرآة smart-link بلا Playwright (e2e يحتاج DB حية).
+  * توكن حبر واتساب: `--whatsapp-foreground: #07361d` في كتلتَي الثيم + جسر `--color-whatsapp-foreground` في @theme + button.tsx يستهلكه بـ `text-(--whatsapp-foreground)`. تبيّن أثناء التنفيذ أن التدقيق فاته حرف خام ثانٍ بنفس النمط: `.whatsapp-btn` في globals.css (`color: #07361d` بجوار `background: var(--whatsapp)` — 5 مستهلكين أحياء) — رُكّب على التوكن نفسه. Suite: 195→197 (بوابتا التوكن + الاستهلاك بلا hex خام في button.tsx).
+  * README: حذف ادعاء render.yaml الكاذب → مسار self-host الفعلي (build:selfhost/start:selfhost، DEPLOYMENT.md §5) + إضافة test:parity إلى قسم Testing.
+  * DEPLOYMENT.md: تحديث سطر حالة الإنتاج المتقادم (2026-09-18 → 2026-10-08/c59a335).
+  * next.config.ts: `poweredByHeader: false` (تصلّيب smart-link؛ الموقع الحي ما زال يرسل x-powered-by).
+  * ملاحظة تثبيت CI: `npm ci` غير ممكن هنا بلا package-lock.json (مُجهَّل عمداً — bun.lock هو القفل)، و`npm install` يجُرّ eslint-config-next@16.4.0 (hooks-plugin 7.1.1) فيولّد 26 خطأً غير موجودة في القفل (16.1.3/7.0.1)، وإضافة package-lock كانت ستقلب كشف مدير الحزم على Vercel إلى npm. الحل: `bun install --frozen-lockfile` (bun 1.3.14) = نفس ما يثبّته الإنتاج بالضبط.
+
+Stage Summary:
+- السجل يطابق git الآن: fdd57ff→c59a335 موثقة بالكامل (جذر سلسلة النشر + موجات r126 الثمانية)، ولا يبقى أي ادعاء "قيد الانتظار" في هذا الملف.
+- الحوكمة مكتملة: CI ذاتي التحقق، آخر hex خام (واتساب ×2) داخل طبقة التوكنات، الوثائق صادقة، والبوابات الثلاث (lint/parity 197/build) خضراء على شجرة bun.lock المجمدة. المتبقي المفتوح (من تدقيق r127-A4): QA الكامل §6 بعد c59a335 (api-e2e 30/30 ضد الإنتاج + جولة يدوية) — آخر دليل مسجل 2026-09-18.

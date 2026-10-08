@@ -120,6 +120,7 @@
   /* ── External brand (reserved usage only) ── */
   --color-whatsapp: var(--whatsapp);
   --color-whatsapp-deep: var(--whatsapp-deep);
+  --color-whatsapp-foreground: var(--whatsapp-foreground);
 
   /* ── Charts + sidebar (mapped onto the Madarek palette) ── */
   --color-chart-1: var(--chart-1);
@@ -322,9 +323,11 @@
   --c-grey-bg: #161D33;      --c-grey-ink: #A9B0C8;      --c-grey-deep: #D5DAE8;
   --c-copper-bg: #2C2312;    --c-copper-ink: #E9B44C;    --c-copper-deep: #F5D48A;
 
-  /* ── External brand (unchanged by definition) ── */
+  /* ── External brand (unchanged by definition; -foreground = the
+       dark on-green ink, identical in both themes) ── */
   --whatsapp: #25d366;
   --whatsapp-deep: #20bd5a;
+  --whatsapp-foreground: #07361d;
 
   /* ── Charts — Madarek dark series (copper/gold-led, §1.14); P4-W3c:
        chained through the family -ink slots (single source) ── */
@@ -495,9 +498,11 @@
   --c-grey-bg: #EFECE7;      --c-grey-ink: #6B665E;      --c-grey-deep: #2D2A24;
   --c-copper-bg: #F4E4D2;    --c-copper-ink: #B57438;    --c-copper-deep: #5C3416;
 
-  /* ── External brand (unchanged by definition) ── */
+  /* ── External brand (unchanged by definition; -foreground = the
+       dark on-green ink, identical in both themes) ── */
   --whatsapp: #25d366;
   --whatsapp-deep: #20bd5a;
+  --whatsapp-foreground: #07361d;
 
   /* ── Charts — Madarek light series (copper-led, §1.14); P4-W3c:
        chained through the family -ink slots ── */
@@ -723,7 +728,7 @@
 /* WhatsApp brand green — reserved for WhatsApp actions only */
 .whatsapp-btn {
   background-color: var(--whatsapp);
-  color: #07361d;
+  color: var(--whatsapp-foreground);
 }
 .whatsapp-btn:hover {
   background-color: var(--whatsapp-deep);

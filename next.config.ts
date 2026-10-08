@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Self-host (Render/Docker) sets NEXT_OUTPUT=standalone; Vercel uses default output
   ...(process.env.NEXT_OUTPUT === "standalone" ? { output: "standalone" as const } : {}),
+  // Strip the `x-powered-by: Next.js` response header (smart-link hardening)
+  poweredByHeader: false,
   outputFileTracingRoot: process.cwd(),
   // Disable dev indicator for clean captures
   devIndicators: false,
