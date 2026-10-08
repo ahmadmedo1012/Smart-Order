@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * test(r125): Madarek parity snapshot — pin the canonical design tokens.
+ * test(r126): Madarek parity snapshot — pin the canonical design tokens.
  * (Task 11-a, Wave B; source of truth: madarek/frontend/src/styles/tokens.css
- * + download/madarek-reference-digest.md — §1 dark · §2 light · §3 radius ·
- * §4 motion · §5 elevation.)
+ * — §1 dark · §2 light · §3 radius · §4 motion · §5 elevation. The old
+ * download/madarek-reference-digest.md citations were removed with the
+ * junk download/ dir in r126; the tokens.css SSOT stands alone.)
  *
  * Run: `npm run test:parity` (plain node — Smart-Order ships no unit-test
  * runner; its e2e script targets a live dev server, so this is a
@@ -255,6 +256,67 @@ for (const scope of [dark, light]) {
 }
 pinAll(dark, 'elev-dark', ELEV_DARK);
 pinAll(light, 'elev-light', ELEV_LIGHT);
+
+// ── r126 pins: focus contract + z-order ladder (audit P4-A5 ring gap) ───────
+// The light --ring was raw copper #B57438 = 3.65:1 (FAIL); the Madarek
+// contract (rubric §B23) requires ≥4.5:1 in BOTH themes. The 2px/2px ring
+// rides --state-focus-ring-* tokens, mirrored by the shadcn --ring bridge.
+const FOCUS_DARK = {
+  '--ring': '#E9B44C',
+  '--state-focus-ring-color': '#C9962F', // Madarek dark --accent-strong (7.87:1)
+  '--state-focus-ring-width': '2px',
+  '--state-focus-ring-offset': '2px',
+};
+const FOCUS_LIGHT = {
+  '--ring': '#5C3416',
+  '--state-focus-ring-color': '#5C3416', // Madarek light --accent-strong (10.29:1)
+  '--state-focus-ring-width': '2px',
+  '--state-focus-ring-offset': '2px',
+};
+pinAll(dark, 'focus-dark', FOCUS_DARK);
+pinAll(light, 'focus-light', FOCUS_LIGHT);
+
+// Z-order ladder (Madarek tokens.css §3a, theme-independent :root tokens)
+const Z_LADDER = {
+  '--z-base': '0',
+  '--z-dropdown': '100',
+  '--z-popover': '200',
+  '--z-tooltip': '250',
+  '--z-sheet': '300',
+  '--z-modal': '400',
+  '--z-toast': '500',
+  '--z-lightbox': '600',
+};
+for (const scope of [dark, light]) {
+  pinAll(scope, 'z-ladder', Z_LADDER);
+}
+
+// Default transition bridge (@theme): every bare transition-* utility rides
+// the ladder (160ms = --t-fast) + the canonical settle curve.
+pin(theme, 'motion(@theme)', '--default-transition-duration', '160ms');
+pin(theme, 'motion(@theme)', '--default-transition-timing-function', 'cubic-bezier(0.16, 1, 0.3, 1)');
+
+// ── r126 consumption gates — existence pins cannot catch dead tokens ────────
+// (The r125 audit proved it: the motion ladder passed 131/131 with ZERO
+// consumers. These assert the tokens are actually wired.)
+const rawCss = readFileSync(new URL('../src/app/globals.css', import.meta.url), 'utf8').replace(/\s+/g, ' ');
+const rawButton = readFileSync(new URL('../src/components/ui/button.tsx', import.meta.url), 'utf8');
+const rawDialog = readFileSync(new URL('../src/components/ui/dialog.tsx', import.meta.url), 'utf8');
+const CONSUMPTION = [
+  ['globals :focus-visible consumes --state-focus-ring-* (the ONE focus language)',
+    /outline: var\(--state-focus-ring-width, 2px\) solid var\(--state-focus-ring-color, var\(--ring\)\)/.test(rawCss) &&
+    rawCss.includes('outline-offset: var(--state-focus-ring-offset, 2px)')],
+  ['sonner toaster pinned to the --z-toast rung',
+    rawCss.includes('[data-sonner-toaster]') && rawCss.includes('z-index: var(--z-toast)')],
+  ['button consumes the motion ladder (duration-(--t-fast) + ease-smooth)',
+    rawButton.includes('duration-(--t-fast)') && rawButton.includes('ease-smooth')],
+  ['dialog consumes the motion + z ladders (duration-(--t-base) + z-(--z-modal))',
+    rawDialog.includes('duration-(--t-base)') && rawDialog.includes('z-(--z-modal)')],
+];
+for (const [name, okFlag] of CONSUMPTION) {
+  if (okFlag) passed += 1;
+  else failures.push(`consumption gate FAILED: ${name}`);
+}
 
 // ── report ───────────────────────────────────────────────────────────────────
 
