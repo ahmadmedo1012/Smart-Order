@@ -792,6 +792,11 @@
   0%, 100% { opacity: 0.3; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.15); }
 }
+@keyframes pulse-soft {
+  /* r128-F8 (B22): tracking status-light — flat 0-blur ring breathe (no glow) */
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 30%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--primary) 0%, transparent); }
+}
 @keyframes price-swap-in {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
@@ -865,6 +870,10 @@
 .animate-orb-float-delayed { animation: orb-float 16s ease-in-out infinite 4s; }
 .animate-orb-float-slow { animation: orb-float 20s ease-in-out infinite 8s; }
 .animate-pulse-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
+/* r128-F8 (B22): the tracking page's active-node status light — the class was
+   referenced by tracking-client.tsx since r9x but never defined; rides the
+   ladder ease + the global reduced-motion belt (0.01ms / 1 iteration). */
+.animate-pulse-soft { animation: pulse-soft 1.6s var(--ease-soft) infinite; }
 .animate-price-swap-in { animation: price-swap-in 0.35s var(--ease-out-quart) both; }
 .animate-wipe-up { animation: wipe-up 0.6s var(--ease-smooth) both; }
 .animate-message-draw { animation: message-draw 0.4s var(--ease-smooth) both; }
@@ -936,6 +945,27 @@
 }
 
 /* Film-grain texture overlay — family atmosphere layer (pointer-safe) */
+/* ════════════════════════════════════════════════════════════════
+   r128-F8 (B18): page-level scroll progress — quiet 2px flat ribbon
+   (Madarek .landing-progress pattern, product tokens). The --p custom
+   property is written imperatively by PageScrollProgress (one rAF per
+   scroll frame, zero setState); flat token fill — no gradient, no glow.
+   ════════════════════════════════════════════════════════════════ */
+.page-progress {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 90; /* under the sticky header (--z-dropdown 100), landing parity */
+  block-size: 2px;
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
+  pointer-events: none;
+}
+.page-progress-bar {
+  block-size: 100%;
+  inline-size: calc(var(--p, 0) * 100%);
+  background: var(--primary); /* flat copper — no gradient, no glow */
+}
+
 .grain-overlay { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
 .grain-overlay::before {
   content: "";

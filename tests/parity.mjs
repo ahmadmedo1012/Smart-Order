@@ -68,7 +68,9 @@
  * button.tsx painted its on-green ink as a literal text-[#07361d]
  * beside the token-ridden bg-whatsapp) is tokenized: --whatsapp-foreground
  * in BOTH theme blocks + the @theme bridge + a consumption/no-raw-hex gate.
- * Suite: 197.
+ * Suite: 231 (197 product + 34 r128-F8 landing-layer pins: 25 .landing
+ * token values + 9 raw gates — marquee keyframes/gap/loop/RM, --sp consumer,
+ * scroll-spy ids, .ln-grain, and the .landing scope-isolation negatives).
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -430,6 +432,77 @@ for (const [name, okFlag] of WHATSAPP_INK) {
   else failures.push(`whatsapp ink gate FAILED: ${name}`);
 }
 
+// ── r128-F8 (B25): LANDING LAYER — pin the Orbit-Ink world in landing.css ────
+// The landing layer is deliberately SEPARATE from globals.css (R4: product
+// pins untouched). These pins read src/app/landing.css: the .landing token
+// block (PORT-KIT §1 verbatim — canonical madarek tokens.css values), the
+// marquee kit (§3: 48px gap + the +24px HALF-gap seam correction + 42s
+// linear loop + the RM off-switch), the --sp scrub consumers, the R2-form
+// scroll-spy selectors, the .ln-grain veil, and the scope contract itself.
+// var() chains resolve against the REAL cascade: .landing overlays :root.
+const landingCssRaw = readFileSync(new URL('../src/app/landing.css', import.meta.url), 'utf8');
+const landingBlocks = topLevelBlocks(landingCssRaw.replace(/\/\*[\s\S]*?\*\//g, ' '));
+const landingBody = landingBlocks.find((x) => x.prelude === '.landing')?.body;
+if (!landingBody) throw new Error('.landing top-level block not found in landing.css');
+const landingScope = { ...dark, ...parseDecls(landingBody) };
+const landingRaw = landingCssRaw.replace(/\s+/g, ' ');
+const LANDING_TOKENS = {
+  '--ln-ink': '#252A3E',
+  '--ln-ink-2': '#1C2032',
+  '--ln-cream': '#F5F3E7',
+  '--ln-cream-dim': '#C9C6B4',
+  '--ln-lime': '#DFEDB2',
+  '--ln-lime-deep': '#B9D778',
+  '--ln-violet': '#7A6BF2',
+  '--ln-violet-deep': '#4E2FB8',
+  '--ln-line': 'rgba(245, 243, 231, 0.14)',
+  '--ln-line-soft': 'rgba(245, 243, 231, 0.07)',
+  '--ln-grain-op': '0.05',
+  '--ln-radius-pill': '9999px', // resolves the scoped --r-full bridge
+  '--ln-h1': 'clamp(2.75rem, 8.2vw, 6.75rem)',
+  '--ln-h1-lh': '1.04',
+  '--ln-t-fast': '160ms',
+  '--ln-t-base': '240ms',
+  '--ln-t-slow': '380ms',
+  '--ln-t-cinema': '720ms',
+  '--ln-t-reveal': '360ms',
+  '--ln-ease': 'cubic-bezier(0.4, 0, 0.2, 1)',
+  '--ln-ease-out': 'cubic-bezier(0.16, 1, 0.3, 1)',
+  '--ln-ease-soft': 'cubic-bezier(0.22, 1, 0.36, 1)',
+  '--ln-ease-spring': 'cubic-bezier(0.34, 1.36, 0.64, 1)',
+  '--ln-ease-linear': 'linear',
+  '--ln-dur-marquee': '42s',
+};
+for (const [token, value] of Object.entries(LANDING_TOKENS)) {
+  pin(landingScope, 'landing', token, value);
+}
+const LANDING_LAYER = [
+  ['marquee keyframes: from translateX(0) → to translateX(calc(50% + 24px)) — the HALF-gap seam correction',
+    /@keyframes ln-marquee \{ from \{ transform: translateX\(0\); \} to \{ transform: translateX\(calc\(50% \+ 24px\)\); \} \}/.test(landingRaw)],
+  ['marquee track geometry: 48px column gap (seam = exactly HALF the gap)',
+    /\.landing \.ln-marquee-track \{[^}]*gap: 48px;/.test(landingRaw)],
+  ['marquee loop: ln-marquee var(--ln-dur-marquee) var(--ln-ease-linear) infinite',
+    /animation: ln-marquee var\(--ln-dur-marquee\) var\(--ln-ease-linear\) infinite;/.test(landingRaw)],
+  ['marquee RM off-switch: prefers-reduced-motion sets the track animation to none',
+    /@media \(prefers-reduced-motion: reduce\) \{ \.landing \.ln-marquee-track \{ animation: none; \}/.test(landingRaw)],
+  ['--sp consumer: journey light path scrubs stroke-dashoffset calc(1 - var(--sp, 0))',
+    landingRaw.includes('stroke-dashoffset: calc(1 - var(--sp, 0));')],
+  ['scroll-spy in R2 form: header[data-active-section] selectors cover all six landing ids',
+    ['trust', 'sectors', 'journey', 'progress', 'venues', 'roles'].every(
+      (id) => landingRaw.includes(`header[data-active-section="${id}"]`),
+    )],
+  ['.ln-grain veil present (the --ln-grain-op consumer)',
+    /\.landing \.ln-grain \{/.test(landingRaw)],
+  ['landing scope isolation: globals.css carries ZERO --ln-* declarations (R4 — product pins untouched)',
+    !/--ln-[\w-]+\s*:/.test(rawCss)],
+  ['landing scope isolation (negative): the Orbit-Ink ground tokens stay out of :root (no --ln-ink / --ln-cream in globals.css)',
+    !rawCss.includes('--ln-ink') && !rawCss.includes('--ln-cream')],
+];
+for (const [name, okFlag] of LANDING_LAYER) {
+  if (okFlag) passed += 1;
+  else failures.push(`landing layer gate FAILED: ${name}`);
+}
+
 // ── P4-W3c (B1): the ≥1-consumer tripwire ────────────────────────────────────
 // Audit systemic #1: pinned tokens drifted into dead definitions. Every
 // pinned token in the four high-traffic families must have ≥1 REAL
@@ -498,4 +571,4 @@ if (failures.length > 0) {
   for (const f of failures) console.error(`  • ${f}`);
   process.exit(1);
 }
-console.log(`✓ Madarek parity snapshot: ${passed} assertions passed (src/app/globals.css == canonical tokens.css values)`);
+console.log(`✓ Madarek parity snapshot: ${passed} assertions passed (globals.css + landing.css == canonical token values)`);

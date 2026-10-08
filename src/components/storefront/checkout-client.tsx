@@ -459,7 +459,7 @@ export function CheckoutClient({
                   type="button"
                   onClick={() => setPaymentMethodId(p.id)}
                   aria-pressed={selected}
-                  className={`flex h-14 flex-col items-center justify-center gap-1 rounded-xl border-2 text-[13px] font-medium transition-[border-color,box-shadow,color,background-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/50 ${
+                  className={`flex h-14 flex-col items-center justify-center gap-1 rounded-xl border-2 text-[13px] font-medium transition-[border-color,box-shadow,color,background-color] duration-(--t-fast) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/50 ${
                     selected
                       ? "border-orange bg-orange/10 shadow-sm"
                       : "border-border/30 text-muted-foreground hover:border-orange/30"

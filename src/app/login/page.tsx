@@ -21,14 +21,8 @@ import { LogIn } from "lucide-react";
 
 const SUPPORT_WHATSAPP = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "218910089975";
 
-function FloatingShapes() {
-  return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      {/* Family calm register/login atmosphere — one soft orange glow only */}
-      <div className="absolute -end-28 -top-24 size-[18rem] rounded-full bg-orange/5 blur-[120px] dark:bg-orange/5" />
-    </div>
-  );
-}
+/* r128-F8 (B19): the FloatingShapes glow blob + flame radial corners are
+   retired (§7 no-glow); the calm atmosphere stays via the flat grain veil. */
 
 export default function LoginPage() {
   const [email, setEmail] = React.useState("");
@@ -58,17 +52,7 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-dvh items-center justify-center px-4 py-20 sm:px-6">
-      {/* Family flame corners background */}
-      <div
-        className="fixed inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(circle at 78% 10%, color-mix(in oklab, var(--c-flame) 6%, transparent), transparent 30%), radial-gradient(circle at 14% 88%, color-mix(in oklab, var(--c-flame) 4%, transparent), transparent 26%)",
-        }}
-        aria-hidden="true"
-      />
       <div className="grain-overlay" aria-hidden="true" />
-      <FloatingShapes />
 
       {/* Back to home + ThemeToggle (family fixed corner cluster) */}
       <div className="fixed start-4 top-4 z-(--z-dropdown) flex items-center gap-2">
@@ -80,11 +64,13 @@ export default function LoginPage() {
         <ThemeToggle />
       </div>
 
-      {/* Decorative top gradient bar (family auth signature) */}
-      <div className="fixed inset-x-0 top-0 z-10 h-1 bg-gradient-to-r from-orange via-orange/80 to-orange/60" />
+      {/* Top accent bar (r128-F8/B19: de-gradient — flat token fill, aligned
+          with the quiet announcement-strip family) */}
+      <div className="fixed inset-x-0 top-0 z-10 h-1 bg-orange" />
 
-      {/* Family login card — glass card w/ elevated shadow */}
-      <div className="animate-scale-in relative z-10 w-full max-w-sm rounded-2xl border-border/50 bg-card/90 shadow-lg shadow-black/20 backdrop-blur-xl sm:max-w-md">
+      {/* Family login card (r128-F8/B19: solid ground — no glass blur, quiet
+          hairline border + neutral lift) */}
+      <div className="animate-scale-in relative z-10 w-full max-w-sm rounded-2xl border border-border/50 bg-card shadow-sm sm:max-w-md">
         {/* Logo area */}
         <div className="pb-2 pt-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center">
@@ -105,8 +91,9 @@ export default function LoginPage() {
           <form onSubmit={onSubmit} className="space-y-5" noValidate>
             <div className="space-y-2">
               <Label htmlFor="email">البريد الإلكتروني</Label>
-              {/* Family SmartBot input — bg-secondary/40 + flame focus ring */}
-              <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-200 focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
+              {/* Family SmartBot input — bg-secondary/40 + flame focus ring
+                  (r128-F8/B19: ladder duration token) */}
+              <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
                 <Input
                   id="email"
                   type="email"
@@ -124,7 +111,7 @@ export default function LoginPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">كلمة المرور</Label>
-              <div className="relative rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-200 focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
+              <div className="relative rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -140,7 +127,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute end-1.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-orange/60"
+                  className="absolute end-1.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-ring/60"
                   aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
                 >
                   {showPassword ? <AnimatedEyeOff className="size-4" /> : <AnimatedEye className="size-4" />}

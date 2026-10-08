@@ -20,9 +20,10 @@ export function stepIndex(step: WizardStep) {
 
 /**
  * StepIndicator — family twin (Smart Menu subscribe/StepIndicator.tsx):
- * flame-gradient step node for the active step (espresso digit on the
- * saffron plateau), check node when done, muted node ahead; connectors
- * animate color on completion.
+ * flat flame step node for the active step (espresso digit on the orange
+ * ground), check node when done, muted node ahead; connectors animate
+ * color on completion. r128-F8 (B20): durations ride the ladder, the
+ * gradient node is retired (§7).
  */
 export function StepIndicator({
   current,
@@ -49,7 +50,7 @@ export function StepIndicator({
               disabled={!clickable}
               onClick={() => clickable && onNavigate?.(s)}
               className={cn(
-                "group flex flex-col items-center gap-1.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-orange/40",
+                "group flex flex-col items-center gap-1.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
                 !clickable && "cursor-default"
               )}
               aria-current={isActive ? "step" : undefined}
@@ -60,9 +61,11 @@ export function StepIndicator({
                 initial={false}
                 whileTap={clickable && !reduceMotion ? { scale: 0.94 } : undefined}
                 className={cn(
-                  "flex size-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-colors duration-300",
+                  /* r128-F8 (B20): ladder durations + flat active node —
+                     the ember→saffron gradient + glow shadow retire (§7) */
+                  "flex size-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-colors duration-(--t-base)",
                   isActive
-                    ? "bg-[linear-gradient(135deg,var(--c-ember),var(--c-saffron)_50%,var(--c-ember))] border-transparent font-bold text-espresso shadow-lg shadow-orange/30"
+                    ? "border-transparent bg-orange font-bold text-espresso shadow-sm"
                     : isDone
                       ? "border-orange/40 bg-orange/15 text-accent-foreground"
                       : "border-border/40 bg-muted/50 text-muted-foreground"
@@ -84,7 +87,7 @@ export function StepIndicator({
             {i < STEP_ORDER.length - 1 && (
               <div
                 className={cn(
-                  "mx-1 h-0.5 w-14 rounded-full transition-colors duration-500 sm:mx-2",
+                  "mx-1 h-0.5 w-14 rounded-full transition-colors duration-(--t-slower) sm:mx-2",
                   i < currentIdx ? "bg-orange/50" : "bg-muted-foreground/15"
                 )}
               />

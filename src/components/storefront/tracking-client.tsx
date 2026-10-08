@@ -96,7 +96,9 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
       <main id="main" className="mx-auto max-w-lg px-4 py-6 space-y-4">
         {/* Order header */}
         <div className="rounded-2xl border border-border bg-card p-5 text-center">
-          <h1 className="font-heading text-xl font-bold tabular">{order.orderNumber}</h1>
+          {/* r128-F8 (B22): mono numerals — order number + receipt figures ride
+              the mixed-script mono stack (Latin/digits mono, Arabic sans) */}
+          <h1 className="font-heading text-xl font-bold tabular font-mono">{order.orderNumber}</h1>
           <p className="mt-1 text-xs text-muted-foreground">{formatArabicDateTime(order.createdAt)}</p>
           {isCancelled ? (
             <div className="mt-4 rounded-xl bg-destructive/10 border border-destructive/25 px-4 py-3">
@@ -131,9 +133,12 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
                 return (
                   <li key={s} className="flex items-center gap-3.5 relative pb-4 last:pb-0">
                     {i < flow.length - 1 && (
+                      /* r128-F8 (B22): thread runs node-center → next-node-center
+                         (station geometry: top 18px = half the 36px node, h-full
+                         lands on the next node's center through the pb-4 gap) */
                       <span
                         aria-hidden="true"
-                        className={cn("absolute top-9 start-[17px] w-0.5 h-[calc(100%-1.75rem)]", done || active ? "bg-primary/40" : "bg-border")}
+                        className={cn("absolute top-[18px] h-full w-0.5 start-[17px]", done || active ? "bg-primary/40" : "bg-border")}
                       />
                     )}
                     <span
@@ -178,24 +183,24 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
                     <div className="text-[11px] text-muted-foreground mt-0.5">{item.options.join("، ")}</div>
                   )}
                 </div>
-                <span className="tabular nums shrink-0">{formatLyd(item.lineTotal)}</span>
+                <span className="tabular nums font-mono shrink-0">{formatLyd(item.lineTotal)}</span>
               </li>
             ))}
           </ul>
           <div className="mt-4 pt-3 border-t border-border/60 space-y-1.5 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>المجموع الفرعي</span>
-              <span className="tabular nums">{formatLyd(order.subtotal)}</span>
+              <span className="tabular nums font-mono">{formatLyd(order.subtotal)}</span>
             </div>
             {order.deliveryFee > 0 && (
               <div className="flex justify-between text-muted-foreground">
                 <span>التوصيل</span>
-                <span className="tabular nums">{formatLyd(order.deliveryFee)}</span>
+                <span className="tabular nums font-mono">{formatLyd(order.deliveryFee)}</span>
               </div>
             )}
             <div className="flex justify-between font-bold pt-1.5 border-t border-border/60">
               <span>الإجمالي</span>
-              <span className="tabular nums text-accent-foreground">{formatLyd(order.total)}</span>
+              <span className="tabular nums font-mono text-accent-foreground">{formatLyd(order.total)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground pt-1 text-xs">
               <span>الدفع</span>

@@ -126,15 +126,8 @@ function RegisterWizard() {
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-x-clip bg-background">
-      {/* Family flame background — two soft radial corners */}
-      <div
-        className="fixed inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(circle at 78% 10%, color-mix(in oklab, var(--c-flame) 6%, transparent), transparent 30%), radial-gradient(circle at 14% 88%, color-mix(in oklab, var(--c-flame) 4%, transparent), transparent 26%)",
-        }}
-        aria-hidden="true"
-      />
+      {/* r128-F8 (B19): flame radial corners retired (§7 no-glow) — the calm
+          grain veil keeps the auth atmosphere. */}
       <div className="grain-overlay" aria-hidden="true" />
 
       {/* Back to home + ThemeToggle (family fixed corner cluster) */}
@@ -147,8 +140,8 @@ function RegisterWizard() {
         <ThemeToggle />
       </div>
 
-      {/* Decorative top gradient bar (family login/register signature) */}
-      <div className="fixed inset-x-0 top-0 z-10 h-1 bg-gradient-to-r from-orange via-orange/80 to-orange/60" />
+      {/* Top accent bar (r128-F8/B19: de-gradient — flat token fill) */}
+      <div className="fixed inset-x-0 top-0 z-10 h-1 bg-orange" />
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center px-4 pb-16 pt-24 sm:px-6">
         {/* Logo + title */}
@@ -234,12 +227,12 @@ function RegisterWizard() {
               </div>
             )}
 
-            <div className="animate-scale-in rounded-2xl border border-border/50 bg-card/90 p-6 shadow-lg shadow-black/20 backdrop-blur-xl sm:p-8">
+            <div className="animate-scale-in rounded-2xl border border-border/50 bg-card p-6 shadow-sm sm:p-8">
               <form onSubmit={onSubmit} className="space-y-4" noValidate>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2 sm:col-span-2">
                     <Label htmlFor="businessName">اسم العمل / المتجر *</Label>
-                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-200 focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
+                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
                       <Input
                         id="businessName"
                         placeholder="مثال: مطعم الأصيل"
@@ -252,7 +245,7 @@ function RegisterWizard() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="name">اسمك *</Label>
-                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-200 focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
+                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
                       <Input
                         id="name"
                         placeholder="اسمك الكامل"
@@ -265,7 +258,7 @@ function RegisterWizard() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">رقم الهاتف</Label>
-                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-200 focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
+                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
                       <Input
                         id="phone"
                         type="tel"
@@ -280,7 +273,7 @@ function RegisterWizard() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">البريد الإلكتروني *</Label>
-                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-200 focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
+                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
                       <Input
                         id="email"
                         type="email"
@@ -312,7 +305,7 @@ function RegisterWizard() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">كلمة المرور *</Label>
-                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-200 focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
+                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
                       <Input
                         id="password"
                         type="password"
@@ -328,7 +321,7 @@ function RegisterWizard() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirm">تأكيد كلمة المرور *</Label>
-                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-200 focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
+                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
                       <Input
                         id="confirm"
                         type="password"
