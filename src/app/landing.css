@@ -308,9 +308,11 @@
 .landing .landing-header-cta { display: flex; align-items: center; gap: var(--sp-2); }
 
 /* ── 4 · buttons — one pill system (landing.css:371-467) ───────────── */
+/* r131-F2: .ln-btn-text dropped from the groups below — 0 TSX consumers
+   (rg-verified). It stays ONLY in the two :active press groups that the
+   parity suite pins verbatim (§4 press tail + §14 RM form). */
 .landing .ln-btn-gold,
-.landing .ln-btn-ghost,
-.landing .ln-btn-text {
+.landing .ln-btn-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -406,16 +408,6 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
 }
 .landing .ln-btn-ghost.xl { padding: 12px 32px; font-size: 16px; min-block-size: 48px; }
-
-/* quiet tertiary */
-.landing .ln-btn-text {
-  padding: 10px 16px;
-  font-size: 14.5px;
-  min-block-size: 44px;
-  background: transparent;
-  color: var(--ln-cream-dim);
-}
-.landing .ln-btn-text:hover { color: var(--ln-cream); }
 
 /* ── 5 · chapter scaffolding — let every scene breathe ─────────────── */
 .landing .ln-chapter {
@@ -1015,7 +1007,8 @@
   line-height: 1.1;
   direction: ltr;
 }
-.landing .ln-stat-unit { color: var(--ln-cream-dim); font-size: 24px; margin-inline-start: 2px; }
+/* r131-F2: .ln-stat-unit deleted — 0 TSX consumers (stats render no
+   units; rg-verified), a dead carry-over from the canonical port. */
 .landing .ln-stat-label { margin-block-start: 8px; color: var(--ln-cream); font-size: 14px; font-weight: var(--fw-semibold); overflow-wrap: anywhere; }
 .landing .ln-stat-note { margin-block-start: 3px; color: var(--ln-cream-dim); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
 
@@ -1363,9 +1356,6 @@
 @media (min-width: 1081px) {
   .landing .landing-mobile-menu { display: none !important; }
 }
-@media (max-width: 1024px) {
-  .landing .ln-hero { padding-block: clamp(104px, 14vh, 150px) 88px; }
-}
 @media (max-width: 920px) {
   /* journey spine — stations stack vertically, nodes ride the gutter.
      Spine stroke up 1.5→2px: hairlines vanish on low-contrast OLED in
@@ -1394,7 +1384,6 @@
   .landing .ln-progress-grid { grid-template-columns: 1fr; }
   .landing .ln-progress-visual { min-block-size: 280px; }
   .landing .ln-chapter { padding-inline: var(--page-gutter-mobile); }
-  .landing .ln-hero { padding-inline: max(5vw, 16px); }
   .landing .ln-trust { padding-inline: max(5vw, 16px); }
   .landing .ln-venues { padding-inline: var(--page-gutter-mobile); }
   .landing .ln-faq { padding-inline: var(--page-gutter-mobile); }
@@ -1445,8 +1434,9 @@
 
   /* decorative canvas recedes; text stays on top */
   .landing .ln-hero-canvas { --ln-canvas-op: 0.35; animation-name: ln-scene-in-dim; }
-  /* Arabic leading: ≥1.15 on mobile */
-  .landing .ln-hero-title { line-height: 1.18; max-inline-size: none; }
+  /* Arabic leading: ≥1.15 on mobile (r131-F2: retargeted from the dead
+     .ln-hero-title to the live .ln-keep-title) */
+  .landing .ln-keep-title { line-height: 1.18; max-inline-size: none; }
 
   /* footer: single column + 1px dividers */
   .landing .landing-footer-grid { grid-template-columns: 1fr; gap: 0; }
@@ -1461,7 +1451,6 @@
      interactive elements on small screens. */
   .landing .ln-btn-gold,
   .landing .ln-btn-ghost,
-  .landing .ln-btn-text,
   .landing .landing-nav-link {
     min-block-size: 48px;
     padding-block: var(--sp-3);
@@ -1472,6 +1461,11 @@
   }
 }
 @media (max-width: 560px) {
+  /* r131-F2: canonical hero CTA rule (madarek landing.css:1707-1710) —
+     the CTA pair goes full-width on the smallest phones. */
+  .landing .ln-keep-actions { gap: var(--sp-3); }
+  .landing .ln-keep-actions .ln-btn-gold,
+  .landing .ln-keep-actions .ln-btn-ghost { inline-size: 100%; }
   .landing .ln-constellation-strip { grid-template-columns: 1fr; }
   /* GAP-5: 2×2 at 390px was a solid text block — give the numbers room */
   .landing .ln-progress-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-5) var(--sp-3); }
@@ -1485,6 +1479,35 @@
    smallest phones so the figures never wrap out of their band */
 @media (max-width: 390px) {
   .landing .ln-trust-inner { gap: var(--sp-3); font-size: 12.5px; }
+}
+
+/* ── r131-F2 · landscape phones — keep the whole hero value story above
+   the fold (canonical landing.css:1731-1757, adapted to the kept split
+   hero). At 844×390 the grid is single-column (below lg) so the phone
+   column sat under the CTAs, pushing the value story below the 390px
+   fold. Portrait phones are untouched — this band only matches short
+   viewports. */
+@media (max-height: 560px) and (orientation: landscape) {
+  /* content-sized, not viewport-sized: every saved pixel is CTA
+     visibility (844×390 budget: chrome 108 + eyebrow + title + lede +
+     CTA + trust pill ≈ 270px — the WHOLE story sits inside the fold) */
+  .landing .ln-keep-hero > .mx-auto { padding-block: 12px; }
+  .landing .ln-keep-eyebrow { margin-block-end: 10px; }
+  .landing .ln-keep-title {
+    font-size: clamp(2rem, 9vh, 3.25rem);
+    line-height: 1.12;
+    margin-block-end: 14px;
+  }
+  .landing .ln-keep-sub {
+    max-inline-size: 60ch;
+    font-size: 14.5px;
+    line-height: 1.5;
+    margin-block-end: 18px;
+  }
+  .landing .ln-keep-actions { margin-block-end: 8px; }
+  .landing .ln-keep-pill { font-size: 11.5px; }
+  /* the decorative proof column retires on the short fold */
+  .landing .ln-keep-phone { display: none; }
 }
 
 /* ── 14 · reduced motion — canonical landing.css:1800-1831 ─────────── */
@@ -1509,7 +1532,6 @@
   }
   .landing .ln-btn-gold,
   .landing .ln-btn-ghost,
-  .landing .ln-btn-text,
   .landing .landing-header,
   .landing .ln-station-card,
   .landing .ln-role-row { transition: none; }
@@ -1571,6 +1593,16 @@
 }
 /* text always wins the sky — content z1 over decor z0 */
 .landing .ln-keep-hero > .mx-auto { position: relative; z-index: 1; }
+/* r131-F2 (A12 P1-2): the hero title rides the CANONICAL --ln-h1 scale
+   — clamp(44px, 8.2vw, 108px) over --ln-h1-lh 1.04, the exact SL/SB/SM
+   pattern (their .ln-hero-title block). The former fixed Tailwind ladder
+   (36→68px) sat below canon at both ends; mobile Arabic leading gets the
+   ≥1.15 override in §13 (≤768px), landscape phones in the fold guard
+   below. Unlayered rule — it outranks any residual utility. */
+.landing .ln-keep-title {
+  font-size: var(--ln-h1);
+  line-height: var(--ln-h1-lh);
+}
 /* the ONE lime word — flat color, no gradient-text */
 .landing .ln-keep-word { color: var(--ln-lime); }
 /* the sub rides cream-dim on the ink stage (was text-muted-foreground) */

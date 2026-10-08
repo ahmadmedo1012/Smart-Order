@@ -128,7 +128,7 @@ function PlanCard({ plan, index, yearly }: { plan: Plan; index: number; yearly: 
           ].map(([label, prefix, num]) => (
             <div key={label as string} className="flex items-center justify-between rounded-lg bg-muted/45 px-3 py-2 text-sm">
               <span className="text-muted-foreground">{label as string}</span>
-              <span className="font-mono font-semibold tabular nums">
+              <span className="font-mono font-semibold tabular-nums">
                 {prefix === null ? (
                   "غير محدود"
                 ) : (

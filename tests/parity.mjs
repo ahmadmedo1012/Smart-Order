@@ -361,6 +361,11 @@ const rawCss = readFileSync(new URL('../src/app/globals.css', import.meta.url), 
 const rawButton = readFileSync(new URL('../src/components/ui/button.tsx', import.meta.url), 'utf8');
 const rawDialog = readFileSync(new URL('../src/components/ui/dialog.tsx', import.meta.url), 'utf8');
 const rawSheet = readFileSync(new URL('../src/components/ui/sheet.tsx', import.meta.url), 'utf8');
+const rawSwitch = readFileSync(new URL('../src/components/ui/switch.tsx', import.meta.url), 'utf8');
+const rawSonner = readFileSync(new URL('../src/components/ui/sonner.tsx', import.meta.url), 'utf8');
+const rawProviders = readFileSync(new URL('../src/app/providers.tsx', import.meta.url), 'utf8');
+const rawThemeColorSync = readFileSync(new URL('../src/components/theme-color-sync.tsx', import.meta.url), 'utf8');
+const rawNextConfig = readFileSync(new URL('../next.config.ts', import.meta.url), 'utf8');
 const rawDropdown = readFileSync(new URL('../src/components/ui/dropdown-menu.tsx', import.meta.url), 'utf8');
 const rawInput = readFileSync(new URL('../src/components/ui/input.tsx', import.meta.url), 'utf8');
 const CONSUMPTION = [
@@ -376,9 +381,12 @@ const CONSUMPTION = [
     rawDialog.includes('duration-(--t-base)') && rawDialog.includes('z-(--z-modal)')],
   // P4-W3c (B1): the three recipe gates the P4-F5b follow-up named —
   // sheet, dropdown, input join button/dialog at the consumption table.
-  ['sheet consumes the motion + z ladders (z-(--z-sheet) + duration-(--t-base) + open duration-(--t-slow) + ease-smooth)',
+  // r131 (F1, A5 P1-4): sheet open duration snapped --t-slow 380ms →
+  // --t-base 240ms (canonical sheet rung, madarek .sheet-panel rides
+  // --motion-duration-medium = 240ms) — BOTH directions now t-base.
+  ['sheet consumes the motion + z ladders (z-(--z-sheet) + duration-(--t-base) both directions + ease-smooth)',
     rawSheet.includes('z-(--z-sheet)') && rawSheet.includes('duration-(--t-base)') &&
-    rawSheet.includes('data-[state=open]:duration-(--t-slow)') && rawSheet.includes('ease-smooth')],
+    rawSheet.includes('data-[state=open]:duration-(--t-base)') && rawSheet.includes('ease-smooth')],
   ['dropdown-menu consumes the z ladder + elevation bridge (z-(--z-dropdown) + rounded-md + shadow-md)',
     rawDropdown.includes('z-(--z-dropdown)') && rawDropdown.includes('rounded-md') &&
     rawDropdown.includes('shadow-md')],
@@ -390,6 +398,61 @@ const CONSUMPTION = [
 for (const [name, okFlag] of CONSUMPTION) {
   if (okFlag) passed += 1;
   else failures.push(`consumption gate FAILED: ${name}`);
+}
+
+// ── r131 (F1) canon gates — the r131 re-base laws, pinned so a future ───────
+// edit cannot silently regress them (same shape as the r126 consumption
+// gates: raw source gates, not existence pins).
+const R131_F1 = [
+  // Switch: RTL thumb mirror (A12 #1 — the physical +translate pushed the
+  // checked thumb OFF the track under dir=rtl).
+  ['switch thumb carries the rtl: mirror (SM/SB fleet pattern)',
+    rawSwitch.includes('data-[state=checked]:rtl:-translate-x-[calc(100%-2px)]')],
+  ['switch ships a ≥44px hit target (SM pseudo-hit pattern, after:-inset-*)',
+    rawSwitch.includes("after:-inset-x-1.5") && rawSwitch.includes("after:-inset-y-3.2") &&
+    rawSwitch.includes("after:content-['']")],
+  // Sheet: logical sides only — no physical placement/border utilities.
+  ['sheet sides are LOGICAL (no physical right-0/left-0/border-l/border-r; docks end-0/start-0)',
+    !rawSheet.includes('right-0') && !rawSheet.includes('left-0') &&
+    !rawSheet.includes('border-l') && !rawSheet.includes('border-r') &&
+    rawSheet.includes('end-0') && rawSheet.includes('start-0')],
+  ['sheet canonical geometry (min(420px,90vw) width + r-2xl leading corners + end-4 close + 4px scrim)',
+    rawSheet.includes('w-[min(420px,90vw)]') && rawSheet.includes('rounded-s-2xl') &&
+    rawSheet.includes('rounded-e-2xl') && rawSheet.includes('end-4') &&
+    rawSheet.includes('backdrop-blur-[4px]')],
+  ['sheet grabber handle (madarek .sheet-grabber) + legacy side aliases preserved',
+    rawSheet.includes('SheetGrabber') && rawSheet.includes('side === "left" ? "end"')],
+  // Toaster: quiet canon — unstyled skin in globals, error manual-dismiss.
+  ['toaster rides unstyled mode at the dir-aware bottom-END (no richColors)',
+    rawSonner.includes('unstyled') && !rawSonner.includes('richColors') &&
+    rawSonner.includes('bottom-left')],
+  ['error toasts are manual-dismiss (toast.error widened to Infinity; rest 6s)',
+    rawSonner.includes('duration: Infinity') && rawSonner.includes('duration={6000}')],
+  ['globals owns the quiet toast card (status hairline inline-start + 28px pastel well + surface bg + elev)',
+    rawCss.includes('border-inline-start-color: var(--destructive)') &&
+    rawCss.includes('background: var(--toast-well-bg, var(--accent-soft))') &&
+    rawCss.includes('inline-size: 28px') &&
+    rawCss.includes('box-shadow: var(--elev-3)')],
+  // Print: paper forces the light palette (dark ink printed near-white).
+  ['print block forces the LIGHT palette (color-scheme light + pastel families on :root/.dark/.light)',
+    rawCss.includes('@media print {') &&
+    rawCss.includes(':root, .dark, .light { color-scheme: light;')],
+  // Providers: root MotionConfig + lazy toaster + theme-color sync.
+  ['root MotionConfig reducedMotion="user" (promoted from the dashboard shell)',
+    rawProviders.includes('reducedMotion="user"')],
+  ['toaster lazy-mounted out of the critical path (dynamic ssr:false)',
+    rawProviders.includes('ssr: false') && !rawProviders.includes('Toaster position=')],
+  ['theme-color metas follow the manual toggle (smart-link ThemeColorSync port)',
+    rawThemeColorSync.includes('{ dark: "#070B16", light: "#FBFAF9" } as const') &&
+    rawThemeColorSync.includes('meta[name="theme-color"]')],
+  // Fonts: immutable 1y cache header (A8 perf).
+  ['fonts served immutable (1y) — smart-link/smart-menu pattern',
+    rawNextConfig.includes('/fonts/:path*') &&
+    rawNextConfig.includes('public, max-age=31536000, immutable')],
+];
+for (const [name, okFlag] of R131_F1) {
+  if (okFlag) passed += 1;
+  else failures.push(`r131 F1 gate FAILED: ${name}`);
 }
 
 // ── P4-W3c (B2): FAMILY_WIRING — the semantic layer must chain through ──────

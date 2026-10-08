@@ -8,6 +8,7 @@ import { formatLyd } from "@/lib/money";
 import { normalizeLibyanPhone, formatPhoneDisplay } from "@/lib/phone";
 import { FULFILLMENT_AR, LIBYA_CITIES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/states";
 import { SkipLink } from "@/components/shared/skip-link";
@@ -17,6 +18,7 @@ import { AnimatedCopy } from "@/components/ui/animated-icons";
 import { libyanaUssdCode, madarUssdCode } from "@/lib/payment-constants";
 import {
   ArrowRight,
+  ArrowLeft,
   ShoppingBag,
   Truck,
   Store,
@@ -169,17 +171,17 @@ export function CheckoutClient({
           </p>
           <div className="mt-2 inline-flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/25 px-5 py-2.5">
             <ClipboardList className="size-5 text-accent-foreground" aria-hidden="true" />
-            <span className="font-heading font-bold text-lg text-accent-foreground tabular">{result.orderNumber}</span>
+            <span className="font-heading font-bold text-lg text-accent-foreground tabular-nums">{result.orderNumber}</span>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">
-            الإجمالي: <span className="font-bold text-foreground tabular nums">{formatLyd(result.total)}</span>
+            الإجمالي: <span className="font-bold text-foreground tabular-nums">{formatLyd(result.total)}</span>
           </p>
 
           <div className="mt-6 space-y-2.5">
             <Button asChild className="w-full h-12 font-bold text-base">
               <Link href={`/track/${result.publicToken}`}>
                 تتبع حالة الطلب
-                <ArrowRight className="size-5 ms-2 rotate-180" aria-hidden="true" />
+                <ArrowLeft className="size-5 ms-2" aria-hidden="true" />
               </Link>
             </Button>
             {result.whatsapp && (
@@ -205,7 +207,7 @@ export function CheckoutClient({
           <p className="mt-6 text-[11px] text-muted-foreground leading-relaxed">
             احفظ رابط التتبع — يمكنك مشاركته مع أي شخص لمتابعة الطلب.
             <br />
-            <span dir="ltr" className="tabular">{trackUrl}</span>
+            <span dir="ltr" className="tabular-nums">{trackUrl}</span>
           </p>
         </div>
       </div>
@@ -223,7 +225,7 @@ export function CheckoutClient({
           action={
             <Button asChild className="px-6">
               <Link href={`/store/${slug}`}>
-                <ArrowRight className="size-4 me-2 rotate-180" aria-hidden="true" />
+                <ArrowLeft className="size-4 me-2" aria-hidden="true" />
                 العودة للمتجر
               </Link>
             </Button>
@@ -265,6 +267,19 @@ export function CheckoutClient({
           </div>
         )}
 
+        {/* r131-F2 (P0-1): a REAL <form> — Enter submits from any field
+            and the button is a true type=submit (form= reaches the sticky
+            bar outside <main>); validation stays manual (noValidate) with
+            the toast as reinforcement. */}
+        <form
+          id="checkout-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            submit();
+          }}
+          noValidate
+          className="contents"
+        >
         {/* Fulfillment */}
         <section className="mt-4 rounded-xl border border-border bg-card p-4">
           <h2 className="font-semibold text-sm mb-3">طريقة الاستلام</h2>
@@ -313,14 +328,13 @@ export function CheckoutClient({
                 <User className="size-3" aria-hidden="true" />
                 الاسم الكامل *
               </label>
-              <input
+              <Input
                 id="c-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoComplete="name"
                 maxLength={80}
                 placeholder="اسمك"
-                className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
               />
             </div>
             <div className="space-y-1.5">
@@ -328,7 +342,7 @@ export function CheckoutClient({
                 <Phone className="size-3" aria-hidden="true" />
                 رقم الهاتف *
               </label>
-              <input
+              <Input
                 id="c-phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -337,7 +351,7 @@ export function CheckoutClient({
                 dir="ltr"
                 maxLength={20}
                 placeholder="0912345678"
-                className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm text-start tabular focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
+                className="text-start tabular-nums"
               />
             </div>
           </div>
@@ -357,7 +371,7 @@ export function CheckoutClient({
                   id="c-city"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
+                  className="w-full h-11 rounded-md border border-input bg-background px-4 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"
                 >
                   {LIBYA_CITIES.map((c) => (
                     <option key={c} value={c}>{c}</option>
@@ -366,13 +380,12 @@ export function CheckoutClient({
               </div>
               <div className="space-y-1.5">
                 <label htmlFor="c-area2" className="text-xs font-medium text-muted-foreground">المنطقة</label>
-                <input
+                <Input
                   id="c-area2"
                   value={area}
                   onChange={(e) => setArea(e.target.value)}
                   maxLength={60}
                   placeholder="مثال: تاجوراء"
-                  className="w-full h-12 rounded-lg border border-input bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
                 />
               </div>
             </div>
@@ -401,11 +414,11 @@ export function CheckoutClient({
                       }`}
                     >
                       <div className="text-xs font-semibold truncate">{z.name}</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5 tabular nums">
+                      <div className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">
                         {z.fee === 0 ? "مجاناً" : formatLyd(z.fee)}
                       </div>
                       {z.minOrder > 0 && (
-                        <div className="text-[9px] text-muted-foreground/70 tabular nums">حد أدنى {formatLyd(z.minOrder)}</div>
+                        <div className="text-[11px] text-muted-foreground tabular-nums">حد أدنى {formatLyd(z.minOrder)}</div>
                       )}
                     </button>
                   );
@@ -415,7 +428,7 @@ export function CheckoutClient({
               {minOrderUnmet && (
                 <p className="text-xs text-destructive-ink rounded-lg bg-destructive/10 border border-destructive/25 px-3 py-2">
                   الحد الأدنى للطلب في {zone?.name} هو {formatLyd(zone!.minOrder)} — أضف منتجات بقيمة{" "}
-                  <span className="font-bold tabular">{formatLyd(zone!.minOrder - subtotal)}</span> أخرى
+                  <span className="font-bold tabular-nums">{formatLyd(zone!.minOrder - subtotal)}</span> أخرى
                 </p>
               )}
             </div>
@@ -428,13 +441,17 @@ export function CheckoutClient({
                 rows={2}
                 maxLength={200}
                 placeholder="الشارع، أقرب معلم، رقم المنزل..."
-                className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
+                className="w-full min-h-11 rounded-md border border-input bg-background px-4 py-2.5 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"
               />
             </div>
           </section>
         )}
 
-        {/* Payment — family ProviderPicker geometry: icon+label border-2 tiles */}
+        {/* Payment — family ProviderPicker geometry: icon+label tiles.
+            r131-F2 (P1-5): the ONE selection grammar — accent border + soft
+            accent wash (border-primary bg-primary/10), identical to the
+            fulfillment/zone/variant tiles; the old border-orange split is
+            retired (--orange ≡ --primary in both themes). */}
         <section className="mt-3 space-y-3 rounded-xl border border-border bg-card p-4">
           <h2 className="flex items-center gap-2 text-sm font-semibold">
             <Coins className="size-4 text-accent-foreground" aria-hidden="true" />
@@ -459,10 +476,10 @@ export function CheckoutClient({
                   type="button"
                   onClick={() => setPaymentMethodId(p.id)}
                   aria-pressed={selected}
-                  className={`flex h-14 flex-col items-center justify-center gap-1 rounded-xl border-2 text-[13px] font-medium transition-[border-color,box-shadow,color,background-color] duration-(--t-fast) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/50 ${
+                  className={`flex h-14 flex-col items-center justify-center gap-1 rounded-xl border text-[13px] font-medium transition-colors duration-(--t-fast) ${
                     selected
-                      ? "border-orange bg-orange/10 shadow-sm"
-                      : "border-border/30 text-muted-foreground hover:border-orange/30"
+                      ? "border-primary bg-primary/10"
+                      : "border-border text-muted-foreground hover:bg-muted/50"
                   }`}
                 >
                   <Icon className="size-4" aria-hidden="true" />
@@ -490,7 +507,7 @@ export function CheckoutClient({
                       navigator.clipboard.writeText(paymentConfig.number!);
                       toast.success("تم نسخ الرقم");
                     }}
-                    className="flex size-10 items-center justify-center rounded-lg border border-border/30 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/60"
+                    className="flex size-10 items-center justify-center rounded-md border border-border/30 transition-colors hover:bg-muted"
                     title="نسخ الرقم"
                     aria-label="نسخ الرقم"
                   >
@@ -521,7 +538,7 @@ export function CheckoutClient({
                         toast.error("فشل النسخ");
                       }
                     }}
-                    className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/60"
+                    className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90"
                     title="نسخ رمز التحويل السريع"
                     aria-label="نسخ رمز التحويل السريع"
                   >
@@ -549,20 +566,21 @@ export function CheckoutClient({
             rows={2}
             maxLength={300}
             placeholder="أي تفاصيل إضافية تريد إخبار المتجر بها..."
-            className="w-full rounded-lg border border-input bg-transparent px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
+            className="w-full min-h-11 rounded-md border border-input bg-transparent px-4 py-2.5 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"
           />
         </section>
+        </form>
 
         {/* Items summary */}
         <section className="mt-3 rounded-xl border border-border bg-card p-4">
           <h2 className="font-semibold text-sm mb-3">
-            ملخص السلة <span className="text-muted-foreground font-normal tabular">({items.length} عنصر)</span>
+            ملخص السلة <span className="text-muted-foreground font-normal tabular-nums">({items.length} عنصر)</span>
           </h2>
           <ul className="space-y-2.5">
             {items.map((i) => (
               <li key={i.key} className="flex items-start justify-between gap-3 text-sm">
                 <div className="min-w-0">
-                  <span className="tabular text-muted-foreground">{i.quantity}×</span>{" "}
+                  <span className="tabular-nums text-muted-foreground">{i.quantity}×</span>{" "}
                   <span className="font-medium">{i.productName}</span>
                   {i.variantName && <span className="text-muted-foreground text-xs"> — {i.variantName}</span>}
                   {i.options.length > 0 && (
@@ -575,7 +593,7 @@ export function CheckoutClient({
                     </div>
                   )}
                 </div>
-                <span className="tabular nums font-medium shrink-0">{formatLyd(i.unitPrice * i.quantity)}</span>
+                <span className="tabular-nums font-medium shrink-0">{formatLyd(i.unitPrice * i.quantity)}</span>
               </li>
             ))}
           </ul>
@@ -587,13 +605,24 @@ export function CheckoutClient({
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center gap-3">
           <div className="flex-1 min-w-0">
             {deliveryFee > 0 && (
-              <div className="text-[11px] text-muted-foreground tabular nums truncate">
+              <div className="text-[11px] text-muted-foreground tabular-nums truncate">
                 المنتجات {formatLyd(subtotal)} + توصيل {formatLyd(deliveryFee)}
               </div>
             )}
-            <div className="font-heading font-bold text-lg tabular nums">{formatLyd(total)}</div>
+            <div className="font-heading font-bold text-lg tabular-nums">{formatLyd(total)}</div>
           </div>
-          <Button onClick={submit} disabled={submitting || minOrderUnmet || !data} className="h-12 px-8 text-base font-bold">
+          {/* r131-F2 (P0-1): type=submit + form= — the sticky bar stays
+              outside <main> yet submits the real checkout form (Enter works
+              from every field). size=lg is the canonical 44px money CTA
+              (13/600 label canon; the h-12/text-base/font-bold override is
+              retired). */}
+          <Button
+            type="submit"
+            form="checkout-form"
+            size="lg"
+            disabled={submitting || minOrderUnmet || !data}
+            className="w-full sm:w-auto"
+          >
             {submitting ? (
               <>
                 <Loader2 className="size-5 animate-spin" aria-hidden="true" />

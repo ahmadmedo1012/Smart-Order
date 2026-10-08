@@ -56,16 +56,19 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
                 "the lime word below is the only pop"); the former lime
                 .ln-label was a 2nd lime pop above the h1 (roster
                 violation) */}
-            <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
+            <div className="ln-keep-eyebrow animate-fade-in" style={{ animationDelay: "0.1s" }}>
               <span className="ln-mono">{"Smart Order · متجر رقمي · ليبيا"}</span>
             </div>
 
             {/* h1 — CSS settle (family r92), visible in SSR HTML on first paint.
+                r131-F2: the fixed 36→68px Tailwind ladder retires — the
+                title now rides the canonical --ln-h1 scale
+                (clamp 44px→108px, SL/SB/SM pattern; landing.css .ln-keep-title).
                 The ONE lime word rides flat color — no gradient-text.
                 r129 S-12: tracking-normal (letter-spacing 0) — Arabic
                 joins; negative tracking breaks cursive connection
                 (canonical landing.css:591 hard rule). */}
-            <h1 className="r92-hero-settle text-balance text-4xl font-bold leading-[1.15] tracking-normal sm:text-5xl lg:text-6xl xl:text-[4.25rem]">
+            <h1 className="r92-hero-settle ln-keep-title text-balance font-bold tracking-normal">
               <span className="block">متجر رقمي لمتجرك</span>
               <span className="block">
                 <span className="ln-keep-word">الطلبات تصلك</span> في لوحة واحدة
@@ -80,9 +83,11 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
               تحكم واحدة.
             </p>
 
-            {/* CTA pair — magnetic gold + ghost (the landing pill system) */}
+            {/* CTA pair — magnetic gold + ghost (the landing pill system).
+                r131-F2: ln-keep-actions — the 560px full-width hook
+                (canonical .ln-hero-actions rule, landing.css §13). */}
             <div
-              className="animate-fade-in flex flex-wrap justify-center gap-3 sm:gap-4 lg:justify-start"
+              className="ln-keep-actions animate-fade-in flex flex-wrap justify-center gap-3 sm:gap-4 lg:justify-start"
               style={{ animationDelay: "0.39s" }}
             >
               <MagneticGoldLink href="/register" withArrow ariaLabel="أنشئ متجرك مجاناً — التسجيل">
@@ -109,8 +114,10 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
             )}
           </div>
 
-          {/* End column — the order moment (phone + floating proof), kept */}
-          <div className="relative z-10 flex justify-center sm:px-4 md:px-0">
+          {/* End column — the order moment (phone + floating proof), kept.
+              r131-F2: ln-keep-phone — the landscape-phone guard hides the
+              proof column so the whole value story fits the 390px fold. */}
+          <div className="ln-keep-phone relative z-10 flex justify-center sm:px-4 md:px-0">
             <HeroPhone />
           </div>
         </div>

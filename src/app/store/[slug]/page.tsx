@@ -1,10 +1,25 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { Storefront } from "@/components/storefront/storefront";
 import { SITE_URL } from "@/app/layout";
 
-export const dynamic = "force-dynamic";
+/* r131-F2 (SO-1, A8 perf): the money page left the force-dynamic path —
+ * ISR 60s on the smart-menu twin pattern (menu/[slug]/page.tsx:2-24):
+ * revalidate + dynamicParams + generateStaticParams [] (the App Router
+ * contract — a dynamic segment WITHOUT generateStaticParams renders
+ * dynamically on every request and `revalidate` is silently ignored;
+ * returning [] = all paths at runtime, zero DB queries at build, every
+ * slug generated on first visit and cached with the 60s revalidation).
+ * Product/stock data still streams client-side from the public API —
+ * the 60s window only governs the SEO/JSON-LD shell. */
+export const revalidate = 60;
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  return [];
+}
 
 /** Absolute URL helper — DB image refs are same-origin /api/media/*
  * relatives; scrapers and OG crawlers need absolutes. */
@@ -13,16 +28,19 @@ function absoluteUrl(url: string | null | undefined): string | undefined {
   return url.startsWith("http") ? url : `${SITE_URL}${url}`;
 }
 
-async function getBusiness(slug: string) {
-  return db.business.findUnique({
+/* r131-F2 (SO-1): React cache() — generateMetadata and StorePage share
+ * ONE memoized db.business.findUnique per request (the smart-menu
+ * getRestaurantBySlug pattern; the duplicate query is gone). */
+const getBusiness = cache(async (slug: string) =>
+  db.business.findUnique({
     where: { slug },
     select: {
       id: true, slug: true, name: true, description: true, logoUrl: true, coverUrl: true,
       city: true, phone: true, whatsappNumber: true, address: true, receiptFooter: true,
       isActive: true, isPublished: true,
     },
-  });
-}
+  })
+);
 
 export async function generateMetadata({
   params,

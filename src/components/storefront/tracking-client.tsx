@@ -99,7 +99,7 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
         <div className="rounded-xl border border-border bg-card p-5 text-center">
           {/* r128-F8 (B22): mono numerals — order number + receipt figures ride
               the mixed-script mono stack (Latin/digits mono, Arabic sans) */}
-          <h1 className="font-heading text-xl font-bold tabular font-mono">{order.orderNumber}</h1>
+          <h1 className="text-xl font-bold tabular-nums font-mono">{order.orderNumber}</h1>
           <p className="mt-1 text-xs text-muted-foreground">{formatArabicDateTime(order.createdAt)}</p>
           {isCancelled ? (
             <div className="mt-4 flex items-start gap-3 rounded-xl border border-border bg-card px-4 py-3 text-start">
@@ -188,31 +188,31 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
             {order.items.map((item, i) => (
               <li key={i} className="flex items-start justify-between gap-3 text-sm">
                 <div className="min-w-0">
-                  <span className="tabular text-muted-foreground">{item.quantity}×</span>{" "}
+                  <span className="tabular-nums text-muted-foreground">{item.quantity}×</span>{" "}
                   <span className="font-medium">{item.productName}</span>
                   {item.variantName && <span className="text-muted-foreground text-xs"> — {item.variantName}</span>}
                   {item.options.length > 0 && (
                     <div className="text-[11px] text-muted-foreground mt-0.5">{item.options.join("، ")}</div>
                   )}
                 </div>
-                <span className="tabular nums font-mono shrink-0">{formatLyd(item.lineTotal)}</span>
+                <span className="tabular-nums font-mono shrink-0">{formatLyd(item.lineTotal)}</span>
               </li>
             ))}
           </ul>
           <div className="mt-4 pt-3 border-t border-border/60 space-y-1.5 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>المجموع الفرعي</span>
-              <span className="tabular nums font-mono">{formatLyd(order.subtotal)}</span>
+              <span className="tabular-nums font-mono">{formatLyd(order.subtotal)}</span>
             </div>
             {order.deliveryFee > 0 && (
               <div className="flex justify-between text-muted-foreground">
                 <span>التوصيل</span>
-                <span className="tabular nums font-mono">{formatLyd(order.deliveryFee)}</span>
+                <span className="tabular-nums font-mono">{formatLyd(order.deliveryFee)}</span>
               </div>
             )}
             <div className="flex justify-between font-bold pt-1.5 border-t border-border/60">
               <span>الإجمالي</span>
-              <span className="tabular nums font-mono text-accent-foreground">{formatLyd(order.total)}</span>
+              <span className="tabular-nums font-mono text-accent-foreground">{formatLyd(order.total)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground pt-1 text-xs">
               <span>الدفع</span>

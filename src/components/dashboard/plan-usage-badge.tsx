@@ -89,7 +89,7 @@ function UsageBar({ label, pct }: { label: string; pct: number }) {
   const warn = pct >= 80;
   return (
     <span className="flex items-center gap-1.5" title={`${label}: ${pct}%`}>
-      <span className="text-[10px] text-muted-foreground">{label}</span>
+      <span className="text-[11px] text-muted-foreground">{label}</span>
       <span className="relative h-1.5 w-16 overflow-hidden rounded-full bg-muted">
         <span
           className={cn(

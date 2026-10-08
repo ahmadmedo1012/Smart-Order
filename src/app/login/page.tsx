@@ -57,7 +57,7 @@ export default function LoginPage() {
       {/* Back to home + ThemeToggle (family fixed corner cluster) */}
       <div className="fixed start-4 top-4 z-(--z-dropdown) flex items-center gap-2">
         <Link href="/">
-          <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground/60 hover:text-foreground">
+          <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground/80 hover:text-foreground">
             العودة للرئيسية
           </Button>
         </Link>
@@ -69,10 +69,19 @@ export default function LoginPage() {
       <div className="fixed inset-x-0 top-0 z-10 h-1 bg-orange" />
 
       {/* Family login card (r128-F8/B19: solid ground — no glass blur, quiet
-          hairline border + neutral lift) */}
-      <div className="animate-scale-in relative z-10 w-full max-w-sm rounded-2xl border border-border/50 bg-card shadow-sm sm:max-w-md">
+          hairline border + neutral lift). r131-F2 (P1-6/P1-7): the canonical
+          auth-card signatures — 2px copper top hairline (inset-inline 30%),
+          clamp(32px,4vw,48px) padding, ONE radius rung (16px), and the
+          wrapper halo = the ONE 3px/22% input halo (the old ring-2/20 is
+          retired). */}
+      <div className="animate-scale-in relative z-10 w-full max-w-sm rounded-xl border border-border/50 bg-card shadow-sm sm:max-w-md">
+        {/* canonical .auth-card::before — the short copper hairline */}
+        <span
+          aria-hidden="true"
+          className="absolute inset-x-[30%] top-0 h-0.5 rounded-b-[2px] bg-[linear-gradient(90deg,transparent,var(--primary),transparent)]"
+        />
         {/* Logo area */}
-        <div className="pb-2 pt-8 text-center">
+        <div className="px-[clamp(2rem,4vw,3rem)] pb-2 pt-[clamp(2rem,4vw,3rem)] text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center">
             <Image
               src="/brand-icon.png"
@@ -87,13 +96,16 @@ export default function LoginPage() {
           <p className="mt-1 text-base text-muted-foreground/80">لوحة تحكم المتاجر</p>
         </div>
 
-        <div className="px-6 pb-8 pt-4 sm:px-8">
+        <div className="px-[clamp(2rem,4vw,3rem)] pb-[clamp(2rem,4vw,3rem)] pt-4">
           <form onSubmit={onSubmit} className="space-y-5" noValidate>
             <div className="space-y-2">
               <Label htmlFor="email">البريد الإلكتروني</Label>
-              {/* Family SmartBot input — bg-secondary/40 + flame focus ring
-                  (r128-F8/B19: ladder duration token) */}
-              <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
+              {/* Family SmartBot input — bg-secondary/40 quiet well; the
+                  focus halo is the ONE 3px/22% accent halo
+                  (--state-input-focus-halo), matching ui/input exactly
+                  (r131-F2 P1-7; the old border-ring/50 + ring-2/ring-ring/20
+                  double indicator is retired). */}
+              <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-primary focus-within:shadow-(--state-input-focus-halo)">
                 <Input
                   id="email"
                   type="email"
@@ -111,7 +123,7 @@ export default function LoginPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">كلمة المرور</Label>
-              <div className="relative rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/20">
+              <div className="relative rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-primary focus-within:shadow-(--state-input-focus-halo)">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -197,14 +209,14 @@ export default function LoginPage() {
             </DialogContent>
           </Dialog>
 
-          <p className="mt-6 text-center text-xs text-muted-foreground/60">
+          <p className="mt-6 text-center text-xs text-muted-foreground/80">
             ليس لديك متجر؟{" "}
             <Link href="/register" className="font-medium text-accent-foreground hover:underline">
               أنشئ متجرك مجاناً
             </Link>
           </p>
 
-          <p className="mt-6 text-center text-xs text-muted-foreground/60">
+          <p className="mt-6 text-center text-xs text-muted-foreground/80">
             نظام إدارة المتاجر · الربط الذكي
           </p>
         </div>

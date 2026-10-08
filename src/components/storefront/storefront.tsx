@@ -159,12 +159,12 @@ export function Storefront({
             <Sheet open={cartOpen} onOpenChange={setCartOpen}>
               <SheetTrigger asChild>
                 <button
-                  className="relative rounded-lg bg-primary text-primary-foreground size-10 flex items-center justify-center font-semibold"
+                  className="relative rounded-md bg-primary text-primary-foreground size-10 flex items-center justify-center font-semibold transition-[color,background-color,transform] duration-(--t-fast) hover:bg-primary/90 active:scale-[0.97] active:duration-(--t-micro)"
                   aria-label={`عرض السلة (${count} عنصر)`}
                 >
                   <ShoppingBag className="size-5" aria-hidden="true" />
                   {count > 0 && (
-                    <span className="absolute -top-1.5 -end-1.5 min-w-5 h-5 rounded-full bg-saffron text-espresso text-[11px] font-bold flex items-center justify-center px-1 tabular">
+                    <span className="absolute -top-1.5 -end-1.5 min-w-5 h-5 rounded-full bg-saffron text-espresso text-[11px] font-bold flex items-center justify-center px-1 tabular-nums">
                       {count}
                     </span>
                   )}
@@ -190,7 +190,7 @@ export function Storefront({
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="ابحث في المنتجات..."
                 aria-label="ابحث في المنتجات"
-                className="w-full h-10 rounded-xl border border-input bg-card ps-9 pe-8 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
+                className="w-full h-11 rounded-md border border-input bg-card ps-9 pe-8 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"
               />
               {q && (
                 <button onClick={() => setQ("")} className="absolute end-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted" aria-label="مسح البحث">
@@ -280,8 +280,8 @@ export function Storefront({
         <div className="lg:hidden sticky bottom-0 z-(--z-dropdown) border-t border-border bg-background/95 backdrop-blur-md safe-bottom">
           <div className="px-4 py-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">
-              <div className="text-xs text-muted-foreground tabular">{count} عنصر في السلة</div>
-              <div className="font-bold text-sm tabular nums">{formatLyd(cartEstimatedSubtotal(items))}</div>
+              <div className="text-xs text-muted-foreground tabular-nums">{count} عنصر في السلة</div>
+              <div className="font-bold text-sm tabular-nums">{formatLyd(cartEstimatedSubtotal(items))}</div>
             </div>
             <Button onClick={() => setCartOpen(true)} className="font-semibold">
               <ShoppingBag className="size-4 me-1.5" aria-hidden="true" />

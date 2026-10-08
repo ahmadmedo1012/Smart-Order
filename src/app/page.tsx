@@ -16,7 +16,10 @@ import { FinaleCta } from "@/components/landing/FinaleCta";
 import { LandingFaq } from "@/components/landing/LandingFaq";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 
-export const dynamic = "force-dynamic";
+/* r131-F2 (SO-2, A8 perf): marketing landing left force-dynamic — ISR 60s
+ * (smart-menu landing precedent; counts are 60s-stale DB numbers, the
+ * family honesty profile). */
+export const revalidate = 60;
 
 /** Structured data — Organization + WebSite (the storefront pages add
  * Store + Product/Offer graphs of their own; LandingFaq adds FAQPage). */

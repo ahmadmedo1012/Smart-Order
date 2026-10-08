@@ -5,11 +5,14 @@ import Image from "next/image";
 import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { EmptyState, ErrorState } from "@/components/shared/states";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
+import { FieldError } from "@/components/dashboard/form-field";
+import { CategoriesSkeleton } from "@/components/dashboard/skeletons";
 import {
   Dialog,
   DialogClose,
@@ -19,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { compressImage } from "@/lib/compress";
 import { toast } from "sonner";
-import { LayoutGrid, Plus, Trash2, Pencil, ImagePlus, Loader2, X } from "lucide-react";
+import { LayoutGrid, Plus, Trash2, Pencil, ImagePlus, X } from "lucide-react";
 import type { Category } from "@/app/dashboard/products/page";
 
 export default function CategoriesPage() {
@@ -28,12 +31,18 @@ export default function CategoriesPage() {
   const [error, setError] = React.useState(false);
   const [editing, setEditing] = React.useState<Category | null>(null);
   const [creating, setCreating] = React.useState(false);
+  /* r131 (F3, A5 P2-5): destructive confirm rides the shared Radix
+     ConfirmDialog (was a native window.confirm). */
+  const [deleting, setDeleting] = React.useState<Category | null>(null);
+  const [deleteBusy, setDeleteBusy] = React.useState(false);
 
   const load = React.useCallback(() => {
     if (!businessId) return;
     setError(false);
     api
-      .get<{ categories: Category[] }>(`/api/categories?businessId=${businessId}`)
+      .get<{ categories: Category[] }>(
+        `/api/categories?businessId=${businessId}`,
+      )
       .then((r) => setCategories(r.data.categories))
       .catch(() => setError(true));
   }, [businessId]);
@@ -42,16 +51,8 @@ export default function CategoriesPage() {
 
   if (error) return <ErrorState retry={load} />;
   if (categories === null) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24" />
-          ))}
-        </div>
-      </div>
-    );
+    /* r131 (F3, A5 P2-7): shape-matched card-grid skeleton. */
+    return <CategoriesSkeleton />;
   }
 
   return (
@@ -59,7 +60,7 @@ export default function CategoriesPage() {
       <PageHeader
         title="الأقسام"
         subtitle={
-          <span className="tabular nums">
+          <span className="tabular-nums">
             {categories.length} قسم — تظهر بترتيبها في المتجر
           </span>
         }
@@ -86,13 +87,24 @@ export default function CategoriesPage() {
       ) : (
         <ul className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {categories.map((c, i) => (
-            <li key={c.id} className="group rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-              <span className="text-xs text-muted-foreground/60 tabular shrink-0" aria-hidden="true">
+            <li
+              key={c.id}
+              className="group rounded-xl border border-border bg-card p-4 flex items-center gap-3"
+            >
+              <span
+                className="text-xs text-muted-foreground/60 tabular-nums shrink-0"
+                aria-hidden="true"
+              >
                 {i + 1}
               </span>
               {c.imageUrl ? (
-                 
-                <Image src={c.imageUrl} alt="" width={44} height={44} className="size-11 rounded-lg object-cover shrink-0" />
+                <Image
+                  src={c.imageUrl}
+                  alt=""
+                  width={44}
+                  height={44}
+                  className="size-11 rounded-lg object-cover shrink-0"
+                />
               ) : (
                 <span className="flex size-11 items-center justify-center rounded-lg bg-primary/10 text-accent-foreground shrink-0">
                   <LayoutGrid className="size-5" aria-hidden="true" />
@@ -100,35 +112,62 @@ export default function CategoriesPage() {
               )}
               <div className="min-w-0 flex-1">
                 <div className="font-semibold text-sm truncate">{c.name}</div>
-                <div className="text-xs text-muted-foreground mt-0.5 tabular">
+                <div className="text-xs text-muted-foreground mt-0.5 tabular-nums">
                   {c._count?.products ?? 0} منتج
                 </div>
               </div>
               <div className="flex gap-1 shrink-0">
-                <button onClick={() => setEditing(c)} className="rounded-lg p-2 hover:bg-muted transition-colors" aria-label={`تعديل ${c.name}`}>
-                  <Pencil className="size-4 text-muted-foreground" aria-hidden="true" />
+                <button
+                  onClick={() => setEditing(c)}
+                  className="rounded-lg p-2 hover:bg-muted transition-colors"
+                  aria-label={`تعديل ${c.name}`}
+                >
+                  <Pencil
+                    className="size-4 text-muted-foreground"
+                    aria-hidden="true"
+                  />
                 </button>
                 <button
-                  onClick={async () => {
-                    if (!confirm(`حذف "${c.name}"؟ سيُؤرشف القسم إن كان يحتوي منتجات.`)) return;
-                    try {
-                      const r = await api.delete<{ archived?: boolean; deleted?: boolean }>(`/api/categories/${c.id}?businessId=${businessId}`);
-                      toast.success(r.data.archived ? "تم أرشفة القسم" : "تم حذف القسم");
-                      load();
-                    } catch (e) {
-                      toast.error(e instanceof Error ? e.message : "تعذر الحذف");
-                    }
-                  }}
+                  onClick={() => setDeleting(c)}
                   className="rounded-lg p-2 hover:bg-destructive/10 transition-colors"
                   aria-label={`حذف ${c.name}`}
                 >
-                  <Trash2 className="size-4 text-destructive-ink" aria-hidden="true" />
+                  <Trash2
+                    className="size-4 text-destructive-ink"
+                    aria-hidden="true"
+                  />
                 </button>
               </div>
             </li>
           ))}
         </ul>
       )}
+
+      <ConfirmDialog
+        open={!!deleting}
+        onOpenChange={(v) => !v && setDeleting(null)}
+        title={`حذف "${deleting?.name}"؟`}
+        description="سيُؤرشف القسم إن كان يحتوي منتجات، وإلا يُحذف نهائياً."
+        confirmLabel="حذف"
+        busy={deleteBusy}
+        onConfirm={async () => {
+          if (!deleting) return;
+          setDeleteBusy(true);
+          try {
+            const r = await api.delete<{
+              archived?: boolean;
+              deleted?: boolean;
+            }>(`/api/categories/${deleting.id}?businessId=${businessId}`);
+            toast.success(r.data.archived ? "تم أرشفة القسم" : "تم حذف القسم");
+            setDeleting(null);
+            load();
+          } catch (e) {
+            toast.error(e instanceof Error ? e.message : "تعذر الحذف");
+          } finally {
+            setDeleteBusy(false);
+          }
+        }}
+      />
 
       {(creating || editing) && (
         <CategoryDialog
@@ -155,7 +194,10 @@ function CategoryDialog({
   onClose: (changed: boolean) => void;
 }) {
   const [name, setName] = React.useState(category?.name ?? "");
-  const [description, setDescription] = React.useState(category?.description ?? "");
+  const [nameError, setNameError] = React.useState<string | null>(null);
+  const [description, setDescription] = React.useState(
+    category?.description ?? "",
+  );
   const [imageUrl, setImageUrl] = React.useState(category?.imageUrl ?? "");
   const [uploading, setUploading] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
@@ -167,7 +209,10 @@ function CategoryDialog({
     setUploading(true);
     try {
       const { dataUrl } = await compressImage(file, { maxDimension: 600 });
-      const r = await api.post<{ url: string }>("/api/media", { businessId, data: dataUrl });
+      const r = await api.post<{ url: string }>("/api/media", {
+        businessId,
+        data: dataUrl,
+      });
       setImageUrl(r.data.url);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "تعذر رفع الصورة");
@@ -177,8 +222,10 @@ function CategoryDialog({
   }
 
   async function save() {
+    /* r131 (F3, A5 P1-6): field-level validation — required name gets
+       the aria-invalid recipe + inline message, not a toast hunt. */
     if (!name.trim()) {
-      toast.error("أدخل اسم القسم");
+      setNameError("أدخل اسم القسم");
       return;
     }
     setSaving(true);
@@ -225,7 +272,7 @@ function CategoryDialog({
             </DialogDescription>
           </div>
           <DialogClose
-            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label="إغلاق"
           >
             <X className="size-4.5" aria-hidden="true" />
@@ -233,21 +280,25 @@ function CategoryDialog({
         </div>
         <div className="space-y-4 p-5">
           <div className="space-y-2">
-            <label htmlFor="c-name" className="text-sm font-medium">
-              اسم القسم *
-            </label>
+            <Label htmlFor="c-name">اسم القسم *</Label>
             <Input
               id="c-name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (nameError) setNameError(null);
+              }}
               placeholder="مثال: مشروبات ساخنة"
               maxLength={60}
+              aria-invalid={!!nameError}
+              aria-describedby={nameError ? "c-name-error" : undefined}
             />
+            {nameError && (
+              <FieldError id="c-name-error">{nameError}</FieldError>
+            )}
           </div>
           <div className="space-y-2">
-            <label htmlFor="c-desc" className="text-sm font-medium">
-              وصف قصير
-            </label>
+            <Label htmlFor="c-desc">وصف قصير</Label>
             <Textarea
               id="c-desc"
               value={description}
@@ -258,20 +309,44 @@ function CategoryDialog({
             />
           </div>
           <div className="space-y-2">
-            <span className="text-sm font-medium">صورة القسم (اختياري)</span>
+            <Label>صورة القسم (اختياري)</Label>
             <div className="flex items-center gap-3">
               <div className="relative size-20 rounded-xl border border-dashed border-border bg-muted/50 overflow-hidden">
                 {imageUrl ? (
                   <>
-                    <Image src={imageUrl} alt="" fill sizes="80px" className="object-cover" />
-                    <button type="button" onClick={() => setImageUrl("")} className="absolute top-1 end-1 rounded-full bg-background/90 shadow p-1" aria-label="إزالة الصورة">
+                    <Image
+                      src={imageUrl}
+                      alt=""
+                      fill
+                      sizes="80px"
+                      className="object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setImageUrl("")}
+                      className="absolute top-1 end-1 rounded-full bg-background/90 shadow p-1"
+                      aria-label="إزالة الصورة"
+                    >
                       <X className="size-3" aria-hidden="true" />
                     </button>
                   </>
                 ) : (
                   <label className="size-full flex items-center justify-center text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-                    {uploading ? <Loader2 className="size-5 animate-spin" aria-hidden="true" /> : <ImagePlus className="size-5" aria-hidden="true" />}
-                    <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={onImage} disabled={uploading} />
+                    {uploading ? (
+                      <span
+                        className="size-5 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-accent-foreground"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <ImagePlus className="size-5" aria-hidden="true" />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="sr-only"
+                      onChange={onImage}
+                      disabled={uploading}
+                    />
                   </label>
                 )}
               </div>
@@ -282,9 +357,8 @@ function CategoryDialog({
           <DialogClose asChild>
             <Button variant="outline">إلغاء</Button>
           </DialogClose>
-          <Button onClick={save} disabled={saving}>
-            {saving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-            {saving ? "جارٍ الحفظ..." : "حفظ"}
+          <Button onClick={save} disabled={saving} loading={saving}>
+            حفظ
           </Button>
         </div>
       </DialogContent>

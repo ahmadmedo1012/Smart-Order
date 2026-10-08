@@ -22,6 +22,14 @@ const nextConfig: NextConfig = {
       { source: "/(.*)", headers: security },
       { source: "/api/(.*)", headers: [...security, { key: "Cache-Control", value: "no-store" }] },
       { source: "/api/media/:path", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+      /* r131 (F1, A8 perf — NO fonts cache header): the self-hosted IBM
+       * Plex woff2 subsets (the two preloaded first-paint arabic files
+       * + fonts.css) were the only heavy assets revalidating on every
+       * visit. Filenames are family-weight-script qualified, so a
+       * file's bytes only ever change alongside a deploy that renames
+       * or re-points them — safe for immutable (smart-link r126 /
+       * smart-menu round85-B7 pattern, exact). */
+      { source: "/fonts/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
     ];
   },
 };

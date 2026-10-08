@@ -8,7 +8,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     <NextThemesProvider
       attribute="class"
       defaultTheme="dark"
-      /* r130 (W2-1, fix 9 — W1-F P2-12): enableSystem REMOVED. The
+      enableSystem={false}
+      /* r131 (F9b fleet hardening): enableSystem={false} EXPLICIT —
+       * next-themes v0.4.6 defaults enableSystem to true, so omitting
+       * the prop (r130's "removal") was a runtime no-op. r130 (W2-1,
+       * fix 9 — W1-F P2-12): enableSystem REMOVED. The
        * pre-paint boot script in layout.tsx implements the family
        * standard (DARK default; light ONLY when explicitly stored) and
        * ignores the OS preference — with enableSystem, next-themes

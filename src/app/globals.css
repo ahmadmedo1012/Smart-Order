@@ -929,13 +929,186 @@
   background-color: var(--whatsapp-deep);
 }
 
-/* Sonner toaster — pin onto the z-ladder toast rung (Madarek --z-toast:
-   toasts sit above sheets/modals, below a lightbox). */
+/* ════════════════════════════════════════════════════════════════
+   Sonner QUIET toaster (r131 F1 — A5 P1-5 / A6 P2-3)
+   The Toaster (ui/sonner.tsx) mounts in unstyled mode: these rules
+   own the whole card skin. Anatomy = the madarek family toast
+   (notifications.css:347 .toast-stack + polish.css:3936/5279): quiet
+   SURFACE card (never richColors solids), 1px rule, r-lg 12, elev-3,
+   a 1px STATUS hairline on the inline-start edge, 28px pastel icon
+   well. The [data-sonner-toaster] prefix keeps every rule above
+   sonner's runtime-injected defaults (0,3,0 vs 0,2,0) regardless of
+   <style> document order.
+   ════════════════════════════════════════════════════════════════ */
 [data-sonner-toaster] {
   z-index: var(--z-toast) !important;
 }
 [data-sonner-toast] {
   z-index: var(--z-toast) !important;
+}
+
+/* Card — surface ground; the inline-start edge is re-pointed per
+   status type below (madarek polish.css:5279 hairline pattern). */
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-3);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  border-inline-start-color: var(--primary);
+}
+/* 1px status hairline + the pastel well palette [data-icon] reads.
+   Theme-safe ink: dark = the luminous family -ink, light resolves
+   the status -ink chains to the -deep tier (both ≥6.9:1 on the
+   pastel -bg grounds). */
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"][data-type="success"] {
+  border-inline-start-color: var(--success);
+  --toast-well-bg: var(--success-soft);
+  --toast-well-ink: var(--success-ink);
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"][data-type="error"] {
+  border-inline-start-color: var(--destructive);
+  --toast-well-bg: var(--destructive-soft);
+  --toast-well-ink: var(--destructive-ink);
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"][data-type="info"] {
+  border-inline-start-color: var(--info);
+  --toast-well-bg: var(--info-soft);
+  --toast-well-ink: var(--info-ink);
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"][data-type="warning"] {
+  border-inline-start-color: var(--warning);
+  --toast-well-bg: var(--warning-soft);
+  --toast-well-ink: var(--warning-ink);
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"][data-type="default"],
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"][data-type="loading"] {
+  border-inline-start-color: var(--primary);
+  --toast-well-bg: var(--accent-soft);
+  --toast-well-ink: var(--accent-foreground);
+}
+
+/* Desktop card measure (≤600px keeps sonner's own mobile geometry) */
+@media (min-width: 601px) {
+  [data-sonner-toaster] [data-sonner-toast][data-styled="false"] {
+    width: min(420px, calc(100vw - 32px));
+  }
+}
+
+/* 28px pastel icon well (r-lg-md corners, family -bg ground) */
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"] [data-icon] {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  inline-size: 28px;
+  block-size: 28px;
+  border-radius: var(--radius-md);
+  background: var(--toast-well-bg, var(--accent-soft));
+  color: var(--toast-well-ink, var(--accent-foreground));
+}
+/* sonner renders an empty [data-icon] shell for untyped toasts —
+   hide it so the card keeps its quiet shape */
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"] [data-icon]:empty {
+  display: none;
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"] [data-icon] .sonner-loading-bar {
+  background: currentColor;
+}
+
+/* Content */
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"] [data-content] {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"] [data-title] {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold, 600);
+  line-height: 1.5;
+  color: inherit;
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"] [data-description] {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-regular, 400);
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+/* Action chip (e.g. the add-to-cart "عرض السلة") — solid accent,
+   never sonner's gray inversion */
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"] [data-button] {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  align-self: center;
+  height: 28px;
+  padding-inline: 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold, 600);
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease-out);
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"] [data-button]:hover {
+  background: var(--accent-hover);
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"] [data-button][data-cancel] {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+/* Close — quiet ghost, always present (error toasts never auto-dismiss,
+   so the affordance must stay discoverable), full strength on hover.
+   Focus rides the global :focus-visible outline (no utility overrides). */
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"] [data-close-button] {
+  position: absolute;
+  top: 6px;
+  inset-inline-end: 6px;
+  display: flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  opacity: 0.45;
+  transition:
+    opacity var(--t-fast) var(--ease-out),
+    background-color var(--t-fast) var(--ease-out);
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="false"] [data-close-button]:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+/* Focus on the toast row (tabIndex 0) = the ONE outline language;
+   replaces sonner's default black box-shadow ring. */
+[data-sonner-toaster] [data-sonner-toast]:focus-visible {
+  box-shadow: var(--elev-3);
+  outline: var(--state-focus-ring-width, 2px) solid
+    var(--state-focus-ring-color, var(--ring));
+  outline-offset: var(--state-focus-ring-offset, 2px);
+}
+
+/* Collapsed back-toasts hide their content (parity with sonner's own
+   data-styled="true" stack behavior) */
+[data-sonner-toaster] [data-sonner-toast][data-expanded="false"][data-front="false"] > * {
+  opacity: 0;
 }
 
 /* r130 (W2-1, fix 9): .text-gradient-orange DELETED — zero consumers
@@ -953,31 +1126,21 @@
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
-.skeleton-shimmer {
-  background: linear-gradient(90deg, var(--muted) 0%, color-mix(in oklch, var(--muted) 40%, var(--card)) 50%, var(--muted) 100%);
-  background-size: 200% 100%;
-  animation: shimmer var(--motion-duration-skeleton, 1200ms) var(--ease-linear, linear) infinite;
-}
+/* r131 (F1, A6 P2-2): .skeleton-shimmer DELETED — zero consumers
+   (rg-verified); .skeleton/.shimmer below are the single spelling.
+   The @keyframes shimmer survives them. */
 
 /* ════════════════════════════════════════════════════════════════
-   Family keyframes — verbatim from the ecosystem motion library
-   (glow literals re-tinted to the Madarek gold accent)
+   Family keyframes — the live set (r131 F1: the dead orbit/glow/
+   breath family pruned; only keyframes with live .animate-* or
+   .skeleton consumers remain)
    ════════════════════════════════════════════════════════════════ */
 @keyframes fade-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slide-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes scale-in { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-@keyframes magnetic-float { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-10px) scale(1.02); } }
-@keyframes breath { 0%, 100% { opacity: 0.6; } 50% { opacity: 0.3; } }
-@keyframes breathe { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 0.8; } }
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 8px rgb(233 180 76 / 0.15); }
-  50% { box-shadow: 0 0 25px rgb(233 180 76 / 0.35); }
-}
-@keyframes hero-glow-pulse {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
-}
+/* r131 (F1, A6 P2-2): slide-up / magnetic-float / breath / breathe /
+   pulse-glow / hero-glow-pulse DELETED — zero consumers (rg-verified);
+   each only ever fed the dead .animate-* utilities below. */
 @keyframes pulse-dot {
   0%, 100% { opacity: 0.3; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.15); }
@@ -991,35 +1154,18 @@
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
-@keyframes wipe-up {
-  from { clip-path: inset(100% 0 0 0); }
-  to { clip-path: inset(0 0 0 0); }
-}
-@keyframes message-draw {
-  from { opacity: 0; transform: translateY(8px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes copy-wiggle {
-  0%, 100% { transform: rotate(0); }
-  25% { transform: rotate(-6deg); }
-  75% { transform: rotate(6deg); }
-}
+/* r131 (F1, A6 P2-2): wipe-up / message-draw / copy-wiggle DELETED —
+   zero consumers (rg-verified). */
 /* r130 (W2-1, fix 9): @keyframes upload-fly DELETED — zero consumers
    (rg-verified) and its 1s duration had no canonical rung. */
-@keyframes orb-float {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(18px, -24px) rotate(2deg); }
-  50% { transform: translate(-12px, -6px) rotate(-1deg); }
-  75% { transform: translate(22px, -12px) rotate(3deg); }
-}
-@keyframes tilt-in { 0% { opacity: 0; transform: rotateX(-10deg) translateY(30px) scale(0.95); } 100% { opacity: 1; transform: rotateX(0) translateY(0) scale(1); } }
 @keyframes float-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 @keyframes ticket-drop {
   0% { opacity: 0; transform: translateY(-14px) scaleY(0.96); }
   60% { opacity: 1; transform: translateY(3px) scaleY(1); }
   100% { opacity: 1; transform: translateY(0) scaleY(1); }
 }
-@keyframes scale-glow { 0%, 100% { box-shadow: 0 0 20px rgb(233 180 76 / 0.20); } 50% { box-shadow: 0 0 50px rgb(233 180 76 / 0.40); } }
+/* r131 (F1, A6 P2-2): @keyframes scale-glow DELETED — zero consumers
+   (rg-verified; glow keyframes are off-canon anyway). */
 
 /* ════════════════════════════════════════════════════════════════
    Family animation utilities — r130 (W2-1, fix 7): every raw duration
@@ -1032,9 +1178,10 @@
    ════════════════════════════════════════════════════════════════ */
 .animate-scale-in { animation: scale-in var(--t-slower, 520ms) var(--ease-out) both; }
 .animate-fade-in { animation: fade-in var(--t-slower, 520ms) var(--ease-out) both; }
-.animate-slide-up { animation: slide-up var(--t-cinema, 720ms) var(--ease-out) both; }
-.animate-page-enter { animation: fade-in var(--motion-duration-page, 320ms) var(--ease-out) both; }
-.animate-reveal { animation: scale-in var(--motion-duration-reveal, 360ms) var(--ease-out) both; }
+/* r131 (F1, A6 P2-2): .animate-slide-up / .animate-page-enter /
+   .animate-reveal DELETED — zero consumers (rg-verified); the live
+   entrance utilities are .animate-scale-in / .animate-fade-in and the
+   JS-armed .reveal-armed primitive below. */
 
 /* Reveal primitive — armed state (added by JS only for below-fold content;
    content without JS stays fully visible) */
@@ -1044,14 +1191,12 @@
 }
 
 .animate-float { animation: float var(--motion-duration-ambient, 2.4s) var(--ease-smooth) infinite; }
-.animate-float-delayed { animation: float var(--motion-duration-ambient-slow, 3.6s) var(--ease-smooth) infinite 1s; }
+/* r131 (F1, A6 P2-2): .animate-float-delayed / .animate-magnetic-float /
+   .animate-breath DELETED — zero consumers (rg-verified). */
 /* r130 (W2-1): .animate-float-slow was referenced by hero-phone.tsx (×3)
    since r9x but never defined — the class silently no-oped (same bug
    class as the r128-F8 pulse-soft fix). Defined here on the drift band. */
 .animate-float-slow { animation: float-slow var(--motion-duration-ambient-drift, 6s) ease-in-out infinite; }
-.animate-magnetic-float { animation: magnetic-float var(--motion-duration-ambient-slow, 3.6s) var(--ease-smooth) infinite; }
-
-.animate-breath { animation: breath var(--motion-duration-ambient-pulse, 1.6s) ease-in-out infinite; }
 
 /* r130 (W2-1, fix 9): .delay-100..500 DELETED — zero consumers
    (rg-verified) AND the unlayered twins collided with Tailwind's
@@ -1059,19 +1204,17 @@
    utilities — smart-menu r126 B3 found the same collision). Stagger
    now rides --motion-stagger-step (60ms × n). */
 
-.animate-pulse-glow { animation: pulse-glow var(--motion-duration-ambient, 2.4s) ease-in-out infinite; }
-.animate-hero-glow-pulse { animation: hero-glow-pulse var(--motion-duration-ambient-slow, 3.6s) var(--ease-smooth) infinite; }
-.animate-orb-float { animation: orb-float var(--motion-duration-ambient-scene, 22s) ease-in-out infinite; }
-.animate-orb-float-delayed { animation: orb-float var(--motion-duration-ambient-scene, 22s) ease-in-out infinite 4s; }
-.animate-orb-float-slow { animation: orb-float var(--motion-duration-ambient-scene, 22s) ease-in-out infinite 8s; }
+/* r131 (F1, A6 P2-2): .animate-pulse-glow / .animate-hero-glow-pulse /
+   .animate-orb-float{,-delayed,-slow} DELETED — zero consumers
+   (rg-verified); the glow keyframes went with them. */
 .animate-pulse-dot { animation: pulse-dot var(--motion-duration-ambient-pulse, 1.6s) ease-in-out infinite; }
 /* r128-F8 (B22): the tracking page's active-node status light — the class was
    referenced by tracking-client.tsx since r9x but never defined; rides the
    ladder ease + the global reduced-motion belt (0.01ms / 1 iteration). */
 .animate-pulse-soft { animation: pulse-soft var(--motion-duration-ambient-pulse, 1.6s) var(--ease-soft) infinite; }
 .animate-price-swap-in { animation: price-swap-in var(--motion-duration-reveal, 360ms) var(--ease-out) both; }
-.animate-wipe-up { animation: wipe-up var(--t-cinema, 720ms) var(--ease-smooth) both; }
-.animate-message-draw { animation: message-draw var(--t-slow, 380ms) var(--ease-smooth) both; }
+/* r131 (F1, A6 P2-2): .animate-wipe-up / .animate-message-draw DELETED
+   — zero consumers (rg-verified). */
 /* r130 (W2-1, fix 9): .animate-upload-fly DELETED with its keyframes —
    zero consumers; its 1s duration had no canonical rung. */
 .animate-ticket-drop { animation: ticket-drop var(--t-slower, 520ms) var(--ease-out) both; }
@@ -1102,8 +1245,8 @@
   border-color: color-mix(in oklab, var(--orange) 40%, var(--border));
 }
 
-/* Glass family */
-.glass-card,
+/* Glass family (r131 F1: the dead .glass-card selector dropped —
+   zero consumers, rg-verified; .glass is the live spelling) */
 .glass {
   background: var(--glass-bg);
   backdrop-filter: blur(16px) saturate(1.1);
@@ -1139,12 +1282,8 @@
   background-size: 200% 100%;
 }
 
-.gpu-layer {
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
+/* r131 (F1, A6 P2-2): .gpu-layer DELETED — zero consumers
+   (rg-verified; modern compositing doesn't need the hint). */
 
 /* Film-grain texture overlay — family atmosphere layer (pointer-safe) */
 /* ════════════════════════════════════════════════════════════════
@@ -1220,8 +1359,59 @@
   padding-top: env(safe-area-inset-top, 0px);
 }
 
-/* Print: receipts clean */
+/* ── Print: receipts clean AND readable (r131 F1, A5 P1-3) ──────────
+   The DARK theme is the app default, and browsers strip backgrounds
+   when printing — the sand-on-night ink tokens printed near-white on
+   white paper (the merchant kitchen-receipt flow). The print block
+   now forces the LIGHT palette onto paper regardless of the active
+   theme class: the load-bearing tokens are re-declared for
+   :root/.dark/.light (this block sits AFTER both theme blocks, so it
+   wins the cascade), and the pastel families ride along so status
+   chips keep dark-on-pastel ink instead of luminous ink on stripped
+   grounds. Decorative fixed layers (grain, scroll progress, toasts)
+   never reach the paper. */
 @media print {
   .no-print { display: none !important; }
-  body { background: white !important; }
+  .grain-overlay,
+  .page-progress,
+  [data-sonner-toaster] { display: none !important; }
+  :root,
+  .dark,
+  .light {
+    color-scheme: light;
+    --background: #FBFAF9;
+    --foreground: #191918;
+    --card: #FFFFFF;
+    --card-foreground: #191918;
+    --popover: #FFFFFF;
+    --popover-foreground: #191918;
+    --muted: #F1EFEC;
+    --muted-foreground: #4F4D48;
+    --secondary: #F7F6F3;
+    --secondary-foreground: #191918;
+    --primary: #B57438;
+    --primary-foreground: #1A0F06;
+    --accent-foreground: #5C3416;
+    --accent-soft: #F4E4D2;
+    --border: #E9E7E2;
+    --input: #6E6C65;
+    --ring: #5C3416;
+    --state-focus-ring-color: #5C3416;
+    /* 9 pastel families (light values) — status chains resolve these
+       at :root, so --success/--warning/--info/--destructive flip with
+       them automatically. */
+    --c-peach-bg: #FFE9DC;     --c-peach-ink: #E07856;     --c-peach-deep: #6B2D1A;
+    --c-mint-bg: #DCF1E2;      --c-mint-ink: #4FA66D;      --c-mint-deep: #1F4F30;
+    --c-lavender-bg: #ECE6FA;  --c-lavender-ink: #8A6FE0;  --c-lavender-deep: #3F2D7A;
+    --c-sky-bg: #DDEBF7;       --c-sky-ink: #5C8FCE;       --c-sky-deep: #1F3D63;
+    --c-yellow-bg: #FCF1CD;    --c-yellow-ink: #D6A330;    --c-yellow-deep: #6B4C0B;
+    --c-rose-bg: #FCE0E2;      --c-rose-ink: #DD6E78;      --c-rose-deep: #6B2128;
+    --c-sand-bg: #F1ECDF;      --c-sand-ink: #B59868;      --c-sand-deep: #5A4623;
+    --c-grey-bg: #EFECE7;      --c-grey-ink: #6B665E;      --c-grey-deep: #2D2A24;
+    --c-copper-bg: #F4E4D2;    --c-copper-ink: #B57438;    --c-copper-deep: #5C3416;
+  }
+  body {
+    background: #FFFFFF !important;
+    color: #191918 !important;
+  }
 }

@@ -7,7 +7,9 @@ export const metadata: Metadata = {
   description: "خطط سمارت أوردر — ابدأ مجاناً وارتقِ متى ما كبر عملك. أسعار بالدينار الليبي.",
 };
 
-export const dynamic = "force-dynamic";
+/* r131-F2 (SO-2, A8 perf): pricing left force-dynamic — ISR 60s (the plan
+ * catalog changes rarely; 60s staleness is the SM-precedented profile). */
+export const revalidate = 60;
 
 /** Server-rendered initial plans (SEO-visible, no post-hydrate waterfall). */
 async function getPlans() {

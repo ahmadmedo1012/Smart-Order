@@ -25,7 +25,7 @@ export function ReceiptUpload({
       <span className="block text-sm font-medium leading-none">صورة التحويل (اختياري)</span>
       <div className="mt-1.5 flex items-center gap-2">
         <label
-          className="flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-border/30 px-4 text-sm text-muted-foreground transition-colors hover:bg-accent"
+          className="flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-border/30 px-4 text-base text-muted-foreground transition-[color,box-shadow,border-color] duration-(--t-fast) hover:bg-muted"
           style={{
             opacity: uploading ? 0.5 : 1,
             pointerEvents: uploading ? "none" : "auto",

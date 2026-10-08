@@ -148,7 +148,7 @@ export function ProductDialog({
                     >
                       <div className="text-xs font-semibold">{v.name}</div>
                       {v.priceDelta !== 0 && (
-                        <div className="text-[10px] mt-0.5 tabular nums">{formatLyd(price)}</div>
+                        <div className="text-[11px] mt-0.5 tabular-nums">{formatLyd(price)}</div>
                       )}
                     </button>
                   );
@@ -165,9 +165,9 @@ export function ProductDialog({
                 <legend className="text-sm font-semibold mb-1 flex items-center gap-2 flex-wrap">
                   {g.name}
                   {g.required ? (
-                    <span className="text-[10px] font-medium text-destructive-ink">إلزامي</span>
+                    <span className="text-[11px] font-medium text-destructive-ink">إلزامي</span>
                   ) : (
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-[11px] text-muted-foreground">
                       {g.maxSelect > 1 ? `حتى ${g.maxSelect} خيارات` : "اختياري"}
                     </span>
                   )}
@@ -198,7 +198,7 @@ export function ProductDialog({
                         </span>
                         <span className="text-sm font-medium flex-1">{o.name}</span>
                         {o.priceDelta !== 0 && (
-                          <span className="text-xs text-muted-foreground tabular nums">
+                          <span className="text-xs text-muted-foreground tabular-nums">
                             {o.priceDelta > 0 ? "+" : ""}
                             {formatLyd(o.priceDelta)}
                           </span>
@@ -214,7 +214,7 @@ export function ProductDialog({
           {/* Note */}
           <div>
             <label htmlFor="item-note" className="text-sm font-semibold mb-1.5 block">
-              ملاحظة <span className="text-[10px] text-muted-foreground font-normal">(اختياري)</span>
+              ملاحظة <span className="text-[11px] text-muted-foreground font-normal">(اختياري)</span>
             </label>
             <textarea
               id="item-note"
@@ -223,7 +223,7 @@ export function ProductDialog({
               placeholder="مثال: بدون بصل، صوص زيادة..."
               maxLength={200}
               rows={2}
-              className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
+              className="w-full min-h-11 rounded-md border border-input bg-background px-4 py-2.5 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"
             />
           </div>
         </div>
@@ -239,7 +239,7 @@ export function ProductDialog({
               >
                 <Plus className="size-4" aria-hidden="true" />
               </button>
-              <span className="w-10 text-center font-bold tabular" aria-live="polite">{quantity}</span>
+              <span className="w-10 text-center font-bold tabular-nums" aria-live="polite">{quantity}</span>
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 className="size-10 flex items-center justify-center hover:bg-muted rounded-e-xl transition-colors"
@@ -250,7 +250,7 @@ export function ProductDialog({
             </div>
             <Button onClick={add} disabled={!groupsValid} className="flex-1 h-11 font-bold text-base">
               <ShoppingBag className="size-5 me-1.5" aria-hidden="true" />
-              إضافة — <span className="tabular nums">{formatLyd(unitPrice * quantity)}</span>
+              إضافة — <span className="tabular-nums">{formatLyd(unitPrice * quantity)}</span>
             </Button>
           </div>
         </div>

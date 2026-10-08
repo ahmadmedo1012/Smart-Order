@@ -71,7 +71,7 @@ export function StepIndicator({
                       : "border-border/40 bg-muted/50 text-muted-foreground"
                 )}
               >
-                {isDone ? <MotionCheck className="size-4" /> : <span className="tabular nums">{i + 1}</span>}
+                {isDone ? <MotionCheck className="size-4" /> : <span className="tabular-nums">{i + 1}</span>}
               </m.div>
               <span
                 className={cn(

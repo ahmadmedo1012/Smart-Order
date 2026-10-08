@@ -4,14 +4,18 @@ import * as React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/client";
+import { m } from "motion/react";
 import { useBusiness } from "@/components/dashboard/shell";
-import { OrderStatusBadge, PaymentStatusBadge } from "@/components/shared/status-badges";
+import {
+  OrderStatusBadge,
+  PaymentStatusBadge,
+} from "@/components/shared/status-badges";
 import { ErrorState } from "@/components/shared/states";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { pageTitleClass } from "@/components/dashboard/page-header";
+import { OrderDetailSkeleton } from "@/components/dashboard/skeletons";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +37,7 @@ import { waLink, buildCustomerConfirmationMessage } from "@/lib/whatsapp";
 import { getAllowedTransitions } from "@/lib/order-machine";
 import {
   FULFILLMENT_AR,
+  ORDER_STATUS_AR,
   PAYMENT_TYPE_AR,
   type OrderStatus,
   type PaymentStatus,
@@ -50,6 +55,14 @@ import {
   Ban,
   Printer,
   ChevronDown,
+  ClipboardList,
+  CheckCircle2,
+  ChefHat,
+  Bell,
+  Truck,
+  PackageCheck,
+  XCircle,
+  type LucideIcon,
 } from "lucide-react";
 
 interface OrderDetail {
@@ -93,9 +106,51 @@ interface OrderDetail {
     changedByName: string | null;
     createdAt: string;
   }>;
-  customer: { id: string; name: string; phone: string; notes: string | null } | null;
-  business: { id: string; name: string; slug: string; whatsappNumber: string | null; phone: string | null };
+  customer: {
+    id: string;
+    name: string;
+    phone: string;
+    notes: string | null;
+  } | null;
+  business: {
+    id: string;
+    name: string;
+    slug: string;
+    whatsappNumber: string | null;
+    phone: string | null;
+  };
 }
+
+/* r131 (F3, A5 P2-3): order-status timeline rides the owner-timeline
+ anatomy (Madarek owner.css:10-66) — 2px accent-tinted spine
+ (28% primary into the border), 32px circular PASTEL icon nodes on
+ the 9-family grounds (same status→family map as the chips), 12px
+ row padding, 60ms stagger-in (RM-gated by the shell MotionConfig). */
+const TIMELINE_NODE: Record<string, { icon: LucideIcon; classes: string }> = {
+  NEW: {
+    icon: ClipboardList,
+    classes: "bg-(--c-copper-bg) text-(--c-copper-ink)",
+  },
+  CONFIRMED: {
+    icon: CheckCircle2,
+    classes: "bg-(--c-sky-bg) text-(--c-sky-ink)",
+  },
+  PREPARING: {
+    icon: ChefHat,
+    classes: "bg-(--c-yellow-bg) text-(--c-yellow-ink)",
+  },
+  READY: { icon: Bell, classes: "bg-(--c-copper-bg) text-(--c-copper-ink)" },
+  OUT_FOR_DELIVERY: {
+    icon: Truck,
+    classes: "bg-(--c-sky-bg) text-(--c-sky-ink)",
+  },
+  DELIVERED: {
+    icon: PackageCheck,
+    classes: "bg-(--c-mint-bg) text-(--c-mint-ink)",
+  },
+  CANCELLED: { icon: Ban, classes: "bg-(--c-grey-bg) text-(--c-grey-ink)" },
+  REJECTED: { icon: XCircle, classes: "bg-(--c-rose-bg) text-(--c-rose-ink)" },
+};
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -103,7 +158,10 @@ export default function OrderDetailPage() {
   const [order, setOrder] = React.useState<OrderDetail | null>(null);
   const [error, setError] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
-  const [confirmAction, setConfirmAction] = React.useState<{ to: OrderStatus; label: string } | null>(null);
+  const [confirmAction, setConfirmAction] = React.useState<{
+    to: OrderStatus;
+    label: string;
+  } | null>(null);
   const [actionNote, setActionNote] = React.useState("");
   const [internalNote, setInternalNote] = React.useState("");
 
@@ -124,7 +182,11 @@ export default function OrderDetailPage() {
   async function transition(to: OrderStatus, note?: string) {
     setBusy(true);
     try {
-      await api.patch(`/api/orders/${id}`, { businessId, status: to, statusNote: note || undefined });
+      await api.patch(`/api/orders/${id}`, {
+        businessId,
+        status: to,
+        statusNote: note || undefined,
+      });
       toast.success("تم تحديث حالة الطلب");
       setConfirmAction(null);
       setActionNote("");
@@ -164,44 +226,55 @@ export default function OrderDetailPage() {
 
   if (error) return <ErrorState retry={load} />;
   if (!order) {
-    return (
-      <div className="space-y-4 max-w-4xl">
-        <Skeleton className="h-8 w-56" />
-        <Skeleton className="h-64" />
-        <Skeleton className="h-40" />
-      </div>
-    );
+    /* r131 (F3, A5 P2-7): shape-matched detail skeleton (back chip +
+       hero row + KPI tiles + cards), not generic bars. */
+    return <OrderDetailSkeleton />;
   }
 
-  const transitions = getAllowedTransitions(order.status, order.fulfillmentType);
-  const customerWa = waLink(toE164(order.customerPhone), buildCustomerConfirmationMessage(
-    {
-      orderNumber: order.orderNumber,
-      customerName: order.customerName,
-      customerPhone: order.customerPhone,
-      items: order.items.map((i) => ({ productName: i.productName, variantName: i.variantName, quantity: i.quantity, lineTotal: i.lineTotal })),
-      fulfillmentType: order.fulfillmentType,
-      subtotal: order.subtotal,
-      deliveryFee: order.deliveryFee,
-      total: order.total,
-    },
-    order.business.name
-  ));
+  const transitions = getAllowedTransitions(
+    order.status,
+    order.fulfillmentType,
+  );
+  const customerWa = waLink(
+    toE164(order.customerPhone),
+    buildCustomerConfirmationMessage(
+      {
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        items: order.items.map((i) => ({
+          productName: i.productName,
+          variantName: i.variantName,
+          quantity: i.quantity,
+          lineTotal: i.lineTotal,
+        })),
+        fulfillmentType: order.fulfillmentType,
+        subtotal: order.subtotal,
+        deliveryFee: order.deliveryFee,
+        total: order.total,
+      },
+      order.business.name,
+    ),
+  );
 
   return (
     <div className="max-w-4xl mx-auto space-y-5">
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
+          {/* Canonical back chip (training.css:218-242): 40px hit,
+ r-sm, negative inline-start inset, hover surface-2. */}
           <Link
             href="/dashboard/orders"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="-ms-2 inline-flex h-10 items-center gap-1.5 rounded-md px-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <ArrowRight className="size-4" aria-hidden="true" />
             العودة للطلبات
           </Link>
           <div className="mt-2 flex items-center gap-3 flex-wrap">
-            <h1 className={`${pageTitleClass} tabular`}>{order.orderNumber}</h1>
+            <h1 className={`${pageTitleClass} tabular-nums`}>
+              {order.orderNumber}
+            </h1>
             <OrderStatusBadge status={order.status} />
             <PaymentStatusBadge status={order.paymentStatus} />
           </div>
@@ -223,7 +296,12 @@ export default function OrderDetailPage() {
                   <>
                     {primary && (
                       <Button
-                        onClick={() => setConfirmAction({ to: primary.to, label: primary.label })}
+                        onClick={() =>
+                          setConfirmAction({
+                            to: primary.to,
+                            label: primary.label,
+                          })
+                        }
                         disabled={busy}
                         className="font-semibold"
                       >
@@ -234,7 +312,11 @@ export default function OrderDetailPage() {
                     {destructive.length > 0 && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="icon" aria-label="إجراءات أخرى">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            aria-label="إجراءات أخرى"
+                          >
                             <MoreHorizontal className="size-4.5" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -242,22 +324,36 @@ export default function OrderDetailPage() {
                           {destructive.map((t) => (
                             <DropdownMenuItem
                               key={t.to}
-                              onClick={() => setConfirmAction({ to: t.to, label: t.label })}
+                              onClick={() =>
+                                setConfirmAction({ to: t.to, label: t.label })
+                              }
                               className="text-destructive-ink focus:text-destructive-ink"
                             >
                               <Ban className="size-4 me-2" aria-hidden="true" />
                               {t.label}
                             </DropdownMenuItem>
                           ))}
-                          {order.paymentStatus !== "PAID" && order.status !== "CANCELLED" && order.status !== "REJECTED" && (
-                            <DropdownMenuItem onClick={() => setPaymentStatus("PAID")}>
-                              <Check className="size-4 me-2" aria-hidden="true" />
-                              تأكيد استلام الدفع
-                            </DropdownMenuItem>
-                          )}
+                          {order.paymentStatus !== "PAID" &&
+                            order.status !== "CANCELLED" &&
+                            order.status !== "REJECTED" && (
+                              <DropdownMenuItem
+                                onClick={() => setPaymentStatus("PAID")}
+                              >
+                                <Check
+                                  className="size-4 me-2"
+                                  aria-hidden="true"
+                                />
+                                تأكيد استلام الدفع
+                              </DropdownMenuItem>
+                            )}
                           {order.paymentStatus === "PAID" && (
-                            <DropdownMenuItem onClick={() => setPaymentStatus("REFUNDED")}>
-                              <Check className="size-4 me-2" aria-hidden="true" />
+                            <DropdownMenuItem
+                              onClick={() => setPaymentStatus("REFUNDED")}
+                            >
+                              <Check
+                                className="size-4 me-2"
+                                aria-hidden="true"
+                              />
                               تسجيل استرجاع المبلغ
                             </DropdownMenuItem>
                           )}
@@ -279,7 +375,9 @@ export default function OrderDetailPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {order.paymentStatus === "PAID" && (
-                  <DropdownMenuItem onClick={() => setPaymentStatus("REFUNDED")}>
+                  <DropdownMenuItem
+                    onClick={() => setPaymentStatus("REFUNDED")}
+                  >
                     تسجيل استرجاع المبلغ
                   </DropdownMenuItem>
                 )}
@@ -287,7 +385,12 @@ export default function OrderDetailPage() {
             </DropdownMenu>
           )}
 
-          <Button variant="outline" size="icon" onClick={() => window.print()} aria-label="طباعة الطلب">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => window.print()}
+            aria-label="طباعة الطلب"
+          >
             <Printer className="size-4.5" aria-hidden="true" />
           </Button>
         </div>
@@ -300,16 +403,23 @@ export default function OrderDetailPage() {
             <h2 className="font-heading font-semibold">تفاصيل الطلب</h2>
             <ul className="mt-4 divide-y divide-border/60">
               {order.items.map((item) => {
-                const options: Array<{ name: string }> = item.optionsJson ? JSON.parse(item.optionsJson) : [];
+                const options: Array<{ name: string }> = item.optionsJson
+                  ? JSON.parse(item.optionsJson)
+                  : [];
                 return (
                   <li key={item.id} className="py-3 first:pt-0 last:pb-0">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="font-medium">
-                          <span className="tabular text-muted-foreground">{item.quantity}×</span>{" "}
+                          <span className="tabular-nums text-muted-foreground">
+                            {item.quantity}×
+                          </span>{" "}
                           {item.productName}
                           {item.variantName && (
-                            <span className="text-muted-foreground"> — {item.variantName}</span>
+                            <span className="text-muted-foreground">
+                              {" "}
+                              — {item.variantName}
+                            </span>
                           )}
                         </div>
                         {options.length > 0 && (
@@ -325,8 +435,10 @@ export default function OrderDetailPage() {
                         )}
                       </div>
                       <div className="text-end shrink-0">
-                        <div className="font-semibold tabular nums">{formatLyd(item.lineTotal)}</div>
-                        <div className="text-[11px] text-muted-foreground tabular nums">
+                        <div className="font-semibold tabular-nums">
+                          {formatLyd(item.lineTotal)}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground tabular-nums">
                           {formatLyd(item.unitPrice)} × {item.quantity}
                         </div>
                       </div>
@@ -339,17 +451,23 @@ export default function OrderDetailPage() {
             <div className="mt-4 pt-4 border-t space-y-2 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>المجموع الفرعي</span>
-                <span className="tabular nums">{formatLyd(order.subtotal)}</span>
+                <span className="tabular-nums">
+                  {formatLyd(order.subtotal)}
+                </span>
               </div>
               {order.deliveryFee > 0 && (
                 <div className="flex justify-between text-muted-foreground">
                   <span>رسوم التوصيل</span>
-                  <span className="tabular nums">{formatLyd(order.deliveryFee)}</span>
+                  <span className="tabular-nums">
+                    {formatLyd(order.deliveryFee)}
+                  </span>
                 </div>
               )}
               <div className="flex justify-between font-bold text-base pt-1 border-t">
                 <span>الإجمالي</span>
-                <span className="tabular nums text-accent-foreground">{formatLyd(order.total)}</span>
+                <span className="tabular-nums text-accent-foreground">
+                  {formatLyd(order.total)}
+                </span>
               </div>
             </div>
           </div>
@@ -359,40 +477,58 @@ export default function OrderDetailPage() {
         <div className="lg:col-span-2 space-y-4">
           <Card className="border-border/80 bg-card rounded-xl p-5">
             <h2 className="font-heading font-semibold">العميل</h2>
-            <div className="mt-3.5 space-y-2.5 text-sm">
-              <div className="flex items-center justify-between gap-2">
+            {/* r131 (F3, A5 P2-12): kv-row hairline rhythm (owner.css:271-281)
+ — 10px vertical padding + 1px hairline separators; phones
+ stay dir=ltr and ride tnum digits. */}
+            <div className="mt-1 text-sm">
+              <div className="flex items-center justify-between gap-2 border-b border-border py-2.5">
                 <span className="text-muted-foreground">الاسم</span>
                 {order.customer ? (
-                  <Link href={`/dashboard/customers/${order.customer.id}`} className="font-medium hover:text-accent-foreground truncate">
+                  <Link
+                    href={`/dashboard/customers/${order.customer.id}`}
+                    className="font-medium hover:text-accent-foreground truncate"
+                  >
                     {order.customerName}
                   </Link>
                 ) : (
-                  <span className="font-medium truncate">{order.customerName}</span>
+                  <span className="font-medium truncate">
+                    {order.customerName}
+                  </span>
                 )}
               </div>
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center justify-between gap-2 border-b border-border py-2.5">
                 <span className="text-muted-foreground">الهاتف</span>
-                <a href={`tel:${order.customerPhone}`} className="font-medium tabular hover:text-accent-foreground" dir="ltr">
-                  {formatPhoneDisplay(order.customerPhone)}
+                <a
+                  href={`tel:${order.customerPhone}`}
+                  className="font-medium tabular-nums hover:text-accent-foreground"
+                  dir="ltr"
+                >
+                  <bdi>{formatPhoneDisplay(order.customerPhone)}</bdi>
                 </a>
               </div>
               {order.fulfillmentType === "DELIVERY" && (
                 <>
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="text-muted-foreground shrink-0">العنوان</span>
+                  <div className="flex items-start justify-between gap-2 border-b border-border py-2.5">
+                    <span className="text-muted-foreground shrink-0">
+                      العنوان
+                    </span>
                     <span className="text-end">
-                      {[order.city, order.area].filter(Boolean).join(" — ") || "—"}
+                      {[order.city, order.area].filter(Boolean).join(" — ") ||
+                        "—"}
                     </span>
                   </div>
                   {order.addressLine && (
-                    <div className="flex items-start gap-2 rounded-lg bg-muted/60 px-3 py-2.5 text-sm">
-                      <MapPin className="size-4 text-muted-foreground shrink-0 mt-0.5" aria-hidden="true" />
+                    <div className="flex items-start gap-2 rounded-lg bg-muted/60 px-3 py-2.5 text-sm mt-2.5">
+                      <MapPin
+                        className="size-4 text-muted-foreground shrink-0 mt-0.5"
+                        aria-hidden="true"
+                      />
                       <span>{order.addressLine}</span>
                     </div>
                   )}
                 </>
               )}
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center justify-between gap-2 py-2.5">
                 <span className="text-muted-foreground">النوع</span>
                 <span>{FULFILLMENT_AR[order.fulfillmentType]}</span>
               </div>
@@ -404,7 +540,11 @@ export default function OrderDetailPage() {
                   اتصال
                 </a>
               </Button>
-              <Button asChild size="sm" className="whatsapp-btn flex-1 border-0 hover:bg-whatsapp-deep">
+              <Button
+                asChild
+                size="sm"
+                className="whatsapp-btn flex-1 border-0 hover:bg-whatsapp-deep"
+              >
                 <a href={customerWa} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="size-4" aria-hidden="true" />
                   واتساب
@@ -415,47 +555,60 @@ export default function OrderDetailPage() {
 
           <Card className="border-border/80 bg-card rounded-xl p-5">
             <h2 className="font-heading font-semibold">الدفع</h2>
-            <div className="mt-3.5 space-y-2.5 text-sm">
-              <div className="flex items-center justify-between gap-2">
+            <div className="mt-1 text-sm">
+              <div className="flex items-center justify-between gap-2 border-b border-border py-2.5">
                 <span className="text-muted-foreground">الطريقة</span>
                 <span className="font-medium">
-                  {order.paymentType ? PAYMENT_TYPE_AR[order.paymentType as keyof typeof PAYMENT_TYPE_AR] ?? order.paymentMethodName : order.paymentMethodName ?? "—"}
+                  {order.paymentType
+                    ? (PAYMENT_TYPE_AR[
+                        order.paymentType as keyof typeof PAYMENT_TYPE_AR
+                      ] ?? order.paymentMethodName)
+                    : (order.paymentMethodName ?? "—")}
                 </span>
               </div>
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center justify-between gap-2 py-2.5">
                 <span className="text-muted-foreground">الحالة</span>
                 <PaymentStatusBadge status={order.paymentStatus} />
               </div>
             </div>
-            {order.paymentStatus !== "PAID" && order.status !== "CANCELLED" && order.status !== "REJECTED" && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-4 w-full text-success-ink border-success/40 hover:bg-success/10"
-                onClick={() => setPaymentStatus("PAID")}
-                disabled={busy}
-              >
-                <Check className="size-4" aria-hidden="true" />
-                تأكيد استلام الدفع
-              </Button>
-            )}
+            {order.paymentStatus !== "PAID" &&
+              order.status !== "CANCELLED" &&
+              order.status !== "REJECTED" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4 w-full text-success-ink border-success/40 hover:bg-success/10"
+                  onClick={() => setPaymentStatus("PAID")}
+                  disabled={busy}
+                >
+                  <Check className="size-4" aria-hidden="true" />
+                  تأكيد استلام الدفع
+                </Button>
+              )}
           </Card>
 
           {/* Customer note — canonical quiet alert: surface ground + hairline
-              + 8px pastel status dot inline-start (no tinted lift). */}
+ + 8px pastel status dot inline-start (no tinted lift). */}
           {order.customerNote && (
             <Card className="rounded-xl border-border/80 bg-card p-5">
               <h2 className="font-heading font-semibold text-sm flex items-center gap-2.5">
-                <span className="size-2 shrink-0 rounded-full bg-warning" aria-hidden="true" />
+                <span
+                  className="size-2 shrink-0 rounded-full bg-warning"
+                  aria-hidden="true"
+                />
                 ملاحظة العميل
               </h2>
-              <p className="mt-2 text-sm leading-relaxed">{order.customerNote}</p>
+              <p className="mt-2 text-sm leading-relaxed">
+                {order.customerNote}
+              </p>
             </Card>
           )}
 
           {/* Internal note */}
           <Card className="border-border/80 bg-card rounded-xl p-5 no-print">
-            <h2 className="font-heading font-semibold text-sm">ملاحظة داخلية</h2>
+            <h2 className="font-heading font-semibold text-sm">
+              ملاحظة داخلية
+            </h2>
             <Textarea
               value={internalNote}
               onChange={(e) => setInternalNote(e.target.value)}
@@ -463,52 +616,84 @@ export default function OrderDetailPage() {
               className="mt-2.5 bg-muted/50 min-h-20"
               maxLength={500}
             />
-            <Button variant="outline" size="sm" className="mt-2.5" onClick={saveInternalNote} disabled={busy}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2.5"
+              onClick={saveInternalNote}
+              disabled={busy}
+            >
               حفظ الملاحظة
             </Button>
           </Card>
         </div>
       </div>
 
-      {/* Timeline */}
+      {/* Timeline — owner-timeline anatomy (r131 F3): 2px accent-tinted
+ spine + 32px pastel icon nodes + 60ms stagger. */}
       <Card className="border-border/80 bg-card rounded-xl p-5">
         <h2 className="font-heading font-semibold">سجل الطلب</h2>
-        <ol className="mt-4 space-y-0 relative">
-          <span className="absolute top-2 bottom-2 start-[7px] w-px bg-border" aria-hidden="true" />
-          {order.history.map((h, i) => (
-            <li key={h.id} className="relative ps-7 pb-5 last:pb-0">
-              <span
-                className={`absolute start-0 top-1 size-3.5 rounded-full border-2 border-background ${
-                  i === order.history.length - 1 ? "bg-primary" : "bg-muted-foreground/50"
-                }`}
-                aria-hidden="true"
-              />
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-medium">
-                  {h.note?.startsWith("تم") || h.toStatus === "NEW" ? h.note ?? "استُقبل الطلب" : `الحالة: ${h.toStatus}`}
+        <ol className="mt-2 relative">
+          <span
+            className="absolute top-4 bottom-4 start-[15px] w-0.5 rounded-full bg-[color-mix(in_srgb,var(--primary)_28%,var(--border))]"
+            aria-hidden="true"
+          />
+          {order.history.map((h, i) => {
+            const node = TIMELINE_NODE[h.toStatus] ?? TIMELINE_NODE.NEW;
+            const NodeIcon = node.icon;
+            return (
+              <m.li
+                key={h.id}
+                initial={{ opacity: 0, x: 6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{
+                  duration: 0.24,
+                  ease: [0.16, 1, 0.3, 1],
+                  delay: i * 0.06,
+                }}
+                className="relative ps-14 py-3 border-b border-border last:border-b-0"
+              >
+                <span
+                  className={`absolute start-0 top-1.5 flex size-8 items-center justify-center rounded-full ${node.classes}`}
+                  aria-hidden="true"
+                >
+                  <NodeIcon className="size-4" />
                 </span>
-              </div>
-              <div className="mt-0.5 text-xs text-muted-foreground flex gap-2 flex-wrap">
-                <span className="tabular">{formatArabicDateTime(h.createdAt)}</span>
-                {h.changedByName && (
-                  <>
-                    <span aria-hidden="true">·</span>
-                    <span>{h.changedByName}</span>
-                  </>
-                )}
-              </div>
-            </li>
-          ))}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-medium">
+                    {h.note?.startsWith("تم") || h.toStatus === "NEW"
+                      ? (h.note ?? "استُقبل الطلب")
+                      : `الحالة: ${ORDER_STATUS_AR[h.toStatus as keyof typeof ORDER_STATUS_AR] ?? h.toStatus}`}
+                  </span>
+                </div>
+                <div className="mt-0.5 text-xs text-muted-foreground flex gap-2 flex-wrap">
+                  <span className="tabular-nums">
+                    {formatArabicDateTime(h.createdAt)}
+                  </span>
+                  {h.changedByName && (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      <span>{h.changedByName}</span>
+                    </>
+                  )}
+                </div>
+              </m.li>
+            );
+          })}
         </ol>
       </Card>
 
       {/* Confirm destructive / status dialog */}
-      <Dialog open={!!confirmAction} onOpenChange={(v) => !v && setConfirmAction(null)}>
+      <Dialog
+        open={!!confirmAction}
+        onOpenChange={(v) => !v && setConfirmAction(null)}
+      >
         <DialogContent dir="rtl">
           <DialogHeader>
             <DialogTitle>{confirmAction?.label}</DialogTitle>
             <DialogDescription>
-              الطلب {order.orderNumber} — الإجراء: {confirmAction?.label}. هذا الإجراء يُسجل في سجل الطلب.
+              الطلب {order.orderNumber} — الإجراء: {confirmAction?.label}. هذا
+              الإجراء يُسجل في سجل الطلب.
             </DialogDescription>
           </DialogHeader>
           <Textarea
@@ -517,16 +702,24 @@ export default function OrderDetailPage() {
             placeholder="سبب اختياري (مثال: نفدت المكونات) — يظهر في السجل"
             maxLength={300}
           />
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-2">
             <Button variant="outline" onClick={() => setConfirmAction(null)}>
               إلغاء
             </Button>
             <Button
-              variant={confirmAction && ["CANCELLED", "REJECTED"].includes(confirmAction.to) ? "destructive" : "default"}
+              variant={
+                confirmAction &&
+                ["CANCELLED", "REJECTED"].includes(confirmAction.to)
+                  ? "destructive"
+                  : "default"
+              }
               disabled={busy}
-              onClick={() => confirmAction && transition(confirmAction.to, actionNote)}
+              loading={busy}
+              onClick={() =>
+                confirmAction && transition(confirmAction.to, actionNote)
+              }
             >
-              {busy ? "جارٍ التنفيذ..." : "تأكيد"}
+              تأكيد
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -534,4 +727,3 @@ export default function OrderDetailPage() {
     </div>
   );
 }
-

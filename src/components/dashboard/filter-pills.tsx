@@ -12,11 +12,14 @@ import { cn } from "@/lib/utils";
 
 export function pillClasses(on: boolean, className?: string) {
   return cn(
-    "inline-flex items-center justify-center rounded-full border text-xs font-semibold whitespace-nowrap transition-[color,background-color,border-color,box-shadow,transform] duration-(--t-fast) ease-smooth outline-none focus-visible:ring-2 focus-visible:ring-ring/60 active:scale-[0.97] active:duration-(--t-micro)",
+    /* r131 (F3): dropped the explicit ring — the ONE global
+ :focus-visible outline contract (globals.css) already covers
+ these; the ring was a double focus indicator. */
+    "inline-flex items-center justify-center rounded-full border text-xs font-semibold whitespace-nowrap transition-[color,background-color,border-color,box-shadow,transform] duration-(--t-fast) ease-smooth active:scale-[0.97] active:duration-(--t-micro)",
     on
       ? "border-transparent bg-foreground text-background shadow-[0_0_0_4px_color-mix(in_srgb,var(--orange)_16%,transparent)] dark:bg-primary dark:text-primary-foreground"
       : "border-border bg-card text-muted-foreground hover:-translate-y-px hover:border-foreground/25 hover:bg-muted hover:text-foreground",
-    className
+    className,
   );
 }
 
@@ -34,7 +37,11 @@ export function FilterPills({
   className?: string;
 }) {
   return (
-    <div role="group" aria-label={label} className={cn("flex flex-wrap items-center gap-2", className)}>
+    <div
+      role="group"
+      aria-label={label}
+      className={cn("flex flex-wrap items-center gap-2", className)}
+    >
       {items.map((it) => (
         <button
           key={it.value}

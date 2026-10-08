@@ -212,22 +212,33 @@ export function PaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[90dvh] max-w-sm overflow-y-auto rounded-2xl border-border/50 p-0 shadow-2xl sm:max-w-md">
-        {/* Header — family flame gradient band */}
-        <div className="bg-gradient-to-br from-orange to-orange/80 p-6 text-white">
+      {/* r131-F2 (P0-3): re-based on the SO ui/dialog recipe — kit
+          rounded-xl 16px + --shadow-modal + the signature top-edge accent
+          gradient hairline (::before, inset-inline 30%); the 20px
+          rounded-2xl/shadow-2xl spelling is retired. Width rides the kit
+          cap (min(560px,100%)). */}
+      <DialogContent className="max-h-[90dvh] overflow-y-auto p-0">
+        {/* Header — family flame gradient band. r131-F2 (P1): ink rides
+            the --orange-foreground token (10.63:1 dark / 4.95:1 light) —
+            text-white on gold was 1.89:1. */}
+        <div className="bg-gradient-to-br from-orange to-orange/80 p-6 text-orange-foreground">
           <div className="mb-2 flex items-center gap-2">
             <Smartphone className="size-5" aria-hidden="true" />
-            <DialogTitle className="text-lg font-bold text-white">دفع الاشتراك</DialogTitle>
+            <DialogTitle className="text-lg font-bold text-orange-foreground">دفع الاشتراك</DialogTitle>
           </div>
-          <DialogDescription className="text-sm text-white/70">ادفع عبر المحفظة الإلكترونية</DialogDescription>
+          <DialogDescription className="text-sm text-orange-foreground/70">ادفع عبر المحفظة الإلكترونية</DialogDescription>
         </div>
 
         <div className="space-y-5 p-5">
-          {/* Plan summary — family orange wash chip */}
-          <div className="rounded-xl border border-orange/15 bg-orange/10 p-4 dark:bg-orange/10">
+          {/* Plan summary — r131-F2: surface + dot (the alpha-wash alert
+              recipe; no more border-orange/15 + bg-orange/10). */}
+          <div className="rounded-xl border border-border/20 bg-muted/40 p-4">
             <div className="flex items-center justify-between">
-              <span className="font-bold">{planNameAr}</span>
-              <span className="text-lg font-bold text-accent-foreground tabular nums" dir="ltr">
+              <span className="flex items-center gap-2 font-bold">
+                <span className="size-2 rounded-full bg-primary" aria-hidden="true" />
+                {planNameAr}
+              </span>
+              <span className="text-lg font-bold text-accent-foreground tabular-nums" dir="ltr">
                 {price} د.ل
               </span>
             </div>
@@ -251,7 +262,7 @@ export function PaymentDialog({
                       <button
                         type="button"
                         onClick={() => copyToClipboard(providerPhone)}
-                        className="flex size-10 items-center justify-center rounded-lg border border-border/30 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/60"
+                        className="flex size-10 items-center justify-center rounded-md border border-border/30 transition-colors hover:bg-muted"
                         title="نسخ الرقم"
                       >
                         <AnimatedCopy className="size-3.5" />
@@ -277,7 +288,7 @@ export function PaymentDialog({
                               window.location.href = `tel:${encodedUSSD}`;
                             }, 150);
                           }}
-                          className="flex h-9 items-center gap-1.5 rounded-lg bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/60"
+                          className="flex h-9 items-center gap-1.5 rounded-md bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90"
                           title="نسخ الرمز وفتح الاتصال"
                         >
                           <AnimatedCopy className="size-3.5" />
@@ -297,7 +308,7 @@ export function PaymentDialog({
                       placeholder="09XXXXXXXXX"
                       inputMode="numeric"
                       maxLength={10}
-                      className="mt-1.5 h-11 rounded-xl text-start font-mono"
+                      className="mt-1.5 text-start font-mono"
                       dir="ltr"
                     />
                     <p className="mt-1 text-[11px] text-muted-foreground">
@@ -329,7 +340,7 @@ export function PaymentDialog({
                         <button
                           type="button"
                           onClick={() => copyToClipboard(row.value)}
-                          className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border/30 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/60"
+                          className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border/30 transition-colors hover:bg-muted"
                           title={`نسخ ${row.label}`}
                         >
                           <AnimatedCopy className="size-4" />
@@ -350,7 +361,7 @@ export function PaymentDialog({
                         if (Number.isNaN(v) || v < 0) return;
                         setBankAmount(v);
                       }}
-                      className="mt-1.5 h-11 rounded-xl"
+                      className="mt-1.5"
                       min={1}
                     />
                   </div>
@@ -363,7 +374,7 @@ export function PaymentDialog({
                       value={senderAccountName}
                       onChange={(e) => setSenderAccountName(e.target.value)}
                       placeholder="الاسم كما يظهر في الحساب"
-                      className="mt-1.5 h-11 rounded-xl"
+                      className="mt-1.5"
                     />
                   </div>
 
@@ -375,7 +386,7 @@ export function PaymentDialog({
                       value={senderAccountNumber}
                       onChange={(e) => setSenderAccountNumber(e.target.value)}
                       placeholder="رقم الحساب الذي حُوّل منه"
-                      className="mt-1.5 h-11 rounded-xl text-start font-mono"
+                      className="mt-1.5 text-start font-mono"
                       dir="ltr"
                     />
                   </div>
@@ -387,14 +398,15 @@ export function PaymentDialog({
               {provider !== "bank" && (
                 <div className="flex items-center justify-between rounded-xl border border-border/20 bg-muted/30 p-3">
                   <span className="text-sm text-muted-foreground">المبلغ المطلوب</span>
-                  <span className="text-lg font-bold text-accent-foreground tabular nums" dir="ltr">
+                  <span className="text-lg font-bold text-accent-foreground tabular-nums" dir="ltr">
                     {price} د.ل
                   </span>
                 </div>
               )}
 
               <Button
-                className="h-12 w-full rounded-xl text-base font-semibold"
+                size="lg"
+                className="w-full"
                 onClick={handleSent}
                 disabled={submitting || (provider !== "bank" && !phone.trim())}
               >
@@ -405,15 +417,14 @@ export function PaymentDialog({
 
           {step === "waiting" && (
             <div className="flex flex-col items-center space-y-6 py-10">
-              {/* Animated payment indicator — family pulse rings */}
+              {/* r131-F2: the off-ladder animate-ping rings retire (motion
+                  ladder); the static layered rings + the ladder-safe
+                  pulse-soft live dot carry the waiting state. */}
               <div className="relative size-28">
-                <div
-                  className="absolute inset-0 animate-ping rounded-full border-2 border-orange/20 opacity-75"
-                  style={{ animationDuration: "2s" }}
-                />
+                <div className="absolute inset-0 rounded-full border-2 border-orange/20" />
                 <div className="absolute inset-2 rounded-full border border-orange/30" />
                 <div className="absolute inset-4 flex items-center justify-center rounded-full bg-gradient-to-br from-orange to-orange/80 shadow-lg shadow-orange/25">
-                  <Smartphone className="size-8 text-white" aria-hidden="true" />
+                  <Smartphone className="size-8 text-orange-foreground" aria-hidden="true" />
                 </div>
               </div>
 
@@ -427,8 +438,7 @@ export function PaymentDialog({
               {/* Live status indicator */}
               <div className="flex items-center gap-2 rounded-full border border-border/20 bg-muted/30 px-4 py-2">
                 <span className="relative flex size-2">
-                  <span className="absolute inset-0 animate-ping rounded-full bg-orange opacity-75" />
-                  <span className="relative size-2 rounded-full bg-orange" />
+                  <span className="relative size-2 animate-pulse-soft rounded-full bg-orange" />
                 </span>
                 <span className="text-[11px] text-muted-foreground">
                   {provider === "libyana" ? "بانتظار تأكيد التحويل" : "بانتظار موافقة الإدارة"}
@@ -440,12 +450,9 @@ export function PaymentDialog({
           {step === "approved" && (
             <div className="flex flex-col items-center space-y-6 py-8">
               <m.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="relative size-20">
-                <div
-                  className="absolute inset-0 animate-ping rounded-full bg-success/20 opacity-75"
-                  style={{ animationDuration: "1.5s" }}
-                />
+                <div className="absolute inset-0 rounded-full bg-success/20" />
                 <div className="relative flex size-full items-center justify-center rounded-full bg-gradient-to-br from-success to-success/80 shadow-lg shadow-success/30">
-                  <CheckCircle2 className="size-10 text-white" aria-hidden="true" />
+                  <CheckCircle2 className="size-10 text-success-foreground" aria-hidden="true" />
                 </div>
               </m.div>
               <div className="space-y-2 text-center">
@@ -463,7 +470,8 @@ export function PaymentDialog({
               </div>
               <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="w-full">
                 <Button
-                  className="h-11 w-full rounded-xl bg-success text-success-foreground hover:bg-success/90"
+                  size="lg"
+                  className="w-full bg-success text-success-foreground hover:bg-success/90"
                   onClick={() => {
                     onOpenChange(false);
                     onSuccess?.();
@@ -478,12 +486,9 @@ export function PaymentDialog({
           {step === "rejected" && (
             <div className="flex flex-col items-center space-y-6 py-8">
               <m.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="relative size-20">
-                <div
-                  className="absolute inset-0 animate-ping rounded-full bg-destructive/20 opacity-75"
-                  style={{ animationDuration: "1.5s" }}
-                />
+                <div className="absolute inset-0 rounded-full bg-destructive/20" />
                 <div className="relative flex size-full items-center justify-center rounded-full bg-gradient-to-br from-destructive to-destructive/80 shadow-lg shadow-destructive/30">
-                  <XCircle className="size-10 text-white" aria-hidden="true" />
+                  <XCircle className="size-10 text-destructive-foreground" aria-hidden="true" />
                 </div>
               </m.div>
               <div className="space-y-2 text-center">
@@ -500,11 +505,12 @@ export function PaymentDialog({
                 </m.p>
               </div>
               <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex w-full gap-2">
-                <Button variant="outline" className="h-11 flex-1 rounded-xl" onClick={() => handleOpenChange(false)}>
+                <Button variant="outline" size="lg" className="flex-1" onClick={() => handleOpenChange(false)}>
                   إغلاق
                 </Button>
                 <Button
-                  className="h-11 flex-1 rounded-xl"
+                  size="lg"
+                  className="flex-1"
                   onClick={() => {
                     setStep("form");
                     setResolutionMsg("");

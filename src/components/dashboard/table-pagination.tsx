@@ -6,17 +6,23 @@ import { cn } from "@/lib/utils";
  * TablePagination — canonical Madarek `.table-pagination`
  * (components.css:899-946): flex-between footer attached to the table,
  * count on the start side + windowed numbered buttons on the end side.
- *   · buttons 36px (44px touch floor below sm)
- *   · active page = accent-soft ground + accent border + accent ink
- *   · disabled step 0.45, ellipsis gap between windows
+ * · buttons 36px (44px touch floor below sm)
+ * · active page = accent-soft ground + accent border + accent ink
+ * · disabled step 0.45, ellipsis gap between windows
  */
 
 function pageWindow(page: number, totalPages: number): Array<number | "gap"> {
-  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+  if (totalPages <= 7)
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
   const pages = new Set<number>([1, totalPages, page, page - 1, page + 1]);
   if (page <= 3) [2, 3, 4].forEach((p) => pages.add(p));
-  if (page >= totalPages - 2) [totalPages - 3, totalPages - 2, totalPages - 1].forEach((p) => pages.add(p));
-  const sorted = [...pages].filter((p) => p >= 1 && p <= totalPages).sort((a, b) => a - b);
+  if (page >= totalPages - 2)
+    [totalPages - 3, totalPages - 2, totalPages - 1].forEach((p) =>
+      pages.add(p),
+    );
+  const sorted = [...pages]
+    .filter((p) => p >= 1 && p <= totalPages)
+    .sort((a, b) => a - b);
   const out: Array<number | "gap"> = [];
   sorted.forEach((p, i) => {
     if (i > 0 && p - (sorted[i - 1] as number) > 1) out.push("gap");
@@ -25,8 +31,10 @@ function pageWindow(page: number, totalPages: number): Array<number | "gap"> {
   return out;
 }
 
+/* r131 (F3): dropped the explicit ring (double focus indicator) —
+ the ONE global :focus-visible outline contract covers these. */
 const stepBtn =
-  "inline-flex h-11 min-w-11 items-center justify-center rounded-md px-2 text-[13px] font-semibold transition-[color,background-color,border-color,box-shadow,opacity] duration-(--t-fast) outline-none focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-45 sm:h-9 sm:min-w-9";
+  "inline-flex h-11 min-w-11 items-center justify-center rounded-md px-2 text-[13px] font-semibold transition-[color,background-color,border-color,box-shadow,opacity] duration-(--t-fast) disabled:pointer-events-none disabled:opacity-45 sm:h-9 sm:min-w-9";
 
 export function TablePagination({
   page,
@@ -46,15 +54,21 @@ export function TablePagination({
   if (totalPages <= 1) return null;
   return (
     <div
-      className={cn("flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3", className)}
+      className={cn(
+        "flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3",
+        className,
+      )}
     >
-      <p className="text-xs text-muted-foreground tabular nums">
+      <p className="text-xs text-muted-foreground tabular-nums">
         {total} {unitLabel}
       </p>
       <nav aria-label="تصفح الصفحات" className="flex items-center gap-1.5">
         <button
           type="button"
-          className={cn(stepBtn, "border border-border bg-card text-muted-foreground hover:text-foreground")}
+          className={cn(
+            stepBtn,
+            "border border-border bg-card text-muted-foreground hover:text-foreground",
+          )}
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
         >
@@ -62,7 +76,11 @@ export function TablePagination({
         </button>
         {pageWindow(page, totalPages).map((p, i) =>
           p === "gap" ? (
-            <span key={`gap-${i}`} className="w-6 text-center text-xs text-muted-foreground" aria-hidden="true">
+            <span
+              key={`gap-${i}`}
+              className="w-6 text-center text-xs text-muted-foreground"
+              aria-hidden="true"
+            >
               …
             </span>
           ) : (
@@ -75,16 +93,19 @@ export function TablePagination({
                 stepBtn,
                 p === page
                   ? "border border-primary/50 bg-accent-soft text-accent-foreground"
-                  : "border border-transparent text-muted-foreground hover:border-border hover:bg-muted hover:text-foreground"
+                  : "border border-transparent text-muted-foreground hover:border-border hover:bg-muted hover:text-foreground",
               )}
             >
-              <span className="tabular nums">{p}</span>
+              <span className="tabular-nums">{p}</span>
             </button>
-          )
+          ),
         )}
         <button
           type="button"
-          className={cn(stepBtn, "border border-border bg-card text-muted-foreground hover:text-foreground")}
+          className={cn(
+            stepBtn,
+            "border border-border bg-card text-muted-foreground hover:text-foreground",
+          )}
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
         >

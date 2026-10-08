@@ -75,7 +75,7 @@ export function PlanSelector({
                   isSelected ? "bg-primary opacity-100" : "pointer-events-none bg-border/60 opacity-0"
                 )}
               >
-                <MotionCheck className="size-3.5 text-white" />
+                <MotionCheck className="size-3.5 text-orange-foreground" />
               </span>
 
               {meta.recommended && (

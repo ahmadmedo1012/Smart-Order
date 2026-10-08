@@ -50,7 +50,7 @@ export function CartDrawer({
         <ShoppingBag className="size-5 text-accent-foreground" aria-hidden="true" />
         <div className="flex-1">
           <SheetTitle className="font-heading font-bold">سلة الطلب</SheetTitle>
-          <p className="text-[11px] text-muted-foreground tabular">{count} عنصر</p>
+          <p className="text-[11px] text-muted-foreground tabular-nums">{count} عنصر</p>
         </div>
       </div>
 
@@ -89,30 +89,34 @@ export function CartDrawer({
                     )}
                   </div>
                   <div className="text-end shrink-0">
-                    <div className="text-sm font-bold tabular nums">{formatLyd(item.unitPrice * item.quantity)}</div>
+                    <div className="text-sm font-bold tabular-nums">{formatLyd(item.unitPrice * item.quantity)}</div>
                   </div>
                 </div>
+                {/* r131-F1b (A7 #4 / A11 SO-9): qty steppers + trash ride the
+                    family 44px touch floor (was size-8/p-2 = 32px) and the ONE
+                    press register (0.97 @ --t-micro); focus rides the global
+                    :focus-visible outline. Cluster corners r-md (10px rung). */}
                 <div className="mt-2.5 flex items-center justify-between">
-                  <div className="flex items-center gap-1 rounded-lg border border-border">
+                  <div className="flex items-center rounded-md border border-border">
                     <button
                       onClick={() => updateQuantity(item.key, item.quantity + 1)}
-                      className="size-8 flex items-center justify-center hover:bg-muted rounded-s-lg transition-colors"
+                      className="flex size-11 items-center justify-center transition-[color,background-color,transform] duration-(--t-fast) hover:bg-muted active:scale-[0.97] active:duration-(--t-micro) rounded-s-md"
                       aria-label={`زيادة كمية ${item.productName}`}
                     >
-                      <Plus className="size-3.5" aria-hidden="true" />
+                      <Plus className="size-4" aria-hidden="true" />
                     </button>
-                    <span className="w-8 text-center text-sm font-bold tabular">{item.quantity}</span>
+                    <span className="w-10 text-center text-sm font-bold tabular-nums" aria-live="polite">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.key, item.quantity - 1)}
-                      className="size-8 flex items-center justify-center hover:bg-muted rounded-e-lg transition-colors"
+                      className="flex size-11 items-center justify-center transition-[color,background-color,transform] duration-(--t-fast) hover:bg-muted active:scale-[0.97] active:duration-(--t-micro) rounded-e-md"
                       aria-label={`إنقاص كمية ${item.productName}`}
                     >
-                      <Minus className="size-3.5" aria-hidden="true" />
+                      <Minus className="size-4" aria-hidden="true" />
                     </button>
                   </div>
                   <button
                     onClick={() => removeItem(item.key)}
-                    className="rounded-lg p-2 hover:bg-destructive/10 transition-colors"
+                    className="flex size-11 items-center justify-center rounded-md transition-[color,background-color,transform] duration-(--t-fast) hover:bg-destructive/10 active:scale-[0.97] active:duration-(--t-micro)"
                     aria-label={`إزالة ${item.productName} من السلة`}
                   >
                     <Trash2 className="size-4 text-destructive-ink" aria-hidden="true" />
@@ -132,7 +136,7 @@ export function CartDrawer({
                       placeholder={`ملاحظة: ${i.productName}`}
                       maxLength={200}
                       onBlur={(e) => updateNote(i.key, e.target.value.trim())}
-                      className="w-full h-9 rounded-lg border border-input bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
+                      className="w-full h-11 rounded-md border border-input bg-background px-4 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"
                     />
                   ))}
                 </div>
@@ -144,7 +148,7 @@ export function CartDrawer({
           <div className="border-t border-border p-4 pb-5 safe-bottom shrink-0 space-y-3 bg-card">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">المجموع التقديري</span>
-              <span className="font-bold tabular nums">{formatLyd(subtotal)}</span>
+              <span className="font-bold tabular-nums">{formatLyd(subtotal)}</span>
             </div>
             <p className="text-[11px] text-muted-foreground">
               رسوم التوصيل تُحسب في الخطوة التالية حسب منطقتك

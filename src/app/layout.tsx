@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { ThemeProvider } from "@/components/shared/theme-provider";
-import { LazyMotionProvider } from "@/components/motion/lazy-motion-provider";
-import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "@/app/providers";
 import "./globals.css";
 
 /** Canonical production origin (order.smart-link.ly, Vercel + Neon).
@@ -12,6 +10,12 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://order.smart
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  /* r131 (F1, A7 P2-6 — title pipeline): the default + template pair
+     (Arabic chrome "%s | سمارت أوردر") already shipped; per-page
+     `export const metadata` (owned by the page agents) inherits the
+     template so every route that opts in gets consistent chrome —
+     history tabs and screen-reader page lists stop reading
+     identically. */
   title: {
     default: "سمارت أوردر — منصة الطلبات الرقمية للأعمال في ليبيا",
     template: "%s | سمارت أوردر",
@@ -85,10 +89,7 @@ export default function RootLayout({
         className="font-sans antialiased bg-background text-foreground min-h-screen flex flex-col"
         style={{ background: "var(--background-radial), var(--background)" }}
       >
-        <ThemeProvider>
-          <LazyMotionProvider>{children}</LazyMotionProvider>
-          <Toaster position="top-center" richColors closeButton dir="rtl" />
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

@@ -107,7 +107,7 @@ export function Footer({ className }: FooterProps) {
               <span className="block cursor-default transition-colors hover:text-foreground">
                 دعم فني عبر واتساب
               </span>
-              <span className="block cursor-default transition-colors hover:text-foreground tabular nums" dir="ltr">
+              <span className="block cursor-default transition-colors hover:text-foreground tabular-nums" dir="ltr">
                 {SUPPORT_WHATSAPP}
               </span>
             </div>
