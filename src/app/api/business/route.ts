@@ -29,7 +29,7 @@ export async function PATCH(req: NextRequest) {
     const member = await requireBusiness(user, input.businessId);
     requirePermission(member, "settings.manage");
 
-    const { businessId, ...data } = input;
+    const { businessId: _businessId, ...data } = input;
 
     if (data.phone) {
       const normalized = normalizeLibyanPhone(data.phone);

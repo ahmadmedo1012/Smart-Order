@@ -5,7 +5,7 @@ import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { EmptyState, ErrorState } from "@/components/shared/states";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PAYMENT_TYPES, PAYMENT_TYPE_AR, PAYMENT_TYPE_DESCRIPTIONS, PAYMENT_TYPES as PT, type PaymentType } from "@/lib/constants";
+import { PAYMENT_TYPES, PAYMENT_TYPE_AR, PAYMENT_TYPE_DESCRIPTIONS, type PaymentType } from "@/lib/constants";
 import { toast } from "sonner";
 import { CreditCard, Plus, Trash2, Loader2, Phone } from "lucide-react";
 

@@ -2,12 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { api } from "@/lib/client";
 import { useCart, cartEstimatedSubtotal } from "@/hooks/use-cart";
 import { formatLyd } from "@/lib/money";
-import { normalizeLibyanPhone, formatPhoneDisplay, toE164 } from "@/lib/phone";
-import { FULFILLMENT_AR, PAYMENT_TYPE_AR, LIBYA_CITIES } from "@/lib/constants";
+import { normalizeLibyanPhone, formatPhoneDisplay } from "@/lib/phone";
+import { FULFILLMENT_AR, LIBYA_CITIES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/states";
@@ -57,7 +56,6 @@ export function CheckoutClient({
   slug: string;
   business: { name: string; logoUrl: string | null; whatsappNumber: string | null };
 }) {
-  const router = useRouter();
   const items = useCart((s) => s.items);
   const clearCart = useCart((s) => s.clear);
   const [data, setData] = React.useState<StoreData | null>(null);

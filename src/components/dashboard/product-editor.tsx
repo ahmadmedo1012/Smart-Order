@@ -5,7 +5,7 @@ import Image from "next/image";
 import { api } from "@/lib/client";
 import { formatLydAmount, tryParseLyd } from "@/lib/money";
 import { compressImage } from "@/lib/compress";
-import type { Product, Category, ProductVariant, ProductOptionGroup } from "@/app/dashboard/products/page";
+import type { Product, Category } from "@/app/dashboard/products/page";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

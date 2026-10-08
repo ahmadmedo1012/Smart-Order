@@ -94,7 +94,7 @@ export function Reveal({
   );
 }
 
-interface ScrollRevealProps extends RevealProps {}
+type ScrollRevealProps = RevealProps;
 
 /** ScrollReveal — single-block family reveal (SSR-visible, fire-once). */
 export function ScrollReveal(props: ScrollRevealProps) {

@@ -1,12 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { m, AnimatePresence, useReducedMotion } from "motion/react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
 const springIcon = { type: "spring" as const, stiffness: 300, damping: 22, mass: 0.8 };
 const instant = { duration: 0 };
+
+/** Post-hydration mounted flag without an effect (rule-clean pattern:
+ * useSyncExternalStore with a server snapshot of false). */
+const emptySubscribe = () => () => {};
+function useMounted() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+}
 
 /**
  * ThemeToggle — family twin (Smart Menu / SmartBot):
@@ -15,11 +26,9 @@ const instant = { duration: 0 };
  */
 export function ThemeToggle({ className }: { className?: string }) {
   const { setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const prefersReducedMotion = useReducedMotion();
   const t = prefersReducedMotion ? instant : springIcon;
-
-  useEffect(() => setMounted(true), []);
 
   const isDark = resolvedTheme === "dark";
 

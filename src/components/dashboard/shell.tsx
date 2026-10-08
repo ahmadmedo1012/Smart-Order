@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { api } from "@/lib/client";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 import {
   LayoutDashboard,
   ClipboardList,

@@ -3,7 +3,6 @@
 import { Globe, ShieldCheck, Smartphone, MessageCircle } from "lucide-react";
 import { SectionContainer } from "@/components/ui/section-container";
 import { Reveal } from "@/components/ui/scroll-reveal";
-import { Eyebrow } from "@/components/ui/eyebrow";
 
 const points = [
   "واجهة عربية كاملة بمنطق RTL أصيل، خطوط عربية سريعة التحميل",

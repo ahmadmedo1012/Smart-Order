@@ -28,7 +28,7 @@ import {
 import { formatLyd } from "@/lib/money";
 import { formatArabicDateTime } from "@/lib/arabic";
 import { formatPhoneDisplay, toE164 } from "@/lib/phone";
-import { waLink, buildCustomerConfirmationMessage, buildStatusUpdateMessage } from "@/lib/whatsapp";
+import { waLink, buildCustomerConfirmationMessage } from "@/lib/whatsapp";
 import { getAllowedTransitions } from "@/lib/order-machine";
 import {
   FULFILLMENT_AR,

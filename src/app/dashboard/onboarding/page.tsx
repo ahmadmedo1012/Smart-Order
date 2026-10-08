@@ -3,7 +3,6 @@
 // Onboarding wizard — get a non-technical owner to a published storefront fast.
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,7 +14,6 @@ interface Category { id: string; name: string }
 interface Zone { id: string; name: string; fee: number; minOrder: number; isActive: boolean }
 
 export default function OnboardingPage() {
-  const router = useRouter();
   const { businessId, business } = useBusiness();
   const [loading, setLoading] = React.useState(true);
   const [publishing, setPublishing] = React.useState(false);
@@ -147,8 +145,6 @@ export default function OnboardingPage() {
       </div>
     </section>
   );
-
-  const productsExist = true; // simplified: category exists implies likely products; publish API enforces product requirement
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">

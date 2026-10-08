@@ -11,18 +11,16 @@ import { Button } from "@/components/ui/button";
 import { PlanUsageBadge } from "@/components/dashboard/plan-usage-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatLyd } from "@/lib/money";
-import { timeAgoAr, formatArabicTime } from "@/lib/arabic";
+import { timeAgoAr } from "@/lib/arabic";
 import type { OrderStatus, PaymentStatus } from "@/lib/constants";
 import { FULFILLMENT_AR } from "@/lib/constants";
 import {
   ClipboardList,
-  CheckCircle2,
   XCircle,
   Coins,
   UserPlus,
   TrendingUp,
   ArrowLeft,
-  PackageX,
   Bell,
   Truck,
   Package,

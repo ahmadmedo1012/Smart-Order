@@ -16,7 +16,7 @@ import { api, ApiError } from "@/lib/client";
 import { LIBYA_CITIES } from "@/lib/constants";
 import type { Plan } from "@/lib/plan-types";
 import { toast } from "sonner";
-import { Loader2, Rocket, Store, Sparkles, Star, Crown, Building2, Flame } from "lucide-react";
+import { Loader2, Rocket, Sparkles, Star, Crown, Building2, Flame } from "lucide-react";
 
 export default function RegisterPage() {
   return (

@@ -3,7 +3,6 @@
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { ok, fail, handleError } from "@/lib/api";
-import { formatLyd } from "@/lib/money";
 
 export const runtime = "nodejs";
 

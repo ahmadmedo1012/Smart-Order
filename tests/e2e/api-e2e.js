@@ -69,7 +69,7 @@ async function main() {
   ok("unauthenticated API blocked with Arabic message", unauth.status === 401 || unauth.body?.error?.code === "UNAUTHENTICATED", JSON.stringify(unauth.body).slice(0, 80));
 
   const A = makeCtx();
-  const { email: emailA, r: regA } = await registerBiz(A, "مخبز الاختبار أ");
+  const { r: regA } = await registerBiz(A, "مخبز الاختبار أ");
   ok("business A registers", regA.status === 201 || regA.body?.success === true, JSON.stringify(regA.body).slice(0, 100));
 
   const meA = await A.call("/api/auth/me");

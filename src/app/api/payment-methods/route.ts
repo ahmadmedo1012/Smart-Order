@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { requireAuth, requireBusiness, requirePermission } from "@/lib/auth";
 import { ok, fail, handleError, readJson } from "@/lib/api";
 import { PAYMENT_TYPES } from "@/lib/constants";
-import { normalizeLibyanPhone, toE164 } from "@/lib/phone";
+import { normalizeLibyanPhone } from "@/lib/phone";
 
 export const runtime = "nodejs";
 

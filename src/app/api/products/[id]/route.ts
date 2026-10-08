@@ -83,7 +83,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     const { businessId: _b, variants, optionGroups, ...scalar } = input;
 
     const updated = await db.$transaction(async (tx) => {
-      const p = await tx.product.update({ where: { id }, data: scalar });
+      await tx.product.update({ where: { id }, data: scalar });
 
       if (variants) {
         // replace-all strategy (simple, correct for editor UX)

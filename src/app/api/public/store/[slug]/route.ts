@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { ok, fail, handleError } from "@/lib/api";
-import { normalizeArabic } from "@/lib/arabic";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

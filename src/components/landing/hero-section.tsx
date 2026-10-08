@@ -6,7 +6,6 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { MotionArrowRight } from "@/components/ui/motion-icons";
 import { ScrollParallax } from "@/components/ui/scroll-parallax";
 import { HeroPhone } from "@/components/landing/hero-phone";
-import { springDefault } from "@/lib/motion";
 
 /**
  * HeroSection — family twin (Smart Menu HeroSection + SmartBot split):

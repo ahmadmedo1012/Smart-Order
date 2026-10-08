@@ -28,7 +28,7 @@ interface BusinessSettings {
 }
 
 export default function SettingsPage() {
-  const { businessId, business } = useBusiness();
+  const { businessId } = useBusiness();
   const [settings, setSettings] = React.useState<BusinessSettings | null>(null);
   const [error, setError] = React.useState(false);
   const [saving, setSaving] = React.useState(false);

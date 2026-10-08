@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { api, ApiError } from "@/lib/client";
 import { toast } from "sonner";
-import { Loader2, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
 
 const SUPPORT_WHATSAPP = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "218910089975";
 
@@ -32,7 +31,6 @@ function FloatingShapes() {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);

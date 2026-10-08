@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
     if (!authorized) return fail("غير مصرح", 403);
 
-    let created = { store: false, products: 0, paymentMethods: 0, zones: 0 };
+    const created = { store: false, products: 0, paymentMethods: 0, zones: 0 };
 
     let demo = await db.business.findUnique({
       where: { slug: "demo-store" },

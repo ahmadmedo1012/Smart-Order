@@ -6,10 +6,9 @@ import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { EmptyState, ErrorState } from "@/components/shared/states";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatLyd } from "@/lib/money";
 import { compressImage } from "@/lib/compress";
 import { toast } from "sonner";
-import { LayoutGrid, Plus, Trash2, Pencil, ImagePlus, Loader2, X, GripVertical } from "lucide-react";
+import { LayoutGrid, Plus, Trash2, Pencil, ImagePlus, Loader2, X } from "lucide-react";
 import type { Category } from "@/app/dashboard/products/page";
 
 export default function CategoriesPage() {

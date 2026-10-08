@@ -11,7 +11,7 @@ import { z } from "zod";
 import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { ok, fail, handleError, readJson } from "@/lib/api";
-import { normalizeLibyanPhone, phoneDigits, toE164 } from "@/lib/phone";
+import { normalizeLibyanPhone, toE164 } from "@/lib/phone";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { MAX_ORDER_ITEMS, MAX_ORDER_QUANTITY } from "@/lib/constants";
 import { buildOrderMessage } from "@/lib/whatsapp";

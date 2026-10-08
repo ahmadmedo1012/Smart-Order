@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { compressImage } from "@/lib/compress";
 import { toast } from "sonner";
 

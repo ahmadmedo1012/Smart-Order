@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
@@ -9,9 +8,8 @@ import { EmptyState, ErrorState } from "@/components/shared/states";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductEditor } from "@/components/dashboard/product-editor";
 import { formatLyd } from "@/lib/money";
-import { compressImage } from "@/lib/compress";
 import { toast } from "sonner";
-import { Package, Plus, Search, Upload, Loader2 } from "lucide-react";
+import { Package, Plus, Search } from "lucide-react";
 
 export interface ProductVariant {
   id?: string;

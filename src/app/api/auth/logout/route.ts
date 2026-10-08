@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { destroySession, requireAuth, getAuthUser } from "@/lib/auth";
+import { destroySession, getAuthUser } from "@/lib/auth";
 import { ok, handleError } from "@/lib/api";
 
 export const runtime = "nodejs";

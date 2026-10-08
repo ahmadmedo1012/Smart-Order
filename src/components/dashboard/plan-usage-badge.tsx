@@ -3,7 +3,6 @@
 import * as React from "react";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { api } from "@/lib/client";
 
 interface PlanInfo {
   name: string;

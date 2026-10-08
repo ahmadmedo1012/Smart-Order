@@ -4,6 +4,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { api } from "@/lib/client";
 import { useCart, cartCount, cartEstimatedSubtotal } from "@/hooks/use-cart";
 import { StorefrontSkeleton } from "@/components/storefront/skeletons";
@@ -19,13 +20,11 @@ import { normalizeArabic } from "@/lib/arabic";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
 import {
   Search,
   ShoppingBag,
   MessageCircle,
   MapPin,
-  Phone,
   Package,
   X,
   Store as StoreIcon,
@@ -72,7 +71,7 @@ export interface StoreData {
 
 export function Storefront({
   slug,
-  business,
+  business: _business,
 }: {
   slug: string;
   business: StoreData["business"];
@@ -84,7 +83,6 @@ export function Storefront({
   const [cartOpen, setCartOpen] = React.useState(false);
 
   const items = useCart((s) => s.items);
-  const cartBusinessSlug = useCart((s) => s.businessSlug);
   const count = cartCount(items);
 
   const load = React.useCallback(() => {
@@ -276,7 +274,7 @@ export function Storefront({
           <p className="mt-10 text-center text-xs text-muted-foreground">{data.business.receiptFooter}</p>
         )}
         <p className="mt-3 text-center text-xs text-muted-foreground">
-          متجر رقمي بواسطة <a href="/" className="hover:text-accent-foreground">سمارت أوردر</a>
+          متجر رقمي بواسطة <Link href="/" className="hover:text-accent-foreground">سمارت أوردر</Link>
         </p>
       </main>
 
