@@ -472,7 +472,7 @@ const LANDING_TOKENS = {
   '--ln-violet-deep': '#4E2FB8',
   '--ln-line': 'rgba(245, 243, 231, 0.14)',
   '--ln-line-soft': 'rgba(245, 243, 231, 0.07)',
-  '--ln-grain-op': '0.05',
+  '--ln-grain-op': '0.075',
   '--ln-radius-pill': '9999px', // resolves the scoped --r-full bridge
   '--ln-h1': 'clamp(2.75rem, 8.2vw, 6.75rem)',
   '--ln-h1-lh': '1.04',
