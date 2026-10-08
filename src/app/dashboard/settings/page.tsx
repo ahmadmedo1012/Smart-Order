@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -188,8 +189,7 @@ export default function SettingsPage() {
           <div className="relative size-20 rounded-2xl border border-dashed border-border bg-muted/50 overflow-hidden shrink-0">
             {form.logoUrl ? (
               <>
-                { }
-                <img src={form.logoUrl} alt="شعار المتجر" className="size-full object-cover" />
+                <Image src={form.logoUrl} alt="شعار المتجر" fill sizes="80px" className="object-cover" />
                 <button type="button" onClick={() => setForm((f) => ({ ...f, logoUrl: "" }))} className="absolute top-1 end-1 rounded-full bg-background/90 shadow p-1" aria-label="إزالة الشعار">
                   <X className="size-3" aria-hidden="true" />
                 </button>

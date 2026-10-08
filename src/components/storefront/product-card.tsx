@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { useCart } from "@/hooks/use-cart";
 import { formatLyd } from "@/lib/money";
 import type { StoreProduct } from "@/components/storefront/storefront";
@@ -52,12 +53,12 @@ export function ProductCard({
           aria-label={`تفاصيل ${product.name}`}
         >
           {product.imageUrl ? (
-             
-            <img
+            <Image
               src={product.imageUrl}
               alt={product.name}
-              className="size-full object-cover transition-transform group-hover:scale-105"
-              loading="lazy"
+              fill
+              sizes="(min-width: 1024px) 30vw, 46vw"
+              className="object-cover transition-transform group-hover:scale-105"
             />
           ) : (
             <span className="size-full flex items-center justify-center text-muted-foreground/30">
@@ -65,7 +66,7 @@ export function ProductCard({
             </span>
           )}
           {product.isFeatured && (
-            <span className="absolute top-2 start-2 rounded-full bg-saffron/95 px-2 py-0.5 text-[11px] font-bold text-black/80 shadow">
+            <span className="absolute top-2 start-2 rounded-full bg-saffron/95 px-2 py-0.5 text-[11px] font-bold text-espresso shadow">
               مميز
             </span>
           )}

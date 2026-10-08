@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { api } from "@/lib/client";
 import { formatLydAmount, tryParseLyd } from "@/lib/money";
 import { compressImage } from "@/lib/compress";
@@ -213,8 +214,7 @@ export function ProductEditor({
                 <div className="relative size-28 rounded-xl border border-dashed border-border bg-muted/50 overflow-hidden shrink-0">
                   {imageUrl ? (
                     <>
-                      { }
-                      <img src={imageUrl} alt="صورة المنتج" className="size-full object-cover" />
+                      <Image src={imageUrl} alt="صورة المنتج" fill sizes="112px" className="object-cover" />
                       <button
                         type="button"
                         onClick={() => setImageUrl("")}

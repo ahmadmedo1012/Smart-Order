@@ -7,7 +7,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/dashboard", "/api", "/track", "/login", "/register", "/checkout"],
+        // checkout lives at /store/[slug]/checkout — the old literal
+        // "/checkout" never matched a real path. (The pages also carry
+        // per-page noindex; this wildcard closes the static gap.)
+        disallow: ["/dashboard", "/api", "/track", "/login", "/register", "/store/*/checkout"],
       },
     ],
     sitemap: site ? `${site}/sitemap.xml` : undefined,

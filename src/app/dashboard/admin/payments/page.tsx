@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { api, ApiError } from "@/lib/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -174,11 +175,10 @@ export default function AdminPaymentsPage() {
                     href={p.receiptImageUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="size-20 shrink-0 overflow-hidden rounded-md border border-border/40 transition-transform hover:scale-105"
+                    className="relative size-20 shrink-0 overflow-hidden rounded-md border border-border/40 transition-transform hover:scale-105"
                     title="عرض صورة التحويل"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.receiptImageUrl} alt="صورة التحويل" className="size-full object-cover" />
+                    <Image src={p.receiptImageUrl} alt="صورة التحويل" fill sizes="80px" className="object-cover" />
                   </a>
                 )}
               </div>

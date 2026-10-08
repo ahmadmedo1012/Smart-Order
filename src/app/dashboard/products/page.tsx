@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { EmptyState, ErrorState } from "@/components/shared/states";
@@ -161,8 +162,7 @@ export default function ProductsPage() {
             >
               <div className="relative h-32 bg-muted overflow-hidden">
                 {p.imageUrl ? (
-                   
-                  <img src={p.imageUrl} alt={p.name} className="size-full object-cover" loading="lazy" />
+                  <Image src={p.imageUrl} alt={p.name} fill sizes="220px" className="object-cover" />
                 ) : (
                   <div className="size-full flex items-center justify-center text-muted-foreground/40">
                     <Package className="size-10" aria-hidden="true" />
@@ -170,7 +170,7 @@ export default function ProductsPage() {
                 )}
                 <div className="absolute top-2 end-2 flex gap-1.5">
                   {p.isFeatured && (
-                    <span className="rounded-full bg-saffron/90 px-2 py-0.5 text-[10px] font-bold text-black/80 shadow">
+                    <span className="rounded-full bg-saffron/90 px-2 py-0.5 text-[10px] font-bold text-espresso shadow">
                       مميز
                     </span>
                   )}

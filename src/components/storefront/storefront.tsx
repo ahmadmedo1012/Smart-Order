@@ -3,6 +3,7 @@
 // Storefront — Arabic RTL customer menu with categories, search, cart drawer.
 
 import * as React from "react";
+import Image from "next/image";
 import { api } from "@/lib/client";
 import { useCart, cartCount, cartEstimatedSubtotal } from "@/hooks/use-cart";
 import { StorefrontSkeleton } from "@/components/storefront/skeletons";
@@ -10,6 +11,7 @@ import { ProductCard } from "@/components/storefront/product-card";
 import { CartDrawer } from "@/components/storefront/cart-drawer";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { EmptyState, ErrorState } from "@/components/shared/states";
+import { SkipLink } from "@/components/shared/skip-link";
 import { formatLyd } from "@/lib/money";
 import { toE164 } from "@/lib/phone";
 import { waLink } from "@/lib/whatsapp";
@@ -121,13 +123,13 @@ export function Storefront({
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SkipLink />
       {/* Store header */}
-      <header className="sticky top-0 z-40 safe-top">
+      <header className="sticky top-0 z-(--z-dropdown) safe-top">
         <div className="bg-background/92 backdrop-blur-md border-b border-border/70">
           <div className="mx-auto max-w-4xl px-4 h-16 flex items-center gap-3">
             {data.business.logoUrl ? (
-               
-              <img src={data.business.logoUrl} alt={data.business.name} className="size-10 rounded-xl object-cover border border-border" />
+                <Image src={data.business.logoUrl} alt={data.business.name} width={40} height={40} className="size-10 rounded-xl object-cover border border-border" />
             ) : (
               <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-accent-foreground">
                 <StoreIcon className="size-5" aria-hidden="true" />
@@ -229,7 +231,7 @@ export function Storefront({
       </header>
 
       {/* Menu */}
-      <main className="flex-1 mx-auto w-full max-w-4xl px-4 py-5">
+      <main id="main" className="flex-1 mx-auto w-full max-w-4xl px-4 py-5">
         {data.business.description && activeCategory === "ALL" && !q && (
           <p className="text-sm text-muted-foreground leading-relaxed mb-5 text-center max-w-lg mx-auto">
             {data.business.description}
@@ -280,7 +282,7 @@ export function Storefront({
 
       {/* Sticky cart bar (mobile) */}
       {count > 0 && (
-        <div className="lg:hidden sticky bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur-md safe-bottom">
+        <div className="lg:hidden sticky bottom-0 z-(--z-dropdown) border-t border-border bg-background/95 backdrop-blur-md safe-bottom">
           <div className="px-4 py-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">
               <div className="text-xs text-muted-foreground tabular">{count} عنصر في السلة</div>

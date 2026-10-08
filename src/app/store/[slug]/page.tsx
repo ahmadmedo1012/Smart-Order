@@ -2,8 +2,16 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { Storefront } from "@/components/storefront/storefront";
+import { SITE_URL } from "@/app/layout";
 
 export const dynamic = "force-dynamic";
+
+/** Absolute URL helper — DB image refs are same-origin /api/media/*
+ * relatives; scrapers and OG crawlers need absolutes. */
+function absoluteUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  return url.startsWith("http") ? url : `${SITE_URL}${url}`;
+}
 
 async function getBusiness(slug: string) {
   return db.business.findUnique({
@@ -31,6 +39,7 @@ export async function generateMetadata({
     const description =
       business.description ??
       `اطلب من ${business.name}${business.city ? ` في ${business.city}` : ""} — تصفح المنتجات واطلب توصيلاً أو استلاماً عبر سمارت أوردر`;
+    const ogImage = absoluteUrl(business.coverUrl ?? business.logoUrl);
     return {
       title,
       description,
@@ -40,7 +49,7 @@ export async function generateMetadata({
         description,
         type: "website",
         locale: "ar_LY",
-        images: business.coverUrl ?? business.logoUrl ?? undefined,
+        images: ogImage ? [{ url: ogImage }] : undefined,
       },
       twitter: { card: "summary_large_image", title, description },
     };
@@ -55,21 +64,89 @@ export default async function StorePage({ params }: { params: Promise<{ slug: st
   const business = await getBusiness(slug);
   if (!business || !business.isActive || !business.isPublished) notFound();
 
-  return (
-    <Storefront
-      slug={slug}
-      business={{
-        slug,
+  // Structured data (SEO): Store + ItemList/Product/Offer graph. Prices
+  // are integer millimes in the DB — schema.org wants decimal LYD.
+  let products: Array<{ name: string; description: string | null; imageUrl: string | null; price: number; isAvailable: boolean }> = [];
+  try {
+    products = await db.product.findMany({
+      where: { businessId: business.id, isArchived: false },
+      select: { name: true, description: true, imageUrl: true, price: true, isAvailable: true },
+      orderBy: { createdAt: "asc" },
+      take: 25,
+    });
+  } catch {
+    // metadata failure must not 500 the page — JSON-LD is skipped
+  }
+  const storeUrl = `${SITE_URL}/store/${business.slug}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Store",
+        "@id": `${storeUrl}#store`,
         name: business.name,
-        description: business.description,
-        logoUrl: business.logoUrl,
-        coverUrl: business.coverUrl,
-        city: business.city,
-        phone: business.phone,
-        whatsappNumber: business.whatsappNumber,
-        address: business.address,
-        receiptFooter: business.receiptFooter,
-      }}
-    />
+        description: business.description ?? undefined,
+        url: storeUrl,
+        image: absoluteUrl(business.coverUrl ?? business.logoUrl),
+        telephone: business.phone ?? undefined,
+        address:
+          business.address || business.city
+            ? {
+                "@type": "PostalAddress",
+                streetAddress: business.address ?? undefined,
+                addressLocality: business.city ?? undefined,
+                addressCountry: "LY",
+              }
+            : undefined,
+      },
+      {
+        "@type": "ItemList",
+        "@id": `${storeUrl}#menu`,
+        numberOfItems: products.length,
+        itemListElement: products.map((p, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          item: {
+            "@type": "Product",
+            name: p.name,
+            description: p.description ?? undefined,
+            image: absoluteUrl(p.imageUrl),
+            offers: {
+              "@type": "Offer",
+              price: (p.price / 1000).toFixed(3),
+              priceCurrency: "LYD",
+              availability: p.isAvailable
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
+              url: storeUrl,
+            },
+          },
+        })),
+      },
+    ],
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Storefront
+        slug={slug}
+        business={{
+          slug,
+          name: business.name,
+          description: business.description,
+          logoUrl: business.logoUrl,
+          coverUrl: business.coverUrl,
+          city: business.city,
+          phone: business.phone,
+          whatsappNumber: business.whatsappNumber,
+          address: business.address,
+          receiptFooter: business.receiptFooter,
+        }}
+      />
+    </>
   );
 }

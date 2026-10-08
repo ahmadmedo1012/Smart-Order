@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Loader2, Upload, X } from "lucide-react";
 import { compressImage } from "@/lib/compress";
 import { toast } from "sonner";
@@ -80,9 +81,8 @@ export function ReceiptUpload({
       </div>
       {receiptImageUrl && (
         /* Family preview — 80px box */
-        <div className="mt-2 size-20 overflow-hidden rounded-md border border-border/30">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={receiptImageUrl} alt="صورة التحويل" className="size-full rounded-none object-cover" />
+        <div className="relative mt-2 size-20 overflow-hidden rounded-md border border-border/30">
+          <Image src={receiptImageUrl} alt="صورة التحويل" fill sizes="80px" className="rounded-none object-cover" />
         </div>
       )}
     </div>

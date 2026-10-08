@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { useCart, MAX_CART_QUANTITY } from "@/hooks/use-cart";
 import { formatLyd } from "@/lib/money";
 import type { StoreProduct } from "@/components/storefront/storefront";
@@ -104,8 +105,7 @@ export function ProductDialog({
       {/* Product header */}
       <div className="relative h-40 shrink-0 rounded-t-2xl bg-muted sm:h-44">
           {product.imageUrl ? (
-             
-            <img src={product.imageUrl} alt={product.name} className="size-full object-cover rounded-t-2xl" />
+            <Image src={product.imageUrl} alt={product.name} fill sizes="(min-width: 640px) 448px, 100vw" className="object-cover rounded-t-2xl" />
           ) : (
             <span className="size-full flex items-center justify-center text-muted-foreground/30">
               <Package className="size-12" aria-hidden="true" />

@@ -4,10 +4,14 @@ import { LazyMotionProvider } from "@/components/motion/lazy-motion-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
+/** Canonical production origin (order.smart-link.ly, Vercel + Neon).
+ * The old smart-order.onrender.com host is retired — keep OG/canonical/
+ * sitemap URLs pointed at the live domain even when the env var is
+ * unset (e.g. preview deployments). */
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://order.smart-link.ly";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://smart-order.onrender.com"
-  ),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "سمارت أوردر — منصة الطلبات الرقمية للأعمال في ليبيا",
     template: "%s | سمارت أوردر",

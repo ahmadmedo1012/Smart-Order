@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useCart, cartEstimatedSubtotal, cartCount } from "@/hooks/use-cart";
 import { formatLyd } from "@/lib/money";
 import type { StoreData } from "@/components/storefront/storefront";
@@ -67,8 +68,7 @@ export function CartDrawer({
               <div key={item.key} className="rounded-xl border border-border bg-card p-3">
                 <div className="flex items-start gap-3">
                   {item.productImage ? (
-                     
-                    <img src={item.productImage} alt="" className="size-14 rounded-lg object-cover shrink-0" loading="lazy" />
+                    <Image src={item.productImage} alt="" width={56} height={56} className="size-14 rounded-lg object-cover shrink-0" />
                   ) : (
                     <span className="flex size-14 items-center justify-center rounded-lg bg-muted text-muted-foreground/40 shrink-0">
                       <Store className="size-5" aria-hidden="true" />

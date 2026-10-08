@@ -9,7 +9,9 @@ import { formatLyd } from "@/lib/money";
 import { normalizeLibyanPhone, formatPhoneDisplay, toE164 } from "@/lib/phone";
 import { FULFILLMENT_AR, PAYMENT_TYPE_AR, LIBYA_CITIES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/states";
+import { SkipLink } from "@/components/shared/skip-link";
 import { toast } from "sonner";
 import { randomUUID } from "@/lib/uuid";
 import { AnimatedCopy } from "@/components/ui/animated-icons";
@@ -59,6 +61,7 @@ export function CheckoutClient({
   const items = useCart((s) => s.items);
   const clearCart = useCart((s) => s.clear);
   const [data, setData] = React.useState<StoreData | null>(null);
+  const [loadError, setLoadError] = React.useState(false);
   const [step, setStep] = React.useState<Step>("form");
   const [submitting, setSubmitting] = React.useState(false);
   const [result, setResult] = React.useState<{
@@ -78,7 +81,8 @@ export function CheckoutClient({
   const [zoneId, setZoneId] = React.useState<string>("");
   const [paymentMethodId, setPaymentMethodId] = React.useState<string>("");
 
-  React.useEffect(() => {
+  const load = React.useCallback(() => {
+    setLoadError(false);
     api
       .get<StoreData>(`/api/public/store/${slug}`)
       .then((r) => {
@@ -87,8 +91,10 @@ export function CheckoutClient({
         if (r.data.paymentMethods.length > 0) setPaymentMethodId(r.data.paymentMethods[0].id);
         if (r.data.deliveryZones.length === 0) setFulfillment("PICKUP");
       })
-      .catch(() => toast.error("تعذر تحميل بيانات المتجر"));
+      .catch(() => setLoadError(true));
   }, [slug]);
+
+  React.useEffect(load, [load]);
 
   const subtotal = cartEstimatedSubtotal(items);
   const zone = data?.deliveryZones.find((z) => z.id === zoneId) ?? null;
@@ -232,7 +238,8 @@ export function CheckoutClient({
   // ===== CHECKOUT FORM =====
   return (
     <div className="min-h-screen bg-muted/30">
-      <header className="bg-background border-b border-border safe-top sticky top-0 z-30">
+      <SkipLink />
+      <header className="bg-background border-b border-border safe-top sticky top-0 z-(--z-dropdown)">
         <div className="mx-auto max-w-2xl px-4 h-14 flex items-center gap-3">
           <Link href={`/store/${slug}`} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors" aria-label="العودة للمتجر">
             <ArrowRight className="size-4" aria-hidden="true" />
@@ -242,14 +249,39 @@ export function CheckoutClient({
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 py-5 pb-32">
+      <main id="main" aria-busy={!data && !loadError} className="mx-auto max-w-2xl px-4 py-5 pb-32">
         <h1 className="font-heading text-xl font-bold">إتمام الطلب</h1>
+
+        {/* Zones/payment fetch failed — explicit banner + retry (never a
+            silent PICKUP-only degrade; submit stays disabled until data
+            resolves). */}
+        {loadError && (
+          <div role="alert" className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3.5">
+            <div>
+              <div className="text-sm font-bold text-destructive-ink">تعذر تحميل بيانات المتجر</div>
+              <p className="mt-0.5 text-xs text-muted-foreground">مناطق التوصيل وطرق الدفع غير متاحة — تحقق من اتصالك وأعد المحاولة.</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={load} className="h-9 shrink-0">
+              إعادة المحاولة
+            </Button>
+          </div>
+        )}
 
         {/* Fulfillment */}
         <section className="mt-4 rounded-xl border border-border bg-card p-4">
           <h2 className="font-semibold text-sm mb-3">طريقة الاستلام</h2>
           <div className="grid grid-cols-2 gap-2">
-            {(data?.deliveryZones.length ? ["DELIVERY", "PICKUP"] : ["PICKUP"]).map((t) => {
+            {!data ? (
+              loadError ? (
+                <p className="col-span-2 text-xs text-muted-foreground">خيارات الاستلام تظهر بعد إعادة المحاولة.</p>
+              ) : (
+                <>
+                  <Skeleton className="h-[76px] rounded-xl" />
+                  <Skeleton className="h-[76px] rounded-xl" />
+                </>
+              )
+            ) : (
+              (data.deliveryZones.length ? ["DELIVERY", "PICKUP"] : ["PICKUP"]).map((t) => {
               const selected = fulfillment === t;
               const Icon = t === "DELIVERY" ? Truck : Store;
               return (
@@ -269,7 +301,8 @@ export function CheckoutClient({
                   </div>
                 </button>
               );
-            })}
+              })
+            )}
           </div>
         </section>
 
@@ -348,7 +381,16 @@ export function CheckoutClient({
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">منطقة التوصيل *</label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {data?.deliveryZones.map((z) => {
+                {!data ? (
+                  !loadError && (
+                    <>
+                      <Skeleton className="h-[76px] rounded-xl" />
+                      <Skeleton className="h-[76px] rounded-xl" />
+                      <Skeleton className="h-[76px] rounded-xl" />
+                    </>
+                  )
+                ) : (
+                  data.deliveryZones.map((z) => {
                   const selected = zoneId === z.id;
                   return (
                     <button
@@ -369,7 +411,8 @@ export function CheckoutClient({
                       )}
                     </button>
                   );
-                })}
+                  })
+                )}
               </div>
               {minOrderUnmet && (
                 <p className="text-xs text-destructive-ink rounded-lg bg-destructive/10 border border-destructive/25 px-3 py-2">
@@ -400,7 +443,16 @@ export function CheckoutClient({
             طريقة الدفع
           </h2>
           <div role="group" aria-label="طرق الدفع" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {data?.paymentMethods.map((p) => {
+            {!data ? (
+              !loadError && (
+                <>
+                  <Skeleton className="h-14 rounded-xl" />
+                  <Skeleton className="h-14 rounded-xl" />
+                  <Skeleton className="h-14 rounded-xl" />
+                </>
+              )
+            ) : (
+              data.paymentMethods.map((p) => {
               const selected = paymentMethodId === p.id;
               const Icon = paymentIcon(p.type);
               return (
@@ -419,7 +471,8 @@ export function CheckoutClient({
                   {p.name}
                 </button>
               );
-            })}
+              })
+            )}
           </div>
           {paymentMethod?.instructions && (
             <p className="text-[11px] leading-relaxed text-muted-foreground">{paymentMethod.instructions}</p>
@@ -498,7 +551,7 @@ export function CheckoutClient({
             rows={2}
             maxLength={300}
             placeholder="أي تفاصيل إضافية تريد إخبار المتجر بها..."
-            className="w-full rounded-lg border border-input bg-transparent px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange/20 focus:border-orange"
+            className="w-full rounded-lg border border-input bg-transparent px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
           />
         </section>
 
@@ -532,7 +585,7 @@ export function CheckoutClient({
       </main>
 
       {/* Sticky total bar */}
-      <div className="fixed bottom-0 inset-x-0 z-30 border-t border-border bg-background/95 backdrop-blur-md safe-bottom">
+      <div className="fixed bottom-0 inset-x-0 z-(--z-dropdown) border-t border-border bg-background/95 backdrop-blur-md safe-bottom">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center gap-3">
           <div className="flex-1 min-w-0">
             {deliveryFee > 0 && (
@@ -542,7 +595,7 @@ export function CheckoutClient({
             )}
             <div className="font-heading font-bold text-lg tabular nums">{formatLyd(total)}</div>
           </div>
-          <Button onClick={submit} disabled={submitting || minOrderUnmet} className="h-12 px-8 text-base font-bold">
+          <Button onClick={submit} disabled={submitting || minOrderUnmet || !data} className="h-12 px-8 text-base font-bold">
             {submitting ? (
               <>
                 <Loader2 className="size-5 animate-spin" aria-hidden="true" />
