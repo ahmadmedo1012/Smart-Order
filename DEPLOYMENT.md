@@ -2,7 +2,7 @@
 
 > **حالة الإنتاج (2026-09-18): منشور ويعمل** — `https://order.smart-link.ly` على Vercel + مشروع Neon مستقل باسم `Smart-Order` (aws-us-east-1, PostgreSQL 18). تم التحقق: E2E 30/30 ضد الإنتاج، تدفق كامل من التسجيل حتى التسليم عبر الواجهة، RTL/الوضع الليلي، رؤوس الأمان.
 
-هذا الدليل يغطي نشر الإنتاج على **Vercel + Neon PostgreSQL**، مع بديل الاستضافة الذاتية على Render.
+هذا الدليل يغطي نشر الإنتاج على **Vercel + Neon PostgreSQL**، مع بديل الاستضافة الذاتية عبر خرج `standalone`.
 
 ---
 
@@ -33,8 +33,21 @@ DATABASE_URL="<neon-url>" npx prisma db push --schema=prisma/schema.postgres.pri
 vercel --prod
 ```
 
-أمر البناء في `vercel.json` يولّد عميل Prisma بمحرك PostgreSQL ثم يبني Next.js:
-`npx prisma generate --schema=prisma/schema.postgres.prisma && npm run build`
+### أمر البناء الحقيقي (vercel.json)
+
+```json
+"buildCommand": "node scripts/vercel-db-sync.mjs && npx prisma generate --schema=prisma/schema.postgres.prisma && npm run build"
+```
+
+السلسلة بترتيبها:
+1. **`scripts/vercel-db-sync.mjs`** — مزامنة المخطط المرنة (إصلاح تجميد النشر ٣ أسابيع، commit `fdd57ff`):
+   - `DATABASE_URL` غير موجود → `[DB-SYNC] SKIPPED` والنشر يستمر.
+   - فشل عابر (P1001/P1002/ECONN*…) → إعادة محاولة ×3 (انتظار 10s/20s لإيقاظ Neon البارد) ثم استمرار مع لافتة تحذير.
+   - خطأ مخطط حقيقي → الافتراض الكامل في لافتة `[DB-SYNC]` + `exit 0` (حجب النشر لم يصلح شيئاً قط — الشفافية + الاستمرار أفضل مقايضة).
+   - النجاح → `[DB-SYNC] ✓ schema synced`.
+   كل نتيجة تُطبع بسطر واحد قابل للـ grep يبدأ بـ `[DB-SYNC]` — فك شفرة أي سجل بناء من سطر واحد.
+2. **`prisma generate`** بمحرك PostgreSQL.
+3. **`npm run build`** — البناء لا يحتاج قاعدة بيانات إطلاقاً (كل مسارات DB هي `force-dynamic`؛ عدّادات الصفحة الرئيسية محمية بـ try/catch).
 
 > **تحقق بعد النشر:** `curl https://<deployment-url>/api/health` يجب أن يعيد `{"status":"ok","db":"up"}` ثم شغّل `npm run test:e2e` مع تمرير رابط الإنتاج: `node tests/e2e/api-e2e.js https://<deployment-url>`
 
@@ -57,9 +70,18 @@ vercel --prod
 - إذا كان DNS خارجياً (Cloudflare وغيرها) → سجل `CNAME` لـ `order` إلى `cname.vercel-dns.com` مع تعطيل الوكيل (DNS only) حتى إصدار الشهادة، ثم يمكن تفعيله.
 - **لا تجري أي تغيير DNS مدمراً** — إضافة سجل جديد لا تمس السجلات القائمة (menu. / bot. / api. تعمل كما هي).
 
-## 5. الاستضافة الذاتية (بديل — Render)
+## 5. الاستضافة الذاتية (بديل — Docker/VPS)
 
-`render.yaml` جاهز: يستخدم `NEXT_OUTPUT=standalone` + `next start`. أضف `DATABASE_URL` من لوحة Render ثم Apply Blueprint. نفس أمر الصحة `/api/health` للمراقبة.
+> `render.yaml` أُزيل من المستودع نهائياً (كان يُفسَّر كـ services بواسطة Vercel CLI ويفشل النشر). لا توجد ملفات Render بعد الآن.
+
+المسار المدعوم ذاتياً: سكربتات `build:selfhost` و `start:selfhost` الموجودة في `package.json` (خرج `standalone` عبر `NEXT_OUTPUT=standalone` + `next start` على المنفذ من `PORT`). أضف `DATABASE_URL` (Neon أو أي PostgreSQL) ثم شغّل:
+
+```bash
+NEXT_OUTPUT=standalone npm run build:selfhost
+PORT=3000 npm run start:selfhost
+```
+
+نفس أمر الصحة `/api/health` للمراقبة. مزامنة المخطط يدوياً قبل التشغيل: `npx prisma db push --schema=prisma/schema.postgres.prisma`.
 
 ## 6. قائمة تحقق ما بعد النشر (إلزامية)
 

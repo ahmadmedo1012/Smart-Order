@@ -5,8 +5,8 @@
 > same commit.
 >
 > **Upstream source:** the Madarek design system (`madarek/frontend/src/styles/
-> tokens.css` — the sibling-family single source of truth; canonical digest:
-> `download/madarek-reference-digest.md`). **Token SSOT in this repo:**
+> tokens.css` — the sibling-family single source of truth; it stands alone,
+> no intermediate digest). **Token SSOT in this repo:**
 > `src/app/globals.css` (`:root` = night layer, `.light` = cream layer,
 > `@theme inline` = Tailwind bridge). Fonts: `public/fonts/fonts.css`. If this
 > file and globals.css disagree, globals.css wins — fix the doc.
@@ -26,7 +26,7 @@ is RETIRED — do not reintroduce it; only "was ..." migration comments may
 mention those hexes.
 
 **Brand signature:** the gold-metal mark gradient `linear-gradient(145deg,
-#C9962F, #E9B44C)` (see `components/landing/brand.tsx`) with void-ink glyph
+#C9962F, #E9B44C)` (see `src/components/shared/brand.tsx`) with void-ink glyph
 `#05070F`. `text-gradient-orange` rides gold → hover-gold at 135° in dark,
 copper `#B57438 → #9A5F25` in light. Raster brand assets (favicon,
 icon-192/512, apple-touch-icon, brand-icon, favicon.ico, og-default.png) are
