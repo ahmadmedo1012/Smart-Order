@@ -214,7 +214,7 @@ export default function LoginPage() {
 
           <p className="mt-6 text-center text-xs text-muted-foreground/60">
             ليس لديك متجر؟{" "}
-            <Link href="/register" className="font-medium text-primary hover:underline">
+            <Link href="/register" className="font-medium text-accent-foreground hover:underline">
               أنشئ متجرك مجاناً
             </Link>
           </p>

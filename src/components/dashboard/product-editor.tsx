@@ -284,7 +284,7 @@ export function ProductEditor({
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-heading font-semibold text-sm flex items-center gap-2">
-                    <Layers className="size-4 text-primary" aria-hidden="true" />
+                    <Layers className="size-4 text-accent-foreground" aria-hidden="true" />
                     الأحجام / الخيارات الأساسية
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">مثال: صغير، وسط، كبير — سعر إضافي لكل حجم</p>
@@ -330,7 +330,7 @@ export function ProductEditor({
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-heading font-semibold text-sm flex items-center gap-2">
-                    <Layers className="size-4 text-saffron" aria-hidden="true" />
+                    <Layers className="size-4 text-accent-foreground" aria-hidden="true" />
                     مجموعات الإضافات
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">مثال: إضافات (جبنة، دجاج، صوص) باختيار متعدد</p>

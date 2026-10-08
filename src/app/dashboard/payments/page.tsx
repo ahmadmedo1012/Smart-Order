@@ -69,7 +69,7 @@ export default function PaymentsPage() {
             return (
               <li key={m.id} className="rounded-xl border border-border bg-card p-4">
                 <div className="flex items-center gap-3">
-                  <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                  <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-accent-foreground shrink-0">
                     <CreditCard className="size-5" aria-hidden="true" />
                   </span>
                   <div className="min-w-0 flex-1">
@@ -133,7 +133,7 @@ export default function PaymentsPage() {
       {available.length > 0 && (
         <button
           onClick={() => setCreating(true)}
-          className="w-full rounded-xl border border-dashed border-primary/40 bg-primary/5 h-11 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors inline-flex items-center justify-center gap-2"
+          className="w-full rounded-xl border border-dashed border-primary/40 bg-primary/5 h-11 text-sm font-semibold text-accent-foreground hover:bg-primary/10 transition-colors inline-flex items-center justify-center gap-2"
         >
           <Plus className="size-4.5" aria-hidden="true" />
           إضافة طريقة دفع ({available.length} متاحة)
@@ -223,7 +223,7 @@ function MethodDialog({
                   type="button"
                   onClick={() => onTypeChange(t)}
                   className={`rounded-lg border h-10 text-xs font-medium transition-colors ${
-                    type === t ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted"
+                    type === t ? "border-primary bg-primary/10 text-accent-foreground" : "border-border hover:bg-muted"
                   }`}
                 >
                   {PAYMENT_TYPE_AR[t]}

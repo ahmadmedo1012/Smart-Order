@@ -143,7 +143,7 @@ export function ProductDialog({
                       onClick={() => setVariantId(v.id)}
                       aria-pressed={selected}
                       className={`rounded-xl border p-2.5 text-center transition-colors ${
-                        selected ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted/60"
+                        selected ? "border-primary bg-primary/10 text-accent-foreground" : "border-border hover:bg-muted/60"
                       }`}
                     >
                       <div className="text-xs font-semibold">{v.name}</div>

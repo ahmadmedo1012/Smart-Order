@@ -94,7 +94,7 @@ export default function CustomersPage() {
               {customers.map((c) => (
                 <tr key={c.id} className="hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3">
-                    <Link href={`/dashboard/customers/${c.id}`} className="font-medium hover:text-primary">
+                    <Link href={`/dashboard/customers/${c.id}`} className="font-medium hover:text-accent-foreground">
                       {c.name}
                     </Link>
                     <div className="text-xs text-muted-foreground tabular" dir="ltr">{formatPhoneDisplay(c.phone)}</div>
@@ -125,7 +125,7 @@ export default function CustomersPage() {
             {customers.map((c) => (
               <li key={c.id}>
                 <Link href={`/dashboard/customers/${c.id}`} className="flex items-center gap-3 p-4 active:bg-muted/50">
-                  <span className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold shrink-0" aria-hidden="true">
+                  <span className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-accent-foreground text-sm font-bold shrink-0" aria-hidden="true">
                     {c.name.slice(0, 2)}
                   </span>
                   <div className="min-w-0 flex-1">

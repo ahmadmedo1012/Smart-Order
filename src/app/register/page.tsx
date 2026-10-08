@@ -195,7 +195,7 @@ function RegisterWizard() {
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               لديك حساب؟{" "}
-              <Link href="/login" className="font-medium text-primary hover:underline">
+              <Link href="/login" className="font-medium text-accent-foreground hover:underline">
                 سجّل الدخول
               </Link>
             </p>
@@ -370,7 +370,7 @@ function RegisterWizard() {
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               لديك حساب؟{" "}
-              <Link href="/login" className="font-medium text-primary hover:underline">
+              <Link href="/login" className="font-medium text-accent-foreground hover:underline">
                 سجّل الدخول
               </Link>
             </p>

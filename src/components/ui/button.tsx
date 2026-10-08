@@ -32,7 +32,7 @@ const buttonVariants = cva(
         whatsapp:
           "bg-whatsapp text-[#07361d] shadow-md shadow-whatsapp/25 hover:bg-whatsapp-deep hover:shadow-lg hover:shadow-whatsapp/40",
         link:
-          "bg-transparent text-primary underline-offset-4 hover:underline active:scale-100",
+          "bg-transparent text-accent-foreground underline-offset-4 hover:underline active:scale-100",
       },
       size: {
         sm: "h-10 gap-1.5 px-3.5 py-2.5 text-xs",

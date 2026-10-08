@@ -140,7 +140,7 @@ export function HeroPhone() {
                 <span className="size-1.5 rounded-full bg-whatsapp" />
                 <span className="text-[10px] font-bold text-foreground">بيتزا مارغريتا ×2</span>
               </div>
-              <span className="text-[10px] font-bold text-ember dark:text-saffron" dir="ltr">
+              <span className="text-[10px] font-bold text-accent-foreground" dir="ltr">
                 32.00 د.ل
               </span>
             </div>

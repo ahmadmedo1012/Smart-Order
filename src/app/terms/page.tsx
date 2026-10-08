@@ -62,7 +62,7 @@ export default function TermsPage() {
           لأي استفسار حول هذه الشروط تواصل معنا عبر واتساب —{" "}
           <a
             href={`https://wa.me/${process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "218910089975"}`}
-            className="font-medium text-primary hover:underline"
+            className="font-medium text-accent-foreground hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >

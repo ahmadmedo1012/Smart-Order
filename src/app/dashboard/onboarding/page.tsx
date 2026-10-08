@@ -132,7 +132,7 @@ export default function OnboardingPage() {
   }) => (
     <section className={`rounded-xl border p-5 transition-colors ${done ? "border-success/40 bg-success/[0.04]" : "border-border bg-card"}`}>
       <div className="flex items-start gap-4">
-        <span className={`flex size-10 items-center justify-center rounded-xl shrink-0 ${done ? "bg-success/15 text-success-ink" : "bg-primary/10 text-primary"}`}>
+        <span className={`flex size-10 items-center justify-center rounded-xl shrink-0 ${done ? "bg-success/15 text-success-ink" : "bg-primary/10 text-accent-foreground"}`}>
           {done ? <Check className="size-5" aria-hidden="true" /> : <Icon className="size-5" aria-hidden="true" />}
         </span>
         <div className="flex-1 min-w-0">
@@ -209,7 +209,7 @@ export default function OnboardingPage() {
         )}
         <p className="mt-3 text-xs text-muted-foreground">
           بعد إضافة قسم، أنشئ منتجك الأول من{" "}
-          <a href="/dashboard/products" className="text-primary font-medium hover:underline">صفحة المنتجات</a>.
+          <a href="/dashboard/products" className="text-accent-foreground font-medium hover:underline">صفحة المنتجات</a>.
         </p>
       </Step>
 
@@ -238,7 +238,7 @@ export default function OnboardingPage() {
 
       <Step n={4} icon={CreditCard} title="طرق الدفع" desc="الدفع عند التوصيل مفعّل تلقائياً — أضف تحويلات مدار/ليبيانا من صفحة المدفوعات" done={hasCod}>
         <p className="text-xs text-muted-foreground">
-          لإضافة المزيد: <a href="/dashboard/payments" className="text-primary font-medium hover:underline">صفحة المدفوعات</a>
+          لإضافة المزيد: <a href="/dashboard/payments" className="text-accent-foreground font-medium hover:underline">صفحة المدفوعات</a>
         </p>
       </Step>
 

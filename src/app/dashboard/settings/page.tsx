@@ -133,7 +133,7 @@ export default function SettingsPage() {
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-sm font-medium">
-              <Globe className="size-4 text-primary" aria-hidden="true" />
+              <Globe className="size-4 text-accent-foreground" aria-hidden="true" />
               رابط متجرك
             </div>
             <div className="mt-2 flex items-center gap-2">

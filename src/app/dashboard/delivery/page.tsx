@@ -83,7 +83,7 @@ export default function DeliveryPage() {
                   <button
                     key={ex.name}
                     onClick={() => setCreating(true)}
-                    className="rounded-full border border-primary/30 bg-primary/5 px-3.5 h-8 text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
+                    className="rounded-full border border-primary/30 bg-primary/5 px-3.5 h-8 text-xs font-medium text-accent-foreground hover:bg-primary/10 transition-colors"
                   >
                     {ex.name} — {ex.fee} د.ل
                   </button>
@@ -96,7 +96,7 @@ export default function DeliveryPage() {
         <ul className="space-y-2.5">
           {zones.map((z) => (
             <li key={z.id} className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
-              <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+              <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-accent-foreground shrink-0">
                 <Truck className="size-5" aria-hidden="true" />
               </span>
               <div className="min-w-0 flex-1">

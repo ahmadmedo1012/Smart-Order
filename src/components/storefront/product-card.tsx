@@ -99,7 +99,7 @@ export function ProductCard({
           {(product.variants.length > 0 || product.optionGroups.length > 0) && product.isAvailable && (
             <button
               onClick={() => setOpen(true)}
-              className="mt-1.5 text-[11px] text-primary font-medium hover:underline"
+              className="mt-1.5 text-[11px] text-accent-foreground font-medium hover:underline"
             >
               {product.variants.length > 0 && `${product.variants.length} أحجام · `}
               {product.optionGroups.length > 0 && `${product.optionGroups.length} إضافات`}

@@ -107,7 +107,7 @@ export default function DashboardOverview() {
   const maxRevenue = Math.max(...data.weekSeries.map((d) => d.revenue), 1);
 
   const cards = [
-    { label: "طلبات اليوم", value: String(stats.todayOrders), icon: ClipboardList, tone: "text-primary" },
+    { label: "طلبات اليوم", value: String(stats.todayOrders), icon: ClipboardList, tone: "text-accent-foreground" },
     { label: "بانتظار الإجراء", value: String(stats.pendingCount), icon: Bell, tone: stats.pendingCount > 0 ? "text-warning-ink" : "text-muted-foreground" },
     { label: "إيراد اليوم", value: formatLyd(stats.todayRevenue), icon: Coins, tone: "text-success-ink" },
     { label: "متوسط الطلب", value: formatLyd(stats.avgOrder), icon: TrendingUp, tone: "text-chart-3" },
@@ -130,7 +130,7 @@ export default function DashboardOverview() {
     alerts.push({
       text: "لم تحدد مناطق توصيل بعد — أضفها ليتمكن العملاء من طلب التوصيل",
       href: "/dashboard/delivery",
-      tone: "bg-primary/5 border-primary/25 text-primary",
+      tone: "bg-primary/5 border-primary/25 text-accent-foreground",
     });
 
   return (
@@ -221,7 +221,7 @@ export default function DashboardOverview() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">أحدث الطلبات</CardTitle>
-              <Button asChild variant="ghost" size="sm" className="text-primary h-8">
+              <Button asChild variant="ghost" size="sm" className="text-accent-foreground h-8">
                 <Link href="/dashboard/orders">عرض الكل</Link>
               </Button>
             </div>

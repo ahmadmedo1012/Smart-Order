@@ -7,11 +7,15 @@ import {
 } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
 
+/* Text slots ride the text-safe *-ink tokens (r125 wave-A) — copper as
+   raw text on its own /15 tint measured 3.21-3.39:1 in light (AA fail);
+   --accent-foreground is the canonical text slot in both themes
+   (dark gold #E9B44C 10.39:1, light copper-deep #5C3416 ~9:1 on tints). */
 const STATUS_STYLES: Record<OrderStatus, string> = {
-  NEW: "bg-orange/15 text-orange border-orange/25",
+  NEW: "bg-orange/15 text-accent-foreground border-orange/25",
   CONFIRMED: "bg-info/15 text-info-ink border-info/25",
   PREPARING: "bg-warning/15 text-warning-ink border-warning/25",
-  READY: "bg-saffron/15 text-ember dark:text-saffron border-saffron/25",
+  READY: "bg-saffron/15 text-accent-foreground border-saffron/25",
   OUT_FOR_DELIVERY: "bg-info/15 text-info-ink border-info/25",
   DELIVERED: "bg-success/15 text-success-ink border-success/25",
   CANCELLED: "bg-muted text-muted-foreground border-border",
@@ -27,7 +31,7 @@ const STATUS_DOTS: Record<OrderStatus, string> = {
   DELIVERED: "bg-success",
   CANCELLED: "bg-muted-foreground",
   REJECTED: "bg-destructive",
-};;
+};
 
 export function OrderStatusBadge({
   status,

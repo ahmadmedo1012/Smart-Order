@@ -173,7 +173,7 @@ export default function OrdersPage() {
                 {orders.map((o) => (
                   <tr key={o.id} className="hover:bg-muted/40 transition-colors">
                     <td className="px-4 py-3 font-semibold tabular">
-                      <Link href={`/dashboard/orders/${o.id}`} className="hover:text-primary">
+                      <Link href={`/dashboard/orders/${o.id}`} className="hover:text-accent-foreground">
                         {o.orderNumber}
                       </Link>
                     </td>

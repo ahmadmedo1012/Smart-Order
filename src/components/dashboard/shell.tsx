@@ -100,7 +100,7 @@ export function DashboardShell({
                 : "text-muted-foreground hover:bg-orange/8 hover:text-foreground"
             )}
           >
-            <Icon className={cn("size-4.5 shrink-0", active ? "text-orange" : "")} aria-hidden="true" />
+            <Icon className={cn("size-4.5 shrink-0", active ? "text-accent-foreground" : "")} aria-hidden="true" />
             {label}
           </Link>
         );
@@ -125,7 +125,7 @@ export function DashboardShell({
                     : "text-muted-foreground hover:bg-orange/8 hover:text-foreground"
                 )}
               >
-                <Icon className={cn("size-4.5 shrink-0", active && "text-orange")} aria-hidden="true" />
+                <Icon className={cn("size-4.5 shrink-0", active && "text-accent-foreground")} aria-hidden="true" />
                 {label}
               </Link>
             );
@@ -155,7 +155,7 @@ export function DashboardShell({
               <Link
                 href={`/store/${biz.slug}`}
                 target="_blank"
-                className="flex items-center gap-2 rounded-lg px-3 h-9 text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors"
+                className="flex items-center gap-2 rounded-lg px-3 h-9 text-xs text-muted-foreground hover:text-accent-foreground hover:bg-primary/5 transition-colors"
               >
                 <ExternalLink className="size-3.5" aria-hidden="true" />
                 معاينة المتجر
@@ -245,7 +245,7 @@ export function DashboardShell({
                     {user.email}
                   </div>
                 </div>
-                <span className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold" aria-hidden="true">
+                <span className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-accent-foreground text-xs font-bold" aria-hidden="true">
                   {user.name.slice(0, 2)}
                 </span>
               </div>
@@ -277,7 +277,7 @@ export function DashboardShell({
                     href={href}
                     className={cn(
                       "flex flex-col items-center justify-center gap-1 min-h-11 text-[10px] font-medium transition-colors",
-                      active ? "text-orange" : "text-muted-foreground hover:text-foreground"
+                      active ? "text-accent-foreground" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <Icon className="size-5" aria-hidden="true" />

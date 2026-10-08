@@ -68,7 +68,7 @@ export default function StaffPage() {
           {staff.map((s) => (
             <li key={s.id} className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-3">
-                <span className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold shrink-0" aria-hidden="true">
+                <span className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-accent-foreground text-sm font-bold shrink-0" aria-hidden="true">
                   {s.user.name.slice(0, 2)}
                 </span>
                 <div className="min-w-0 flex-1">
@@ -76,7 +76,7 @@ export default function StaffPage() {
                   <div className="text-xs text-muted-foreground truncate" dir="ltr">{s.user.email}</div>
                 </div>
                 {s.role === "OWNER" ? (
-                  <span className="rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-semibold shrink-0">
+                  <span className="rounded-full bg-primary/10 text-accent-foreground px-3 py-1 text-xs font-semibold shrink-0">
                     {ROLE_AR[s.role]}
                   </span>
                 ) : (
@@ -199,7 +199,7 @@ function StaffDialog({ businessId, onClose }: { businessId: string; onClose: (ch
                   type="button"
                   onClick={() => setRole(r)}
                   className={`rounded-lg border h-10 text-xs font-medium transition-colors ${
-                    role === r ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted"
+                    role === r ? "border-primary bg-primary/10 text-accent-foreground" : "border-border hover:bg-muted"
                   }`}
                 >
                   {ROLE_AR[r]}

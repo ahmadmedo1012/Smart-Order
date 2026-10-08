@@ -227,7 +227,7 @@ export function PaymentDialog({
           <div className="rounded-xl border border-orange/15 bg-orange/10 p-4 dark:bg-orange/10">
             <div className="flex items-center justify-between">
               <span className="font-bold">{planNameAr}</span>
-              <span className="text-lg font-bold text-orange tabular nums" dir="ltr">
+              <span className="text-lg font-bold text-accent-foreground tabular nums" dir="ltr">
                 {price} د.ل
               </span>
             </div>
@@ -263,7 +263,7 @@ export function PaymentDialog({
                   <div className="rounded-xl border border-success/25 bg-success/10 p-3">
                     <p className="mb-1.5 text-xs font-medium text-success-ink">رمز التحويل السريع</p>
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate font-mono text-sm font-bold text-orange" dir="ltr">
+                      <span className="truncate font-mono text-sm font-bold text-accent-foreground" dir="ltr">
                         {quickTransferCode}
                       </span>
                       <div className="flex shrink-0 items-center gap-1.5">
@@ -313,7 +313,7 @@ export function PaymentDialog({
                   {/* Bank account info card — values from env-configurable constants */}
                   <div className="space-y-2.5 rounded-xl border border-border/20 bg-muted/30 p-3">
                     <p className="flex items-center gap-1.5 text-xs font-medium">
-                      <Landmark className="size-3.5 text-orange" aria-hidden="true" />
+                      <Landmark className="size-3.5 text-accent-foreground" aria-hidden="true" />
                       حوّل على الحساب البنكي التالي
                     </p>
                     {[
@@ -387,7 +387,7 @@ export function PaymentDialog({
               {provider !== "bank" && (
                 <div className="flex items-center justify-between rounded-xl border border-border/20 bg-muted/30 p-3">
                   <span className="text-sm text-muted-foreground">المبلغ المطلوب</span>
-                  <span className="text-lg font-bold text-orange tabular nums" dir="ltr">
+                  <span className="text-lg font-bold text-accent-foreground tabular nums" dir="ltr">
                     {price} د.ل
                   </span>
                 </div>

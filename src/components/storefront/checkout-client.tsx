@@ -164,8 +164,8 @@ export function CheckoutClient({
             رقم طلبك هو
           </p>
           <div className="mt-2 inline-flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/25 px-5 py-2.5">
-            <ClipboardList className="size-5 text-primary" aria-hidden="true" />
-            <span className="font-heading font-bold text-lg text-primary tabular">{result.orderNumber}</span>
+            <ClipboardList className="size-5 text-accent-foreground" aria-hidden="true" />
+            <span className="font-heading font-bold text-lg text-accent-foreground tabular">{result.orderNumber}</span>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">
             الإجمالي: <span className="font-bold text-foreground tabular nums">{formatLyd(result.total)}</span>
@@ -262,7 +262,7 @@ export function CheckoutClient({
                     selected ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50"
                   }`}
                 >
-                  <Icon className={`size-5 shrink-0 ${selected ? "text-primary" : "text-muted-foreground"}`} aria-hidden="true" />
+                  <Icon className={`size-5 shrink-0 ${selected ? "text-accent-foreground" : "text-muted-foreground"}`} aria-hidden="true" />
                   <div>
                     <div className="text-sm font-semibold">{FULFILLMENT_AR[t as "DELIVERY" | "PICKUP"]}</div>
                     {t === "DELIVERY" && <div className="text-[11px] text-muted-foreground mt-0.5">حسب منطقتك</div>}
@@ -316,7 +316,7 @@ export function CheckoutClient({
         {fulfillment === "DELIVERY" && (
           <section className="mt-3 rounded-xl border border-border bg-card p-4 space-y-3.5">
             <h2 className="font-semibold text-sm flex items-center gap-2">
-              <MapPin className="size-4 text-primary" aria-hidden="true" />
+              <MapPin className="size-4 text-accent-foreground" aria-hidden="true" />
               عنوان التوصيل
             </h2>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -396,7 +396,7 @@ export function CheckoutClient({
         {/* Payment — family ProviderPicker geometry: icon+label border-2 tiles */}
         <section className="mt-3 space-y-3 rounded-xl border border-border bg-card p-4">
           <h2 className="flex items-center gap-2 text-sm font-semibold">
-            <Coins className="size-4 text-primary" aria-hidden="true" />
+            <Coins className="size-4 text-accent-foreground" aria-hidden="true" />
             طريقة الدفع
           </h2>
           <div role="group" aria-label="طرق الدفع" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -451,7 +451,7 @@ export function CheckoutClient({
               <div className="rounded-xl border border-success/25 bg-success/10 p-3">
                 <p className="mb-1.5 text-xs font-medium text-success-ink">رمز التحويل السريع</p>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="truncate font-mono text-sm font-bold text-orange" dir="ltr">
+                  <span className="truncate font-mono text-sm font-bold text-accent-foreground" dir="ltr">
                     {paymentMethod.type === "LIBYANA"
                       ? libyanaUssdCode(paymentConfig.number, total / 1000)
                       : madarUssdCode(paymentConfig.number, total / 1000)}

@@ -90,7 +90,7 @@ export default function CustomerDetailPage() {
 
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div className="flex items-center gap-4">
-          <span className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary text-lg font-bold" aria-hidden="true">
+          <span className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-accent-foreground text-lg font-bold" aria-hidden="true">
             {customer.name.slice(0, 2)}
           </span>
           <div>

@@ -105,7 +105,7 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
             </div>
           ) : (
             <div className="mt-3">
-              <span className="rounded-full bg-primary/10 text-primary px-4 py-1.5 text-sm font-bold">
+              <span className="rounded-full bg-primary/10 text-accent-foreground px-4 py-1.5 text-sm font-bold">
                 {ORDER_STATUS_AR[status]}
               </span>
             </div>
@@ -140,7 +140,7 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
                         done
                           ? "bg-primary border-primary text-primary-foreground"
                           : active
-                            ? "bg-primary/15 border-primary text-primary animate-pulse-soft"
+                            ? "bg-primary/15 border-primary text-accent-foreground animate-pulse-soft"
                             : "bg-muted border-border text-muted-foreground/60"
                       )}
                     >
@@ -151,10 +151,10 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
                         {meta.label}
                       </div>
                       {active && (
-                        <div className="text-[11px] text-primary mt-0.5">المرحلة الحالية</div>
+                        <div className="text-[11px] text-accent-foreground mt-0.5">المرحلة الحالية</div>
                       )}
                     </div>
-                    {done && <Check className="size-4 text-primary" aria-hidden="true" />}
+                    {done && <Check className="size-4 text-accent-foreground" aria-hidden="true" />}
                   </li>
                 );
               })}
@@ -193,7 +193,7 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
             )}
             <div className="flex justify-between font-bold pt-1.5 border-t border-border/60">
               <span>الإجمالي</span>
-              <span className="tabular nums text-primary">{formatLyd(order.total)}</span>
+              <span className="tabular nums text-accent-foreground">{formatLyd(order.total)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground pt-1 text-xs">
               <span>الدفع</span>

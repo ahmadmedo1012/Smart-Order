@@ -18,7 +18,7 @@ function CustomerReceipt() {
   return (
     <div className="card-premium rounded-2xl p-6 shadow-xl sm:p-8">
       <div className="flex items-center gap-3 border-b border-border/60 pb-4">
-        <Smartphone className="size-5 text-primary" aria-hidden="true" />
+        <Smartphone className="size-5 text-accent-foreground" aria-hidden="true" />
         <span className="font-semibold">تجربة العميل على الهاتف</span>
       </div>
       <div className="mt-5 space-y-3.5">
@@ -41,7 +41,7 @@ function CustomerReceipt() {
           </div>
           <div className="flex justify-between text-base font-bold">
             <span>الإجمالي</span>
-            <span className="tabular text-primary">109.000 د.ل</span>
+            <span className="tabular text-accent-foreground">109.000 د.ل</span>
           </div>
         </div>
         <div className="flex gap-2 pt-2">
@@ -70,7 +70,7 @@ export function LocalSection() {
           <ul className="mt-6 space-y-4">
             {points.map((point) => (
               <li key={point} className="flex items-start gap-3">
-                <ShieldCheck className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
+                <ShieldCheck className="mt-0.5 size-5 shrink-0 text-accent-foreground" aria-hidden="true" />
                 <span className="leading-relaxed text-foreground/90">{point}</span>
               </li>
             ))}

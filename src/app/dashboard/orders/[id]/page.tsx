@@ -348,7 +348,7 @@ export default function OrderDetailPage() {
               )}
               <div className="flex justify-between font-bold text-base pt-1 border-t">
                 <span>الإجمالي</span>
-                <span className="tabular nums text-primary">{formatLyd(order.total)}</span>
+                <span className="tabular nums text-accent-foreground">{formatLyd(order.total)}</span>
               </div>
             </div>
           </div>
@@ -362,7 +362,7 @@ export default function OrderDetailPage() {
               <div className="flex items-center justify-between gap-2">
                 <span className="text-muted-foreground">الاسم</span>
                 {order.customer ? (
-                  <Link href={`/dashboard/customers/${order.customer.id}`} className="font-medium hover:text-primary truncate">
+                  <Link href={`/dashboard/customers/${order.customer.id}`} className="font-medium hover:text-accent-foreground truncate">
                     {order.customerName}
                   </Link>
                 ) : (
@@ -371,7 +371,7 @@ export default function OrderDetailPage() {
               </div>
               <div className="flex items-center justify-between gap-2">
                 <span className="text-muted-foreground">الهاتف</span>
-                <a href={`tel:${order.customerPhone}`} className="font-medium tabular hover:text-primary" dir="ltr">
+                <a href={`tel:${order.customerPhone}`} className="font-medium tabular hover:text-accent-foreground" dir="ltr">
                   {formatPhoneDisplay(order.customerPhone)}
                 </a>
               </div>

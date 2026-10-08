@@ -95,6 +95,14 @@ export function Storefront({
 
   React.useEffect(load, [load]);
 
+  // Toast CTA relay — "عرض السلة" in the add-to-cart toast dispatches
+  // "open-cart"; open the cart Sheet here (its only controller).
+  React.useEffect(() => {
+    const openCart = () => setCartOpen(true);
+    window.addEventListener("open-cart", openCart);
+    return () => window.removeEventListener("open-cart", openCart);
+  }, []);
+
   if (error) return <ErrorState retry={load} className="min-h-screen" />;
   if (!data) return <StorefrontSkeleton />;
 
@@ -121,7 +129,7 @@ export function Storefront({
                
               <img src={data.business.logoUrl} alt={data.business.name} className="size-10 rounded-xl object-cover border border-border" />
             ) : (
-              <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-accent-foreground">
                 <StoreIcon className="size-5" aria-hidden="true" />
               </span>
             )}
@@ -266,7 +274,7 @@ export function Storefront({
           <p className="mt-10 text-center text-xs text-muted-foreground">{data.business.receiptFooter}</p>
         )}
         <p className="mt-3 text-center text-xs text-muted-foreground">
-          متجر رقمي بواسطة <a href="/" className="hover:text-primary">سمارت أوردر</a>
+          متجر رقمي بواسطة <a href="/" className="hover:text-accent-foreground">سمارت أوردر</a>
         </p>
       </main>
 

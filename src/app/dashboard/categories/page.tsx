@@ -85,7 +85,7 @@ export default function CategoriesPage() {
                  
                 <img src={c.imageUrl} alt="" className="size-11 rounded-lg object-cover shrink-0" loading="lazy" />
               ) : (
-                <span className="flex size-11 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                <span className="flex size-11 items-center justify-center rounded-lg bg-primary/10 text-accent-foreground shrink-0">
                   <LayoutGrid className="size-5" aria-hidden="true" />
                 </span>
               )}

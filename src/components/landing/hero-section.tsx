@@ -114,7 +114,7 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
             {/* Trust badge — real count only (family honesty policy) */}
             {showTrustBadge && (
               <div
-                className="animate-fade-in mt-6 inline-flex items-center gap-1.5 rounded-full border border-accent-foreground/25 bg-accent-foreground/8 px-3.5 py-1.5 text-[11px] font-medium text-ember shadow-sm dark:text-saffron"
+                className="animate-fade-in mt-6 inline-flex items-center gap-1.5 rounded-full border border-accent-foreground/25 bg-accent-foreground/8 px-3.5 py-1.5 text-[11px] font-medium text-accent-foreground shadow-sm"
                 style={{ animationDelay: "0.51s" }}
               >
                 <span className="size-1.5 animate-pulse-dot rounded-full bg-primary" />

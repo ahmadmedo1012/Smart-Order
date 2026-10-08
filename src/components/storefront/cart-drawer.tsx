@@ -11,12 +11,8 @@ import { EmptyState } from "@/components/shared/states";
 import { toast } from "sonner";
 import { ShoppingBag, Minus, Plus, Trash2, ArrowLeft, Store, StickyNote } from "lucide-react";
 
-// listen for external "open cart" events (e.g., toast action)
-if (typeof window !== "undefined") {
-  window.addEventListener("open-cart", () => {
-    window.dispatchEvent(new CustomEvent("toggle-cart-drawer"));
-  });
-}
+// The "open-cart" toast CTA is handled by the Storefront (the cart Sheet's
+// only controller) — this module must not listen/relay for it.
 
 export function CartDrawer({
   slug,
@@ -50,7 +46,7 @@ export function CartDrawer({
     <SheetContent side="left" className="w-full sm:max-w-md p-0 flex flex-col" dir="rtl">
       <SheetDescription className="sr-only">راجع منتجاتك وأكمل الطلب</SheetDescription>
       <div className="h-16 flex items-center gap-3 px-5 border-b border-border shrink-0">
-        <ShoppingBag className="size-5 text-primary" aria-hidden="true" />
+        <ShoppingBag className="size-5 text-accent-foreground" aria-hidden="true" />
         <div className="flex-1">
           <SheetTitle className="font-heading font-bold">سلة الطلب</SheetTitle>
           <p className="text-[11px] text-muted-foreground tabular">{count} عنصر</p>
