@@ -32,11 +32,41 @@
  *   danger --danger → --destructive / --destructive-soft / --destructive-ink
  *   radius --r-* → --radius-* (Tailwind @theme, same 6/8/10/12/16/20/28)
  *
- * Every pinned literal below was cross-checked against the live SSOT by
- * scripts/parity_matrix.py (download/madarek-parity-matrix.md) — 127/127
- * present tokens green at the time of authoring.
+ * P4-W3c — the pastel families: WHO consumes the 54 --c-* tokens
+ * ─────────────────────────────────────────────────────────────────────
+ * Smart-Menu's idiom, adopted here (B2): the families are consumed via
+ * the SEMANTIC layer that chains through them — --success/-ink/-soft →
+ * mint, --warning* → yellow, --info* → sky, --destructive* → rose,
+ * --chart-1..5 → copper/mint/sky/rose/lavender -ink, --accent-foreground
+ * → copper -ink (dark) / -deep (light), --accent-soft → copper -bg.
+ * Every status chip (OrderStatusBadge/PaymentStatusBadge), dashboard
+ * stat tone, alert tint and chart color is therefore family-backed; the
+ * family set is the SINGLE SOURCE (globals.css chains, no duplicated
+ * literals). Direct product surfaces for the -bg pastel grounds: the
+ * dashboard KPI icon wells + plan-usage chips (accent-soft) and the
+ * per-card soft grounds (bg-success-soft etc.).
+ *
+ * N/A families (documented, per the audit's "no forced usage" rule):
+ *   - peach/sand/grey: Madarek consumes these in its training/student/
+ *     quality modules — surfaces this product does not have. Smart-Order
+ *     is a single-accent commerce product; its non-status surfaces ride
+ *     copper/muted. No natural surface → pinned for parity, not adopted.
+ *   - lavender -bg/-deep: lavender appears only as --chart-5's ink; no
+ *     lavender-grounded surface exists (in the Smart family lavender IS
+ *     SmartBot's identity color — this repo links out, never paints it).
+ *   - --radius-3xl (28): pinned but RESERVED — no 28px surface exists
+ *     (cards 16, storefront dialog 20, hero orbs rounded-full).
+ *   - --t-micro: consumed since P4-W3c as the canonical press tier
+ *     (button + quick-add active:duration), Madarek §4.3 idiom.
+ *
+ * Every pinned literal was verified against the live SSOT
+ * (madarek/frontend/src/styles/tokens.css) at authoring time; the
+ * P4-W3c chains are additionally pinned RAW (see FAMILY_WIRING below)
+ * so the single-source shape itself is under test, not just values.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const css = readFileSync(new URL('../src/app/globals.css', import.meta.url), 'utf8').replace(
   /\/\*[\s\S]*?\*\//g,
@@ -158,13 +188,15 @@ const GROUNDS_LIGHT = {
 const ACCENT_DARK = {
   '--primary': '#E9B44C', // Madarek --accent (their --accent is the 15% wash twin)
   '--primary-foreground': '#05070F', // Madarek --accent-fg
-  '--accent-foreground': '#E9B44C', // Madarek --accent-ink
+  '--accent-foreground': '#E9B44C', // Madarek --accent-ink (chains --c-copper-ink)
+  '--accent-soft': '#2C2312', // Madarek --accent-soft (chains --c-copper-bg)
   '--c-copper-bg': '#2C2312', // Madarek --accent-soft (family copper ground)
 };
 const ACCENT_LIGHT = {
   '--primary': '#B57438',
   '--primary-foreground': '#1A0F06',
-  '--accent-foreground': '#5C3416',
+  '--accent-foreground': '#5C3416', // chains --c-copper-deep
+  '--accent-soft': '#F4E4D2', // chains --c-copper-bg
   '--c-copper-bg': '#F4E4D2',
 };
 const STATUS_DARK = {
@@ -302,20 +334,134 @@ pin(theme, 'motion(@theme)', '--default-transition-timing-function', 'cubic-bezi
 const rawCss = readFileSync(new URL('../src/app/globals.css', import.meta.url), 'utf8').replace(/\s+/g, ' ');
 const rawButton = readFileSync(new URL('../src/components/ui/button.tsx', import.meta.url), 'utf8');
 const rawDialog = readFileSync(new URL('../src/components/ui/dialog.tsx', import.meta.url), 'utf8');
+const rawSheet = readFileSync(new URL('../src/components/ui/sheet.tsx', import.meta.url), 'utf8');
+const rawDropdown = readFileSync(new URL('../src/components/ui/dropdown-menu.tsx', import.meta.url), 'utf8');
+const rawInput = readFileSync(new URL('../src/components/ui/input.tsx', import.meta.url), 'utf8');
 const CONSUMPTION = [
   ['globals :focus-visible consumes --state-focus-ring-* (the ONE focus language)',
     /outline: var\(--state-focus-ring-width, 2px\) solid var\(--state-focus-ring-color, var\(--ring\)\)/.test(rawCss) &&
     rawCss.includes('outline-offset: var(--state-focus-ring-offset, 2px)')],
   ['sonner toaster pinned to the --z-toast rung',
     rawCss.includes('[data-sonner-toaster]') && rawCss.includes('z-index: var(--z-toast)')],
-  ['button consumes the motion ladder (duration-(--t-fast) + ease-smooth)',
-    rawButton.includes('duration-(--t-fast)') && rawButton.includes('ease-smooth')],
+  ['button consumes the motion ladder (duration-(--t-fast) + ease-smooth + the micro press tier)',
+    rawButton.includes('duration-(--t-fast)') && rawButton.includes('ease-smooth') &&
+    rawButton.includes('active:duration-(--t-micro)')],
   ['dialog consumes the motion + z ladders (duration-(--t-base) + z-(--z-modal))',
     rawDialog.includes('duration-(--t-base)') && rawDialog.includes('z-(--z-modal)')],
+  // P4-W3c (B1): the three recipe gates the P4-F5b follow-up named —
+  // sheet, dropdown, input join button/dialog at the consumption table.
+  ['sheet consumes the motion + z ladders (z-(--z-sheet) + duration-(--t-base) + open duration-(--t-slow) + ease-smooth)',
+    rawSheet.includes('z-(--z-sheet)') && rawSheet.includes('duration-(--t-base)') &&
+    rawSheet.includes('data-[state=open]:duration-(--t-slow)') && rawSheet.includes('ease-smooth')],
+  ['dropdown-menu consumes the z ladder + elevation bridge (z-(--z-dropdown) + rounded-md + shadow-md)',
+    rawDropdown.includes('z-(--z-dropdown)') && rawDropdown.includes('rounded-md') &&
+    rawDropdown.includes('shadow-md')],
+  ['input consumes the motion ladder + the token-based focus halo (duration-(--t-fast) + ring-ring/20 + accent color-mix halo)',
+    rawInput.includes('duration-(--t-fast)') &&
+    rawInput.includes('focus-visible:ring-ring/20') &&
+    rawInput.includes('focus-visible:shadow-[0_0_0_3px_color-mix(in_srgb,var(--primary)_22%,transparent)]')],
 ];
 for (const [name, okFlag] of CONSUMPTION) {
   if (okFlag) passed += 1;
   else failures.push(`consumption gate FAILED: ${name}`);
+}
+
+// ── P4-W3c (B2): FAMILY_WIRING — the semantic layer must chain through ──────
+// the pastel families (Smart-Menu's SSOT idiom). Pins prove the VALUES;
+// these raw-declaration gates prove the CHAIN SHAPE, so a future edit
+// that re-duplicates a literal (forking the family from the status
+// tokens) fails parity. rawCss is whitespace-collapsed → the spellings
+// below match single-space source formatting.
+function occurrences(needle) {
+  return rawCss.split(needle).length - 1;
+}
+const FAMILY_WIRING = [
+  ['status base+text chain through mint/yellow/sky/rose -ink in BOTH themes (8 chains)',
+    ['--success: var(--c-mint-ink)', '--warning: var(--c-yellow-ink)',
+     '--info: var(--c-sky-ink)', '--destructive: var(--c-rose-ink)',
+     '--success-ink: var(--c-mint-deep)', '--warning-ink: var(--c-yellow-deep)',
+     '--info-ink: var(--c-sky-deep)', '--destructive-ink: var(--c-rose-deep)']
+      .map(occurrences)
+      .reduce((a, b) => a + b, 0) === 8 + 4], // 4 identical in both themes + 4 -deep light-only
+  ['status soft grounds chain through the family -bg slots in BOTH themes (8 chains)',
+    ['--success-soft: var(--c-mint-bg)', '--warning-soft: var(--c-yellow-bg)',
+     '--info-soft: var(--c-sky-bg)', '--destructive-soft: var(--c-rose-bg)']
+      .map(occurrences)
+      .reduce((a, b) => a + b, 0) === 8],
+  ['charts chain through the family -ink slots in BOTH themes (10 chains)',
+    ['--chart-1: var(--c-copper-ink)', '--chart-2: var(--c-mint-ink)', '--chart-3: var(--c-sky-ink)',
+     '--chart-4: var(--c-rose-ink)', '--chart-5: var(--c-lavender-ink)']
+      .map(occurrences)
+      .reduce((a, b) => a + b, 0) === 10],
+  ['accent chains through the copper family in BOTH themes (accent-foreground ×2 + accent-soft ×2)',
+    occurrences('--accent-foreground: var(--c-copper-ink)') === 1 &&
+    occurrences('--accent-foreground: var(--c-copper-deep)') === 1 &&
+    occurrences('--accent-soft: var(--c-copper-bg)') === 2],
+];
+for (const [name, okFlag] of FAMILY_WIRING) {
+  if (okFlag) passed += 1;
+  else failures.push(`family wiring gate FAILED: ${name}`);
+}
+
+// ── P4-W3c (B1): the ≥1-consumer tripwire ────────────────────────────────────
+// Audit systemic #1: pinned tokens drifted into dead definitions. Every
+// pinned token in the four high-traffic families must have ≥1 REAL
+// consumer somewhere in src/ — a var()/arbitrary-utility reference or a
+// @theme bridge in globals.css, or a spelling in product code
+// (z-(--z-modal), duration-(--t-fast), rounded-xl …). Declarations
+// (`--x:`) and the reduced-motion re-declarations do NOT count.
+const srcRoot = join(dirname(fileURLToPath(import.meta.url)), '..', 'src');
+function walk(dir, out = []) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) walk(join(dir, entry.name), out);
+    else if (/\.(tsx?|css)$/.test(entry.name)) out.push(join(dir, entry.name));
+  }
+  return out;
+}
+const corpus = [rawCss];
+const codeTexts = [];
+for (const f of walk(srcRoot)) {
+  if (f.endsWith('globals.css')) continue; // already in corpus as rawCss
+  codeTexts.push(readFileSync(f, 'utf8'));
+}
+function consumerCount(name) {
+  const any = new RegExp(`${name}(?![\\w-])`, 'g');
+  const decl = new RegExp(`${name}(?![\\w-])\\s*:`, 'g');
+  let count = 0;
+  for (const text of corpus.concat(codeTexts)) {
+    count += (text.match(any) || []).length - (text.match(decl) || []).length;
+  }
+  return count;
+}
+function utilityCount(spelling) {
+  const re = new RegExp(`${spelling}(?![\\w-])`, 'g');
+  let count = 0;
+  for (const text of codeTexts) count += (text.match(re) || []).length;
+  return count;
+}
+const TRIPWIRE = [
+  // backgrounds — the ground/surface slots (each must stay bridged or
+  // directly consumed)
+  ...['--background', '--card', '--popover', '--secondary', '--muted']
+    .map((t) => [`backgrounds: ${t} has ≥1 consumer`, consumerCount(t) >= 1]),
+  // foregrounds — every ink slot incl. the rare --placeholder-text
+  ...['--foreground', '--card-foreground', '--popover-foreground', '--secondary-foreground',
+      '--muted-foreground', '--placeholder-text', '--primary-foreground', '--accent-foreground']
+    .map((t) => [`foregrounds: ${t} has ≥1 consumer`, consumerCount(t) >= 1]),
+  // radius — @theme rungs consumed via rounded-* utilities (3xl is the
+  // documented RESERVED rung — see the header; it stays pinned, not
+  // tripwired)
+  ...[['--radius-xs', 'rounded-xs'], ['--radius-sm', 'rounded-sm'], ['--radius-md', 'rounded-md'],
+      ['--radius-lg', 'rounded-lg'], ['--radius-xl', 'rounded-xl'], ['--radius-2xl', 'rounded-2xl']]
+    .map(([t, u]) => [`radius: ${t} has ≥1 consumer (rounded-* utility or var())`,
+      utilityCount(u) + consumerCount(t) >= 1]),
+  // motion — the full --t-* ladder incl. the micro press tier
+  ...['--t-micro', '--t-fast', '--t-base', '--t-slow', '--t-slower', '--t-cinema']
+    .map((t) => [`motion: ${t} has ≥1 consumer`, consumerCount(t) >= 1]),
+];
+for (const [name, okFlag] of TRIPWIRE) {
+  if (okFlag) passed += 1;
+  else failures.push(`consumer tripwire FAILED: ${name}`);
 }
 
 // ── report ───────────────────────────────────────────────────────────────────
