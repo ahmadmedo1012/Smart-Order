@@ -1,3 +1,4 @@
+import "./landing.css";
 import { Header } from "@/components/layout/header";
 import { SkipLink } from "@/components/shared/skip-link";
 import { Footer } from "@/components/layout/footer";
@@ -58,8 +59,10 @@ async function getLandingStats(): Promise<{ totalStores: number; totalOrders: nu
 export default async function LandingPage() {
   const stats = await getLandingStats();
 
+  // r128-F4a: `.landing` activates the Orbit-Ink layer (src/app/landing.css) —
+  // the stage for the Stage-B section rebuild.
   return (
-    <div className="relative flex min-h-dvh flex-col overflow-x-clip bg-background">
+    <div className="landing relative flex min-h-dvh flex-col overflow-x-clip bg-background">
       <SkipLink />
       {/* Family atmosphere: film-grain overlay (pointer-safe, both themes) */}
       <div className="grain-overlay" aria-hidden="true" />
