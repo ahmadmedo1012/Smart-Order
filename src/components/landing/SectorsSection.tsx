@@ -1,25 +1,37 @@
 import { Globe } from "lucide-react";
 import { RevealCssClass } from "@/hooks/useReveal";
+import {
+  SectorsConstellation,
+  type SectorPin,
+} from "@/components/landing/SectorsConstellation";
 
 /* r128 Stage B (F4b) — Chapter 01 «الاكتشاف»: the sectors constellation
- * (colleges→products→SECTORS per PORT-KIT §6). Server component: the sky
- * chart is a static SVG (dashed hairline rings) + DOM overlay dots with
- * CSS-only tooltips; the real names live in the pins, the mobile chips
- * strip and the note. Content = the clients section's REAL registry:
- * the five sectors the shipped partners actually operate (مطاعم، مقاهي،
- * بيتزيريا، برغر، متاجر تجزئة) with honest per-sector counts —
- * nothing invented. */
+ * (colleges→products→SECTORS per PORT-KIT §6). The sky chart is a static
+ * SVG (dashed hairline rings) + DOM overlay dots with CSS-only tooltips;
+ * the real names live in the pins, the mobile chips strip and the note.
+ * Content = the clients section's REAL registry: the five sectors the
+ * shipped partners actually operate (مطاعم، مقاهي، بيتزيريا، برغر،
+ * متاجر تجزئة) with honest per-sector counts — nothing invented.
+ *
+ * r129 (F4) geometry discipline (audit S-13): pins are ON-RING pure
+ * trigonometry now (ring index + angle → SectorsConstellation computes
+ * the position on the ring's exact radius — the former hand-placed
+ * percentages floated 145/220/188px off-track vs the 130/200/270
+ * radii), and the stage carries the canonical resting-life cycle. */
 
 const LIME_DOT = "var(--ln-lime)";
 const DIM_DOT = "rgba(245,243,231,0.45)";
 
-/** The five real sectors — every pin traces to a shipped partner. */
-const SECTORS = [
-  { name: "مطاعم", partners: "مطعم الأصيل · Kubaba", count: "02", left: "38.8%", top: "35.6%", dot: LIME_DOT },
-  { name: "مقاهي", partners: "SOHO · Empire", count: "02", left: "61.2%", top: "35.6%", dot: LIME_DOT },
-  { name: "بيتزيريا", partners: "Telepizza · بيتزا روما", count: "02", left: "28.5%", top: "57.5%", dot: LIME_DOT },
-  { name: "برغر", partners: "The Cheese", count: "01", left: "71.5%", top: "57.5%", dot: LIME_DOT },
-  { name: "متاجر تجزئة", partners: "متجر الواحة", count: "01", left: "50%", top: "79.4%", dot: DIM_DOT },
+/** The five real sectors — every pin traces to a shipped partner.
+ * ring/angle: pure trig — distance from the stage center (500,320)
+ * equals the ring radius exactly; per-ring phases keep every pin on a
+ * distinct ray (canonical CollegeConstellation discipline). */
+const SECTORS: SectorPin[] = [
+  { name: "مطاعم", partners: "مطعم الأصيل · Kubaba", count: "02", ring: 0, angle: 220, dot: LIME_DOT },
+  { name: "مقاهي", partners: "SOHO · Empire", count: "02", ring: 0, angle: 320, dot: LIME_DOT },
+  { name: "بيتزيريا", partners: "Telepizza · بيتزا روما", count: "02", ring: 1, angle: 168, dot: LIME_DOT },
+  { name: "برغر", partners: "The Cheese", count: "01", ring: 1, angle: 12, dot: LIME_DOT },
+  { name: "متاجر تجزئة", partners: "متجر الواحة", count: "01", ring: 2, angle: 90, dot: DIM_DOT },
 ];
 
 /** The full registry for the mobile chips strip (all 5, accessible). */
@@ -41,30 +53,10 @@ export function SectorsSection() {
 
       <RevealCssClass as="div" delay={2}>
         <div className="ln-constellation">
-          {/* the sky chart — dashed hairline rings, flat violet heart */}
-          <div className="ln-constellation-stage">
-            <svg className="ln-constellation-svg" viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-              <circle className="ln-constellation-ring" style={{ ["--ln-ri" as string]: 0 }} cx={500} cy={320} r={130} />
-              <circle className="ln-constellation-ring" style={{ ["--ln-ri" as string]: 1 }} cx={500} cy={320} r={200} />
-              <circle className="ln-constellation-ring" style={{ ["--ln-ri" as string]: 2 }} cx={500} cy={320} r={270} />
-            </svg>
-
-            {/* the sectors — decorative pins (the names live in the chips
-                strip below, which is the accessible copy) */}
-            {SECTORS.map((s, i) => (
-              <span
-                key={s.name}
-                className="ln-constellation-dot"
-                aria-hidden="true"
-                style={{ left: s.left, top: s.top, ["--dot" as string]: s.dot, ["--ln-ci" as string]: i }}
-              >
-                <span className="ln-constellation-tip">
-                  <b>{s.name}</b>
-                  <i>{s.partners}</i>
-                </span>
-              </span>
-            ))}
-          </div>
+          {/* the sky chart — dashed hairline rings, flat violet heart;
+              client island: on-ring pins + the 4s resting-life cycle
+              (RM-gated, offscreen-paused) */}
+          <SectorsConstellation sectors={SECTORS} />
 
           {/* the domain strip — carries the full registry accessibly
               (desktop keeps the sky chart; phones get these chips) */}

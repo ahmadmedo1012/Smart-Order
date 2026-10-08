@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { RevealCssClass } from "@/hooks/useReveal";
 
 /* r128 Stage B (F4b) — the compact ln-styled FAQ: the six REAL Q&As
@@ -58,7 +59,12 @@ export function LandingFaq() {
       <div className="ln-faq-list">
         {FAQS.map((f) => (
           <details key={f.q} className="ln-faq-item">
-            <summary className="ln-faq-q">{f.q}</summary>
+            {/* r129 P3-5: the chevron the .ln-faq-q svg rotate rules
+                always expected — the summary affordance now paints */}
+            <summary className="ln-faq-q">
+              {f.q}
+              <ChevronDown size={18} aria-hidden="true" />
+            </summary>
             <p className="ln-faq-a">{f.a}</p>
           </details>
         ))}

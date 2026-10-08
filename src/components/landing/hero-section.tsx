@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { MagneticGoldLink } from "@/components/landing/MagneticGoldLink";
 import { HeroDepthLayer } from "@/components/landing/HeroDepthLayer";
-import { HeroOrbits } from "@/components/landing/HeroOrbits";
+import { OrbitScene } from "@/components/landing/OrbitScene";
 import { HeroPhone } from "@/components/landing/hero-phone";
 
 /**
@@ -11,11 +11,14 @@ import { HeroPhone } from "@/components/landing/hero-phone";
  * editorial text stack (eyebrow → h1 → sub → magnetic CTA pair → trust
  * pill), end column = the phone "order moment". What changed on the
  * Orbit-Ink stage (F4b):
- * · BEHIND it — the sky: HeroDepthLayer (parallax starfield) + a flat
- *   SVG sector orbit chart (1px cream/lime lines, nodes, violet core,
- *   horizon) — content sits at z1 over decor z0;
+ * · BEHIND it — the sky: HeroDepthLayer (parallax starfield, resting
+ *   opacity .5 + the ONE sanctioned violet depth radial) + the r129
+ *   OrbitScene canvas (the living orbital system — Madarek port,
+ *   mounted exactly like canonical LandingPage.tsx: above the depth
+ *   plane, below the content, pointer-events none) — content sits at
+ *   z1 over decor z0;
  * · the product warmth/glow layers retire (§7 no-glow discipline) —
- *   the sky is flat ink with no gradients;
+ *   the flat HeroOrbits chart retires with the canvas port (r129);
  * · CTAs convert to the landing pill system — magnetic gold
  *   (useMagnetic(7) via MagneticGoldLink) + ghost.
  *
@@ -33,11 +36,14 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
         {'@keyframes r92-hero-settle{from{transform:translateY(12px)}to{transform:translateY(0)}}.r92-hero-settle{animation:r92-hero-settle .6s var(--ease-out-quart,ease-out) both}'}
       </style>
 
-      {/* r128 F4b — the sky behind everything: starfield depth plane +
-          the sector orbit chart (flat SVG, decorative) */}
+      {/* r129 — the sky behind everything: starfield depth plane (z −1,
+          resting opacity .5) + the living OrbitScene canvas (the Madarek
+          engine: DPR-capped, IO+visibility paused, RM composed still).
+          Same mount order as canonical LandingPage.tsx: depth layer
+          first, canvas after (paints above it), content at z1 above both. */}
       <div className="ln-keep-sky" aria-hidden="true">
         <HeroDepthLayer />
-        <HeroOrbits className="ln-keep-orbits" />
+        <OrbitScene className="ln-hero-canvas" biasX={-0.35} />
       </div>
 
       {/* Family container rhythm (§4) — kept verbatim */}
@@ -45,14 +51,21 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
         <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-10">
           {/* Start column — editorial text stack */}
           <div className="text-center lg:text-start">
-            {/* Eyebrow — above the fold, on the mono machine-voice */}
+            {/* Eyebrow — above the fold, on the mono machine-voice.
+                r129 S-11: ln-mono dim (canonical LandingPage.tsx:352 —
+                "the lime word below is the only pop"); the former lime
+                .ln-label was a 2nd lime pop above the h1 (roster
+                violation) */}
             <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              <span className="ln-label">{"Smart Order · متجر رقمي · ليبيا"}</span>
+              <span className="ln-mono">{"Smart Order · متجر رقمي · ليبيا"}</span>
             </div>
 
             {/* h1 — CSS settle (family r92), visible in SSR HTML on first paint.
-                The ONE lime word rides flat color — no gradient-text. */}
-            <h1 className="r92-hero-settle text-balance text-4xl font-bold leading-[1.15] tracking-tighter sm:text-5xl lg:text-6xl xl:text-[4.25rem]">
+                The ONE lime word rides flat color — no gradient-text.
+                r129 S-12: tracking-normal (letter-spacing 0) — Arabic
+                joins; negative tracking breaks cursive connection
+                (canonical landing.css:591 hard rule). */}
+            <h1 className="r92-hero-settle text-balance text-4xl font-bold leading-[1.15] tracking-normal sm:text-5xl lg:text-6xl xl:text-[4.25rem]">
               <span className="block">متجر رقمي لمتجرك</span>
               <span className="block">
                 <span className="ln-keep-word">الطلبات تصلك</span> في لوحة واحدة

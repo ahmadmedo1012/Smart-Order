@@ -23,19 +23,32 @@
 
 /* ── 0 · scope base — Orbit-Ink token block (PORT-KIT §1 verbatim) ── */
 .landing {
-  /* canonical bridges (see header) — scoped, product pins untouched */
+  /* canonical bridges (see header) — scoped, product pins untouched.
+     r129 P0: the bridge was authored against a partial token list while
+     the sibling smart-link §0b bridge (landing.css:60-83) is complete —
+     --sp-3/-4/-7/-8, --r-2xl, --page-gutter-mobile and
+     --motion-duration-ambient-scene were referenced (46 var() sites)
+     but defined NOWHERE, so every containing declaration was invalid
+     at computed-value time (square cards, zero paddings/gaps, phone
+     chapters flush to the edges, dead finale converge). Completed by
+     mirroring smart-link EXACTLY — canonical madarek values only. */
   --r-full: 9999px;                     /* madarek tokens.css:37 */
   --r-md: 10px;                         /* tokens.css:32 (= --radius-md) */
   --r-xl: 16px;                         /* tokens.css:34 (= --radius-xl) */
+  --r-2xl: 20px;                        /* tokens.css:35 — station/stat/venue/role radii */
   --fw-medium: 500;                     /* tokens.css:95 */
   --fw-semibold: 600;                   /* tokens.css:96 */
   --fw-bold: 700;                       /* tokens.css:97 */
   --sp-1: 4px;  --sp-2: 8px;            /* tokens.css:19 */
+  --sp-3: 12px; --sp-4: 16px;           /* tokens.css:19 — station titles, stat/role paddings */
   --sp-5: 20px; --sp-6: 24px;           /* tokens.css:20 */
+  --sp-7: 32px; --sp-8: 40px;           /* tokens.css:20 — station cards, constellation gaps */
   --ease-linear: linear;                /* tokens.css:138 — marquee speed */
   --motion-duration-reveal: 360ms;      /* tokens.css:182 — 360ms canonical (kit §1) */
+  --motion-duration-ambient-scene: 22s; /* tokens.css:209 — finale converge breathe */
   --marketing-max-w: 1200px;            /* tokens.css:347 */
   --page-gutter: 48px;                  /* tokens.css:357 = --sp-9 */
+  --page-gutter-mobile: 20px;           /* tokens.css:358 = --sp-5 — ≤920px chapter gutters */
 
   --ln-ink:        #252A3E;   /* primary flat ground */
   --ln-ink-2:      #1C2032;   /* darker step — scene separation */
@@ -72,6 +85,11 @@
   --ln-mono: 'IBM Plex Mono', 'IBM Plex Sans Arabic', ui-monospace, monospace;
 }
 
+/* selection rides the violet depth pair (7.78:1) — lime stays rare
+   (canonical landing.css:62; without this the product gold ::selection
+   from globals.css bleeds into the Orbit-Ink world) */
+.landing ::selection { background: var(--ln-violet-deep); color: var(--ln-cream); }
+
 /* Film grain — the one permanent texture. Fixed veil above the whole
    landing (below native dialog overlays, which live in the top layer),
    5% white feTurbulence noise on a 200px stitchable tile. */
@@ -102,6 +120,7 @@
    Direction-neutral (inherits RTL) so the Latin numeral opens the
    reading; tabular numerals keep the indexes aligned across chapters. */
 .landing .ln-label {
+  position: relative; /* P4-18 halo anchor (canonical landing.css:787) */
   display: block;
   font-family: var(--ln-mono);
   font-size: 12px;
@@ -112,14 +131,24 @@
   direction: inherit;
   margin-block-end: 14px;
 }
+/* P4-18 (canonical landing.css:778-786): the lime label carries a faint
+   radial halo — the word reads as lit from behind, α 0.12 + 6px blur,
+   flat craft (no glow bloom on the ink). */
+.landing .ln-label::before {
+  content: '';
+  position: absolute;
+  inset: -4px 0;
+  background: radial-gradient(ellipse at center, var(--ln-lime) 0%, transparent 70%);
+  opacity: 0.12;
+  filter: blur(6px);
+  pointer-events: none;
+  z-index: -1;
+}
 /* (.ln-mono-eyebrow deleted — dead since the .ln-label rename; zero TSX
    consumers, verified by grep before the premium-polish purge) */
 
-.landing .marketing-container {
-  max-inline-size: var(--marketing-max-w);
-  margin-inline: auto;
-  padding-inline: var(--page-gutter);
-}
+/* (r129 P3-2: .marketing-container deleted — zero TSX consumers, verified
+   by grep; the chapters ship their own max-inline-size containers) */
 
 /* ── 1 · marquee — one slow pass (PORT-KIT §3 verbatim) ────────────── */
 .landing .ln-marquee {
@@ -166,9 +195,8 @@
   background: var(--ln-lime);
   flex-shrink: 0;
 }
-@media (prefers-reduced-motion: reduce) {
-  .landing .ln-marquee-track { animation: none; } /* raw-duration loop: explicit off-switch */
-}
+/* (r129 P3-2: this RM off-switch also lives verbatim in §0j below —
+   one copy removed, cascade unchanged) */
 
 /* ── 2 · top progress ribbon (PORT-KIT §4) ─────────────────────────── */
 .landing .landing-progress {
@@ -203,33 +231,9 @@
   border-block-end-color: var(--ln-line);
 }
 
-.landing .landing-nav-links {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-1);
-  margin-inline-start: auto;
-}
-.landing .landing-nav-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 14px;
-  border-radius: var(--ln-radius-pill);
-  color: var(--ln-cream-dim);
-  font-size: 14px;
-  font-weight: var(--fw-medium);
-  text-decoration: none;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  font-family: inherit;
-  transition:
-    color var(--ln-t-fast) var(--ln-ease-soft),
-    background var(--ln-t-fast) var(--ln-ease-soft);
-}
-.landing .landing-nav-link:hover { color: var(--ln-cream); background: rgb(245 243 231 / 0.04); }
-.landing .landing-nav-link:focus-visible { outline: 2px solid var(--ln-cream); outline-offset: 3px; border-radius: var(--ln-radius-pill); }
-.landing .landing-nav-link svg { transition: transform var(--ln-t-fast) var(--ln-ease-out); }
+/* (r129 P3-2: the .landing-nav-links/.landing-nav-link block that stood
+   here was a byte-exact duplicate of the §1 header-internals block below
+   — one copy removed, cascade unchanged) */
 
 /* Scroll-spy active state — nav link highlighted when its section is
    visible (R2, the INTENDED form): the observer writes
@@ -350,8 +354,19 @@
     0 0 0 1px rgba(245,243,231,0.10);
   transform: translate(var(--mag-x, 0), calc(var(--mag-y, 0) - 1px));
 }
+/* P4-01 (canonical landing.css:1839-1850): the press tail — every pill
+   compresses to --press-scale over the micro tier; the magnetic gold
+   preserves its translate while pressing. Replaces the former
+   translate-only gold :active. */
+.landing .ln-btn-gold:active,
+.landing .ln-btn-ghost:active,
+.landing .ln-btn-text:active {
+  transform: scale(var(--press-scale, 0.97));
+  transition-duration: var(--t-micro);
+}
+/* Magnetic CTA preserves its translate while pressing */
 .landing .ln-btn-gold:active {
-  transform: translate(var(--mag-x, 0), calc(var(--mag-y, 0) + 1px));
+  transform: translate(var(--mag-x, 0), var(--mag-y, 0)) scale(var(--press-scale, 0.97));
 }
 /* Premium glow — world-class button depth on hover */
 .landing .ln-btn-gold::after {
@@ -451,7 +466,6 @@
 /* ── 0i · mobile rhythm — canonical landing.css:1612/1618/1639-1640 ── */
 @media (max-width: 920px) {
   .landing .ln-chapter { padding-inline: var(--page-gutter-mobile); }
-  .landing .marketing-container { padding-inline: var(--page-gutter-mobile); }
 }
 @media (max-width: 768px) {
   /* GAP-5 · mobile density pass — the desktop 96–140px chapter rhythm
@@ -855,6 +869,8 @@
   border-radius: var(--r-2xl);
   background: rgb(245 243 231 / 0.03); /* card recipe (spec §4.2.6) */
   border: 1px solid var(--ln-line-soft);
+  /* P3-28 (canonical landing.css:1066): resting depth */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
   transition: border-color var(--ln-t-base) var(--ln-ease);
 }
 .landing .ln-station-card:hover { border-color: var(--ln-line); }
@@ -910,6 +926,9 @@
   display: grid;
   place-items: center;
   min-block-size: 340px;
+  /* P3-29 (canonical landing.css:1124): inset hairline — the visual
+     reads as a lit plate without gaining a drop shadow */
+  box-shadow: inset 0 1px 0 rgba(245,243,231,0.04);
 }
 .landing .ln-progress-orbits {
   position: relative;
@@ -982,6 +1001,8 @@
   border-radius: var(--r-2xl);
   background: rgb(245 243 231 / 0.03);
   border: 1px solid var(--ln-line-soft);
+  /* P3-30 (canonical landing.css:1202): resting depth */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
   transition: border-color var(--ln-t-base) var(--ln-ease);
 }
 .landing .ln-stat:hover { border-color: var(--ln-line); }
@@ -1074,6 +1095,8 @@
 .landing .ln-role-row:hover {
   background: rgb(245 243 231 / 0.03);
   border-color: var(--ln-line-soft);
+  /* P3-35 (canonical landing.css:1318): subtle depth on hover */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
 }
 .landing .ln-role-row:hover .ln-role-index { color: var(--ln-cream); }
 @media (min-width: 921px) {
@@ -1180,7 +1203,15 @@
   text-wrap: balance;
 }
 .landing .ln-cta-title em { font-style: normal; color: var(--ln-cream); }
-.landing .ln-cta-lede { margin: 0; color: var(--ln-cream-dim); font-size: clamp(15px, 1.5vw, 16.5px); line-height: 1.6; max-inline-size: 54ch; }
+.landing .ln-cta-lede {
+  margin: 0;
+  color: var(--ln-cream-dim);
+  font-size: clamp(15px, 1.5vw, 16.5px);
+  line-height: 1.6;
+  /* P4-10 resolved tail (canonical landing.css:1986): the base 54ch is
+     overridden to the 72ch measure fold — same as the chapter lede */
+  max-inline-size: 72ch;
+}
 .landing .ln-cta-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-4); margin-block-start: var(--sp-2); }
 /* P3-36 (canonical): CTA buttons get a subtle lift on hover */
 .landing .ln-cta-actions .ln-btn-gold:hover { transform: translateY(-1px) translate(var(--mag-x, 0), calc(var(--mag-y, 0) - 1px)); }
@@ -1283,7 +1314,14 @@
   width: fit-content;
   transition: color var(--ln-t-fast) var(--ln-ease-soft);
 }
-.landing .landing-footer-link:hover { color: var(--ln-cream); }
+/* P4-13 (canonical landing.css:2004-2008): hover underline — the link
+   feels interactive even before the color shift registers */
+.landing .landing-footer-link:hover {
+  color: var(--ln-cream);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
 .landing .landing-footer-bottom {
   margin-block-start: var(--sp-6);
   padding-block-start: var(--sp-4);
@@ -1313,13 +1351,20 @@
 .landing .ln-faq { content-visibility: auto; contain-intrinsic-size: auto 860px; }
 
 /* ── 13 · mobile blocks — canonical landing.css:1595-1760 ──────────── */
-@media (max-width: 1024px) {
-  .landing .ln-hero { padding-block: clamp(104px, 14vh, 150px) 88px; }
-  /* burger breakpoint: nav links + header CTA fold into the drawer */
+/* burger fold: canonical 1080 (landing.css:1586-1591) — was 1024, which
+   folded the nav 56px early; plus the canonical min-1081 drawer guard
+   (1592-1594) so the mobile menu can never reappear above the fold. */
+@media (max-width: 1080px) {
   .landing .landing-nav-links { display: none; }
   .landing .landing-burger { display: grid; margin-inline-start: auto; }
   .landing .landing-header-cta { display: none; }
   .landing .landing-mobile-menu { display: flex; }
+}
+@media (min-width: 1081px) {
+  .landing .landing-mobile-menu { display: none !important; }
+}
+@media (max-width: 1024px) {
+  .landing .ln-hero { padding-block: clamp(104px, 14vh, 150px) 88px; }
 }
 @media (max-width: 920px) {
   /* journey spine — stations stack vertically, nodes ride the gutter.
@@ -1343,6 +1388,9 @@
 
   .landing .landing-nav { padding-inline: 16px; }
   .landing .landing-mobile-menu { padding-inline: 16px; }
+  /* P4-06 (canonical landing.css:1937-1941): the drawer respects the
+     home-indicator band — content never hides under iOS chrome */
+  .landing .landing-mobile-menu { padding-block-end: env(safe-area-inset-bottom, var(--sp-4)); }
   .landing .ln-progress-grid { grid-template-columns: 1fr; }
   .landing .ln-progress-visual { min-block-size: 280px; }
   .landing .ln-chapter { padding-inline: var(--page-gutter-mobile); }
@@ -1351,7 +1399,6 @@
   .landing .ln-venues { padding-inline: var(--page-gutter-mobile); }
   .landing .ln-faq { padding-inline: var(--page-gutter-mobile); }
   .landing .ln-cta { padding-inline: var(--page-gutter-mobile); }
-  .landing .ln-hero-scroll { display: none; }
 }
 @media (max-width: 768px) {
   /* GAP-5 · mobile density pass — tighter chapters, tighter heads,
@@ -1425,10 +1472,6 @@
   }
 }
 @media (max-width: 560px) {
-  .landing .ln-hero-actions { gap: var(--sp-3); }
-  .landing .ln-hero-actions .ln-btn-gold,
-  .landing .ln-hero-actions .ln-btn-ghost,
-  .landing .ln-hero-actions .ln-btn-text { inline-size: 100%; }
   .landing .ln-constellation-strip { grid-template-columns: 1fr; }
   /* GAP-5: 2×2 at 390px was a solid text block — give the numbers room */
   .landing .ln-progress-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-5) var(--sp-3); }
@@ -1438,18 +1481,32 @@
   .landing .ln-cta-actions .ln-btn-ghost.xl { inline-size: 100%; }
   .landing .ln-venues-grid { grid-template-columns: 1fr; }
 }
+/* canonical landing.css:1723-1725 — the mono data strip tightens on the
+   smallest phones so the figures never wrap out of their band */
+@media (max-width: 390px) {
+  .landing .ln-trust-inner { gap: var(--sp-3); font-size: 12.5px; }
+}
 
 /* ── 14 · reduced motion — canonical landing.css:1800-1831 ─────────── */
 @media (prefers-reduced-motion: reduce) {
   .landing .ln-hero-canvas { animation: none; opacity: var(--ln-canvas-op, 1); }
-  .landing .ln-hero-scroll-line::after { animation: none; }
   .landing .ln-journey-path-light { stroke-dashoffset: 0; }
   /* P3-21/P2-13 bespoke verbs: all off — the chart plots instantly, the
-     finale stands still */
+     resting highlight never cycles (JS-gated too), the finale stands
+     still */
   .landing .ln-cta-orbit.o0,
   .landing .ln-cta-orbit.o2,
   .landing .ln-constellation-ring,
   .landing .ln-constellation-dot { animation: none; }
+  /* P4-07 (canonical landing.css:1946-1955): the press scale is disabled
+     but the active background tint stays so users know the button
+     responded */
+  .landing .ln-btn-gold:active,
+  .landing .ln-btn-ghost:active,
+  .landing .ln-btn-text:active {
+    transform: none;
+    background: var(--ln-lime-deep);
+  }
   .landing .ln-btn-gold,
   .landing .ln-btn-ghost,
   .landing .ln-btn-text,
@@ -1460,6 +1517,9 @@
      is killed */
   .landing .ln-hero-depth { opacity: 0.4; }
 }
+/* P3-32 (canonical landing.css:1826): the scroll progress bar stays
+   visible under reduced motion */
+.landing .landing-progress { opacity: 1 !important; }
 
 /* ── 15 · P4 tail — card hover elevation (canonical P4-18) ──────────
    Lift + subtle shadow on hover signals interactivity without violating
@@ -1479,19 +1539,35 @@
    (z0); the content column wins (z1). Flat grammar only — the product
    warmth/glow layers retire with this commit (§7 no-glow discipline). */
 .landing .ln-keep-hero { background: var(--ln-ink); }
+/* the sky: flat ink + the ONE sanctioned violet depth radial
+   (α 0.10 ≤ 0.12, canonical landing.css:533-548 — the only place the
+   Orbit-Ink world is allowed depth) + the ::after cream breath */
 .landing .ln-keep-sky {
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: clip;
   pointer-events: none;
+  background: radial-gradient(46% 54% at 30% 44%, rgb(122 107 242 / 0.10) 0%, transparent 70%);
 }
-.landing .ln-keep-sky .ln-hero-depth,
-.landing .ln-keep-sky .ln-keep-orbits {
+.landing .ln-keep-sky::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 60%, rgba(245,243,231,0.02) 0%, transparent 60%);
+  pointer-events: none;
+}
+/* starfield depth plane — canonical P4-16 (landing.css:2039-2045):
+   z −1 (below the canvas), resting opacity 0.5 (was 1 — the sky read
+   ~2× brighter than canonical) */
+.landing .ln-keep-sky .ln-hero-depth {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.5;
 }
 /* text always wins the sky — content z1 over decor z0 */
 .landing .ln-keep-hero > .mx-auto { position: relative; z-index: 1; }
@@ -1525,4 +1601,92 @@
 .landing .landing-footer-bottom-links {
   display: inline-flex;
   gap: 16px;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   r129 (F4) — tactile + focus + canvas docking layer, ported from the
+   canonical Madarek landing.css tail (P4-01/06/09/13/16/18 + §5 hero
+   canvas block 551-562 + 720) per audits/r129/smartorder-differential.
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* ── r129 · a · universal cream focus ring (canonical 1783-1786 + P4-09
+   1971-1977). Without this the product GOLD ring from globals.css
+   (2px/2px --state-focus-ring-*) leaks into the Orbit-Ink world on
+   every landing CTA/footer/megamenu focus — the landing world owns a
+   CREAM ring, 2px/3px. Specificity (0,2,0) beats the global
+   :focus-visible (0,1,0); component rules that already carry their own
+   cream ring keep winning (higher specificity). */
+.landing :focus-visible {
+  outline: 2px solid var(--ln-cream);
+  outline-offset: 3px;
+}
+/* button restores (P4-09): ghost/text keep cream; the lime conversion
+   pill takes an INK ring — cream on lime would vanish (canonical
+   .btn.primary pattern) */
+.landing .ln-btn-ghost:focus-visible { outline-color: var(--ln-cream); }
+.landing .ln-btn-gold:focus-visible { outline-color: var(--ln-ink); }
+
+/* ── r129 · b · skip link — canonical landing.css:1763-1781 (P3-24).
+   The product SkipLink (gold chip, corner, z-500) sits UNDER the
+   z-2000 grain veil and speaks the product language; on the landing it
+   is re-skinned to the canonical lime pill, centered, z-2100 (ABOVE
+   the grain). a-element specificity (0,2,1) outranks the Tailwind
+   focus: utilities (0,2,0) the component ships. */
+.landing a.ln-skip-link {
+  position: fixed;
+  inset-block-start: 8px;
+  inset-inline-start: 50%;
+  translate: -50% -150%;
+  z-index: 2100;
+  padding: 10px 18px;
+  border-radius: var(--ln-radius-pill);
+  background: var(--ln-lime);
+  color: var(--ln-ink);
+  font-size: 14px;
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
+  transition: translate var(--ln-t-fast) var(--ln-ease-out);
+}
+.landing a.ln-skip-link:focus,
+.landing a.ln-skip-link:focus-visible {
+  translate: -50% 0;
+}
+
+/* ── r129 · c · sectors constellation resting life (canonical
+   landing.css:897-900): one pin gently breathes at a time on a 4s
+   cycle — JS-rotated (SectorsConstellation), gated by
+   prefers-reduced-motion + paused offscreen via its IO. */
+.landing .ln-constellation-dot.is-resting {
+  transform: scale(1.45);
+  box-shadow: 0 0 0 4px rgb(245 243 231 / 0.1);
+}
+
+/* ── r129 · d · OrbitScene canvas docking (canonical §5 block 551-562
+   + returning-visitor calm 720): the hero's living orbital system —
+   a canvas painted by OrbitScene.tsx, faded in by CSS over 380ms
+   ease-out with a 160ms delay (literal end-states, no var() inside
+   keyframes — maximum compatibility). The ≤768 dim ceiling
+   (--ln-canvas-op 0.35, §13 above) and the RM off-switch (§14 above)
+   already reference these names — this base rule is what un-deadens
+   them. */
+.landing .ln-hero-canvas {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none; /* decorative — the sky wrapper is aria-hidden */
+  --ln-canvas-op: 1; /* decorative ceiling — 0.35 on mobile (spec §4.3) */
+  opacity: 0;
+  animation: ln-scene-in var(--ln-t-slow) var(--ln-ease-out) var(--ln-t-fast) forwards;
+}
+/* literal end-states (no var() inside keyframes — maximum compatibility) */
+@keyframes ln-scene-in { to { opacity: 1; } }
+@keyframes ln-scene-in-dim { to { opacity: 0.35; } }
+/* returning-visitor calm (canonical 720): the page script marks
+   .landing[data-intro-seen] via sessionStorage
+   'smartorder.intro.seen' — later visits this session snap the canvas
+   in fast (160ms, zero delay) instead of replaying the full fade */
+.landing[data-intro-seen='true'] .ln-hero-canvas {
+  animation-duration: var(--ln-t-fast);
+  animation-delay: 0s;
 }

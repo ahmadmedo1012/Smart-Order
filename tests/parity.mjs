@@ -71,6 +71,19 @@
  * Suite: 231 (197 product + 34 r128-F8 landing-layer pins: 25 .landing
  * token values + 9 raw gates — marquee keyframes/gap/loop/RM, --sp consumer,
  * scroll-spy ids, .ln-grain, and the .landing scope-isolation negatives).
+ *
+ * r129 (F4): 231 → 276. The r129-A7 audit proved the suite's blind spot —
+ * 231/231 green while 7 bridge tokens (--sp-3/-4/-7/-8, --r-2xl,
+ * --page-gutter-mobile, --motion-duration-ambient-scene; 46 var() sites)
+ * were defined NOWHERE and every containing declaration resolved to 0/none.
+ * The fix layer adds: the MASTER var()-RESOLVER GATE (every var() in
+ * landing.css must resolve against landing ∪ globals ∪ fonts — would have
+ * caught the P0), the 7 bridge-value pins, the tactile/canvas/constellation
+ * docking gates, the OrbitScene port pins (palette triplets, omega rad/ms,
+ * biasX, intro key, DPR cap) and the r129 token-matrix additions
+ * (--ring fleet reconciliation, --c-ember light, --accent-hover,
+ * --ease-spring-snappy, --hover-lift, --gold-soft, --brand-purple, the
+ * global --r-* ladder).
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -302,7 +315,9 @@ pinAll(light, 'elev-light', ELEV_LIGHT);
 // contract (rubric §B23) requires ≥4.5:1 in BOTH themes. The 2px/2px ring
 // rides --state-focus-ring-* tokens, mirrored by the shadcn --ring bridge.
 const FOCUS_DARK = {
-  '--ring': '#E9B44C',
+  // r129: #C9962F — the fleet reconciliation (r127-A6): SL/SM paint the
+  // strong gold; the former raw-accent #E9B44C was the one fleet outlier.
+  '--ring': '#C9962F',
   '--state-focus-ring-color': '#C9962F', // Madarek dark --accent-strong (7.87:1)
   '--state-focus-ring-width': '2px',
   '--state-focus-ring-offset': '2px',
@@ -563,6 +578,208 @@ for (const [name, okFlag] of TRIPWIRE) {
   if (okFlag) passed += 1;
   else failures.push(`consumer tripwire FAILED: ${name}`);
 }
+
+// ── r129 (F4): MASTER var()-RESOLVER GATE ─────────────────────────────────────
+// The r129-A7 audit's process finding: 231/231 pins were green while 7
+// bridge tokens consumed by 46 var() sites were defined NOWHERE — value
+// pins can never catch an unresolvable var() chain. This gate extracts
+// EVERY var() reference from landing.css and asserts each resolves in
+// the served token blocks (landing.css ∪ globals.css ∪ public/fonts/
+// fonts.css declarations, any selector scope — declarations inside
+// media queries count too). Whitelist: the runtime-set element vars
+// written imperatively by hooks/components (--p/--sp scroll progress,
+// --mag-x/--mag-y magnetic, --dot/--ln-ci/--ln-ri constellation,
+// --m milestone thresholds) — those are element-level by design.
+{
+  const fontsCss = (() => {
+    try {
+      return readFileSync(new URL('../public/fonts/fonts.css', import.meta.url), 'utf8');
+    } catch {
+      return '';
+    }
+  })();
+  const stripComments = (t) => t.replace(/\/\*[\s\S]*?\*\//g, ' ');
+  const definedNames = new Map();
+  for (const text of [stripComments(css), stripComments(landingCssRaw), stripComments(fontsCss)]) {
+    for (const m of text.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) {
+      if (!definedNames.has(m[1])) definedNames.set(m[1], m[2].trim());
+    }
+  }
+  const RUNTIME_VARS = new Set([
+    '--p', '--sp', '--m', '--mag-x', '--mag-y', '--dot', '--ln-ci', '--ln-ri',
+  ]);
+  const refs = new Map(); // name -> count
+  for (const m of stripComments(landingCssRaw).matchAll(/var\(\s*(--[\w-]+)/g)) {
+    refs.set(m[1], (refs.get(m[1]) ?? 0) + 1);
+  }
+  const unresolved = [...refs.keys()].filter((n) => !definedNames.has(n) && !RUNTIME_VARS.has(n));
+  const totalRefs = [...refs.values()].reduce((a, b) => a + b, 0);
+  if (unresolved.length === 0 && totalRefs > 0) {
+    passed += 1; // the gate itself — one pin: 0 undefined / all resolved
+  } else {
+    failures.push(
+      `resolver gate FAILED: ${unresolved.length} undefined var() name(s) in landing.css [${unresolved.join(', ')}] — ${totalRefs} total references checked`,
+    );
+  }
+}
+
+// ── r129 (F4): the 7 bridge-value pins (the P0 cluster, now defined) ─────────
+// Mirrored from smart-link landing.css:60-83 (canonical madarek values).
+// Each was referenced-but-undefined at r128 (46 consumer sites rendering
+// 0/none) — these pins pin the DEFINITION so the drift can never return.
+const BRIDGE_TOKENS = {
+  '--sp-3': '12px',   // tokens.css:19 — 14 refs
+  '--sp-4': '16px',   // tokens.css:19 — 16 refs
+  '--sp-7': '32px',   // tokens.css:20 — station-card padding
+  '--sp-8': '40px',   // tokens.css:20 — constellation gaps
+  '--r-2xl': '20px',  // tokens.css:35 — 6 border-radius sites
+  '--page-gutter-mobile': '20px', // tokens.css:358 — ≤920px chapter gutters
+  '--motion-duration-ambient-scene': '22s', // tokens.css:209 — finale converge
+};
+for (const [token, value] of Object.entries(BRIDGE_TOKENS)) {
+  pin(landingScope, 'bridge', token, value);
+}
+
+// ── r129 (F4): landing-layer raw gates (tactile + canvas + constellation) ───
+const R129_LAYER = [
+  ['finale o2 converge consumes the ambient-scene duration (the dead-verb fix)',
+    landingRaw.includes('animation: ln-cta-converge var(--motion-duration-ambient-scene)')],
+  ['canvas keyframes: ln-scene-in → opacity 1 (literal end-state, no var() inside)',
+    landingRaw.includes('@keyframes ln-scene-in { to { opacity: 1; } }')],
+  ['canvas keyframes: ln-scene-in-dim → opacity 0.35 (the ≤768px dim ceiling)',
+    landingRaw.includes('@keyframes ln-scene-in-dim { to { opacity: 0.35; } }')],
+  ['canvas base rule: .ln-hero-canvas carries the 380ms/+160ms entrance over --ln-t-slow/--ln-t-fast',
+    /animation: ln-scene-in var\(--ln-t-slow\) var\(--ln-ease-out\) var\(--ln-t-fast\) forwards;/.test(landingRaw)],
+  ['returning-visitor calm: [data-intro-seen] shortens the canvas entrance to --ln-t-fast/zero delay',
+    /\.landing\[data-intro-seen='true'\] \.ln-hero-canvas \{ animation-duration: var\(--ln-t-fast\); animation-delay: 0s; \}/.test(landingRaw)],
+  ['::selection rides the violet depth pair (no product gold bleed into the landing)',
+    /\.landing ::selection \{ background: var\(--ln-violet-deep\); color: var\(--ln-cream\); \}/.test(landingRaw)],
+  ['press states P4-01: gold/ghost/text compress to --press-scale over the micro tier',
+    /\.landing \.ln-btn-gold:active, \.landing \.ln-btn-ghost:active, \.landing \.ln-btn-text:active \{ transform: scale\(var\(--press-scale, 0\.97\)\); transition-duration: var\(--t-micro\); \}/.test(landingRaw)],
+  ['press states P4-01 magnetic variant: gold preserves its translate while pressing',
+    /\.landing \.ln-btn-gold:active \{ transform: translate\(var\(--mag-x, 0\), var\(--mag-y, 0\)\) scale\(var\(--press-scale, 0\.97\)\); \}/.test(landingRaw)],
+  ['RM press form P4-07: scale disabled, lime-deep active tint stays',
+    /\.landing \.ln-btn-gold:active, \.landing \.ln-btn-ghost:active, \.landing \.ln-btn-text:active \{ transform: none; background: var\(--ln-lime-deep\); \}/.test(landingRaw)],
+  ['footer link hover underline P4-13: 2px thickness, 4px offset',
+    landingRaw.includes('text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px;')],
+  ['mobile drawer safe-area P4-06: padding-block-end rides env(safe-area-inset-bottom, --sp-4)',
+    landingRaw.includes('padding-block-end: env(safe-area-inset-bottom, var(--sp-4));')],
+  ['resting card shadows P3-28/30/35: station/stat/role carry 0 1px 2px rgba(0,0,0,0.06) (3 sites)',
+    landingRaw.split('box-shadow: 0 1px 2px rgba(0,0,0,0.06);').length - 1 === 3],
+  ['progress visual resting hairline P3-29: inset 0 1px 0 rgba(245,243,231,0.04)',
+    landingRaw.includes('box-shadow: inset 0 1px 0 rgba(245,243,231,0.04);')],
+  ['cta-lede measure P4-10 resolved tail: 72ch (was 54ch)',
+    /\.landing \.ln-cta-lede \{[^}]*max-inline-size: 72ch;/.test(landingRaw)],
+  ['burger fold at the canonical 1080px (was 1024) + the min-1081 drawer guard',
+    /@media \(max-width: 1080px\) \{ \.landing \.landing-nav-links \{ display: none; \}/.test(landingRaw) &&
+    /@media \(min-width: 1081px\) \{ \.landing \.landing-mobile-menu \{ display: none !important; \}/.test(landingRaw)],
+  ['universal cream focus ring: .landing :focus-visible 2px/3px (no product gold leak)',
+    /\.landing :focus-visible \{ outline: 2px solid var\(--ln-cream\); outline-offset: 3px; \}/.test(landingRaw)],
+  ['focus restores P4-09: gold pill takes the INK ring (cream would vanish on lime)',
+    /\.landing \.ln-btn-gold:focus-visible \{ outline-color: var\(--ln-ink\); \}/.test(landingRaw)],
+  ['hero sky: the ONE sanctioned violet depth radial rgb(122 107 242 / 0.10)',
+    landingRaw.includes('radial-gradient(46% 54% at 30% 44%, rgb(122 107 242 / 0.10) 0%, transparent 70%)')],
+  ['hero sky ::after cream breath: ellipse at 70% 60%, α 0.02',
+    landingRaw.includes('radial-gradient(ellipse at 70% 60%, rgba(245,243,231,0.02) 0%, transparent 60%)')],
+  ['starfield resting opacity P4-16: .ln-keep-sky .ln-hero-depth at 0.5 (was 1 — ~2× too bright)',
+    /\.landing \.ln-keep-sky \.ln-hero-depth \{[^}]*opacity: 0\.5;/.test(landingRaw)],
+  ['label halo P4-18: .ln-label::before radial lime α0.12 + 6px blur',
+    /\.landing \.ln-label::before \{[^}]*opacity: 0\.12; filter: blur\(6px\);/.test(landingRaw)],
+  ['skip link: canonical lime pill, centered, z-2100 above the z-2000 grain veil',
+    /\.landing a\.ln-skip-link \{[^}]*z-index: 2100;[^}]*background: var\(--ln-lime\);/.test(landingRaw)],
+  ['constellation resting life: .is-resting scale(1.45) + the 4px halo ring',
+    /\.landing \.ln-constellation-dot\.is-resting \{ transform: scale\(1\.45\); box-shadow: 0 0 0 4px rgb\(245 243 231 \/ 0\.1\); \}/.test(landingRaw)],
+  ['@390 trust tightening (canonical landing.css:1723-1725)',
+    /@media \(max-width: 390px\) \{ \.landing \.ln-trust-inner \{ gap: var\(--sp-3\); font-size: 12\.5px; \}/.test(landingRaw)],
+  ['RM progress guard P3-32: the ribbon stays visible under reduced motion',
+    /\.landing \.landing-progress \{ opacity: 1 !important; \}/.test(landingRaw)],
+];
+for (const [name, okFlag] of R129_LAYER) {
+  if (okFlag) passed += 1;
+  else failures.push(`r129 layer gate FAILED: ${name}`);
+}
+
+// ── r129 (F4): OrbitScene port pins — the canvas engine, port-faithful ──────
+const orbitSceneSrc = readFileSync(new URL('../src/components/landing/OrbitScene.tsx', import.meta.url), 'utf8');
+const heroSectionSrc = readFileSync(new URL('../src/components/landing/hero-section.tsx', import.meta.url), 'utf8');
+const pageSrc = readFileSync(new URL('../src/app/page.tsx', import.meta.url), 'utf8');
+const ORBIT_SCENE = [
+  ['OrbitScene palette: CREAM triplet 245, 243, 231 (canvas-side of --ln-cream)',
+    orbitSceneSrc.includes('const CREAM = [245, 243, 231] as const;')],
+  ['OrbitScene palette: LIME triplet 223, 237, 178 (canvas-side of --ln-lime)',
+    orbitSceneSrc.includes('const LIME = [223, 237, 178] as const;')],
+  ['OrbitScene palette: VIOLET triplet 122, 107, 242 (canvas-side of --ln-violet)',
+    orbitSceneSrc.includes('const VIOLET = [122, 107, 242] as const;')],
+  ['OrbitScene omega stays RADIANS PER MILLISECOND (0.00016 inner ring — never convert without rescaling dt)',
+    orbitSceneSrc.includes('omega: 0.00016,') && orbitSceneSrc.includes('omega: 0.00011,') && orbitSceneSrc.includes('omega: 0.00006,')],
+  ['OrbitScene DPR hard cap 1.5 (Math.min(devicePixelRatio, 1.5))',
+    orbitSceneSrc.includes('Math.min(window.devicePixelRatio || 1, 1.5)')],
+  ['OrbitScene dt clamp 48ms + intro bloom 1400ms',
+    orbitSceneSrc.includes('Math.min(48, now - last || 16)') && orbitSceneSrc.includes('dtGlobal / 1400')],
+  ['OrbitScene IO pause band 80px + visibilitychange gating',
+    orbitSceneSrc.includes('rootMargin:') && orbitSceneSrc.includes('80px 0px') && orbitSceneSrc.includes('visibilitychange')],
+  ['OrbitScene RM path: single composed drawStatic() frame, never loops',
+    orbitSceneSrc.includes('function drawStatic()') && /if \(reducedMotion\) return; \/\/ static path never loops/.test(orbitSceneSrc)],
+  ['hero mounts the canvas exactly like canonical: biasX -0.35, class ln-hero-canvas, above depth, aria-hidden sky',
+    heroSectionSrc.includes('<OrbitScene className="ln-hero-canvas" biasX={-0.35} />') &&
+    heroSectionSrc.indexOf('<HeroDepthLayer />') < heroSectionSrc.indexOf('<OrbitScene')],
+  ['intro-seen key is product-scoped: smartorder.intro.seen (never the madarek key)',
+    pageSrc.includes('smartorder.intro.seen') && !pageSrc.includes('madarek.intro.seen')],
+  ['sectors pins ride ON the rings: ring index + angle trig (SectorsConstellation), not hand-placed %',
+    readFileSync(new URL('../src/components/landing/SectorsConstellation.tsx', import.meta.url), 'utf8').includes('const RING_RADII = [130, 200, 270] as const;')],
+];
+for (const [name, okFlag] of ORBIT_SCENE) {
+  if (okFlag) passed += 1;
+  else failures.push(`OrbitScene gate FAILED: ${name}`);
+}
+
+// ── r129 (F4): health API mirror pins (smart-menu-real route.ts:15-79) ──────
+const healthSrc = readFileSync(new URL('../src/app/api/health/route.ts', import.meta.url), 'utf8');
+const HEALTH_API = [
+  ['health commitSha: VERCEL_GIT_COMMIT_SHA || GIT_COMMIT_SHA || null (never fabricated)',
+    healthSrc.includes('process.env.VERCEL_GIT_COMMIT_SHA || process.env.GIT_COMMIT_SHA || null')],
+  ['health payload carries the observability set (uptime/version/dbLatencyMs/env/connected)',
+    healthSrc.includes('uptime: process.uptime()') &&
+    healthSrc.includes('version: process.env.npm_package_version') &&
+    healthSrc.includes('dbLatencyMs: health.latencyMs') &&
+    healthSrc.includes('db: ok ? "connected" : "error"') &&
+    healthSrc.includes('env: process.env.NODE_ENV')],
+  ['health throttle: in-memory per-IP 30/min + the 429/retry-after path + getClientIp',
+    healthSrc.includes('MAX_PER_WINDOW = 30') &&
+    healthSrc.includes('{ status: 429, headers: { "retry-after": "10" } }') &&
+    healthSrc.includes('getClientIp(request)')],
+  ['health is never cached: export const revalidate = 0',
+    /export const revalidate = 0;/.test(healthSrc)],
+];
+for (const [name, okFlag] of HEALTH_API) {
+  if (okFlag) passed += 1;
+  else failures.push(`health API gate FAILED: ${name}`);
+}
+
+// ── r129 (F4): token-matrix additions (globals.css) ───────────────────────────
+// --c-ember light was mislabeled with the base accent; the canonical STRONG
+// slot (light --accent-strong) is the deep copper #5C3416.
+pin(light, 'matrix-light', '--c-ember', '#5C3416');
+// canonical --accent-hover (tokens.css:520/750) — the hover step of the
+// accent family, previously absent in SO.
+pin(dark, 'matrix-dark', '--accent-hover', '#F5D48A');
+pin(light, 'matrix-light', '--accent-hover', '#9A5F25');
+// canonical --gold-soft/--brand-purple (tokens.css:576-577/781-782) —
+// chain the pastel families per-theme.
+pin(dark, 'matrix-dark', '--gold-soft', '#2C2410');
+pin(light, 'matrix-light', '--gold-soft', '#FCF1CD');
+pin(dark, 'matrix-dark', '--brand-purple', '#B7A0F4');
+pin(light, 'matrix-light', '--brand-purple', '#8A6FE0');
+// canonical easings/hover step (tokens.css:153/171).
+pin(dark, 'matrix-dark', '--ease-spring-snappy', 'cubic-bezier(0.5, 1.6, 0.4, 1)');
+pin(dark, 'matrix-dark', '--hover-lift', '-1px');
+// the global --r-* ladder (canonical §1.2 names; SO previously carried
+// only the Tailwind --radius-* spellings).
+const R_NAMES = {
+  '--r-xs': '6px', '--r-sm': '8px', '--r-md': '10px', '--r-lg': '12px',
+  '--r-xl': '16px', '--r-2xl': '20px', '--r-3xl': '28px', '--r-full': '9999px',
+};
+pinAll(dark, 'r-names', R_NAMES);
 
 // ── report ───────────────────────────────────────────────────────────────────
 

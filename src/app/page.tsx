@@ -105,10 +105,28 @@ export default async function LandingPage() {
      r8/r9); client islands are exactly: LandingHeader (chrome/spy/
      menus), HeroSection's sky (parallax + magnetic CTA), JourneySection
      (light path + --sp), ProgressSection (--sp + CountUp), CountUp, and
-     the RevealCssClass observers. */
+     the RevealCssClass observers. r129 adds two more islands: the
+     OrbitScene canvas engine (hero sky) and SectorsConstellation
+     (on-ring pins + the 4s resting-life cycle). */
   return (
     <div className="landing relative flex min-h-dvh flex-col overflow-x-clip">
-      <SkipLink />
+      {/* r129 — returning-visitor calm (canonical LandingPage.tsx:102-120,
+          adapted for a server page): a blocking inline script marks
+          .landing[data-intro-seen] from sessionStorage
+          'smartorder.intro.seen' BEFORE the canvas ever paints — later
+          visits this session snap the hero canvas in fast (160ms, zero
+          delay) instead of replaying the full 380ms fade. Product-scoped
+          key per the port spec §9.2 item 6. */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            "(function(){try{var r=document.currentScript.parentElement;if(window.sessionStorage.getItem('smartorder.intro.seen')==='1'){r.setAttribute('data-intro-seen','true')}else{window.sessionStorage.setItem('smartorder.intro.seen','1')}}catch(e){}})()",
+        }}
+      />
+      {/* r129 S-18 — the landing re-skins the skip link to the canonical
+          lime pill (centered, z-2100 above the grain veil); see
+          landing.css §r129-b. */}
+      <SkipLink className="ln-skip-link" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(landingJsonLd) }}
@@ -116,7 +134,10 @@ export default async function LandingPage() {
 
       <LandingHeader />
 
-      <main id="main" className="flex-1">
+      {/* r129 S-19 — tabIndex -1: the skip-link focus target (canonical
+          LandingPage.tsx:340); without it the focus jump lands on main
+          without an AT-announced landmark change */}
+      <main id="main" tabIndex={-1} className="flex-1">
         {/* ═══ الفصل ٠ — المدار: the kept split hero on the Orbit-Ink sky ═══ */}
         <HeroSection trustCount={stats.totalStores} />
 

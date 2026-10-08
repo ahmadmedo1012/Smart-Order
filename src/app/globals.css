@@ -207,8 +207,20 @@
   --ease-spring-soft: cubic-bezier(0.34, 1.18, 0.64, 1);
   --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* r129 (token-matrix): canonical tokens.css:153/171 — the snappy
+     spring (fleet-wide absent per the r129-A10 audit) and the hover
+     lift step (canonical pair: --hover-lift / --hover-lift-lg). */
+  --ease-spring-snappy: cubic-bezier(0.5, 1.6, 0.4, 1);
+  --hover-lift: -1px;
+  --hover-lift-lg: -3px;
   --motion-direction: 1; /* flips to -1 under [dir=rtl] at file end */
   --press-scale: 0.97;
+  /* ── Radius ladder, canonical --r-* names (tokens.css §1.2) — r129
+     (token-matrix: SO carried only the Tailwind --radius-* spellings;
+     these bridges give non-Tailwind consumers the canonical names;
+     same values, theme-independent like every literal ladder). ── */
+  --r-xs: 6px;   --r-sm: 8px;   --r-md: 10px;  --r-lg: 12px;
+  --r-xl: 16px;  --r-2xl: 20px; --r-3xl: 28px; --r-full: 9999px;
   /* ── Focus contract (Madarek tokens.css §1.10 interaction tokens):
      the ring MUST clear 4.5:1 against the ground. Dark = strong gold
      #C9962F (7.87:1 on the night ground). Width/offset are the
@@ -260,9 +272,15 @@
      pastel ground as the SOFT ACCENT chip surface (Madarek §1.5
      --accent-soft). Consumers: plan-usage chips, dashboard wells/alerts. */
   --accent-soft: var(--c-copper-bg);
+  /* r129 (token-matrix): canonical --accent-hover dark (tokens.css:750)
+     — the hover step of the accent family, previously absent. */
+  --accent-hover: #F5D48A;
   --border: #1B2444; /* Madarek hairline: neutral-200 dark */
   --input: #7A83A0; /* Madarek neutral-400: 4.86:1 vs card (1.4.11) */
-  --ring: #E9B44C;
+  /* r129 (fleet reconciliation, r127-A6): --ring = the strong gold
+     #C9962F, matching --state-focus-ring-color and the SL/SM fleet
+     (the former #E9B44C was the raw accent — the one fleet outlier). */
+  --ring: #C9962F;
 
   /* ── Accent metal ramp (dark) — Madarek gold CTA family:
      flame/saffron = --accent #E9B44C, ember = --accent-strong
@@ -322,6 +340,12 @@
   --c-sand-bg: #241F14;      --c-sand-ink: #D9C18C;      --c-sand-deep: #EFE2C5;
   --c-grey-bg: #161D33;      --c-grey-ink: #A9B0C8;      --c-grey-deep: #D5DAE8;
   --c-copper-bg: #2C2312;    --c-copper-ink: #E9B44C;    --c-copper-deep: #F5D48A;
+  /* r129 (token-matrix): canonical brand companions (tokens.css:781-782)
+     — declared PER-THEME because they chain the pastel families (the
+     var() substitutes at declaration scope, so a :root-only copy would
+     freeze the dark value into .light). */
+  --brand-purple: var(--c-lavender-ink); /* = #B7A0F4 dark */
+  --gold-soft: var(--c-yellow-bg);       /* = #2C2410 dark */
 
   /* ── External brand (unchanged by definition; -foreground = the
        dark on-green ink, identical in both themes) ── */
@@ -432,6 +456,10 @@
   --accent: rgb(181 116 56 / 0.12); /* 12% copper wash */
   --accent-foreground: var(--c-copper-deep); /* copper-deep as text — 10.29:1 (P4-W3c: chains the copper family) */
   --accent-soft: var(--c-copper-bg); /* P4-W3c (B2): soft accent chip ground (Madarek §1.5) */
+  /* r129 (token-matrix): canonical --accent-hover light (tokens.css:520)
+     — #9A5F25, the copper family's hover step (the closest value in
+     the sheet was --c-saffron-ink #6B4C0B — a different slot). */
+  --accent-hover: #9A5F25;
   --border: #E9E7E2; /* Madarek hairline: neutral-200 light */
   --input: #6E6C65; /* 5.26:1 vs card (WCAG 1.4.11) */
   /* Focus ring — Madarek light contract: raw accent #B57438 is only
@@ -446,7 +474,10 @@
   --orange: #B57438;
   --orange-foreground: #1A0F06;
   --c-flame: #B57438;
-  --c-ember: #B57438;
+  /* r129 (token-matrix): --c-ember light = #5C3416 — the STRONG slot
+     was mislabeled with the base accent #B57438 (canonical light
+     --accent-strong = --c-copper-deep #5C3416, tokens.css:522). */
+  --c-ember: #5C3416;
   --c-saffron: #D6A330;
   --c-saffron-ink: #6B4C0B; /* Madarek gold-ink light: 7.56:1 */
   --c-espresso: #1A0F06;
@@ -497,6 +528,10 @@
   --c-sand-bg: #F1ECDF;      --c-sand-ink: #B59868;      --c-sand-deep: #5A4623;
   --c-grey-bg: #EFECE7;      --c-grey-ink: #6B665E;      --c-grey-deep: #2D2A24;
   --c-copper-bg: #F4E4D2;    --c-copper-ink: #B57438;    --c-copper-deep: #5C3416;
+  /* r129 (token-matrix): canonical brand companions, light (tokens.css:576-577)
+     — same chain, per-theme (see the dark block's note). */
+  --brand-purple: var(--c-lavender-ink); /* = #8A6FE0 light */
+  --gold-soft: var(--c-yellow-bg);       /* = #FCF1CD light */
 
   /* ── External brand (unchanged by definition; -foreground = the
        dark on-green ink, identical in both themes) ── */
