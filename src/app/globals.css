@@ -80,6 +80,9 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  /* P4-W3c (B2): the soft accent chip ground rides the utility
+     namespace (bg-accent-soft) — Smart-Menu parity. */
+  --color-accent-soft: var(--accent-soft);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -135,10 +138,12 @@
 
   /* ── Radius scale — Madarek "Notion-soft" ladder (tokens.css §1.2),
      exact: xs 6 · sm 8 · md 10 · lg 12 · xl 16 · 2xl 20 · 3xl 28.
-     Consumers: buttons/inputs ride rounded-md (10 = r-md), cards
-     ride rounded-xl (16 = Madarek .card border-radius r-xl),
-     dialogs/sheets ride rounded-2xl (20 = r-2xl), hero panels ride
-     rounded-3xl (28 = r-3xl). ── */
+     Consumers (P4-W3c audit, measured): xs/sm on small glyphs,
+     buttons/inputs/dropdowns ride rounded-md/lg (10/12), cards ride
+     rounded-xl (16 = Madarek .card r-xl), the storefront product
+     dialog rides rounded-2xl (20). The 3xl (28) rung is pinned but
+     RESERVED — no surface exists at that scale today (hero orbs are
+     rounded-full); adopting it would be forced usage. ── */
   --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 10px;
@@ -249,7 +254,11 @@
   --secondary: #121A36;
   --secondary-foreground: #C3C8DC;
   --accent: rgb(233 180 76 / 0.15); /* 15% gold wash (hover tints) */
-  --accent-foreground: #E9B44C; /* gold as text — 10.39:1 on cards */
+  --accent-foreground: var(--c-copper-ink); /* gold as text — 10.39:1 on cards (P4-W3c: chains the copper family) */
+  /* P4-W3c (B2): Smart-Menu-parity accent-soft — the copper family's
+     pastel ground as the SOFT ACCENT chip surface (Madarek §1.5
+     --accent-soft). Consumers: plan-usage chips, dashboard wells/alerts. */
+  --accent-soft: var(--c-copper-bg);
   --border: #1B2444; /* Madarek hairline: neutral-200 dark */
   --input: #7A83A0; /* Madarek neutral-400: 4.86:1 vs card (1.4.11) */
   --ring: #E9B44C;
@@ -271,26 +280,32 @@
        family ink (fill/stroke/TEXT — dark ink == base, the canonical
        identity), -ink = the text slot (same luminous ink here),
        -foreground = void/dark ink on the luminous fills (canonical
-       --danger-fg dark pattern; never white on the luminous mids). ── */
-  --success: #7FD39A;
-  --success-ink: #7FD39A;
+       --danger-fg dark pattern; never white on the luminous mids).
+       P4-W3c (B2): the whole status layer now CHAINS through the 9
+       pastel families (Smart-Menu's SSOT idiom — its globals.css does
+       exactly this) instead of duplicating their literals: mint/yellow/
+       sky/rose -ink base+text, their -bg as the soft grounds. The
+       family set below is the single source; editing a family hue now
+       reaches every chip/chart/alert at once. ── */
+  --success: var(--c-mint-ink);
+  --success-ink: var(--c-mint-ink);
   --success-foreground: #191918;
-  --warning: #ECC97D;
-  --warning-ink: #ECC97D;
+  --warning: var(--c-yellow-ink);
+  --warning-ink: var(--c-yellow-ink);
   --warning-foreground: #191918;
-  --info: #8FBBF2;
-  --info-ink: #8FBBF2;
+  --info: var(--c-sky-ink);
+  --info-ink: var(--c-sky-ink);
   --info-foreground: #191918;
-  --destructive: #F0938F;
-  --destructive-ink: #F0938F;
+  --destructive: var(--c-rose-ink);
+  --destructive-ink: var(--c-rose-ink);
   --destructive-foreground: #05070F;
 
-  /* ── Status soft grounds (dark) — Madarek deep pastel -bg fills
-       (the mint/yellow/sky/rose entries of the family set below) ── */
-  --success-soft: #0F241C;
-  --warning-soft: #2C2410;
-  --info-soft: #14213A;
-  --destructive-soft: #2C1620;
+  /* ── Status soft grounds (dark) — the mint/yellow/sky/rose family
+       -bg slots, chained (P4-W3c: were duplicated literals) ── */
+  --success-soft: var(--c-mint-bg);
+  --warning-soft: var(--c-yellow-bg);
+  --info-soft: var(--c-sky-bg);
+  --destructive-soft: var(--c-rose-bg);
 
   /* ── 9 pastel families (dark) — Madarek tokens.css :698-706 exact:
        space-tinted deep bg / luminous ink / pale tint per family.
@@ -311,12 +326,13 @@
   --whatsapp: #25d366;
   --whatsapp-deep: #20bd5a;
 
-  /* ── Charts — Madarek dark series (copper/gold-led, §1.14) ── */
-  --chart-1: #E9B44C; /* copper/gold-ink */
-  --chart-2: #7FD39A; /* mint-ink */
-  --chart-3: #8FBBF2; /* sky-ink */
-  --chart-4: #F0938F; /* rose-ink */
-  --chart-5: #B7A0F4; /* lavender-ink */
+  /* ── Charts — Madarek dark series (copper/gold-led, §1.14); P4-W3c:
+       chained through the family -ink slots (single source) ── */
+  --chart-1: var(--c-copper-ink);
+  --chart-2: var(--c-mint-ink);
+  --chart-3: var(--c-sky-ink);
+  --chart-4: var(--c-rose-ink);
+  --chart-5: var(--c-lavender-ink);
 
   /* ── Sidebar — Madarek night (§1.11): gold wash active state ── */
   --sidebar: #070B16;
@@ -411,7 +427,8 @@
   --secondary: #F7F6F3;
   --secondary-foreground: #191918;
   --accent: rgb(181 116 56 / 0.12); /* 12% copper wash */
-  --accent-foreground: #5C3416; /* copper-deep as text — 10.29:1 */
+  --accent-foreground: var(--c-copper-deep); /* copper-deep as text — 10.29:1 (P4-W3c: chains the copper family) */
+  --accent-soft: var(--c-copper-bg); /* P4-W3c (B2): soft accent chip ground (Madarek §1.5) */
   --border: #E9E7E2; /* Madarek hairline: neutral-200 light */
   --input: #6E6C65; /* 5.26:1 vs card (WCAG 1.4.11) */
   /* Focus ring — Madarek light contract: raw accent #B57438 is only
@@ -440,26 +457,28 @@
        rose #DD6E78); -ink = the family -deep for TEXT (7.9-11.2:1 on
        cards and soft tints — the slot text consumers must ride);
        -foreground = #191918 ink on the mid fills (Madarek --danger-fg
-       light pattern, 5.3-7.7:1 — white on the mids fails AA). ── */
-  --success: #4FA66D;
-  --success-ink: #1F4F30;
+       light pattern, 5.3-7.7:1 — white on the mids fails AA).
+       P4-W3c (B2): chained through the family set below (Smart-Menu's
+       SSOT idiom) — the literals above describe the resolved values. ── */
+  --success: var(--c-mint-ink);
+  --success-ink: var(--c-mint-deep);
   --success-foreground: #191918;
-  --warning: #D6A330;
-  --warning-ink: #6B4C0B;
+  --warning: var(--c-yellow-ink);
+  --warning-ink: var(--c-yellow-deep);
   --warning-foreground: #191918;
-  --info: #5C8FCE;
-  --info-ink: #1F3D63;
+  --info: var(--c-sky-ink);
+  --info-ink: var(--c-sky-deep);
   --info-foreground: #191918;
-  --destructive: #DD6E78;
-  --destructive-ink: #6B2128;
+  --destructive: var(--c-rose-ink);
+  --destructive-ink: var(--c-rose-deep);
   --destructive-foreground: #191918;
 
-  /* ── Status soft grounds (light) — Madarek pastel -bg fills
-       (the mint/yellow/sky/rose entries of the family set below) ── */
-  --success-soft: #DCF1E2;
-  --warning-soft: #FCF1CD;
-  --info-soft: #DDEBF7;
-  --destructive-soft: #FCE0E2;
+  /* ── Status soft grounds (light) — the family -bg pastel fills,
+       chained (P4-W3c: were duplicated literals) ── */
+  --success-soft: var(--c-mint-bg);
+  --warning-soft: var(--c-yellow-bg);
+  --info-soft: var(--c-sky-bg);
+  --destructive-soft: var(--c-rose-bg);
 
   /* ── 9 pastel families (light) — Madarek tokens.css :453-461 exact:
        pastel bg / readable ink / deep text per family. Status -soft
@@ -480,12 +499,13 @@
   --whatsapp: #25d366;
   --whatsapp-deep: #20bd5a;
 
-  /* ── Charts — Madarek light series (copper-led, §1.14) ── */
-  --chart-1: #B57438; /* copper-ink */
-  --chart-2: #4FA66D; /* mint-ink */
-  --chart-3: #5C8FCE; /* sky-ink */
-  --chart-4: #DD6E78; /* rose-ink */
-  --chart-5: #8A6FE0; /* lavender-ink */
+  /* ── Charts — Madarek light series (copper-led, §1.14); P4-W3c:
+       chained through the family -ink slots ── */
+  --chart-1: var(--c-copper-ink);
+  --chart-2: var(--c-mint-ink);
+  --chart-3: var(--c-sky-ink);
+  --chart-4: var(--c-rose-ink);
+  --chart-5: var(--c-lavender-ink);
 
   /* ── Sidebar — Madarek cream (§1.11): neutral-150 flat active ── */
   --sidebar: #FBFAF9;

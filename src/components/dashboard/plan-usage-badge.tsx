@@ -44,7 +44,7 @@ export function PlanUsageBadge({
       <a
         href="/pricing"
         className={cn(
-          "inline-flex items-center gap-2 rounded-full border border-accent-foreground/25 bg-accent-foreground/[0.06] px-3 py-1 text-xs font-medium text-accent-foreground transition-colors hover:bg-accent-foreground/10",
+          "inline-flex items-center gap-2 rounded-full border border-accent-foreground/25 bg-accent-soft px-3 py-1 text-xs font-medium text-accent-foreground transition-colors hover:bg-accent-foreground/10",
           className
         )}
       >
@@ -63,7 +63,7 @@ export function PlanUsageBadge({
           "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold",
           isFree
             ? "border border-border/50 bg-muted text-muted-foreground"
-            : "border border-accent-foreground/25 bg-accent-foreground/[0.08] text-accent-foreground"
+            : "border border-accent-foreground/25 bg-accent-soft text-accent-foreground"
         )}
       >
         <Sparkles className="size-3.5" aria-hidden="true" />

@@ -105,10 +105,13 @@ export default function DashboardOverview() {
   const maxRevenue = Math.max(...data.weekSeries.map((d) => d.revenue), 1);
 
   const cards = [
-    { label: "طلبات اليوم", value: String(stats.todayOrders), icon: ClipboardList, tone: "text-accent-foreground" },
-    { label: "بانتظار الإجراء", value: String(stats.pendingCount), icon: Bell, tone: stats.pendingCount > 0 ? "text-warning-ink" : "text-muted-foreground" },
-    { label: "إيراد اليوم", value: formatLyd(stats.todayRevenue), icon: Coins, tone: "text-success-ink" },
-    { label: "متوسط الطلب", value: formatLyd(stats.avgOrder), icon: TrendingUp, tone: "text-chart-3" },
+    /* P4-W3c (B2): icon wells ride the family soft grounds (the Madarek
+       pastel -bg slots) instead of one shared muted — the differentiated
+       KPI idiom; the -soft tokens are family-backed through globals. */
+    { label: "طلبات اليوم", value: String(stats.todayOrders), icon: ClipboardList, tone: "text-accent-foreground", well: "bg-accent-soft" },
+    { label: "بانتظار الإجراء", value: String(stats.pendingCount), icon: Bell, tone: stats.pendingCount > 0 ? "text-warning-ink" : "text-muted-foreground", well: stats.pendingCount > 0 ? "bg-warning-soft" : "bg-muted" },
+    { label: "إيراد اليوم", value: formatLyd(stats.todayRevenue), icon: Coins, tone: "text-success-ink", well: "bg-success-soft" },
+    { label: "متوسط الطلب", value: formatLyd(stats.avgOrder), icon: TrendingUp, tone: "text-chart-3", well: "bg-info-soft" },
   ];
 
   const alerts: Array<{ text: string; href: string; tone: string }> = [];
@@ -167,12 +170,12 @@ export default function DashboardOverview() {
 
       {/* Stat cards */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        {cards.map(({ label, value, icon: Icon, tone }) => (
+        {cards.map(({ label, value, icon: Icon, tone, well }) => (
           <Card key={label} className="border-border/80">
             <CardContent className="p-4 sm:p-5">
               <div className="flex items-center justify-between">
                 <span className="text-xs sm:text-sm text-muted-foreground font-medium">{label}</span>
-                <span className={`flex size-8 items-center justify-center rounded-lg bg-muted ${tone}`}>
+                <span className={`flex size-8 items-center justify-center rounded-lg ${tone} ${well}`}>
                   <Icon className="size-4" aria-hidden="true" />
                 </span>
               </div>

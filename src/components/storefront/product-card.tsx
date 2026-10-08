@@ -92,7 +92,7 @@ export function ProductCard({
               onClick={quickAdd}
               disabled={!product.isAvailable}
               aria-label={`إضافة ${product.name} إلى السلة`}
-              className="rounded-lg bg-primary text-primary-foreground size-11 flex items-center justify-center font-bold hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-lg bg-primary text-primary-foreground size-11 flex items-center justify-center font-bold hover:bg-primary/90 active:scale-95 active:duration-(--t-micro) transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Plus className="size-5" aria-hidden="true" />
             </button>

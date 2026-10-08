@@ -34,7 +34,12 @@ export function ShowcaseSection() {
 
       <ScrollReveal y={30} delay={100}>
         <div className="relative rounded-2xl bg-foreground/[0.035] p-1.5 ring-1 ring-foreground/10 sm:p-2 dark:bg-white/[0.045] dark:ring-white/10">
-          <div className="relative overflow-hidden rounded-[calc(1rem-0.375rem)] shadow-[inset_0_1px_1px_color-mix(in_oklab,var(--foreground)_15%,transparent)] sm:rounded-[calc(1rem-0.5rem)]">
+          {/* P4-W3c: the inner frame snapped from the stale ad-hoc
+              rounded-[calc(1rem-…)] concentric trick (written for a 16px
+              outer; the outer is rounded-2xl=20px since r126) onto the
+              ladder — rounded-lg (12) is the exact concentric fit at sm
+              (20−8) and the safe under-curve at base. */}
+          <div className="relative overflow-hidden rounded-lg shadow-[inset_0_1px_1px_color-mix(in_oklab,var(--foreground)_15%,transparent)]">
             <m.div style={{ scale: imageScale, y: imageY }}>
               <Image
                 src="/showcase-store.webp"
