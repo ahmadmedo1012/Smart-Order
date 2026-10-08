@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { SkipLink } from "@/components/shared/skip-link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { api } from "@/lib/client";
@@ -94,7 +95,7 @@ export function DashboardShell({
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 py-2 text-sm font-medium transition-[color,background-color,box-shadow] duration-200 focus-visible:ring-2 focus-visible:ring-orange/60 outline-none",
+              "group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 py-2 text-sm font-medium transition-[color,background-color,box-shadow] duration-(--t-fast) focus-visible:ring-2 focus-visible:ring-orange/60 outline-none",
               active
                 ? "bg-orange/12 text-foreground shadow-xs"
                 : "text-muted-foreground hover:bg-orange/8 hover:text-foreground"
@@ -119,7 +120,7 @@ export function DashboardShell({
                 onClick={onNavigate}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 py-2 text-sm font-medium transition-[color,background-color,box-shadow] duration-200 focus-visible:ring-2 focus-visible:ring-orange/60 outline-none",
+                  "group relative flex min-h-11 items-center gap-3 overflow-hidden rounded-xl px-3 py-2 text-sm font-medium transition-[color,background-color,box-shadow] duration-(--t-fast) focus-visible:ring-2 focus-visible:ring-orange/60 outline-none",
                   active
                     ? "bg-orange/12 text-foreground shadow-xs"
                     : "text-muted-foreground hover:bg-orange/8 hover:text-foreground"
@@ -137,6 +138,7 @@ export function DashboardShell({
 
   return (
     <div className="min-h-screen bg-muted/30 flex flex-col">
+      <SkipLink />
       {/* Desktop layout: sidebar start-side (right in RTL) */}
       <div className="flex flex-1">
         <aside className="hidden lg:flex w-60 xl:w-64 shrink-0 flex-col border-e border-border bg-card sticky top-0 h-screen">
@@ -174,7 +176,7 @@ export function DashboardShell({
 
         <div className="flex-1 min-w-0 flex flex-col">
           {/* Topbar */}
-          <header className="sticky top-0 z-30 h-16 border-b border-border bg-background/90 backdrop-blur-md flex items-center gap-3 px-4 sm:px-6">
+          <header className="sticky top-0 z-(--z-dropdown) h-16 border-b border-border bg-background/90 backdrop-blur-md flex items-center gap-3 px-4 sm:px-6">
             {/* Mobile menu */}
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
@@ -212,7 +214,7 @@ export function DashboardShell({
                   setBiz(businesses.find((b) => b.id === e.target.value) ?? null);
                   router.refresh();
                 }}
-                className="h-10 rounded-lg border border-input bg-card px-3 text-sm max-w-40 sm:max-w-52 truncate focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange/20"
+                className="h-10 rounded-lg border border-input bg-card px-3 text-sm max-w-40 sm:max-w-52 truncate focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-orange"
               >
                 {businesses.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -254,13 +256,13 @@ export function DashboardShell({
 
           {/* Context provider */}
           <BusinessContext.Provider value={{ businessId, business: biz }}>
-            <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8 min-w-0">{children}</main>
+            <main id="main" className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8 min-w-0">{children}</main>
           </BusinessContext.Provider>
 
           {/* Mobile bottom nav */}
           <nav
             aria-label="التنقل السريع"
-            className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-border bg-background/95 backdrop-blur-md safe-bottom"
+            className="lg:hidden fixed bottom-0 inset-x-0 z-(--z-dropdown) border-t border-border bg-background/95 backdrop-blur-md safe-bottom"
           >
             <div className="grid grid-cols-5 h-16">
               {[

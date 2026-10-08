@@ -79,7 +79,7 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
             </div>
 
             {/* h1 — CSS settle (family r92), visible in SSR HTML on first paint */}
-            <h1 className="r92-hero-settle text-balance text-4xl font-extrabold leading-[1.15] tracking-tighter sm:text-5xl lg:text-6xl xl:text-[4.25rem]">
+            <h1 className="r92-hero-settle text-balance text-4xl font-bold leading-[1.15] tracking-tighter sm:text-5xl lg:text-6xl xl:text-[4.25rem]">
               <span className="block">متجر رقمي لمتجرك</span>
               <span className="block">
                 <span className="text-gradient-orange">الطلبات تصلك</span> في لوحة واحدة

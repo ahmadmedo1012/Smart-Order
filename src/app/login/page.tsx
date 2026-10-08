@@ -73,7 +73,7 @@ export default function LoginPage() {
       <FloatingShapes />
 
       {/* Back to home + ThemeToggle (family fixed corner cluster) */}
-      <div className="fixed start-4 top-4 z-50 flex items-center gap-2">
+      <div className="fixed start-4 top-4 z-(--z-dropdown) flex items-center gap-2">
         <Link href="/">
           <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground/60 hover:text-foreground">
             العودة للرئيسية

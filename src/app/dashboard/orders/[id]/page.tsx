@@ -403,7 +403,7 @@ export default function OrderDetailPage() {
                   اتصال
                 </a>
               </Button>
-              <Button asChild size="sm" className="whatsapp-btn flex-1 border-0 hover:bg-[#1fc15a]">
+              <Button asChild size="sm" className="whatsapp-btn flex-1 border-0 hover:bg-whatsapp-deep">
                 <a href={customerWa} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="size-4" aria-hidden="true" />
                   واتساب

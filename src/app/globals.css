@@ -155,6 +155,13 @@
   --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
   --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
 
+  /* ── Default transition = the ladder (r126): every bare
+     `transition-*` utility (no explicit duration) rides --t-fast +
+     the canonical settle instead of Tailwind's off-ladder 150ms
+     default curve — one bridge, dozens of consumers snapped. ── */
+  --default-transition-duration: 160ms;
+  --default-transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+
   /* ── Font weight scale (family literals) ── */
   --font-light: 300;
   --font-regular: 400;

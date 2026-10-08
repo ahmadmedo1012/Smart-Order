@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { EmptyState, ErrorState } from "@/components/shared/states";
@@ -83,7 +84,7 @@ export default function CategoriesPage() {
               </span>
               {c.imageUrl ? (
                  
-                <img src={c.imageUrl} alt="" className="size-11 rounded-lg object-cover shrink-0" loading="lazy" />
+                <Image src={c.imageUrl} alt="" width={44} height={44} className="size-11 rounded-lg object-cover shrink-0" />
               ) : (
                 <span className="flex size-11 items-center justify-center rounded-lg bg-primary/10 text-accent-foreground shrink-0">
                   <LayoutGrid className="size-5" aria-hidden="true" />
@@ -200,7 +201,7 @@ function CategoryDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={category ? "تعديل قسم" : "قسم جديد"}>
+    <div className="fixed inset-0 z-(--z-modal) flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={category ? "تعديل قسم" : "قسم جديد"}>
       <div className="absolute inset-0 bg-black/50" onClick={() => onClose(false)} aria-hidden="true" />
       <div className="relative w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl p-5">
         <h2 className="font-heading font-semibold text-lg">{category ? "تعديل القسم" : "قسم جديد"}</h2>
@@ -234,8 +235,7 @@ function CategoryDialog({
               <div className="relative size-20 rounded-xl border border-dashed border-border bg-muted/50 overflow-hidden">
                 {imageUrl ? (
                   <>
-                    { }
-                    <img src={imageUrl} alt="" className="size-full object-cover" />
+                    <Image src={imageUrl} alt="" fill sizes="80px" className="object-cover" />
                     <button type="button" onClick={() => setImageUrl("")} className="absolute top-1 end-1 rounded-full bg-background/90 shadow p-1" aria-label="إزالة الصورة">
                       <X className="size-3" aria-hidden="true" />
                     </button>

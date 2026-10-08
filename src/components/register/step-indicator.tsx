@@ -62,7 +62,7 @@ export function StepIndicator({
                 className={cn(
                   "flex size-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-colors duration-300",
                   isActive
-                    ? "bg-[linear-gradient(135deg,var(--c-ember),var(--c-saffron)_50%,var(--c-ember))] border-transparent font-extrabold text-espresso shadow-lg shadow-orange/30"
+                    ? "bg-[linear-gradient(135deg,var(--c-ember),var(--c-saffron)_50%,var(--c-ember))] border-transparent font-bold text-espresso shadow-lg shadow-orange/30"
                     : isDone
                       ? "border-orange/40 bg-orange/15 text-accent-foreground"
                       : "border-border/40 bg-muted/50 text-muted-foreground"

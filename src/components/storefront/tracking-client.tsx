@@ -16,6 +16,7 @@ import {
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { SkipLink } from "@/components/shared/skip-link";
 import {
   ClipboardList,
   Check,
@@ -81,7 +82,8 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <header className="bg-background border-b border-border safe-top sticky top-0 z-20">
+      <SkipLink />
+      <header className="bg-background border-b border-border safe-top sticky top-0 z-(--z-dropdown)">
         <div className="mx-auto max-w-lg px-4 h-14 flex items-center gap-3">
           <Link href={`/store/${order.business.slug}`} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <Store className="size-4" aria-hidden="true" />
@@ -91,7 +93,7 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-lg px-4 py-6 space-y-4">
+      <main id="main" className="mx-auto max-w-lg px-4 py-6 space-y-4">
         {/* Order header */}
         <div className="rounded-2xl border border-border bg-card p-5 text-center">
           <h1 className="font-heading text-xl font-bold tabular">{order.orderNumber}</h1>

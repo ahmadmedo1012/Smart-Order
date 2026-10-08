@@ -19,7 +19,7 @@ export function HowItWorks() {
           <Reveal key={s.n} y={24} delay={i * 90}>
             <div className="card-premium group relative rounded-2xl p-6 pt-8">
               {/* Step number — flame gradient chip, family step-node pattern */}
-              <span className="absolute -top-4 start-6 flex size-9 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--c-ember),var(--c-saffron)_50%,var(--c-ember))] text-sm font-extrabold text-espresso shadow-lg shadow-orange/30">
+              <span className="absolute -top-4 start-6 flex size-9 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--c-ember),var(--c-saffron)_50%,var(--c-ember))] text-sm font-bold text-espresso shadow-lg shadow-orange/30">
                 {s.n}
               </span>
               <h3 className="font-heading text-lg font-bold">{s.title}</h3>

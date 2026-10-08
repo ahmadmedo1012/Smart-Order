@@ -119,7 +119,7 @@ function MobileMenu({ open, onClose, pathname }: { open: boolean; onClose: () =>
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm"
+            className="fixed inset-0 z-(--z-sheet) bg-background/60 backdrop-blur-sm"
             onClick={onClose}
           />
           <m.div
@@ -133,7 +133,7 @@ function MobileMenu({ open, onClose, pathname }: { open: boolean; onClose: () =>
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={springDefault}
-            className="fixed inset-x-0 top-0 z-50 mx-4 mt-4 rounded-2xl bg-background/90 border border-border/40 shadow-2xl backdrop-blur-xl overflow-hidden"
+            className="fixed inset-x-0 top-0 z-(--z-sheet) mx-4 mt-4 rounded-2xl bg-background/90 border border-border/40 shadow-2xl backdrop-blur-xl overflow-hidden"
             style={{ transformOrigin: "top center" }}
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
@@ -224,7 +224,7 @@ export function Header({ className }: HeaderProps) {
     <>
       <header
         className={cn(
-          "fixed top-0 inset-x-0 z-30 h-16 transition-[transform,background-color,box-shadow,border-color] duration-500 will-change-transform [backface-visibility:hidden]",
+          "fixed top-0 inset-x-0 z-(--z-dropdown) h-16 transition-[transform,background-color,box-shadow,border-color] duration-(--t-slower) will-change-transform [backface-visibility:hidden]",
           visible ? "translate-y-0" : "-translate-y-full",
           scrolled
             ? "bg-background/80 backdrop-blur-2xl backdrop-saturate-150 border-b border-border/40 shadow-lg shadow-black/20"
@@ -266,7 +266,7 @@ export function Header({ className }: HeaderProps) {
                       href={link.href}
                       aria-current={linkActive ? "page" : undefined}
                       className={cn(
-                        "relative z-10 px-4 py-2 text-sm font-medium transition-colors duration-200 rounded-full",
+                        "relative z-10 px-4 py-2 text-sm font-medium transition-colors duration-(--t-fast) rounded-full",
                         linkActive ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground"
                       )}
                     >

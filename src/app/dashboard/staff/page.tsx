@@ -172,7 +172,7 @@ function StaffDialog({ businessId, onClose }: { businessId: string; onClose: (ch
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="عضو جديد">
+    <div className="fixed inset-0 z-(--z-modal) flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="عضو جديد">
       <div className="absolute inset-0 bg-black/50" onClick={() => onClose(false)} aria-hidden="true" />
       <div className="relative w-full max-w-sm rounded-2xl border border-border bg-card shadow-2xl p-5">
         <h2 className="font-heading font-semibold text-lg">عضو فريق جديد</h2>
