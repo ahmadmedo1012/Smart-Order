@@ -1,129 +1,103 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Eyebrow } from "@/components/ui/eyebrow";
-import { MotionArrowRight } from "@/components/ui/motion-icons";
-import { ScrollParallax } from "@/components/ui/scroll-parallax";
+import { MagneticGoldLink } from "@/components/landing/MagneticGoldLink";
+import { HeroDepthLayer } from "@/components/landing/HeroDepthLayer";
+import { HeroOrbits } from "@/components/landing/HeroOrbits";
 import { HeroPhone } from "@/components/landing/hero-phone";
 
 /**
- * HeroSection — family twin (Smart Menu HeroSection + SmartBot split):
- * start column = editorial text stack (Eyebrow → h1 with flame gradient
- * span → sub → flame/outline CTA pair → trust pill), end column = the
- * phone "order moment" with floating glass proof cards.
+ * HeroSection — the split hero KEPT (r128 Stage B): start column = the
+ * editorial text stack (eyebrow → h1 → sub → magnetic CTA pair → trust
+ * pill), end column = the phone "order moment". What changed on the
+ * Orbit-Ink stage (F4b):
+ * · BEHIND it — the sky: HeroDepthLayer (parallax starfield) + a flat
+ *   SVG sector orbit chart (1px cream/lime lines, nodes, violet core,
+ *   horizon) — content sits at z1 over decor z0;
+ * · the product warmth/glow layers retire (§7 no-glow discipline) —
+ *   the sky is flat ink with no gradients;
+ * · CTAs convert to the landing pill system — magnetic gold
+ *   (useMagnetic(7) via MagneticGoldLink) + ghost.
  *
- * LCP doctrine (family r92): the h1 entrance is pure CSS, starts VISIBLE
- * (translate-only, opacity never 0) so the LCP text never waits for JS.
+ * LCP doctrine (family r92) UNTOUCHED: the h1 entrance stays pure CSS,
+ * starts VISIBLE (translate-only, opacity never 0) — the LCP text never
+ * waits for JS, and stays server-rendered in the instant-paint HTML.
  */
 export function HeroSection({ trustCount }: { trustCount?: number }) {
   const showTrustBadge = !!trustCount && trustCount > 0;
 
   return (
-    <section className="relative overflow-clip">
+    <section className="ln-keep-hero relative isolate overflow-clip">
       {/* Family LCP-safe hero settle (r92) — hoisted keyframe, h1 starts VISIBLE */}
       <style href="r92-hero-entrance" precedence="high">
         {'@keyframes r92-hero-settle{from{transform:translateY(12px)}to{transform:translateY(0)}}.r92-hero-settle{animation:r92-hero-settle .6s var(--ease-out-quart,ease-out) both}'}
       </style>
-      {/* Family warmth layer — one restrained flame glow stack with parallax */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-clip" aria-hidden="true">
-        <ScrollParallax rate={-0.15} maxTravel={30} className="absolute inset-0">
-          {/* Kitchen glow — pulses with ambient breath */}
-          <div
-            className="absolute top-[12%] left-1/2 -translate-x-1/2 size-[min(72vmin,680px)] animate-hero-glow-pulse rounded-full"
-            style={{
-              background:
-                "radial-gradient(ellipse at center, color-mix(in srgb, var(--c-flame) 14%, transparent) 0%, color-mix(in srgb, var(--c-flame) 4%, transparent) 48%, transparent 72%)",
-              filter: "blur(54px)",
-            }}
-          />
-          {/* Saffron mist — upper atmosphere warmth */}
-          <div
-            className="absolute top-0 end-0 size-[50vmin] rounded-full"
-            style={{
-              background:
-                "radial-gradient(ellipse at center, color-mix(in srgb, var(--c-saffron) 8%, transparent) 0%, transparent 70%)",
-              filter: "blur(110px)",
-            }}
-          />
-          {/* Ember floor wash — ground warmth */}
-          <div
-            className="absolute bottom-0 start-1/4 size-[56vmin] rounded-full"
-            style={{
-              background:
-                "radial-gradient(ellipse at center, color-mix(in srgb, var(--c-ember) 8%, transparent) 0%, transparent 70%)",
-              filter: "blur(100px)",
-            }}
-          />
-          {/* Ambient micro-orb — subtle depth particle */}
-          <div
-            className="absolute top-[30%] start-[15%] size-32 animate-orb-float rounded-full opacity-30"
-            style={{
-              background:
-                "radial-gradient(circle, color-mix(in srgb, var(--c-saffron) 40%, transparent) 0%, transparent 70%)",
-              filter: "blur(40px)",
-            }}
-          />
-        </ScrollParallax>
+
+      {/* r128 F4b — the sky behind everything: starfield depth plane +
+          the sector orbit chart (flat SVG, decorative) */}
+      <div className="ln-keep-sky" aria-hidden="true">
+        <HeroDepthLayer />
+        <HeroOrbits className="ln-keep-orbits" />
       </div>
 
-      {/* Family container rhythm (§4) */}
+      {/* Family container rhythm (§4) — kept verbatim */}
       <div className="mx-auto max-w-[1220px] px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-32 lg:px-10 lg:pt-36 lg:pb-24">
         <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-10">
           {/* Start column — editorial text stack */}
           <div className="text-center lg:text-start">
-            {/* Eyebrow — above the fold */}
+            {/* Eyebrow — above the fold, on the mono machine-voice */}
             <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              <Eyebrow>متجر رقمي، طلب مباشر على هاتفك</Eyebrow>
+              <span className="ln-label">{"Smart Order · متجر رقمي · ليبيا"}</span>
             </div>
 
-            {/* h1 — CSS settle (family r92), visible in SSR HTML on first paint */}
+            {/* h1 — CSS settle (family r92), visible in SSR HTML on first paint.
+                The ONE lime word rides flat color — no gradient-text. */}
             <h1 className="r92-hero-settle text-balance text-4xl font-bold leading-[1.15] tracking-tighter sm:text-5xl lg:text-6xl xl:text-[4.25rem]">
               <span className="block">متجر رقمي لمتجرك</span>
               <span className="block">
-                <span className="text-gradient-orange">الطلبات تصلك</span> في لوحة واحدة
+                <span className="ln-keep-word">الطلبات تصلك</span> في لوحة واحدة
               </span>
             </h1>
 
             <p
-              className="animate-fade-in mx-auto mb-8 max-w-xl text-balance text-lg leading-relaxed text-muted-foreground lg:mx-0 md:text-xl"
+              className="ln-keep-sub animate-fade-in mx-auto mb-8 max-w-xl text-balance text-lg leading-relaxed lg:mx-0 md:text-xl"
               style={{ animationDelay: "0.27s" }}
             >
               أنشئ متجرك بصور وأسعار، استقبل الطلبات فوراً، نظّم التوصيل بمناطقك، وتابع أداء يومك من لوحة
               تحكم واحدة.
             </p>
 
-            {/* CTA pair — flame primary + outline secondary */}
+            {/* CTA pair — magnetic gold + ghost (the landing pill system) */}
             <div
               className="animate-fade-in flex flex-wrap justify-center gap-3 sm:gap-4 lg:justify-start"
               style={{ animationDelay: "0.39s" }}
             >
-              <Link href="/register">
-                <Button variant="flame" size="lg" className="text-sm sm:text-base">
-                  ابدأ مجاناً <MotionArrowRight className="size-4 rtl:rotate-180 sm:size-5" />
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="outline" size="lg" className="text-sm sm:text-base">
-                  تسجيل الدخول
-                </Button>
+              <MagneticGoldLink href="/register" withArrow ariaLabel="أنشئ متجرك مجاناً — التسجيل">
+                ابدأ مجاناً
+              </MagneticGoldLink>
+              <Link href="/store/demo-store" className="ln-btn-ghost">
+                شاهد متجراً تجريبياً
               </Link>
             </div>
 
             {/* Trust badge — real count only (family honesty policy) */}
             {showTrustBadge && (
               <div
-                className="animate-fade-in mt-6 inline-flex items-center gap-1.5 rounded-full border border-accent-foreground/25 bg-accent-foreground/8 px-3.5 py-1.5 text-[11px] font-medium text-accent-foreground shadow-sm"
+                className="ln-keep-pill animate-fade-in mt-6 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium"
                 style={{ animationDelay: "0.51s" }}
               >
-                <span className="size-1.5 animate-pulse-dot rounded-full bg-primary" />
+                <span
+                  className="size-1.5 animate-pulse-dot rounded-full"
+                  style={{ background: "var(--ln-lime)" }}
+                  aria-hidden="true"
+                />
                 أكثر من {trustCount.toLocaleString("en-US").replace(/,/g, "")} متجر يثقون بنا
               </div>
             )}
           </div>
 
-          {/* End column — the order moment (phone + floating proof) */}
-          <div className="relative flex justify-center sm:px-4 md:px-0">
+          {/* End column — the order moment (phone + floating proof), kept */}
+          <div className="relative z-10 flex justify-center sm:px-4 md:px-0">
             <HeroPhone />
           </div>
         </div>

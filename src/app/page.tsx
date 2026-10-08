@@ -1,23 +1,25 @@
 import "./landing.css";
-import { Header } from "@/components/layout/header";
+import { Fragment } from "react";
 import { SkipLink } from "@/components/shared/skip-link";
-import { Footer } from "@/components/layout/footer";
-import { HeroSection } from "@/components/landing/hero-section";
-import { FeaturesBento } from "@/components/landing/features-bento";
-import { ShowcaseSection } from "@/components/landing/showcase-section";
-import { StatsSection } from "@/components/landing/stats-section";
-import { HowItWorks } from "@/components/landing/how-it-works";
-import { LocalSection } from "@/components/landing/local-section";
-import { ClientsSection } from "@/components/landing/clients-section";
-import { FaqSection } from "@/components/landing/faq-section";
-import { FinalCta } from "@/components/landing/final-cta";
 import { db } from "@/lib/db";
 import { SITE_URL } from "@/app/layout";
+import { CountUp } from "@/components/ui/CountUp";
+import { LandingHeader } from "@/components/landing/LandingHeader";
+import { HeroSection } from "@/components/landing/hero-section";
+import { LandingMarquee } from "@/components/landing/LandingMarquee";
+import { SectorsSection } from "@/components/landing/SectorsSection";
+import { JourneySection } from "@/components/landing/JourneySection";
+import { ProgressSection } from "@/components/landing/ProgressSection";
+import { VenuesSection } from "@/components/landing/VenuesSection";
+import { RolesSection } from "@/components/landing/RolesSection";
+import { FinaleCta } from "@/components/landing/FinaleCta";
+import { LandingFaq } from "@/components/landing/LandingFaq";
+import { LandingFooter } from "@/components/landing/LandingFooter";
 
 export const dynamic = "force-dynamic";
 
 /** Structured data — Organization + WebSite (the storefront pages add
- * Store + Product/Offer graphs of their own). */
+ * Store + Product/Offer graphs of their own; LandingFaq adds FAQPage). */
 const landingJsonLd = {
   "@context": "https://schema.org",
   "@graph": [
@@ -56,36 +58,112 @@ async function getLandingStats(): Promise<{ totalStores: number; totalOrders: nu
   }
 }
 
+/* Marquee vocabulary — the REAL partner/sector names from the shipped
+   Local/Clients domain data (8 partners + 5 sectors), ×2 by the marquee
+   kit for the seamless 42s RTL loop. */
+const MARQUEE_ITEMS = [
+  "متجر الواحة",
+  "مطعم الأصيل",
+  "بيتزا روما",
+  "SOHO",
+  "Telepizza",
+  "The Cheese",
+  "Empire",
+  "Kubaba",
+  "مطاعم",
+  "مقاهي",
+  "بيتزيريا",
+  "برغر",
+  "متاجر تجزئة",
+];
+
 export default async function LandingPage() {
   const stats = await getLandingStats();
 
-  // r128-F4a: `.landing` activates the Orbit-Ink layer (src/app/landing.css) —
-  // the stage for the Stage-B section rebuild.
+  /* Trust band — the live DB figures the home has always published,
+     plus the three cities the shipped testimonials name (SSR'd final +
+     CountUp on view). The "+" rides only non-zero counts (honesty). */
+  const trustStats = [
+    {
+      value: stats.totalStores > 0 ? `+${stats.totalStores}` : `${stats.totalStores}`,
+      label: "متجر مسجل",
+    },
+    {
+      value: stats.totalOrders > 0 ? `+${stats.totalOrders}` : `${stats.totalOrders}`,
+      label: "طلب مستقبَل",
+    },
+    { value: "3", label: "مدن" },
+  ];
+
+  /* r128 Stage B (F4b) — the landing assembled as the Madarek journey
+     (PORT-KIT §5, §6 Order column): المدار (kept split hero + the sky
+     behind it) → شريط الشركاء (marquee) → الثقة → قطاعات المتاجر →
+     رحلة الطلب (5 stations + light path --sp) → قصة التقدّم (--sp
+     rings + live CountUp) → شركاؤنا على الأرض → الأدوار → نقطة
+     البداية → الأسئلة الشائعة. The page stays a SERVER component —
+     the h1 and hero sub render inline (instant-paint LCP doctrine,
+     r8/r9); client islands are exactly: LandingHeader (chrome/spy/
+     menus), HeroSection's sky (parallax + magnetic CTA), JourneySection
+     (light path + --sp), ProgressSection (--sp + CountUp), CountUp, and
+     the RevealCssClass observers. */
   return (
-    <div className="landing relative flex min-h-dvh flex-col overflow-x-clip bg-background">
+    <div className="landing relative flex min-h-dvh flex-col overflow-x-clip">
       <SkipLink />
-      {/* Family atmosphere: film-grain overlay (pointer-safe, both themes) */}
-      <div className="grain-overlay" aria-hidden="true" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(landingJsonLd) }}
       />
 
-      <Header />
+      <LandingHeader />
 
       <main id="main" className="flex-1">
+        {/* ═══ الفصل ٠ — المدار: the kept split hero on the Orbit-Ink sky ═══ */}
         <HeroSection trustCount={stats.totalStores} />
-        <FeaturesBento />
-        <ShowcaseSection />
-        <StatsSection stats={stats} />
-        <HowItWorks />
-        <LocalSection />
-        <ClientsSection />
-        <FaqSection />
-        <FinalCta />
+
+        {/* ═══ شريط الشركاء — مدار واحد تنتظم فيه الأسماء (marquee) ═══ */}
+        <LandingMarquee items={MARQUEE_ITEMS} />
+
+        {/* ═══ الفصل ١ — الثقة (quiet mono DATA band, live figures) ═══ */}
+        <section id="trust" className="ln-trust" aria-label="أرقام المنصّة">
+          <div className="ln-trust-inner">
+            {trustStats.map((s, i) => (
+              <Fragment key={s.label}>
+                {i > 0 && <span className="ln-trust-sep" aria-hidden="true" />}
+                <span className="ln-mono">
+                  <CountUp value={s.value} /> {s.label}
+                </span>
+              </Fragment>
+            ))}
+          </div>
+        </section>
+
+        {/* ═══ الفصل ٢ — قطاعات المتاجر (sectors constellation) ═══ */}
+        <SectorsSection />
+
+        {/* ═══ الفصل ٣ — رحلة الطلب (5 stations + light path) ═══ */}
+        <JourneySection />
+
+        {/* ═══ الفصل ٤ — قصّة التقدّم (--sp rings + real CountUp) ═══ */}
+        <ProgressSection stores={stats.totalStores} orders={stats.totalOrders} />
+
+        {/* ═══ الفصل ٥ — الأرض: شركاؤنا على الأرض (venues plate) ═══ */}
+        <VenuesSection />
+
+        {/* ═══ الفصل ٦ — الأدوار ═══ */}
+        <RolesSection />
+
+        {/* ═══ الفصل ٧ — نقطة البداية ═══ */}
+        <FinaleCta />
+
+        {/* ═══ الأسئلة الشائعة — compact, ln-styled, zero JS ═══ */}
+        <LandingFaq />
       </main>
 
-      <Footer />
+      <LandingFooter />
+
+      {/* film-grain texture layer — last child, painted over the whole world
+          (the ONE veil; the product grain-overlay retires with this commit) */}
+      <div className="ln-grain" aria-hidden="true" />
     </div>
   );
 }

@@ -1,12 +1,11 @@
-"use client";
+import { RevealCssClass } from "@/hooks/useReveal";
 
-import { ChevronDown } from "lucide-react";
-import { SectionContainer } from "@/components/ui/section-container";
-import { SectionHeader } from "@/components/ui/section-header";
-import { Reveal } from "@/components/ui/scroll-reveal";
+/* r128 Stage B (F4b) — the compact ln-styled FAQ: the six REAL Q&As
+ * from the shipped faq-section, verbatim, now on native <details>
+ * rows (zero JS) over the Orbit-Ink ground — plus the FAQPage JSON-LD
+ * so the rich results carry the same honest answers. */
 
-/** Family FAQ pattern — native details/summary with grid-rows expansion. */
-const faqs = [
+const FAQS = [
   {
     q: "هل أحتاج خبرة تقنية لإنشاء متجري؟",
     a: "لا. التسجيل يستغرق أقل من دقيقتين، وإضافة المنتجات تتم من الهاتف بنفس سهولة نشر صورة على واتساب. لا تثبيت ولا برمجة.",
@@ -33,34 +32,37 @@ const faqs = [
   },
 ];
 
-export function FaqSection() {
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQS.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
+export function LandingFaq() {
   return (
-    <SectionContainer id="faq">
-      <SectionHeader eyebrow="أسئلة شائعة" title="إجابات سريعة قبل أن تبدأ" />
-      <Reveal y={20}>
-        <div className="mx-auto max-w-3xl space-y-3 sm:space-y-4">
-          {faqs.map((faq, i) => (
-            <details
-              key={i}
-              className="group overflow-hidden rounded-xl border border-border/50 bg-card transition-[border-color,box-shadow] duration-500 open:border-accent-foreground/25 open:shadow-sm"
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between rounded-sm px-4 py-3 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/60 sm:px-5 sm:text-base sm:py-4">
-                {faq.q}
-                <span className="text-muted-foreground transition-transform duration-300 group-open:rotate-180">
-                  <ChevronDown className="size-4" aria-hidden="true" />
-                </span>
-              </summary>
-              <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 group-open:grid-rows-[1fr]">
-                <div className="overflow-hidden">
-                  <p className="px-4 pb-4 text-xs leading-relaxed text-muted-foreground sm:px-5 sm:text-sm">
-                    {faq.a}
-                  </p>
-                </div>
-              </div>
-            </details>
-          ))}
-        </div>
-      </Reveal>
-    </SectionContainer>
+    <section className="ln-faq" aria-label="الأسئلة الشائعة">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <div className="ln-faq-head">
+        <span className="ln-label">{"الأسئلة الشائعة · FAQ"}</span>
+        <RevealCssClass as="h2" className="ln-chapter-title" delay={1}>
+          أسئلة يسألها <em>أصحاب المتاجر</em>
+        </RevealCssClass>
+      </div>
+      <div className="ln-faq-list">
+        {FAQS.map((f) => (
+          <details key={f.q} className="ln-faq-item">
+            <summary className="ln-faq-q">{f.q}</summary>
+            <p className="ln-faq-a">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
   );
 }
