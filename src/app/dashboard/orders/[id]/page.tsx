@@ -155,7 +155,7 @@ const TIMELINE_NODE: Record<string, { icon: LucideIcon; classes: string }> = {
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { businessId } = useBusiness();
+  const { businessId, perms } = useBusiness();
   const [order, setOrder] = React.useState<OrderDetail | null>(null);
   const [error, setError] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
@@ -245,6 +245,15 @@ export default function OrderDetailPage() {
     order.status,
     order.fulfillmentType,
   );
+  /* r134 (V2 P3): the API enforces orders.cancel on CANCELLED/REJECTED
+     (this round); gate the UI too so STAFF never sees dead destructive
+     buttons that 403 on click. Owner/Admin keep everything. */
+  const canCancel = perms.includes("orders.cancel");
+  const visibleTransitions = canCancel
+    ? transitions
+    : transitions.filter(
+        (t) => t.to !== "CANCELLED" && t.to !== "REJECTED",
+      );
   const customerWa = waLink(
     toE164(order.customerPhone),
     buildCustomerConfirmationMessage(
@@ -296,12 +305,12 @@ export default function OrderDetailPage() {
 
         <div className="flex items-center gap-2 no-print">
           {/* Context-aware actions */}
-          {transitions.length > 0 && (
+          {visibleTransitions.length > 0 && (
             <>
               {/* Primary: first non-destructive */}
               {(() => {
-                const primary = transitions.find((t) => !t.destructive);
-                const destructive = transitions.filter((t) => t.destructive);
+                const primary = visibleTransitions.find((t) => !t.destructive);
+                const destructive = visibleTransitions.filter((t) => t.destructive);
                 return (
                   <>
                     {primary && (

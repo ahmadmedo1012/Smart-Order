@@ -76,10 +76,13 @@ const ADMIN_NAV = [
 export function DashboardShell({
   user,
   businesses,
+  memberships,
   children,
 }: {
   user: { name: string; email: string; isPlatformAdmin?: boolean };
   businesses: Biz[];
+  /* r134 (V2 P3): optional so existing callers stay source-compatible. */
+  memberships?: { businessId: string; perms: string[] }[];
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -97,6 +100,9 @@ export function DashboardShell({
   }, [businesses]);
 
   const businessId = biz?.id ?? "";
+  /* r134 (V2 P3): effective permissions for the ACTIVE business (mirrors the
+     server's permissionsFor resolution; client gate only — the API enforces). */
+  const activePerms = memberships?.find((mm) => mm.businessId === biz?.id)?.perms ?? [];
 
   async function logout() {
     try {
@@ -384,7 +390,7 @@ export function DashboardShell({
             {/* Context provider — content capped at the canonical
  --content-max-w 1280px (A5 P2-1): list tables stop
  stretching to viewport width on wide monitors. */}
-            <BusinessContext.Provider value={{ businessId, business: biz }}>
+            <BusinessContext.Provider value={{ businessId, business: biz, perms: activePerms }}>
               {/* r133 (A11 S2): tabIndex={-1} on the skip-link target so
                  Safari/Firefox move keyboard focus into <main> on skip. */}
               <main
@@ -491,7 +497,9 @@ const BusinessContext = createContext<{
     name: string;
     isPublished: boolean;
   } | null;
-}>({ businessId: "", business: null });
+  /* r134 (V2 P3): effective permissions of the active membership. */
+  perms: string[];
+}>({ businessId: "", business: null, perms: [] });
 
 export function useBusiness() {
   return useContext(BusinessContext);

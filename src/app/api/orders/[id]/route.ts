@@ -68,8 +68,9 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       /* r134 (W2 #2): destructive transitions additionally need
          orders.cancel — the permission was declared (constants.ts) but
          never enforced, so STAFF (orders.update only) could cancel /
-         reject orders straight through the API even though the UI
-         hides those actions. */
+         reject orders straight through the API. (The UI showed those
+         actions to everyone until V2; the client now gates on
+         orders.cancel too — shell perms context, orders/[id]/page.tsx.) */
       if (to === "CANCELLED" || to === "REJECTED") {
         requirePermission(member, "orders.cancel");
       }

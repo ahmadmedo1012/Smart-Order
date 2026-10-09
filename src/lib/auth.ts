@@ -28,7 +28,11 @@ function sha256(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
-function permissionsFor(role: Role, extraPerms: string): Permission[] {
+/* r134 (V2 P3): exported so the dashboard layout can resolve the member's
+   effective permissions server-side and hand them to the client shell —
+   the orders detail UI now gates destructive actions on orders.cancel
+   (the API already enforces it; the UI must not show dead buttons). */
+export function permissionsFor(role: Role, extraPerms: string): Permission[] {
   const base = ROLE_PERMISSIONS[role] ?? [];
   const extra = (extraPerms || "")
     .split(",")
