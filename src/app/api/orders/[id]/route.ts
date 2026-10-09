@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAuth, requireBusiness, requirePermission } from "@/lib/auth";
-import { ok, fail, handleError, readJson } from "@/lib/api";
+import { ok, fail, handleError, readJson, ApiFailError } from "@/lib/api";
 import { canTransition, canMarkPaid, isTerminal } from "@/lib/order-machine";
 import { ORDER_STATUSES, PAYMENT_STATUSES, type OrderStatus, type PaymentStatus } from "@/lib/constants";
 
@@ -65,6 +65,14 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       if (!canTransition(from, to, order.fulfillmentType as "DELIVERY" | "PICKUP")) {
         return fail("انتقال غير صالح لهذه الحالة", 409, "INVALID_TRANSITION");
       }
+      /* r134 (W2 #2): destructive transitions additionally need
+         orders.cancel — the permission was declared (constants.ts) but
+         never enforced, so STAFF (orders.update only) could cancel /
+         reject orders straight through the API even though the UI
+         hides those actions. */
+      if (to === "CANCELLED" || to === "REJECTED") {
+        requirePermission(member, "orders.cancel");
+      }
       updates.status = to;
     }
 
@@ -73,6 +81,17 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       const to = input.paymentStatus as PaymentStatus;
       if (to === "PAID" && !canMarkPaid(order.status as OrderStatus)) {
         return fail("لا يمكن وضع علامة مدفوع على طلب ملغي", 409, "INVALID_TRANSITION");
+      }
+      /* r134 (W2 #4): the payment-state machine had server gaps the UI
+         already blocks (orders/[id]/page.tsx shows REFUNDED only on PAID):
+         REFUNDED requires the order to be PAID first, and REFUNDED is
+         terminal — no payment transitions out of it (covers
+         PAID-from-REFUNDED). */
+      if (order.paymentStatus === "REFUNDED") {
+        return fail("لا يمكن تغيير حالة الدفع لطلب مسترجع المبلغ", 409, "INVALID_TRANSITION");
+      }
+      if (to === "REFUNDED" && order.paymentStatus !== "PAID") {
+        return fail("لا يمكن تسجيل استرجاع المبلغ لطلب غير مدفوع", 409, "INVALID_TRANSITION");
       }
       updates.paymentStatus = to;
     }
@@ -87,7 +106,23 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     }
 
     const updated = await db.$transaction(async (tx) => {
-      const o = await tx.order.update({ where: { id }, data: updates });
+      /* r134 (W2 #5): CAS — the guards above validated the request
+         against the snapshot read at the top; the write is now
+         CONDITIONAL on that snapshot still holding (`status` in the
+         where clause), so a concurrent PATCH that moved the row between
+         the read and the write wins for its request and this one
+         surfaces the existing transition-conflict copy (Smart-Menu's
+         orders updateMany recipe). updateMany returns only a count —
+         the row is re-read for the response. */
+      const cas = await tx.order.updateMany({
+        where: { id, status: order.status },
+        data: updates,
+      });
+      if (cas.count !== 1) {
+        throw new ApiFailError("انتقال غير صالح لهذه الحالة", 409, "INVALID_TRANSITION");
+      }
+      const o = await tx.order.findUnique({ where: { id } });
+      if (!o) throw new ApiFailError("الطلب غير موجود", 404, "NOT_FOUND");
       if (updates.status) {
         await tx.orderStatusHistory.create({
           data: {
@@ -117,18 +152,21 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
           },
         });
       }
+      /* r134 (W2 #13): the audit row used to be written AFTER the
+         transaction — a crash between the two left the mutation
+         un-audited. It now rides the same $transaction and commits
+         atomically with the mutation it describes. */
+      await tx.auditLog.create({
+        data: {
+          businessId: member.businessId,
+          userId: user.id,
+          action: "ORDER_UPDATED",
+          entity: "Order",
+          entityId: id,
+          metadata: JSON.stringify({ ...updates }),
+        },
+      });
       return o;
-    });
-
-    await db.auditLog.create({
-      data: {
-        businessId: member.businessId,
-        userId: user.id,
-        action: "ORDER_UPDATED",
-        entity: "Order",
-        entityId: id,
-        metadata: JSON.stringify({ ...updates }),
-      },
     });
 
     return ok({ order: updated });

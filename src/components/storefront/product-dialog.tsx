@@ -153,7 +153,9 @@ export function ProductDialog({
           )}
           <button
             onClick={onClose}
-            className="absolute top-3 end-3 rounded-full bg-background/90 shadow p-2 hover:bg-background"
+            /* r134 (W2 #9): 44px close hit floor — was p-2 + size-4 ≈32px;
+               matches the r133 Sheet close treatment (sheet.tsx size-11). */
+            className="absolute top-3 end-3 z-[2] flex size-11 items-center justify-center rounded-full bg-background/90 shadow hover:bg-background"
             aria-label="إغلاق"
           >
             <X className="size-4" aria-hidden="true" />

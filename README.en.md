@@ -122,7 +122,7 @@ The canonical source is [`.env.example`](.env.example) — the table shows the r
 ```bash
 bun run dev                                  # start the dev server
 bun run test:parity                          # Madarek parity
-node tests/e2e/api-e2e.js https://your-deployment.vercel.app   # E2E against any deployment
+node tests/e2e/api-e2e.js https://order.smart-link.ly   # E2E against any deployment
 ```
 
 ---

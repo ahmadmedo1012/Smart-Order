@@ -14,6 +14,7 @@ history if ever needed; they had zero references.
 | `seed-family.js` | Idempotent family seed: the plans catalog + the public demo store (`/store/demo-store`) that the landing header links to. Upserts by natural keys — safe to re-run. | On a fresh/empty database (local or a new environment): `node scripts/seed-family.js` |
 | `make-admin.js` | Creates/verifies the platform-admin QA user (`admin@smart-link.ly`, idempotent — the only path to a platform-admin account). | When you need an admin login for QA: `node scripts/make-admin.js` |
 | `qa-xss-test.js` | XSS injection harness: creates an order with malicious payloads through the public API, then verifies stored values round-trip escaped. | Ad-hoc regression check after touching any rendering/escaping path. |
+| `check-schema-twins.mjs` | Schema-twins guard: asserts `prisma/schema.prisma` (SQLite dev) ≡ `prisma/schema.postgres.prisma` (PostgreSQL prod) at the MODEL level (generator/datasource plumbing exempt by design); exits 1 on the first divergence. r134 decided NOT to adopt `prisma migrate` — see the script header. | Automatic — every CI run (`.github/workflows/ci.yml`). |
 
 ## Conventions
 

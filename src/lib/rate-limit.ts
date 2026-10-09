@@ -11,9 +11,11 @@
 // KEY (client-ip.ts spoof-collapse) but left the bucket store
 // per-instance; SM hit the same wall and moved the store to PostgreSQL.
 //
-// SHAPE (SO call-site constraint): SO's six call sites consume the
-// limiter SYNCHRONOUSLY (`const rl = rateLimit(...); if (!rl.ok)`), so
-// `rateLimit()` keeps its exact sync signature and works as:
+// SHAPE (SO call-site constraint, r134 update): ALL six call sites now
+// consume the limiter via the awaited authoritative twin below
+// (`const rl = await dbRateLimit(...)`); the legacy sync `rateLimit()`
+// shim stays exported for any future call site that cannot await — it
+// still works as:
 //
 //   1. FAST PATH (sync, zero added latency): the in-memory bucket
 //      decides — same behavior as before when the DB is unreachable.
@@ -26,9 +28,10 @@
 //
 // `dbRateLimit()` is the authoritative awaited twin (SM's check()
 // verbatim: single round trip, fail-closed) for call sites that CAN
-// await — flip call sites to it one file at a time (r132 worklog
-// handoff: api/auth/login, api/auth/register, api/public/orders,
-// api/subscriptions, api/subscriptions/receipt, api/media).
+// await. r134 (W2 #8): the r132 handoff list is COMPLETE — all six call
+// sites adopted it (api/auth/login, api/auth/register, api/public/orders,
+// api/media, api/subscriptions, api/subscriptions/receipt); the sync
+// shim has zero callers and remains as the documented fallback.
 //
 // Failure semantics: DB unreachable → the local bucket still counts and
 // enforces per-instance (the pre-r132 behavior — never worse). The

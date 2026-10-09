@@ -36,7 +36,11 @@ export const metadata: Metadata = {
     siteName: "سمارت أوردر",
     title: "سمارت أوردر — منصة الطلبات الرقمية",
     description: "أنشئ متجرك الرقمي واستقبل الطلبات عبر الويب وواتساب — مصممة للأعمال الليبية.",
-    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "الربط الذكي — سمارت أوردر" }],
+    /* r134 (W2 #18): family og:image alt form — «الربط الذكي» prefix +
+       the one-word Latin product brand (SmartLink/SmartBot og alt
+       convention); was «الربط الذكي — سمارت أوردر» (AR/brand split from
+       the XC audit). */
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "الربط الذكي — SmartOrder" }],
   },
   twitter: {
     card: "summary_large_image",

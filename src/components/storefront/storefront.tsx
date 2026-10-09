@@ -111,6 +111,20 @@ export function Storefront({
 
   React.useEffect(load, [load]);
 
+  // r134 (W2 #10): normalized search index — name + description are
+  // normalized ONCE per data change, not re-normalized for every product
+  // on every keystroke (the old filter called normalizeArabic twice per
+  // product per render).
+  const searchIndex = React.useMemo(
+    () =>
+      (data?.products ?? []).map((p) => ({
+        p,
+        name: normalizeArabic(p.name),
+        desc: normalizeArabic(p.description ?? ""),
+      })),
+    [data],
+  );
+
   // Toast CTA relay — "عرض السلة" in the add-to-cart toast dispatches
   // "open-cart"; open the cart Sheet here (its only controller).
   React.useEffect(() => {
@@ -123,11 +137,13 @@ export function Storefront({
   if (!data) return <StorefrontSkeleton />;
 
   const query = normalizeArabic(q);
-  const visibleProducts = data.products.filter((p) => {
-    if (activeCategory !== "ALL" && p.categoryId !== activeCategory) return false;
-    if (query && !normalizeArabic(p.name).includes(query) && !normalizeArabic(p.description ?? "").includes(query)) return false;
-    return true;
-  });
+  const visibleProducts = searchIndex
+    .filter(({ p, name, desc }) => {
+      if (activeCategory !== "ALL" && p.categoryId !== activeCategory) return false;
+      if (query && !name.includes(query) && !desc.includes(query)) return false;
+      return true;
+    })
+    .map(({ p }) => p);
 
   const featured = visibleProducts.filter((p) => p.isFeatured);
   const regular = visibleProducts.filter((p) => !p.isFeatured);

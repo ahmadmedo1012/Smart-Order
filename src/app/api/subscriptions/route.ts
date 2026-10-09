@@ -3,7 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { ok, fail, handleError, readJson } from "@/lib/api";
 import { requireAuth } from "@/lib/auth";
-import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { dbRateLimit, clientIp } from "@/lib/rate-limit";
 import { normalizeLibyanPhone } from "@/lib/phone";
 
 export const runtime = "nodejs";
@@ -27,7 +27,10 @@ const schema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const ip = clientIp(req);
-    const rl = rateLimit(`subpay:${ip}`, 10, 10 * 60 * 1000);
+    /* r134 (W2 #8): the awaited authoritative twin (SM check() verbatim,
+       fail-closed) — the documented r132 handoff executed for all six
+       call sites. */
+    const rl = await dbRateLimit(`subpay:${ip}`, 10, 10 * 60 * 1000);
     if (!rl.ok) return fail("عدد كبير من المحاولات، انتظر قليلاً", 429);
 
     const user = await requireAuth();

@@ -25,8 +25,27 @@ export function fail(message: string, status = 400, code?: string): NextResponse
   return NextResponse.json({ success: false, error: { message, code } }, { status });
 }
 
+/* r134 (W2): a fail()-shaped error that can be thrown from INSIDE a
+   $transaction callback (they can only abort by throwing) and carries
+   the exact response — message/status/code — back out to the route
+   boundary, where the standard catch → handleError maps it (AuthError
+   precedent). Lets transactional guards (stock CAS, order PATCH CAS)
+   surface their precise Arabic copy instead of a generic 500. */
+export class ApiFailError extends Error {
+  status: number;
+  code?: string;
+  constructor(message: string, status = 400, code?: string) {
+    super(message);
+    this.status = status;
+    this.code = code;
+  }
+}
+
 /** Map any thrown error to a safe Arabic response — never leak internals. */
 export function handleError(err: unknown): NextResponse {
+  if (err instanceof ApiFailError) {
+    return fail(err.message, err.status, err.code);
+  }
   if (err instanceof AuthError) {
     return fail(err.message, err.status, err.status === 401 ? "UNAUTHENTICATED" : "FORBIDDEN");
   }

@@ -55,7 +55,10 @@ const buttonVariants = cva(
       size: {
         sm: "h-8 gap-1.5 px-3 text-xs",
         default: "h-10 px-5",
-        lg: "h-11 gap-2.5 px-6 text-sm",
+        /* r134 (W2 #19): lg = the canon 48px rung (madarek
+           components.css .btn.lg block-size 48px; Smart-Menu button.tsx
+           h-12) — was h-11 (44px), caught by the sibling canon-check. */
+        lg: "h-12 gap-2.5 px-6 text-sm",
         icon: "size-10",
         "icon-sm": "size-8",
       },

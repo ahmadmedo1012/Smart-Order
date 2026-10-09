@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { ok, fail, handleError } from "@/lib/api";
 import { storeImage } from "@/lib/storage";
-import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { dbRateLimit, clientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -13,7 +13,11 @@ export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
   try {
     const ip = clientIp(req);
-    const rl = rateLimit(`receipt:${ip}`, 20, 10 * 60 * 1000);
+    /* r134 (W2 #8): the awaited authoritative twin (SM check() verbatim,
+       fail-closed) — the documented r132 handoff executed for all six
+       call sites. This is a PUBLIC surface (receipt upload needs no
+       session) — fail-closed matters most here. */
+    const rl = await dbRateLimit(`receipt:${ip}`, 20, 10 * 60 * 1000);
     if (!rl.ok) return fail("عدد كبير من الرفعات، انتظر قليلاً", 429);
 
     const body = await req.json().catch(() => null);

@@ -67,6 +67,14 @@ jobs:
       - name: Lint (ESLint صفر أخطاء)
         run: npm run lint
 
+      # r134 (W2 #7): حارس التوأمين — prisma/schema.prisma (SQLite تطوير)
+      # و schema.postgres.prisma (PostgreSQL إنتاج) يُبقيان يدوياً؛ أي
+      # انحراف في النماذج يفشل الدفعة قبل البناء. كتلا generator/datasource
+      # مستثناة بالتصميم (فروق النشر المقصودة). قرار r134: لا تبنّي
+      # prisma migrate هذه الجولة — موثّق في رأس السكربت.
+      - name: Schema twins (SQLite ⇄ PostgreSQL)
+        run: node scripts/check-schema-twins.mjs
+
       # r126/r127: Madarek parity — 197 pins: القيم القانونية (ألوان/
       # أنصاف أقواس/حركة/z/ارتفاعات) + بوابات الاستهلاك + أسلاك العائلات
       # + حبر واتساب؛ أي انحراف يفشل الدفعة قبل البناء أصلاً.

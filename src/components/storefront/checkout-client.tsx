@@ -17,7 +17,7 @@ import { FieldError } from "@/components/dashboard/form-field";
 import { toast } from "sonner";
 import { randomUUID } from "@/lib/uuid";
 import { AnimatedCopy } from "@/components/ui/animated-icons";
-import { libyanaUssdCode, madarUssdCode } from "@/lib/payment-constants";
+import { libyanaUssdCode, madarUssdCode, WALLET_CAP_LYD } from "@/lib/payment-constants";
 import {
   ArrowRight,
   ArrowLeft,
@@ -132,11 +132,46 @@ export function CheckoutClient({
   const zone = data?.deliveryZones.find((z) => z.id === zoneId) ?? null;
   const deliveryFee = fulfillment === "DELIVERY" ? (zone?.fee ?? 0) : 0;
   const total = subtotal + deliveryFee;
+  /* r134 (W2 #3): wallet networks (libyana/madar) reject single
+     transfers above WALLET_CAP_LYD — subscriptions already enforce the
+     cap (payment-dialog.tsx); the checkout quick-code row now matches
+     (amounts are millimes — the constant is whole LYD). */
+  const overWalletCap = total > WALLET_CAP_LYD * 1000;
   const paymentMethod = data?.paymentMethods.find((p) => p.id === paymentMethodId) ?? null;
   const paymentConfig = paymentMethod?.config ? (JSON.parse(paymentMethod.config) as { number?: string }) : null;
 
   const minOrderUnmet: boolean =
     fulfillment === "DELIVERY" && !!zone && zone.minOrder > 0 && subtotal < zone.minOrder;
+
+  /* r134 (W2 #15): beforeunload dirty guard — the r133 useDirtyClose
+     family pattern adapted to a full-page client form (dialogs guard
+     ESC/scrim/close; a page form needs the browser-level guard; note
+     beforeunload fires on real unloads only — refresh/close — not on
+     Next.js client-side navigations, and the success path uses
+     router.replace so it never trips). Dirty = any field off the value
+     load() seeds; armed only while there are items to lose. */
+  const formDirty =
+    step === "form" &&
+    !!data &&
+    (name.trim() !== "" ||
+      phone.trim() !== "" ||
+      area.trim() !== "" ||
+      addressLine.trim() !== "" ||
+      customerNote.trim() !== "" ||
+      city !== "طرابلس" ||
+      zoneId !== (data.deliveryZones[0]?.id ?? "") ||
+      paymentMethodId !== (data.paymentMethods[0]?.id ?? "") ||
+      fulfillment !== (data.deliveryZones.length > 0 ? "DELIVERY" : "PICKUP"));
+
+  React.useEffect(() => {
+    if (!formDirty || items.length === 0) return;
+    const guardUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = ""; // legacy contract — Chrome ignores preventDefault alone
+    };
+    window.addEventListener("beforeunload", guardUnload);
+    return () => window.removeEventListener("beforeunload", guardUnload);
+  }, [formDirty, items.length]);
 
   async function submit() {
     // r132-F1a (A2 F4): collect ALL field errors in one pass — every
@@ -624,38 +659,48 @@ export function CheckoutClient({
                   </button>
                 </div>
               </div>
-              {/* Quick transfer code — family USSD quick-code row */}
-              <div className="rounded-xl border border-success/25 bg-success/10 p-3">
-                <p className="mb-1.5 text-xs font-medium text-success-ink">رمز التحويل السريع</p>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="truncate font-mono text-sm font-bold text-accent-foreground" dir="ltr">
-                    {paymentMethod.type === "LIBYANA"
-                      ? libyanaUssdCode(paymentConfig.number, total / 1000)
-                      : madarUssdCode(paymentConfig.number, total / 1000)}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const code =
-                        paymentMethod.type === "LIBYANA"
-                          ? libyanaUssdCode(paymentConfig.number!, total / 1000)
-                          : madarUssdCode(paymentConfig.number!, total / 1000);
-                      try {
-                        await navigator.clipboard.writeText(code);
-                        toast.success("تم نسخ الرمز");
-                      } catch {
-                        toast.error("تعذّر النسخ");
-                      }
-                    }}
-                    className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90"
-                    title="نسخ رمز التحويل السريع"
-                    aria-label="نسخ رمز التحويل السريع"
-                  >
-                    <AnimatedCopy className="size-3.5" />
-                    نسخ
-                  </button>
+              {/* Quick transfer code — family USSD quick-code row.
+                  r134 (W2 #3): hidden above the wallet network cap — the
+                  amount-embedded USSD code cannot succeed over 99 LYD; the
+                  family cap note (provider-picker pattern) replaces the
+                  dead code, the manual transfer target above stays. */}
+              {overWalletCap ? (
+                <p className="text-xs text-accent-foreground">
+                  المبالغ فوق 99 د.ل لا تُدعم عبر رمز التحويل السريع — حوّل المبلغ يدوياً إلى الرقم أعلاه
+                </p>
+              ) : (
+                <div className="rounded-xl border border-success/25 bg-success/10 p-3">
+                  <p className="mb-1.5 text-xs font-medium text-success-ink">رمز التحويل السريع</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate font-mono text-sm font-bold text-accent-foreground" dir="ltr">
+                      {paymentMethod.type === "LIBYANA"
+                        ? libyanaUssdCode(paymentConfig.number, total / 1000)
+                        : madarUssdCode(paymentConfig.number, total / 1000)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const code =
+                          paymentMethod.type === "LIBYANA"
+                            ? libyanaUssdCode(paymentConfig.number!, total / 1000)
+                            : madarUssdCode(paymentConfig.number!, total / 1000);
+                        try {
+                          await navigator.clipboard.writeText(code);
+                          toast.success("تم نسخ الرمز");
+                        } catch {
+                          toast.error("تعذّر النسخ");
+                        }
+                      }}
+                      className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90"
+                      title="نسخ رمز التحويل السريع"
+                      aria-label="نسخ رمز التحويل السريع"
+                    >
+                      <AnimatedCopy className="size-3.5" />
+                      نسخ
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </>
           )}
           <p className="text-[11px] leading-relaxed text-muted-foreground">

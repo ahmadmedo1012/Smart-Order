@@ -10,7 +10,7 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
-import { ok, fail, handleError, readJson } from "@/lib/api";
+import { ok, fail, handleError, readJson, ApiFailError } from "@/lib/api";
 import { normalizeLibyanPhone, toE164 } from "@/lib/phone";
 import { dbRateLimit, clientIp } from "@/lib/rate-limit";
 import { MAX_ORDER_ITEMS, MAX_ORDER_QUANTITY } from "@/lib/constants";
@@ -206,97 +206,143 @@ export async function POST(req: NextRequest) {
 
     // ---- Persist (transaction + sequence retry) ----
     const publicToken = randomUUID();
-    const order = await db.$transaction(
-      async (tx) => {
-        // daily sequence per business
-        const dayStart = new Date();
-        dayStart.setHours(0, 0, 0, 0);
-        const todayCount = await tx.order.count({
-          where: { businessId: business.id, createdAt: { gte: dayStart } },
-        });
-
-        let created: { id: string; orderNumber: string; publicToken: string } | null = null;
-        let lastErr: unknown = null;
-        for (let attempt = 0; attempt < 3; attempt++) {
-          const seq = todayCount + 1 + attempt;
-          try {
-            created = await tx.order.create({
-              data: {
-                businessId: business.id,
-                orderNumber: orderNumberFor(new Date(), seq),
-                publicToken,
-                status: "NEW",
-                fulfillmentType: input.fulfillmentType,
-                subtotal,
-                deliveryFee,
-                total,
-                paymentMethodId: paymentMethod?.id ?? null,
-                paymentMethodName: paymentMethod?.name ?? null,
-                paymentType: paymentMethod?.type ?? null,
-                paymentStatus: "UNPAID",
-                customerName: input.customerName,
-                customerPhone: phone,
-                city: input.city || null,
-                area: input.area || zoneName || null,
-                addressLine: input.addressLine || null,
-                customerNote: input.customerNote || null,
-                idempotencyKey: input.idempotencyKey,
-                source: "STOREFRONT",
-                items: { create: lineItems },
-                history: {
-                  create: { fromStatus: null, toStatus: "NEW", note: "استُقبل الطلب من المتجر", changedByName: "النظام" },
-                },
-              },
-              select: { id: true, orderNumber: true, publicToken: true },
-            });
-            break;
-          } catch (e) {
-            lastErr = e;
-            if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") continue;
-            throw e;
-          }
-        }
-        if (!created) throw lastErr ?? new Error("INSERT_FAILED");
-
-        // customer upsert (reusable across orders)
-        const customer = await tx.customer.upsert({
-          where: { businessId_phone: { businessId: business.id, phone } },
-          create: { businessId: business.id, name: input.customerName, phone },
-          update: { name: input.customerName },
-          select: { id: true },
-        });
-        await tx.order.update({ where: { id: created.id }, data: { customerId: customer.id } });
-        if (input.fulfillmentType === "DELIVERY" && input.addressLine) {
-          const existingAddr = await tx.customerAddress.findFirst({
-            where: { customerId: customer.id, addressLine: input.addressLine, city: input.city || "" },
+    const runOrderTx = () =>
+      db.$transaction(
+        async (tx) => {
+          // daily sequence per business
+          const dayStart = new Date();
+          dayStart.setHours(0, 0, 0, 0);
+          const todayCount = await tx.order.count({
+            where: { businessId: business.id, createdAt: { gte: dayStart } },
           });
-          if (!existingAddr) {
-            await tx.customerAddress.create({
-              data: {
-                customerId: customer.id,
-                city: input.city || "",
-                area: input.area || null,
-                addressLine: input.addressLine,
-              },
-            });
-          }
-        }
 
-        // inventory decrement
-        for (const line of lineItems) {
-          const p = productMap.get(line.productId)!;
-          if (p.trackInventory) {
-            await tx.product.update({
-              where: { id: p.id },
-              data: { stockQuantity: { decrement: line.quantity } },
-            });
+          let created: { id: string; orderNumber: string; publicToken: string } | null = null;
+          let lastErr: unknown = null;
+          for (let attempt = 0; attempt < 3; attempt++) {
+            const seq = todayCount + 1 + attempt;
+            try {
+              created = await tx.order.create({
+                data: {
+                  businessId: business.id,
+                  orderNumber: orderNumberFor(new Date(), seq),
+                  publicToken,
+                  status: "NEW",
+                  fulfillmentType: input.fulfillmentType,
+                  subtotal,
+                  deliveryFee,
+                  total,
+                  paymentMethodId: paymentMethod?.id ?? null,
+                  paymentMethodName: paymentMethod?.name ?? null,
+                  paymentType: paymentMethod?.type ?? null,
+                  paymentStatus: "UNPAID",
+                  customerName: input.customerName,
+                  customerPhone: phone,
+                  city: input.city || null,
+                  area: input.area || zoneName || null,
+                  addressLine: input.addressLine || null,
+                  customerNote: input.customerNote || null,
+                  idempotencyKey: input.idempotencyKey,
+                  source: "STOREFRONT",
+                  items: { create: lineItems },
+                  history: {
+                    create: { fromStatus: null, toStatus: "NEW", note: "استُقبل الطلب من المتجر", changedByName: "النظام" },
+                  },
+                },
+                select: { id: true, orderNumber: true, publicToken: true },
+              });
+              break;
+            } catch (e) {
+              lastErr = e;
+              if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") continue;
+              throw e;
+            }
           }
-        }
+          if (!created) throw lastErr ?? new Error("INSERT_FAILED");
 
-        return { ...created, customerId: customer.id };
-      },
-      { isolationLevel: "Serializable" }
-    );
+          // customer upsert (reusable across orders)
+          const customer = await tx.customer.upsert({
+            where: { businessId_phone: { businessId: business.id, phone } },
+            create: { businessId: business.id, name: input.customerName, phone },
+            update: { name: input.customerName },
+            select: { id: true },
+          });
+          await tx.order.update({ where: { id: created.id }, data: { customerId: customer.id } });
+          if (input.fulfillmentType === "DELIVERY" && input.addressLine) {
+            const existingAddr = await tx.customerAddress.findFirst({
+              where: { customerId: customer.id, addressLine: input.addressLine, city: input.city || "" },
+            });
+            if (!existingAddr) {
+              await tx.customerAddress.create({
+                data: {
+                  customerId: customer.id,
+                  city: input.city || "",
+                  area: input.area || null,
+                  addressLine: input.addressLine,
+                },
+              });
+            }
+          }
+
+          // inventory decrement
+          for (const line of lineItems) {
+            const p = productMap.get(line.productId)!;
+            if (p.trackInventory) {
+              /* r134 (W2 #1): the stock pre-check above runs OUTSIDE the tx
+                 on a snapshot — two concurrent orders both passed it and
+                 both decrements landed (negative stock). The decrement is
+                 now CONDITIONAL inside the tx: gte guard + count assert
+                 make check-and-decrement one atomic statement; a lost
+                 race aborts the WHOLE order (no order rows, no decrement)
+                 and re-surfaces the same STOCK copy the pre-check uses.
+                 Products without stock tracking are untouched. */
+              const res = await tx.product.updateMany({
+                where: { id: p.id, stockQuantity: { gte: line.quantity } },
+                data: { stockQuantity: { decrement: line.quantity } },
+              });
+              if (res.count !== 1) {
+                const fresh = await tx.product.findUnique({
+                  where: { id: p.id },
+                  select: { stockQuantity: true },
+                });
+                throw new ApiFailError(
+                  `الكمية المتاحة من "${p.name}" هي ${fresh?.stockQuantity ?? 0} فقط`,
+                  422,
+                  "STOCK"
+                );
+              }
+            }
+          }
+
+          return { ...created, customerId: customer.id };
+        },
+        { isolationLevel: "Serializable" }
+      );
+
+    /* r134 (W2 #6): P2034 = serialization abort of the whole tx (the
+       P2002 orderNumber loop above only handles collisions INSIDE the
+       tx) — it previously escaped as a raw 500 and the storefront fell
+       back to a generic internal-error toast. ONE retry of the whole tx
+       (the idempotency replay above makes a re-run safe); a second
+       conflict surfaces the family retry copy (checkout-client's exact
+       fallback line). STOCK guards are business failures, not
+       conflicts — they ride the generic throw → handleError path. */
+    let order: Awaited<ReturnType<typeof runOrderTx>>;
+    try {
+      order = await runOrderTx();
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2034") {
+        try {
+          order = await runOrderTx();
+        } catch (retryErr) {
+          if (retryErr instanceof Prisma.PrismaClientKnownRequestError && retryErr.code === "P2034") {
+            return fail("تعذّر إرسال الطلب، حاول مرة أخرى", 503, "WRITE_CONFLICT");
+          }
+          throw retryErr;
+        }
+      } else {
+        throw err;
+      }
+    }
 
     // WhatsApp structured message (real channel — wa.me deep link)
     const waMessage = buildOrderMessage({

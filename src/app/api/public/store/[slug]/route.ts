@@ -124,6 +124,16 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ slug: stri
 
 export async function HEAD(_req: NextRequest, ctx: { params: Promise<{ slug: string }> }) {
   const { slug } = await ctx.params;
-  const business = await db.business.findUnique({ where: { slug }, select: { id: true } });
-  return new Response(null, { status: business ? 200 : 404 });
+  /* r134 (W2 #12): the same isActive/isPublished gate as GET — HEAD
+     used to answer 200 for ANY existing slug, leaking unpublished /
+     deactivated stores to link-checkers and uptime probes. Status codes
+     mirror GET (404 missing/inactive, 403 unpublished); HEAD carries no
+     body so only the codes are observable. */
+  const business = await db.business.findUnique({
+    where: { slug },
+    select: { isActive: true, isPublished: true },
+  });
+  if (!business || !business.isActive) return new Response(null, { status: 404 });
+  if (!business.isPublished) return new Response(null, { status: 403 });
+  return new Response(null, { status: 200 });
 }

@@ -122,7 +122,7 @@ bun run build                 # بناء الإنتاج
 ```bash
 bun run dev                                  # ابدأ خادم التطوير
 bun run test:parity                          # تكافؤ مدارك
-node tests/e2e/api-e2e.js https://your-deployment.vercel.app   # E2E ضد أي نشر
+node tests/e2e/api-e2e.js https://order.smart-link.ly   # E2E ضد أي نشر
 ```
 
 ---

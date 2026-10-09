@@ -58,14 +58,19 @@ export const useCart = create<CartState>()(
         const state = get();
         // single-business cart: switching business resets
         const replaced = state.businessSlug !== null && state.businessSlug !== slug;
-        const items = replaced ? [] : [...state.items];
+        const base = replaced ? [] : state.items;
         const key = signatureOf(item);
-        const existing = items.find((i) => i.key === key);
-        if (existing) {
-          existing.quantity = Math.min(MAX_CART_QUANTITY, existing.quantity + item.quantity);
-        } else {
-          items.push({ ...item, key });
-        }
+        /* r134 (W2 #14): map to a NEW item object on merge — the old
+           in-place `existing.quantity = ...` mutated an object still
+           aliased by the previous array snapshot (torn reads for any
+           consumer holding the old items reference). */
+        const items = base.some((i) => i.key === key)
+          ? base.map((i) =>
+              i.key === key
+                ? { ...i, quantity: Math.min(MAX_CART_QUANTITY, i.quantity + item.quantity) }
+                : i,
+            )
+          : [...base, { ...item, key }];
         set({ businessSlug: slug, businessName, items });
         return { replaced };
       },
