@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
   // Disable dev indicator for clean captures
   devIndicators: false,
   images: {
+    // r132 (F1c, A9 SO-8): avif first — Next's default is webp-only; SM/SL
+    // ship ['image/avif','image/webp']. Store logos/product images serve
+    // ~20-30% smaller at equal quality.
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [],
   },
   async headers() {

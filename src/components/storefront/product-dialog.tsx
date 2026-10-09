@@ -4,7 +4,8 @@ import * as React from "react";
 import Image from "next/image";
 import { useCart, MAX_CART_QUANTITY } from "@/hooks/use-cart";
 import { formatLyd } from "@/lib/money";
-import type { StoreProduct } from "@/components/storefront/storefront";
+import { api } from "@/lib/client";
+import type { StoreProduct, StoreData } from "@/components/storefront/storefront";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Minus, Plus, Package, ShoppingBag, X, Check } from "lucide-react";
@@ -30,6 +31,38 @@ export function ProductDialog({
   const [selectedOptions, setSelectedOptions] = React.useState<Record<string, Set<string>>>({});
   const [quantity, setQuantity] = React.useState(1);
   const [note, setNote] = React.useState("");
+
+  // r132-F1a (A2 F1): live availability — `product` is a render-time
+  // snapshot, and merchants flip availability while a customer tab
+  // stays open. Every dialog open refetches the public store payload and
+  // adopts THIS product's fresh isAvailable (catches the stale-available
+  // direction that used to dead-end at checkout submit, and the
+  // stale-unavailable one alike). A 10s per-product guard bounds the
+  // chatter on rapid re-opens; the server re-checks at submit as the
+  // final line of defense.
+  const [available, setAvailable] = React.useState(product.isAvailable);
+  const lastCheckRef = React.useRef<{ id: string; at: number } | null>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const last = lastCheckRef.current;
+    if (last && last.id === product.id && Date.now() - last.at < 10_000) return;
+    lastCheckRef.current = { id: product.id, at: Date.now() };
+    let cancelled = false;
+    api
+      .get<StoreData>(`/api/public/store/${slug}`)
+      .then((r) => {
+        if (cancelled) return;
+        const fresh = r.data.products.find((p) => p.id === product.id);
+        if (fresh) setAvailable(fresh.isAvailable);
+      })
+      .catch(() => {
+        // keep the snapshot — the server re-checks at checkout submit
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, product.id, slug]);
 
   const variant = product.variants.find((v) => v.id === variantId) ?? null;
 
@@ -71,6 +104,13 @@ export function ProductDialog({
   });
 
   function add() {
+    // r132-F1a (A2 F1): the money-path gate — an unavailable product can
+    // never enter the cart from the dialog (the card blocks opening for
+    // the unavailable snapshot; this catches the STALE-available case).
+    if (!available) {
+      toast.error("هذا المنتج غير متاح حالياً");
+      return;
+    }
     if (!groupsValid) {
       toast.error("أكمل الاختيارات المطلوبة أولاً");
       return;
@@ -118,6 +158,16 @@ export function ProductDialog({
           >
             <X className="size-4" aria-hidden="true" />
           </button>
+          {/* r132-F1a (A2 F1): the card's unavailable treatment, inside the
+              dialog — when the live check flips isAvailable, the image
+              greys and the CTA disables below. */}
+          {!available && (
+            <span className="absolute inset-0 bg-background/80 backdrop-blur-[2px] flex items-center justify-center">
+              <span className="rounded-full bg-muted px-3 py-1 text-xs font-bold text-muted-foreground">
+                غير متاح حالياً
+              </span>
+            </span>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
@@ -248,9 +298,15 @@ export function ProductDialog({
                 <Minus className="size-4" aria-hidden="true" />
               </button>
             </div>
-            <Button onClick={add} disabled={!groupsValid} className="flex-1 h-11 font-bold text-base">
-              <ShoppingBag className="size-5 me-1.5" aria-hidden="true" />
-              إضافة — <span className="tabular-nums">{formatLyd(unitPrice * quantity)}</span>
+            <Button onClick={add} disabled={!groupsValid || !available} className="flex-1 h-11 font-bold text-base">
+              {available ? (
+                <>
+                  <ShoppingBag className="size-5 me-1.5" aria-hidden="true" />
+                  إضافة — <span className="tabular-nums">{formatLyd(unitPrice * quantity)}</span>
+                </>
+              ) : (
+                "غير متاح حالياً"
+              )}
             </Button>
           </div>
         </div>

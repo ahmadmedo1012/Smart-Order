@@ -29,7 +29,7 @@
  *     copper accent #B57438 (copper-deep #5C3416 as text, 10.29:1).
  *   · Type: IBM Plex Sans Arabic 400-700 self-hosted (one family,
  *     weight 700 carries display — no true 800 exists), IBM Plex
- *     Mono for codes/IDs, Plex Serif italic latin-only.
+ *     Mono for codes/IDs.
  *   · Radius: the Notion-soft ladder 6/8/10/12/16/20/28.
  *   · Elevation: --elev-1..5 (dark fill-led + inset top highlight,
  *     light soft two-layer). Motion: --t-micro…--t-cinema ladder.
@@ -837,10 +837,6 @@
   }
   :focus:not(:focus-visible) {
     outline: none;
-  }
-  /* Noto Naskh Arabic — editorial/quote text only (RTL) */
-  [dir="rtl"] .font-naskh {
-    font-family: "Noto Naskh Arabic", "IBM Plex Sans Arabic", system-ui, sans-serif;
   }
 }
 

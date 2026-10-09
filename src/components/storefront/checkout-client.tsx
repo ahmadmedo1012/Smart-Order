@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/states";
 import { SkipLink } from "@/components/shared/skip-link";
+import { FieldError } from "@/components/dashboard/form-field";
 import { toast } from "sonner";
 import { randomUUID } from "@/lib/uuid";
 import { AnimatedCopy } from "@/components/ui/animated-icons";
@@ -51,6 +52,24 @@ interface StoreData {
 
 type Step = "form" | "success";
 
+/** r132-F1a (A2 F4): field-level checkout validation keys — the r131
+ * aria-invalid + FieldError recipe (dashboard form-field.tsx), extended
+ * to the customer money path. Errors are set on the submit attempt and
+ * each field clears its own on change, exactly like the dashboard
+ * dialogs (delivery/page.tsx ZoneDialog). */
+type FieldKey = "name" | "phone" | "zone" | "address" | "payment";
+
+/** First-invalid focus targets — inputs focus natively; the two tile
+ * groups (zone/payment) get tabIndex={-1} containers so focus()+scroll
+ * land on them. */
+const FIELD_FOCUS_ID: Record<FieldKey, string> = {
+  name: "c-name",
+  phone: "c-phone",
+  zone: "c-zone-grid",
+  address: "c-address",
+  payment: "c-pay-group",
+};
+
 export function CheckoutClient({
   slug,
   business,
@@ -80,6 +99,17 @@ export function CheckoutClient({
   const [customerNote, setCustomerNote] = React.useState("");
   const [zoneId, setZoneId] = React.useState<string>("");
   const [paymentMethodId, setPaymentMethodId] = React.useState<string>("");
+  const [errors, setErrors] = React.useState<Partial<Record<FieldKey, string>>>({});
+
+  // r132-F1a (A10 #2): idempotency key is minted ONCE per cart-session
+  // and reused across retries — the SM checkoutKeyRef spec
+  // (smart-menu-real cart/page.tsx:85-92). A fresh randomUUID() per
+  // submit click defeated the DB @@unique([businessId, idempotencyKey])
+  // dedup: an ambiguous failure (network cut after the server committed)
+  // retried with a NEW key and produced a duplicate order. Retired ONLY
+  // after a confirmed success (fresh 201 or the inert replay) so the
+  // next order in the same session mints a fresh key.
+  const checkoutKeyRef = React.useRef("");
 
   const load = React.useCallback(() => {
     setLoadError(false);
@@ -107,23 +137,46 @@ export function CheckoutClient({
     fulfillment === "DELIVERY" && !!zone && zone.minOrder > 0 && subtotal < zone.minOrder;
 
   async function submit() {
-    // validation
-    if (name.trim().length < 2) return toast.error("أدخل اسمك الكامل");
-    if (!normalizeLibyanPhone(phone)) return toast.error("رقم الهاتف غير صحيح — مثال: 0912345678");
-    if (fulfillment === "DELIVERY" && !zoneId) return toast.error("اختر منطقة التوصيل");
-    if (fulfillment === "DELIVERY" && !addressLine.trim()) return toast.error("أدخل عنوانك بالتفصيل");
-    if (minOrderUnmet) return toast.error(`الحد الأدنى للطلب في ${zone?.name} هو ${formatLyd(zone!.minOrder)}`);
-    if (!paymentMethodId) return toast.error("اختر طريقة الدفع");
+    // r132-F1a (A2 F4): collect ALL field errors in one pass — every
+    // failing field gets its inline FieldError + aria-invalid at once
+    // (the old one-toast-at-a-time flow never marked the field and made
+    // the customer guess which input was wrong).
+    if (minOrderUnmet) {
+      toast.error(`الحد الأدنى للطلب في ${zone?.name} هو ${formatLyd(zone!.minOrder)}`);
+      return;
+    }
     if (items.length === 0) return toast.error("سلتك فارغة");
+
+    const found: Partial<Record<FieldKey, string>> = {};
+    if (name.trim().length < 2) found.name = "أدخل اسمك الكامل";
+    if (!normalizeLibyanPhone(phone)) found.phone = "رقم الهاتف غير صحيح — مثال: 0912345678";
+    if (fulfillment === "DELIVERY" && !zoneId) found.zone = "اختر منطقة التوصيل";
+    if (fulfillment === "DELIVERY" && !addressLine.trim()) found.address = "أدخل عنوانك بالتفصيل";
+    if (!paymentMethodId) found.payment = "اختر طريقة الدفع";
+
+    const first = (["name", "phone", "zone", "address", "payment"] as const).find((k) => found[k]);
+    setErrors(found);
+    if (first) {
+      // Toast stays as reinforcement (r131 <form> ruling); the field
+      // itself now announces and receives focus/scroll.
+      toast.error(found[first]);
+      const el = document.getElementById(FIELD_FOCUS_ID[first]);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      el?.focus({ preventScroll: true });
+      return;
+    }
 
     setSubmitting(true);
     try {
-      const idempotencyKey = randomUUID();
+      // r132-F1a (A10 #2): reuse ONE key per cart-session (see
+      // checkoutKeyRef) — network retries now hit the DB dedup and get
+      // the inert replay instead of a second order.
+      if (!checkoutKeyRef.current) checkoutKeyRef.current = randomUUID();
       const r = await api.post<{ order: { orderNumber: string; publicToken: string; total: number; replay?: boolean }; whatsapp: { number: string; message: string } | null }>(
         "/api/public/orders",
         {
           slug,
-          idempotencyKey,
+          idempotencyKey: checkoutKeyRef.current,
           fulfillmentType: fulfillment,
           customerName: name.trim(),
           customerPhone: phone,
@@ -145,12 +198,17 @@ export function CheckoutClient({
       if (r.data.order.replay) {
         toast.info("تم استلام طلبك مسبقاً");
       }
+      // Confirmed success (fresh 201 OR the inert replay) — retire the
+      // key so the NEXT order in this session mints a fresh one.
+      checkoutKeyRef.current = "";
       setResult({ ...r.data.order, whatsapp: r.data.whatsapp });
       setStep("success");
       clearCart();
       window.scrollTo({ top: 0 });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "تعذر إرسال الطلب، حاول مرة أخرى");
+      // key intentionally KEPT — the retry resubmits the same key and
+      // the server replays the existing order if it actually committed.
     } finally {
       setSubmitting(false);
     }
@@ -331,11 +389,17 @@ export function CheckoutClient({
               <Input
                 id="c-name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (errors.name) setErrors((x) => ({ ...x, name: undefined }));
+                }}
                 autoComplete="name"
                 maxLength={80}
                 placeholder="اسمك"
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? "c-name-error" : undefined}
               />
+              {errors.name && <FieldError id="c-name-error">{errors.name}</FieldError>}
             </div>
             <div className="space-y-1.5">
               <label htmlFor="c-phone" className="text-xs font-medium text-muted-foreground flex items-center gap-1">
@@ -345,14 +409,20 @@ export function CheckoutClient({
               <Input
                 id="c-phone"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                  if (errors.phone) setErrors((x) => ({ ...x, phone: undefined }));
+                }}
                 autoComplete="tel"
                 inputMode="tel"
                 dir="ltr"
                 maxLength={20}
                 placeholder="0912345678"
                 className="text-start tabular-nums"
+                aria-invalid={!!errors.phone}
+                aria-describedby={errors.phone ? "c-phone-error" : undefined}
               />
+              {errors.phone && <FieldError id="c-phone-error">{errors.phone}</FieldError>}
             </div>
           </div>
         </section>
@@ -391,7 +461,14 @@ export function CheckoutClient({
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">منطقة التوصيل *</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div
+                id="c-zone-grid"
+                role="group"
+                aria-label="منطقة التوصيل"
+                tabIndex={-1}
+                aria-describedby={errors.zone ? "c-zone-error" : undefined}
+                className="grid grid-cols-2 sm:grid-cols-3 gap-2 focus-visible:outline-none"
+              >
                 {!data ? (
                   !loadError && (
                     <>
@@ -407,7 +484,10 @@ export function CheckoutClient({
                     <button
                       key={z.id}
                       type="button"
-                      onClick={() => setZoneId(z.id)}
+                      onClick={() => {
+                        setZoneId(z.id);
+                        if (errors.zone) setErrors((x) => ({ ...x, zone: undefined }));
+                      }}
                       aria-pressed={selected}
                       className={`rounded-xl border p-2.5 text-center transition-colors ${
                         selected ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50"
@@ -425,6 +505,7 @@ export function CheckoutClient({
                   })
                 )}
               </div>
+              {errors.zone && <FieldError id="c-zone-error">{errors.zone}</FieldError>}
               {minOrderUnmet && (
                 <p className="text-xs text-destructive-ink rounded-lg bg-destructive/10 border border-destructive/25 px-3 py-2">
                   الحد الأدنى للطلب في {zone?.name} هو {formatLyd(zone!.minOrder)} — أضف منتجات بقيمة{" "}
@@ -437,12 +518,18 @@ export function CheckoutClient({
               <textarea
                 id="c-address"
                 value={addressLine}
-                onChange={(e) => setAddressLine(e.target.value)}
+                onChange={(e) => {
+                  setAddressLine(e.target.value);
+                  if (errors.address) setErrors((x) => ({ ...x, address: undefined }));
+                }}
                 rows={2}
                 maxLength={200}
                 placeholder="الشارع، أقرب معلم، رقم المنزل..."
-                className="w-full min-h-11 rounded-md border border-input bg-background px-4 py-2.5 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"
+                aria-invalid={!!errors.address}
+                aria-describedby={errors.address ? "c-address-error" : undefined}
+                className="w-full min-h-11 rounded-md border border-input bg-background px-4 py-2.5 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo) aria-invalid:border-destructive aria-invalid:shadow-(--state-input-error-halo)"
               />
+              {errors.address && <FieldError id="c-address-error">{errors.address}</FieldError>}
             </div>
           </section>
         )}
@@ -457,7 +544,14 @@ export function CheckoutClient({
             <Coins className="size-4 text-accent-foreground" aria-hidden="true" />
             طريقة الدفع
           </h2>
-          <div role="group" aria-label="طرق الدفع" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <div
+            id="c-pay-group"
+            role="group"
+            aria-label="طرق الدفع"
+            tabIndex={-1}
+            aria-describedby={errors.payment ? "c-pay-error" : undefined}
+            className="grid grid-cols-2 gap-2 sm:grid-cols-3 focus-visible:outline-none"
+          >
             {!data ? (
               !loadError && (
                 <>
@@ -474,7 +568,10 @@ export function CheckoutClient({
                 <button
                   key={p.id}
                   type="button"
-                  onClick={() => setPaymentMethodId(p.id)}
+                  onClick={() => {
+                    setPaymentMethodId(p.id);
+                    if (errors.payment) setErrors((x) => ({ ...x, payment: undefined }));
+                  }}
                   aria-pressed={selected}
                   className={`flex h-14 flex-col items-center justify-center gap-1 rounded-xl border text-[13px] font-medium transition-colors duration-(--t-fast) ${
                     selected
@@ -489,6 +586,7 @@ export function CheckoutClient({
               })
             )}
           </div>
+          {errors.payment && <FieldError id="c-pay-error">{errors.payment}</FieldError>}
           {paymentMethod?.instructions && (
             <p className="text-[11px] leading-relaxed text-muted-foreground">{paymentMethod.instructions}</p>
           )}

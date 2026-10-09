@@ -661,11 +661,23 @@ export default function OrderDetailPage() {
                 </span>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-medium">
-                    {h.note?.startsWith("تم") || h.toStatus === "NEW"
+                    {h.toStatus === "NEW"
                       ? (h.note ?? "استُقبل الطلب")
                       : `الحالة: ${ORDER_STATUS_AR[h.toStatus as keyof typeof ORDER_STATUS_AR] ?? h.toStatus}`}
                   </span>
                 </div>
+                {/* r132 (A2 F6): the operator's note is the whole point of
+                    the "يظهر في السجل" promise — the old startsWith("تم")
+                    heuristic silently REPLACED any custom reason (e.g.
+                    "نفدت المكونات") with the generic status label. Now the
+                    status name and the note are shown together; system
+                    payment notes ("تم تأكيد استلام الدفع") render the same
+                    way — status + what happened, no string sniffing. */}
+                {h.note && h.toStatus !== "NEW" && (
+                  <p className="mt-0.5 text-[13px] leading-6 text-muted-foreground">
+                    {h.note}
+                  </p>
+                )}
                 <div className="mt-0.5 text-xs text-muted-foreground flex gap-2 flex-wrap">
                   <span className="tabular-nums">
                     {formatArabicDateTime(h.createdAt)}

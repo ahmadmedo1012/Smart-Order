@@ -13,15 +13,29 @@ export function ProductCard({
   product,
   slug,
   businessName,
+  eager = false,
 }: {
   product: StoreProduct;
   slug: string;
   businessName: string;
+  /** r132-F1a (A9 SO-9): first 4 above-the-fold cards render with
+   * priority (fetchPriority=high + preload) — the SM MenuItemCard
+   * `eager` prop shape; everything else stays lazy. */
+  eager?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
   const addItem = useCart((s) => s.addItem);
 
+  // r132-F1a (A2 F1): the out-of-stock overlay is rendered INSIDE the
+  // image/title buttons — tapping the "غير متاح حالياً" overlay used to
+  // open the dialog with a LIVE add CTA and the dead item rode all the
+  // way to checkout submit. The dialog is now blocked at the source for
+  // the unavailable snapshot (and re-checks live availability on every
+  // open — see product-dialog).
+  const canOpen = product.isAvailable;
+
   function quickAdd() {
+    if (!product.isAvailable) return; // defense-in-depth (button already disabled)
     if (product.variants.length > 0 || product.optionGroups.some((g) => g.required)) {
       setOpen(true); // needs selection
       return;
@@ -48,8 +62,9 @@ export function ProductCard({
         className="group rounded-xl border border-border bg-card overflow-hidden flex flex-col transition-[border-color,box-shadow,transform] duration-(--t-fast) hover:border-foreground/25 hover:shadow-(--shadow-card-h) hover:-translate-y-px"
       >
         <button
-          onClick={() => setOpen(true)}
-          className="relative h-28 sm:h-32 bg-muted overflow-hidden text-start"
+          onClick={() => canOpen && setOpen(true)}
+          disabled={!canOpen}
+          className="relative h-28 sm:h-32 bg-muted overflow-hidden text-start disabled:cursor-not-allowed"
           aria-label={`تفاصيل ${product.name}`}
         >
           {product.imageUrl ? (
@@ -58,6 +73,7 @@ export function ProductCard({
               alt={product.name}
               fill
               sizes="(min-width: 1024px) 30vw, 46vw"
+              priority={eager}
               className="object-cover transition-transform group-hover:scale-105"
             />
           ) : (
@@ -80,7 +96,7 @@ export function ProductCard({
         </button>
 
         <div className="p-3 flex flex-col flex-1">
-          <button onClick={() => setOpen(true)} className="text-start">
+          <button onClick={() => canOpen && setOpen(true)} disabled={!canOpen} className="text-start disabled:cursor-not-allowed">
             <h3 className="font-semibold text-sm leading-snug line-clamp-2">{product.name}</h3>
           </button>
           {product.description && (

@@ -1,99 +1,199 @@
-# Smart Order — سمارت أوردر
+# 🛍️ سمارت أوردر | Smart Order
 
-منصة الطلبات الرقمية للأعمال في ليبيا — متجر رقمي، لوحة تحكم كاملة، توصيل بمناطق، ومدفوعات محلية.
-Part of the Smart ecosystem (smart-link.ly): sibling of [Smart Menu](https://menu.smart-link.ly) and [Smart Bot](https://bot.smart-link.ly).
+**Digital storefront, orders & delivery for businesses — an Arabic-first RTL SaaS on Next.js 16.**
 
-## What is this?
+> 🌐 **العربية** · [English](./README.en.md)
 
-**Smart Order** lets any Libyan business launch a professional digital ordering storefront in minutes:
+**منصة الطلبات الرقمية للأعمال في ليبيا** — أي عمل يُطلق متجره الرقمي الاحترافي في دقائق: واجهة متجر عامة جاهزة للمسح بـ QR بسلة ودفع، محرّك طلبات بحالات موثّقة، توصيل بمناطق ورسوم، مدفوعات محلية، وتأكيدات واتساب، ولوحة تحكم كاملة لصاحب العمل.
 
-- 🛍️ **Storefront** — public menu with categories, search, product variants (sizes) and option groups (add-ons), Arabic-first RTL UX
-- 🧾 **Order engine** — validated state machine (NEW → CONFIRMED → PREPARING → READY → OUT_FOR_DELIVERY → DELIVERED / CANCELLED / REJECTED), public order numbers (`SO-20260917-0042`), full audit history, customer tracking page
-- 🚚 **Delivery zones** — per-zone fees + minimum order, enforced server-side at checkout
-- 💳 **Libya-native payments** — Cash / COD / Madar / Libyana transfers / manual confirmation (provider-agnostic architecture, no fake gateway success)
-- 💬 **WhatsApp-first** — structured order messages via wa.me deep links for customers and businesses
-- 📊 **Dashboard** — today's stats, actionable alerts, orders with filters/search, products/categories/customers/delivery/payments/staff management
-- 🔐 **Multi-tenant SaaS** — strict tenant isolation, role-based access (OWNER/ADMIN/STAFF), server-enforced permissions
+> **الإنتاج:** <https://order.smart-link.ly> · Next.js 16 · PostgreSQL (Neon) · Vercel
 
-## Tech Stack
+[![CI](https://github.com/ahmadmedo1012/Smart-Order/actions/workflows/ci.yml/badge.svg)](https://github.com/ahmadmedo1012/Smart-Order/actions/workflows/ci.yml)
+[![Live](https://img.shields.io/badge/live-order.smart--link.ly-E9B44C)](https://order.smart-link.ly)
+[![License](https://img.shields.io/badge/license-proprietary-%23B57438)](./LICENSE)
+
+---
+
+## 🖼 نظرة سريعة
+
+| الوضع النهاري ☀️ | الوضع الليلي 🌙 |
+|:---:|:---:|
+| [![الصفحة الرئيسية بالوضع النهاري — العنوان «متجر رقمي لمتجرك — الطلبات تصلك في لوحة واحدة» ومجسّم هاتف لواجهة الطلبات](docs/screenshots/hero-light.jpg)](docs/screenshots/hero-light.jpg) | [![الصفحة الرئيسية بالوضع الليلي — نفس الشريط بهوية مدارك night/gold](docs/screenshots/hero-dark.jpg)](docs/screenshots/hero-dark.jpg) |
+
+> مزيد من اللقطات (المتجر، إتمام الطلب، لوحة التحكم) في قسم «لقطات الشاشة» أدناه — والتعليقات الكاملة والمقاسات في [`docs/screenshots/README.md`](docs/screenshots/README.md).
+
+---
+
+## 🧭 ما هو سمارت أوردر؟
+
+**Smart Order** يتيح لأي عمل ليبي إطلاق متجر طلبات رقمي كامل بدون كود أو وسيط:
+
+- **متجر عام جاهز لـ QR** — رابط عام لكل عمل (`/store/[slug]`) يُصيَّر من الخادم (SSR) فيظهر المنتجات في أول إطار عند مسح الرمز، مع أقسام وبحث ومشتقات (مقاسات وإضافات).
+- **سلة وإتمام طلب** — سلة عميل كاملة بصفحة إتمام طلب: بيانات التواصل، العنوان، مناطق التوصيل بالرسوم والحد الأدنى (تُفرض من الخادم)، وطرق دفع محلية.
+- **محرّك طلبات موثّق** — آلة حالات مُتحقَّقة (NEW → CONFIRMED → PREPARING → READY → OUT_FOR_DELIVERY → DELIVERED / CANCELLED / REJECTED)، أرقام طلبات عامة (`SO-20260917-0042`)، سجل تدقيق كامل، وصفحة تتبّع عامة للزبون برمز غير قابل للتخمين.
+- **مدفوعات ليبية** — نقدًا / عند التوصيل / تحويل مدار / تحويل ليبيانا، مع تأكيد يدوي من المتجر (لا نجاح زائف من أي بوابة).
+- **واتساب أولًا** — رسائل طلب مهيكلة عبر روابط `wa.me` للزبون ولصاحب العمل بعد كل طلب.
+- **لوحة تحكم للمالك** — إحصائيات اليوم وتنبيهات قابلة للتنفيذ، الطلبات بفلاتر وبحث، وإدارة المنتجات والأقسام والعملاء والتوصيل والمدفوعات والموظفين — كل شيء بالعربية RTL على هوية مدارك.
+
+---
+
+## ✨ المميزات
+
+- 🛍️ **واجهة المتجر** — منيو عام بأقسام، بحث فوري، مشتقات منتجات (مقاسات + مجموعات إضافات)، وتجربة عربية RTL أولًا.
+- 🧾 **محرّك الطلبات** — آلة حالات مُتحققة من الخادم، أرقام عامة، تاريخ تدقيق لكل حالة، وصفحة تتبّع عامة بالرمز (`/track/[token]`).
+- 🚚 **مناطق التوصيل** — رسوم وحد أدنى لكل منطقة، تُحسب وتُفرض من الخادم عند إتمام الطلب (لا يُعتمد أي شيء من العميل).
+- 💳 **مدفوعات محلية** — نقدي / عند التوصيل / مدار / ليبيانا، بمعمارية محايدة للمزوّد وتأكيد يدوي موثّق.
+- 💬 **واتساب أولًا** — رسالة مهيكلة جاهزة بالطلب للزبون وللمتجر عبر `wa.me`.
+- 📊 **لوحة التحكم** — إحصائيات اليوم، تنبيهات قابلة للتنفيذ، طلبات بفلاتر وبحث، وإدارة منتجات/أقسام/عملاء/توصيل/مدفوعات/موظفين.
+- 🔐 **SaaS متعدد المستأجرين** — عزل صارم للمستأجرين، صلاحيات حسب الدور (OWNER / ADMIN / STAFF) مفروضة من الخادم.
+
+---
+
+## 🧰 التقنيات
 
 - **Next.js 16** (App Router) + React 19 + TypeScript
-- **Tailwind CSS 4** + shadcn/ui (Radix) — Madarek design system (night/gold dark + cream/copper light), light & dark themes
-- **Prisma ORM** — SQLite for local dev, PostgreSQL (Neon) in production
-- **Custom session auth** — PBKDF2-SHA512 (600k iterations), hashed session tokens, httpOnly cookies
-- **Money** — integer millimes everywhere (1 LYD = 1000 dirham), zero floating-point math
-- Self-hosted **IBM Plex Sans Arabic** subsets (400-700, arabic + latin — Madarek parity, no external requests)
+- **Tailwind CSS 4** + shadcn/ui (Radix) — نظام تصميم مدارك: ليلي night/gold ونهاري cream/copper، بالوضعين.
+- **Prisma ORM** — SQLite للتطوير المحلي، PostgreSQL (Neon) في الإنتاج.
+- **مصادقة جلسات مخصصة** — PBKDF2-SHA512 بـ 600 ألف تكرار، رموز جلسات مُجزَّأة (hashed)، وكوكيز httpOnly.
+- **الأموال** — درهم صحيح (millimes) في كل المسارات: 1 د.ل = 1000 درهم، بلا أي حساب فاصلة عائمة.
+- **خطوط مستضافة ذاتيًا** — subsets من IBM Plex Sans Arabic (400–700، عربي + لاتيني) بموجب OFL — تكافؤ مدارك الحرفي، بلا أي طلبات خارجية.
 
-## Architecture Notes
+---
 
-- All money paths re-price server-side; client-sent prices are ignored
-- Order creation is idempotent (client-generated key) — double submits replay the same order
-- Tenant isolation: every query is scoped by `businessId` after membership check
-- Images: validated by magic bytes, client-side compression, stored in DB (survives redeploys, no external storage credentials needed)
-- API envelope: `{ success, data, meta }` with Arabic user-facing errors — internals never leak
+## 🏗️ ملاحظات معمارية
 
-## Local Development
+- كل مسارات الأموال يُعاد تسعيرها من الخادم؛ الأسعار المرسلة من العميل تُهمَل.
+- إنشاء الطلب idempotent بمفتاح من العميل — الإرسال المزدوج يُعيد نفس الطلب نفسه.
+- عزل المستأجرين: كل استعلام مقيّد بـ `businessId` بعد التحقق من العضوية.
+- الصور: تُتحقق بالبايت السحري، تُضغط في المتصفح، وتُخزَّن في قاعدة البيانات (تنجو من إعادة النشر — بلا اعتمادات تخزين خارجي).
+- غلاف API موحّد `{ success, data, meta }` بأخطاء عربية للمستخدم — الدواخل لا تتسرب أبدًا.
+
+---
+
+## 🚀 البدء محليًا
+
+> التثبيت عبر **bun** (`bun.lock` هو قفل المستودع — `npm install` يجرّ إصدارات لا يقبلها القفل).
 
 ```bash
 git clone https://github.com/ahmadmedo1012/Smart-Order.git
 cd Smart-Order
-npm install
-cp .env.example .env       # set DATABASE_URL (SQLite default works out of the box)
-npx prisma db push          # create local schema
-npm run dev                 # http://localhost:3000
+bun install --frozen-lockfile
+cp .env.example .env          # اضبط DATABASE_URL (وضع SQLite الافتراضي يعمل فورًا)
+bunx prisma db push           # إنشاء المخطط المحلي
+bun run dev                   # http://localhost:3000
+bun run build                 # بناء الإنتاج
 ```
 
-## Deployment (Vercel + Neon PostgreSQL)
+### متغيرات البيئة
 
-Primary production path — same architecture as the Smart ecosystem siblings (Smart Menu, Smart Bot): **Vercel + Neon PostgreSQL**. `vercel.json` is included; the full runbook (env vars, DB setup, custom domain `order.smart-link.ly`, post-deploy checklist) lives in [DEPLOYMENT.md](./DEPLOYMENT.md).
+المصدر القانوني هو [`.env.example`](.env.example) — الجدول يعرض المجموعة المطلوبة:
+
+| المتغير | الغرض |
+|---|---|
+| `DATABASE_URL` | قاعدة البيانات: ملف SQLite للتطوير (`file:…`) أو رابط PostgreSQL (Neon) للإنتاج |
+| `NEXT_PUBLIC_SITE_URL` | الرابط القانوني للموقع (SEO / Open Graph / sitemap) — يجب أن يكون رابطًا حقيقيًا أو يُترك فارغًا |
+| `GIT_COMMIT_SHA` | توثيق إصدار الخدمة في `/api/health` للنشر الذاتي (Vercel يحقنه تلقائيًا — لا يُختلق أبدًا؛ `null` إن غاب) |
+
+---
+
+## 📜 الأوامر
+
+| الأمر | الوصف |
+|---|---|
+| `bun run dev` | خادم التطوير على المنفذ 3000 |
+| `bun run build` | بناء إنتاج Vercel (`next build`) |
+| `bun run build:selfhost` | بناء standalone للاستضافة الذاتية (ينسخ `static/` و`public/` داخل الحزمة) |
+| `bun run start` | تشغيل نسخة الإنتاج محليًا |
+| `bun run start:selfhost` | تشغيل حزمة standalone (`NODE_ENV=production`) |
+| `bun run lint` | ESLint |
+| `bun run test:parity` | اختبارات تكافؤ مدارك (الألوان، نصف القطر، الحركة، z-index، الارتفاعات + بوابات الاستهلاك) |
+| `bun run test:e2e` | مجموعة E2E للـ API: المصادقة، عزل المستأجرين، دورة حياة الطلب، إعادة التسعير، حدود المعدل — تعمل ضد أي Base URL |
+| `bun run db:push` | دفع مخطط Prisma إلى قاعدة البيانات (`--accept-data-loss`) |
+| `bun run db:generate` | توليد عميل Prisma |
+| `bun run db:migrate` | إنشاء/تطبيق ترحيلات للتطوير |
+| `bun run db:reset` | تصفير قاعدة البيانات وإعادة الترحيل |
+
+> أعداد الاختبارات تُوثَّق في [`CHANGELOG.md`](CHANGELOG.md) لكل جولة — لا تُثبَّت أرقام في هذا الملف (عقيدة هندسة التوثيق: لا أرقام تتقادم).
+
+---
+
+## 🧪 التشغيل ضد إنتاج حي
+
+```bash
+bun run dev                                  # ابدأ خادم التطوير
+bun run test:parity                          # تكافؤ مدارك
+node tests/e2e/api-e2e.js https://your-deployment.vercel.app   # E2E ضد أي نشر
+```
+
+---
+
+## 🚢 النشر (Vercel + Neon PostgreSQL)
+
+مسار الإنتاج الأساسي — نفس معمارية أشقائي في منظومة سمارت (سمارت منيو وسمارت بوت): **Vercel + Neon PostgreSQL**. `vercel.json` مضمّن، والمرجع الكامل (المتغيرات، قاعدة البيانات، النطاق `order.smart-link.ly`، قائمة ما بعد النشر) في [`DEPLOYMENT.md`](DEPLOYMENT.md).
 
 ```bash
 vercel link
-vercel env add DATABASE_URL production        # Neon PostgreSQL connection string
+vercel env add DATABASE_URL production        # رابط Neon PostgreSQL
 vercel env add NEXT_PUBLIC_SITE_URL production
-DATABASE_URL="<neon-url>" npx prisma db push --schema=prisma/schema.postgres.prisma
+DATABASE_URL="<neon-url>" bunx prisma db push --schema=prisma/schema.postgres.prisma
 vercel --prod
 ```
 
-Environment variables (see `.env.example`):
+> **ملاحظة vercel-db-sync:** أمر البناء الحقيقي (`vercel.json`) يشغّل `scripts/vercel-db-sync.mjs` قبل توليد Prisma وبناء Next — مزامنة مخطط مرنة من قاعدة الإنتاج (إصلاح تجميد النشر ثلاثة أسابيع، الالتزام `fdd57ff`).
 
-| Variable | Purpose |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection string (prod) / SQLite file (dev) |
-| `NEXT_PUBLIC_SITE_URL` | Canonical site URL for SEO/OG metadata |
+البديل الذاتي: `bun run build:selfhost` + `start:selfhost` (standalone) — راجع DEPLOYMENT.md §5.
 
-Self-host fallback: `npm run build:selfhost` + `start:selfhost` (standalone) — see DEPLOYMENT.md §5.
+---
 
-## Testing
-
-```bash
-npm run dev                     # start dev server
-npm run test:parity             # 197 Madarek token pins (colors / radius /
-                                # motion / z / elev + consumption gates)
-npm run test:e2e                # 30-check API E2E suite (auth, tenant isolation,
-                                # order lifecycle, money re-pricing, rate limits)
-```
-
-The suite runs against any base URL — pass a production deployment to verify it live:
-`node tests/e2e/api-e2e.js https://your-deployment.vercel.app`
-
-## Project Structure
+## 📁 هيكل المشروع
 
 ```
 src/
   app/
-    page.tsx                  # SaaS landing
-    login/ register/          # auth
-    dashboard/                # business app (overview, orders, products, categories,
-                              #   customers, delivery, payments, staff, settings, onboarding)
-    store/[slug]/             # public storefront + checkout
-    track/[token]/            # public order tracking
-    api/                      # REST endpoints (auth, business CRUD, public order path, media)
+    page.tsx                  # صفحة SaaS الرئيسية (الهيرو + الأقسام + الأسعار + FAQ)
+    login/ register/          # المصادقة (معالج تسجيل متعدد الخطوات)
+    dashboard/                # تطبيق العمل: نظرة عامة، الطلبات، المنتجات، الأقسام،
+                              #   العملاء، التوصيل، المدفوعات، الموظفون، الإعدادات، التهيئة
+    store/[slug]/             # المتجر العام + checkout
+    track/[token]/            # التتبع العام للطلب
+    api/                      # نقاط REST (مصادقة، CRUD للأعمال، مسار الطلب العام، الوسائط)
   components/  dashboard/ storefront/ shared/ ui/
-  lib/         constants, auth, order-machine, money, phone, whatsapp, storage, api, ...
-prisma/        schema.prisma (SQLite dev) + schema.postgres.prisma (PostgreSQL prod)
+  lib/         constants, auth, order-machine, money, phone, whatsapp, storage, api, …
+prisma/        schema.prisma (SQLite للتطوير) + schema.postgres.prisma (PostgreSQL للإنتاج)
+tests/         parity.mjs + e2e/api-e2e.js
 ```
 
-## License
+---
 
-Proprietary — © 2026 Smart ecosystem.
+## 🖼️ لقطات الشاشة
+
+| المتجر العام «مخبز الواحة» (تجريبي) | إتمام الطلب |
+|:---:|:---:|
+| [![واجهة المتجر العام — بحث ومرشّحات أقسام وشبكة منتجات بصور وأسعار](docs/screenshots/storefront.jpg)](docs/screenshots/storefront.jpg) | [![صفحة إتمام الطلب — مناطق التوصيل، طرق الدفع المحلية، وملخص السلة](docs/screenshots/checkout.jpg)](docs/screenshots/checkout.jpg) |
+
+| لوحة تحكم صاحب المتجر |
+|:---:|
+| [![لوحة التحكم — إحصائيات اليوم، التنبيهات، أحدث الطلبات بشارات الحالة، ومخطط المبيعات](docs/screenshots/dashboard.jpg)](docs/screenshots/dashboard.jpg) |
+
+> التعليقات الكاملة والمقاسات في [`docs/screenshots/README.md`](docs/screenshots/README.md).
+
+---
+
+## 🛰️ جزء من منظومة مدارك — Part of the Madarek Ecosystem
+
+> نظام تصميم واحد لكل المشاريع · هوية مدارك: ليلي night/gold `#070B16`/`#E9B44C` — نهاري cream/copper `#FBFAF9`/`#B57438` — خط IBM Plex Sans Arabic
+
+| المشروع | الدور | GitHub | الموقع المباشر |
+|---|---|---|---|
+| 🎓 **مدارك / Madarek** | منصة التعليم الذكي لجامعة الزاوية — المرجع الأم لنظام التصميم | [github.com/ahmadmedo1012/madarek](https://github.com/ahmadmedo1012/madarek) | [madarek.onrender.com](https://madarek.onrender.com) |
+| 🔗 **سمارت لينك / Smart-Link** | المظلة الرقمية للأعمال في ليبيا | [github.com/ahmadmedo1012/Smart-Link](https://github.com/ahmadmedo1012/Smart-Link) | [smart-link.ly](https://smart-link.ly) |
+| 🍽️ **سمارت منيو / Smart-Menu** | منيو رقمي وطلبات واتساب للمطاعم | [github.com/ahmadmedo1012/Smart-Menu](https://github.com/ahmadmedo1012/Smart-Menu) | [menu.smart-link.ly](https://menu.smart-link.ly) |
+| 🤖 **سمارت بوت / SmartBot** | بوت ماسنجر وأتمتة لصفحات فيسبوك | [github.com/ahmadmedo1012/SmartBot](https://github.com/ahmadmedo1012/SmartBot) | [bot.smart-link.ly](https://bot.smart-link.ly) |
+| 🛍️ **سمارت أوردر / Smart-Order** | متجر رقمي وطلبات وتوصيل للأعمال | [github.com/ahmadmedo1012/Smart-Order](https://github.com/ahmadmedo1012/Smart-Order) | [order.smart-link.ly](https://order.smart-link.ly) |
+
+## 📜 التراخيص والملكية
+
+مشروع خاص — جميع الحقوق محفوظة © 2026 أحمد مدو (`ahmadmedo1012`). النص القانوني الكامل في ملف [`LICENSE`](LICENSE).
+
+### الخطوط
+العلامة الأساسية **IBM Plex Sans Arabic** (400–700، subsets عربي + لاتيني) مع IBM Plex Mono — self-hosted بلا أي طلبات خارجية، وكلاهما بموجب **رخصة SIL Open Font License 1.1**.

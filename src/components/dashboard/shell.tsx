@@ -452,7 +452,7 @@ export function DashboardShell({
 
 import { createContext, useContext } from "react";
 
-export const BusinessContext = createContext<{
+const BusinessContext = createContext<{
   businessId: string;
   business: {
     id: string;

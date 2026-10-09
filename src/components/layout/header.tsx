@@ -16,7 +16,7 @@ interface HeaderProps {
 }
 
 /** Demo store the family pattern links to (seeded, idempotent). */
-export const DEMO_STORE_SLUG = "demo-store";
+const DEMO_STORE_SLUG = "demo-store";
 
 const landingLinks = [
   { href: "/pricing", label: "الخطط والأسعار" },
@@ -233,7 +233,7 @@ export function Header({ className }: HeaderProps) {
         )}
       >
         <nav
-          className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-10 h-full flex items-center justify-between"
+          className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 h-full flex items-center justify-between"
           aria-label="الرئيسية"
         >
           {/* Logo & Hamburger */}

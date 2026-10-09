@@ -28,20 +28,3 @@ export function FieldError({
     </p>
   );
 }
-
-/**
- * hasError — tiny guard so callers can build the aria wiring in one
- * expression: aria-invalid={hasError(errors.name)} plus
- * aria-describedby={describedBy(errors.name, "f-name")}.
- */
-export function hasError(error: string | undefined): boolean {
-  return !!error;
-}
-
-/** aria-describedby id only when the error is present. */
-export function errorId(
-  error: string | undefined,
-  id: string,
-): string | undefined {
-  return error ? id : undefined;
-}

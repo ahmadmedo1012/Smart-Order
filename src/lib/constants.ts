@@ -42,8 +42,12 @@ export const PAYMENT_STATUS_AR: Record<PaymentStatus, string> = {
   REFUNDED: "مسترجع",
 };
 
-export const FULFILLMENT_TYPES = ["DELIVERY", "PICKUP"] as const;
-export type FulfillmentType = (typeof FULFILLMENT_TYPES)[number];
+/* r132 (F1c): the FULFILLMENT_TYPES const-array twin was export-only
+   (zero value consumers) — the union type below is the whole contract.
+   The 7 inline re-declarations across the app (A1 finding 14) can
+   migrate to this type in a later round; the type stays module-local
+   until one of them imports it. */
+type FulfillmentType = "DELIVERY" | "PICKUP";
 
 export const FULFILLMENT_AR: Record<FulfillmentType, string> = {
   DELIVERY: "توصيل",
@@ -80,7 +84,7 @@ export const ROLE_AR: Record<Role, string> = {
   STAFF: "موظف",
 };
 
-export const PERMISSIONS = [
+const PERMISSIONS = [
   "orders.read",
   "orders.update",
   "orders.cancel",
@@ -146,6 +150,5 @@ export const LIBYA_CITIES = [
   "الأصابعة",
 ] as const;
 
-export const MAX_IMAGE_BYTES = 500 * 1024; // 500 KB post-compression cap
 export const MAX_ORDER_ITEMS = 50;
 export const MAX_ORDER_QUANTITY = 99;

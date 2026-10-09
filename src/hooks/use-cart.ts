@@ -6,13 +6,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export interface CartOption {
+interface CartOption {
   id: string;
   name: string;
   priceDelta: number; // display only (server re-prices)
 }
 
-export interface CartItem {
+interface CartItem {
   key: string; // signature: product+variant+options+note
   productId: string;
   productName: string;

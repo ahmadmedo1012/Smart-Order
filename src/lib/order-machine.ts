@@ -2,7 +2,7 @@
 
 import type { OrderStatus } from "@/lib/constants";
 
-export interface TransitionRule {
+interface TransitionRule {
   to: OrderStatus;
   label: string; // Arabic action label for the dashboard
   destructive?: boolean;

@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { AuthError } from "@/lib/auth";
 
-export interface OkOptions {
+interface OkOptions {
   status?: number;
   headers?: Record<string, string>;
   meta?: Record<string, unknown>;
@@ -19,10 +19,6 @@ export function ok<T>(data: T, opts?: OkOptions): NextResponse {
     ...(opts?.status ? { status: opts.status } : {}),
     ...(opts?.headers ? { headers: opts.headers } : {}),
   });
-}
-
-export function okList<T>(data: T[], meta?: Record<string, unknown>): NextResponse {
-  return NextResponse.json({ success: true, data, meta: meta ?? { total: data.length } });
 }
 
 export function fail(message: string, status = 400, code?: string): NextResponse {

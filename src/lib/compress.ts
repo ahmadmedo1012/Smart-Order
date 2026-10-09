@@ -2,7 +2,7 @@
 
 // Image compression before upload — canvas resize + JPEG/WebP encode, keeps payload small.
 
-export interface CompressResult {
+interface CompressResult {
   dataUrl: string;
   size: number;
 }

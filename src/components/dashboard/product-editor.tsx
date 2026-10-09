@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FieldError } from "@/components/dashboard/form-field";
+import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
 import {
   Dialog,
   DialogContent,
@@ -28,7 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { Plus, Trash2, ImagePlus, X, Layers, GripVertical } from "lucide-react";
+import { Plus, Trash2, ImagePlus, X, Layers } from "lucide-react";
 
 interface VariantDraft {
   key: string;
@@ -109,6 +110,14 @@ export function ProductEditor({
   );
   const [uploading, setUploading] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
+  /* r132 (A2 F3): destructive archive + dirty-draft guard. (a) The archive
+     button now routes through the shared ConfirmDialog — the 5th call site
+     (categories/delivery/payments/staff converted in r131; this one was
+     missed). (b) ESC / scrim / X / إلغاء no longer discard a dirty draft
+     silently: every close attempt funnels through requestClose, and a
+     dirty draft asks first (AlertDialog reuse per the r131 ruling). */
+  const [archiveOpen, setArchiveOpen] = React.useState(false);
+  const [discardOpen, setDiscardOpen] = React.useState(false);
   /* r131 (F3, A5 P1-6): field-level validation — the two required
  basics (name, price) now validate on submit with the canonical
  error recipe (aria-invalid destructive border + halo + inline
@@ -118,6 +127,78 @@ export function ProductEditor({
     name?: string;
     price?: string;
   }>({});
+
+  /* Pristine snapshot for the dirty check — the same mapping that
+     seeded the useState drafts above (formatLydAmount round-trip
+     included), so toggles/typoes/added rows all count as dirty. */
+  const pristine = {
+    name: product?.name ?? "",
+    description: product?.description ?? "",
+    categoryId: product?.categoryId ?? "none",
+    price: product ? formatLydAmount(product.price) : "",
+    imageUrl: product?.imageUrl ?? "",
+    isAvailable: product?.isAvailable ?? true,
+    isFeatured: product?.isFeatured ?? false,
+    trackInventory: product?.trackInventory ?? false,
+    stockQuantity: String(product?.stockQuantity ?? 0),
+    variants:
+      product?.variants.map((v) => ({
+        name: v.name,
+        priceDelta: formatLydAmount(v.priceDelta),
+      })) ?? [],
+    groups:
+      product?.optionGroups.map((g) => ({
+        name: g.name,
+        minSelect: g.minSelect,
+        maxSelect: g.maxSelect,
+        required: g.required,
+        options: g.options.map((o) => ({
+          name: o.name,
+          priceDelta: formatLydAmount(o.priceDelta),
+        })),
+      })) ?? [],
+  };
+  const dirty =
+    name !== pristine.name ||
+    description !== pristine.description ||
+    categoryId !== pristine.categoryId ||
+    price !== pristine.price ||
+    imageUrl !== pristine.imageUrl ||
+    isAvailable !== pristine.isAvailable ||
+    isFeatured !== pristine.isFeatured ||
+    trackInventory !== pristine.trackInventory ||
+    stockQuantity !== pristine.stockQuantity ||
+    variants.length !== pristine.variants.length ||
+    variants.some(
+      (v, i) =>
+        v.name !== pristine.variants[i].name ||
+        v.priceDelta !== pristine.variants[i].priceDelta,
+    ) ||
+    groups.length !== pristine.groups.length ||
+    groups.some(
+      (g, i) =>
+        g.name !== pristine.groups[i].name ||
+        g.minSelect !== pristine.groups[i].minSelect ||
+        g.maxSelect !== pristine.groups[i].maxSelect ||
+        g.required !== pristine.groups[i].required ||
+        g.options.length !== pristine.groups[i].options.length ||
+        g.options.some(
+          (o, j) =>
+            o.name !== pristine.groups[i].options[j].name ||
+            o.priceDelta !== pristine.groups[i].options[j].priceDelta,
+        ),
+    );
+
+  function requestClose() {
+    /* a save/archive is settling — it closes the editor on success;
+       don't race it with a manual close. */
+    if (saving) return;
+    if (!dirty) {
+      onClose(false);
+      return;
+    }
+    setDiscardOpen(true);
+  }
 
   function validateFields(): boolean {
     const e: { name?: string; price?: string } = {};
@@ -188,8 +269,10 @@ export function ProductEditor({
       isAvailable,
       isFeatured,
       trackInventory,
+      /* r132 (A2 F25): clamp negatives — type=number min={0} only constrains
+         spinners; a typed -5 passed through to a generic server Zod error. */
       stockQuantity: trackInventory
-        ? parseInt(stockQuantity || "0", 10) || 0
+        ? Math.max(0, parseInt(stockQuantity || "0", 10) || 0)
         : 0,
       variants: variants.map((v) => ({
         name: v.name.trim(),
@@ -237,7 +320,8 @@ export function ProductEditor({
   }
 
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose(false)}>
+    <>
+      <Dialog open onOpenChange={(v) => !v && requestClose()}>
       <DialogContent
         dir="rtl"
         className="max-w-2xl w-[calc(100vw-2rem)] max-h-[92vh] p-0 gap-0"
@@ -472,10 +556,9 @@ export function ProductEditor({
                 <ul className="space-y-2">
                   {variants.map((v, i) => (
                     <li key={v.key} className="flex items-center gap-2">
-                      <GripVertical
-                        className="size-4 text-muted-foreground/50 shrink-0"
-                        aria-hidden="true"
-                      />
+                      {/* r132 (A2 F19): the GripVertical drag handle is retired —
+                          it promised drag/drop that never existed (no reordering
+                          anywhere in the file); an honest row reads cleaner. */}
                       <Input
                         value={v.name}
                         onChange={(e) =>
@@ -775,7 +858,7 @@ export function ProductEditor({
           {product && (
             <Button
               variant="outline"
-              onClick={archive}
+              onClick={() => setArchiveOpen(true)}
               disabled={saving}
               className="text-destructive-ink hover:bg-destructive/10"
             >
@@ -785,7 +868,7 @@ export function ProductEditor({
           <div className="ms-auto flex gap-2">
             <Button
               variant="outline"
-              onClick={() => onClose(false)}
+              onClick={requestClose}
               disabled={saving}
             >
               إلغاء
@@ -800,6 +883,33 @@ export function ProductEditor({
           </div>
         </div>
       </DialogContent>
-    </Dialog>
+      </Dialog>
+
+      {/* r132 (A2 F3a): destructive archive rides the shared ConfirmDialog
+          («تأكيد الأرشفة») — same Arabic pattern as the 4 r131 conversions. */}
+      <ConfirmDialog
+        open={archiveOpen}
+        onOpenChange={(v) => !v && setArchiveOpen(false)}
+        title="تأكيد الأرشفة"
+        description={`سيُخفى "${product?.name ?? ""}" من متجرك ولن يظهر للعملاء بعد الآن.`}
+        confirmLabel="أرشفة"
+        busy={saving}
+        onConfirm={archive}
+      />
+
+      {/* r132 (A2 F3b): dirty-draft guard — ESC / scrim / X / إلغاء on a
+          dirty editor ask before discarding; cancel returns to the draft. */}
+      <ConfirmDialog
+        open={discardOpen}
+        onOpenChange={(v) => !v && setDiscardOpen(false)}
+        title="تجاهل التغييرات غير المحفوظة؟"
+        description="لديك تعديلات غير محفوظة على هذا المنتج، وسيتم فقدانها عند الإغلاق."
+        confirmLabel="تجاهل"
+        onConfirm={() => {
+          setDiscardOpen(false);
+          onClose(false);
+        }}
+      />
+    </>
   );
 }

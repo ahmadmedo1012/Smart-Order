@@ -10,6 +10,11 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://order.smart
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  /* r132 (F1c, A11 P2-2): root canonical + og:url — the marketing pages
+     (landing/pricing/terms/privacy) inherit the home canonical contract;
+     per-page canonicals override where set (store/[slug], the three
+     marketing routes). SL's root-canonical pattern. */
+  alternates: { canonical: "/" },
   /* r131 (F1, A7 P2-6 — title pipeline): the default + template pair
      (Arabic chrome "%s | سمارت أوردر") already shipped; per-page
      `export const metadata` (owned by the page agents) inherits the
@@ -26,6 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ar_LY",
+    url: "/",
     siteName: "سمارت أوردر",
     title: "سمارت أوردر — منصة الطلبات الرقمية",
     description: "أنشئ متجرك الرقمي واستقبل الطلبات عبر الويب وواتساب — مصممة للأعمال الليبية.",

@@ -50,7 +50,7 @@ import { useEffect, useRef, useState } from 'react';
 
 type Density = 'full' | 'low';
 
-export type OrbitSceneProps = {
+type OrbitSceneProps = {
   className?: string;
   /** Force a density tier (used by tests / embeds). Default: auto. */
   density?: Density;

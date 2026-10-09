@@ -12,7 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PaymentDialog } from "@/components/payment/payment-dialog";
 import { StepIndicator, type WizardStep } from "@/components/register/step-indicator";
 import { PlanSelector } from "@/components/register/plan-selector";
+import { FieldError } from "@/components/dashboard/form-field";
+import { ErrorState } from "@/components/shared/states";
 import { api, ApiError } from "@/lib/client";
+import { cn } from "@/lib/utils";
+import { normalizeLibyanPhone } from "@/lib/phone";
 import { LIBYA_CITIES } from "@/lib/constants";
 import type { Plan } from "@/lib/plan-types";
 import { toast } from "sonner";
@@ -32,14 +36,33 @@ export default function RegisterPage() {
   );
 }
 
+/* The auth-card input well (r131-F2) + the aria-invalid destructive
+   treatment from the r131 input recipe: these register inputs draw their
+   border on the WRAPPER (Input rides border-0), so the error border +
+   3px/22% destructive halo land on the wrapper — the same visual contract
+   ui/input.tsx gives plain inputs (error halo persists until focused;
+   focus then shows the accent halo, the inline FieldError stays). */
+const fieldWell = (invalid: boolean) =>
+  cn(
+    "rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-primary focus-within:shadow-(--state-input-focus-halo)",
+    invalid && "border-destructive shadow-(--state-input-error-halo)",
+  );
+
 function RegisterWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [plans, setPlans] = React.useState<Plan[]>([]);
   const [plansLoading, setPlansLoading] = React.useState(true);
+  /* r132 (A2 F8): plan-catalog fetch failure used to be a dead end —
+     toast (auto-fades) + empty grid + no way forward. plansError keeps
+     the step actionable: canonical ErrorState with a retry that re-runs
+     the catalog load. */
+  const [plansError, setPlansError] = React.useState(false);
   const [selectedPlan, setSelectedPlan] = React.useState<Plan | null>(null);
-  const [step, setStep] = React.useState<WizardStep>(searchParams.get("plan") ? "plan" : "plan");
+  /* r132 (A2 F15): dead ternary removed — both branches were "plan";
+     the ?plan= deep link preselects (below) without advancing the step. */
+  const [step, setStep] = React.useState<WizardStep>("plan");
   const [paymentOpen, setPaymentOpen] = React.useState(false);
   const [createdBusinessId, setCreatedBusinessId] = React.useState<string | null>(null);
 
@@ -54,32 +77,79 @@ function RegisterWizard() {
   });
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  /* r132 (A2 F4): field-level validation — the r131 recipe (already the
+     reference in the dashboard forms: product-editor, delivery, staff,
+     settings) reaches the account-acquisition funnel. Each input carries
+     aria-invalid + aria-describedby → inline FieldError (role=alert), and
+     the error clears on first keystroke in that field. */
+  const [errors, setErrors] = React.useState<{
+    businessName?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+    password?: string;
+    confirm?: string;
+  }>({});
 
-  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((f) => ({ ...f, [key]: e.target.value }));
+    if (errors[key]) setErrors((x) => ({ ...x, [key]: undefined }));
+  };
 
-  // Load plan catalog (deep-link ?plan= preselects)
-  React.useEffect(() => {
-    let cancelled = false;
-    (async () => {
+  /* Client-side mirror of the server Zod contract
+     (api/auth/register/route.ts) — same Arabic messages, no round-trip. */
+  function validateFields() {
+    const e: typeof errors = {};
+    if (form.businessName.trim().length < 2) e.businessName = "أدخل اسم العمل";
+    if (form.name.trim().length < 2) e.name = "أدخل اسمك الكامل";
+    if (form.phone.trim() && !normalizeLibyanPhone(form.phone))
+      e.phone = "رقم الهاتف الليبي غير صحيح (مثال: 0912345678)";
+    if (!form.email.trim()) e.email = "أدخل البريد الإلكتروني";
+    else if (!/^\S+@\S+\.\S+$/.test(form.email.trim()))
+      e.email = "البريد الإلكتروني غير صحيح";
+    if (!form.password) e.password = "أدخل كلمة المرور";
+    else if (form.password.length < 8)
+      e.password = "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
+    if (!form.confirm) e.confirm = "أعد كتابة كلمة المرور";
+    else if (form.confirm !== form.password)
+      e.confirm = "كلمتا المرور غير متطابقتين";
+    return e;
+  }
+
+  // Load plan catalog (deep-link ?plan= preselects) — retryable (F8)
+  const loadPlans = React.useCallback(
+    async (signal?: { cancelled: boolean }) => {
+      setPlansError(false);
+      setPlansLoading(true);
       try {
         const data = await fetch("/api/plans").then((r) => r.json());
         const list: Plan[] = data.data ?? [];
-        if (cancelled) return;
+        if (signal?.cancelled) return;
         setPlans(list);
         const pre = searchParams.get("plan");
         if (pre) {
-          const found = list.find((p) => p.id === pre) ?? list.find((p) => p.name.toLowerCase() === pre.toLowerCase());
+          const found =
+            list.find((p) => p.id === pre) ??
+            list.find((p) => p.name.toLowerCase() === pre.toLowerCase());
           if (found) setSelectedPlan(found);
         }
       } catch {
-        if (!cancelled) toast.error("فشل تحميل الخطط");
+        if (!signal?.cancelled) {
+          setPlansError(true);
+          toast.error("فشل تحميل الخطط");
+        }
       } finally {
-        if (!cancelled) setPlansLoading(false);
+        if (!signal?.cancelled) setPlansLoading(false);
       }
-    })();
+    },
+    [searchParams],
+  );
+
+  React.useEffect(() => {
+    const signal = { cancelled: false };
+    loadPlans(signal);
     return () => {
-      cancelled = true;
+      signal.cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -87,8 +157,15 @@ function RegisterWizard() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (form.password !== form.confirm) {
-      setError("كلمتا المرور غير متطابقتين");
+    const fieldErrs = validateFields();
+    setErrors(fieldErrs);
+    const firstInvalid = (
+      ["businessName", "name", "phone", "email", "password", "confirm"] as const
+    ).find((k) => fieldErrs[k]);
+    if (firstInvalid) {
+      /* focus the first invalid field — the banner-free funnel needs a
+         visible anchor next to the inline error (keyboard/SR path). */
+      document.getElementById(firstInvalid)?.focus();
       return;
     }
     setLoading(true);
@@ -177,6 +254,12 @@ function RegisterWizard() {
                   </div>
                 ))}
               </div>
+            ) : plansError ? (
+              <ErrorState
+                title="تعذر تحميل الخطط"
+                description="تحقق من اتصالك وأعد المحاولة — يمكنك المتابعة أيضاً بدون خطة (مجانية للأبد)."
+                retry={() => loadPlans()}
+              />
             ) : (
               <PlanSelector
                 plans={plans}
@@ -241,33 +324,51 @@ function RegisterWizard() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2 sm:col-span-2">
                     <Label htmlFor="businessName">اسم العمل / المتجر *</Label>
-                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-primary focus-within:shadow-(--state-input-focus-halo)">
+                    <div className={fieldWell(!!errors.businessName)}>
                       <Input
                         id="businessName"
                         placeholder="مثال: مطعم الأصيل"
                         required
+                        maxLength={100}
                         value={form.businessName}
                         onChange={set("businessName")}
+                        aria-invalid={!!errors.businessName}
+                        aria-describedby={
+                          errors.businessName ? "r-businessName-error" : undefined
+                        }
                         className="border-0 bg-transparent focus-visible:ring-0"
                       />
                     </div>
+                    {errors.businessName && (
+                      <FieldError id="r-businessName-error">
+                        {errors.businessName}
+                      </FieldError>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="name">اسمك *</Label>
-                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-primary focus-within:shadow-(--state-input-focus-halo)">
+                    <div className={fieldWell(!!errors.name)}>
                       <Input
                         id="name"
                         placeholder="اسمك الكامل"
                         required
+                        maxLength={80}
                         value={form.name}
                         onChange={set("name")}
+                        aria-invalid={!!errors.name}
+                        aria-describedby={
+                          errors.name ? "r-name-error" : undefined
+                        }
                         className="border-0 bg-transparent focus-visible:ring-0"
                       />
                     </div>
+                    {errors.name && (
+                      <FieldError id="r-name-error">{errors.name}</FieldError>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">رقم الهاتف</Label>
-                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-primary focus-within:shadow-(--state-input-focus-halo)">
+                    <div className={fieldWell(!!errors.phone)}>
                       <Input
                         id="phone"
                         type="tel"
@@ -275,14 +376,22 @@ function RegisterWizard() {
                         className="border-0 bg-transparent text-start focus-visible:ring-0"
                         inputMode="tel"
                         placeholder="0912345678"
+                        maxLength={20}
                         value={form.phone}
                         onChange={set("phone")}
+                        aria-invalid={!!errors.phone}
+                        aria-describedby={
+                          errors.phone ? "r-phone-error" : undefined
+                        }
                       />
                     </div>
+                    {errors.phone && (
+                      <FieldError id="r-phone-error">{errors.phone}</FieldError>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">البريد الإلكتروني *</Label>
-                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-primary focus-within:shadow-(--state-input-focus-halo)">
+                    <div className={fieldWell(!!errors.email)}>
                       <Input
                         id="email"
                         type="email"
@@ -294,8 +403,15 @@ function RegisterWizard() {
                         required
                         value={form.email}
                         onChange={set("email")}
+                        aria-invalid={!!errors.email}
+                        aria-describedby={
+                          errors.email ? "r-email-error" : undefined
+                        }
                       />
                     </div>
+                    {errors.email && (
+                      <FieldError id="r-email-error">{errors.email}</FieldError>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="city">المدينة</Label>
@@ -314,7 +430,7 @@ function RegisterWizard() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">كلمة المرور *</Label>
-                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-primary focus-within:shadow-(--state-input-focus-halo)">
+                    <div className={fieldWell(!!errors.password)}>
                       <Input
                         id="password"
                         type="password"
@@ -322,26 +438,44 @@ function RegisterWizard() {
                         autoComplete="new-password"
                         required
                         minLength={8}
+                        maxLength={100}
                         value={form.password}
                         onChange={set("password")}
+                        aria-invalid={!!errors.password}
+                        aria-describedby={
+                          errors.password ? "r-password-error" : undefined
+                        }
                         className="border-0 bg-transparent focus-visible:ring-0"
                       />
                     </div>
+                    {errors.password && (
+                      <FieldError id="r-password-error">
+                        {errors.password}
+                      </FieldError>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirm">تأكيد كلمة المرور *</Label>
-                    <div className="rounded-xl border border-border/50 bg-secondary/40 shadow-xs transition-[border-color,box-shadow] duration-(--t-fast) focus-within:border-primary focus-within:shadow-(--state-input-focus-halo)">
+                    <div className={fieldWell(!!errors.confirm)}>
                       <Input
                         id="confirm"
                         type="password"
                         placeholder="أعد كتابة كلمة المرور"
                         autoComplete="new-password"
                         required
+                        maxLength={100}
                         value={form.confirm}
                         onChange={set("confirm")}
+                        aria-invalid={!!errors.confirm}
+                        aria-describedby={
+                          errors.confirm ? "r-confirm-error" : undefined
+                        }
                         className="border-0 bg-transparent focus-visible:ring-0"
                       />
                     </div>
+                    {errors.confirm && (
+                      <FieldError id="r-confirm-error">{errors.confirm}</FieldError>
+                    )}
                   </div>
                 </div>
 

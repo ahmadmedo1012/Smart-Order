@@ -36,7 +36,9 @@ export function Footer({ className }: FooterProps) {
       transition={{ duration: 0.52, ease: [0.16, 1, 0.3, 1] }}
       className={cn("border-t border-border/40 bg-card/30 pt-12 sm:pt-16", className)}
     >
-      <div className="max-w-[1220px] mx-auto px-4 sm:px-6">
+      {/* r132 (A1 finding 4): 1280px frame canon (r131 ruling) — matches
+          dashboard shell.tsx + landing.css chapters. */}
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 mb-10 sm:mb-12">
           <div className="col-span-2 sm:col-span-1">
             <Link href="/" className="inline-flex mb-4" aria-label="سمارت أوردر — الرئيسية">
@@ -115,9 +117,9 @@ export function Footer({ className }: FooterProps) {
         </div>
       </div>
 
-      {/* Family: sunken full-width bottom bar (outside the 1220px container) */}
+      {/* Family: sunken full-width bottom bar (outside the 1280px container) */}
       <div className="border-t border-border/40 bg-card/60">
-        <div className="max-w-[1220px] mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
             &copy; {new Date().getFullYear()} الربط الذكي | Smart Order. جميع الحقوق محفوظة.
           </p>

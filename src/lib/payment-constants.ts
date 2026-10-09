@@ -30,14 +30,3 @@ export function madarUssdCode(phone: string, amountLyD: number): string {
 
 /** The payment channel discriminator — family type. */
 export type PaymentProvider = "libyana" | "madar" | "bank";
-
-export const PROVIDER_AR: Record<PaymentProvider, string> = {
-  libyana: "ليبيانا",
-  madar: "مدار",
-  bank: "تحويل بنكي",
-};
-
-/** Wallet-cap guard shared by dialogs (family behavior). */
-export function requiresBankTransfer(amountLyD: number): boolean {
-  return amountLyD > WALLET_CAP_LYD;
-}

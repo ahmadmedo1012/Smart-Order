@@ -3,8 +3,13 @@ import { PricingClient } from "@/components/pricing/pricing-client";
 import { db } from "@/lib/db";
 
 export const metadata: Metadata = {
-  title: "الباقات والأسعار | سمارت أوردر",
+  /* r132 (F1c, A11 P1/P2): suffix stripped — the root template already
+     appends " | سمارت أوردر" (hardcoding it here produced the double
+     suffix "… | سمارت أوردر | سمارت أوردر" in tabs + SERP). Canonical
+     added (marketing pages had none). */
+  title: "الباقات والأسعار",
   description: "خطط سمارت أوردر — ابدأ مجاناً وارتقِ متى ما كبر عملك. أسعار بالدينار الليبي.",
+  alternates: { canonical: "/pricing" },
 };
 
 /* r131-F2 (SO-2, A8 perf): pricing left force-dynamic — ISR 60s (the plan

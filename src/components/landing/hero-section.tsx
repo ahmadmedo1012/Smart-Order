@@ -46,8 +46,10 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
         <OrbitScene className="ln-hero-canvas" biasX={-0.35} />
       </div>
 
-      {/* Family container rhythm (§4) — kept verbatim */}
-      <div className="mx-auto max-w-[1220px] px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-32 lg:px-10 lg:pt-36 lg:pb-24">
+      {/* Family container rhythm (§4) — r132 (A1 finding 4): the frame canon
+          is 1280px (r131 ruling) — dashboard shell.tsx + landing.css chapters
+          landed it; the marketing frame (hero/header/footer) follows. */}
+      <div className="mx-auto max-w-[1280px] px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-32 lg:px-10 lg:pt-36 lg:pb-24">
         <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-10">
           {/* Start column — editorial text stack */}
           <div className="text-center lg:text-start">

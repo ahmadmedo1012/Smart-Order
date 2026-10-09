@@ -512,6 +512,11 @@ export function PaymentDialog({
                   size="lg"
                   className="flex-1"
                   onClick={() => {
+                    // r132-F1a (A2 F2): un-latch the sent guard — it was
+                    // set true when the original request fired and never
+                    // reset on this rejected→form path, so "إعادة المحاولة"
+                    // silently no-oped (handleSent early-returned forever).
+                    sentRef.current = false;
                     setStep("form");
                     setResolutionMsg("");
                     setPhone("");

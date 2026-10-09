@@ -26,8 +26,9 @@ is RETIRED — do not reintroduce it; only "was ..." migration comments may
 mention those hexes.
 
 **Brand signature:** the gold-metal mark gradient `linear-gradient(145deg,
-#C9962F, #E9B44C)` (see `src/components/shared/brand.tsx`) with void-ink glyph
-`#05070F`. `text-gradient-orange` rides gold → hover-gold at 135° in dark,
+#C9962F, #E9B44C)` with void-ink glyph `#05070F` — carried by the raster
+brand assets (the dead `shared/brand.tsx` component, zero consumers, was
+removed in r132). `text-gradient-orange` rides gold → hover-gold at 135° in dark,
 copper `#B57438 → #9A5F25` in light. Raster brand assets (favicon,
 icon-192/512, apple-touch-icon, brand-icon, favicon.ico, og-default.png) are
 night+gold. `public/showcase-store.webp` was recolored to the same identity in
@@ -61,9 +62,9 @@ r125 — the flame-era original is gone.
 - **IBM Plex Sans Arabic is THE family** (body + display + headings,
   `--font-sans` = `--font-heading`), self-hosted 400/500/600/700 × {arabic,
   latin} subsets, `font-display: swap`, the two arabic subsets preloaded in
-  `app/layout.tsx`. Accent cuts: Plex Serif italic (latin runs only), Plex
-  Mono (latin) for codes/IDs. Noto Naskh Arabic stays registered for the
-  editorial `.font-naskh` voice (RTL quotes).
+  `app/layout.tsx`. Accent cut: Plex Mono (latin) for codes/IDs. (r132: the
+  dead Plex Serif italic + Noto Naskh Arabic faces — zero consumers — were
+  removed with the `.font-naskh` rule.)
 - Legacy `--font-cairo` is a documented shim NAME whose value is defined in
   `public/fonts/fonts.css` (`:root { --font-cairo: "IBM Plex Sans Arabic" }`,
   ~line 38) — kept as the load-bearing contract (an undefined var would
@@ -75,7 +76,7 @@ r125 — the flame-era original is gone.
 - **No letter-spacing on Arabic, ever** — the `[dir=rtl] :lang(ar)` +
   heading guards in globals.css enforce it (Madarek ruling #2: tracking
   breaks cursive joins). Tracking is legal only on Latin-safe runs
-  (`brand.tsx` Latin wordmark). No synthetic italics on Arabic.
+  (Latin wordmarks). No synthetic italics on Arabic.
 - Numbers everywhere: `tabular-nums` + `lining-nums` globally (this is a
   money product — 1 LYD = 1000 millimes, always Int millimes, never floats).
 

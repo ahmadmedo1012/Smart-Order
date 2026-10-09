@@ -162,7 +162,7 @@ export function CardListSkeleton({
 }
 
 /** Simple stacked list-card rows (settings-ish forms, staff, delivery). */
-export function ListRowsSkeleton({
+function ListRowsSkeleton({
   rows = 3,
   className,
 }: {
@@ -189,7 +189,7 @@ export function ListRowsSkeleton({
 }
 
 /** Card grid — products/categories tiles with image header. */
-export function CardGridSkeleton({
+function CardGridSkeleton({
   count = 8,
   className,
 }: {
@@ -228,7 +228,7 @@ export function CardGridSkeleton({
 }
 
 /** Detail page — back chip + hero row + KPI tiles + two cards. */
-export function DetailSkeleton() {
+function DetailSkeleton() {
   return (
     <div className="max-w-4xl mx-auto space-y-5" aria-hidden="true">
       <Skeleton className="h-9 w-32 rounded-md" />

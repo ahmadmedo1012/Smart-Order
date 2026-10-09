@@ -32,15 +32,6 @@ export function formatArabicDate(date: Date | string): string {
   return `${d.getDate()} ${AR_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-export function formatArabicTime(date: Date | string): string {
-  const d = typeof date === "string" ? new Date(date) : date;
-  const h = d.getHours();
-  const m = String(d.getMinutes()).padStart(2, "0");
-  const ampm = h < 12 ? "ص" : "م";
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${h12}:${m} ${ampm}`;
-}
-
 /** Relative "منذ ٥ دقائق" style label for dashboard freshness. */
 export function timeAgoAr(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
@@ -65,13 +56,4 @@ export function normalizeArabic(input: string): string {
     .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
     .toLowerCase()
     .trim();
-}
-
-/** Arabic plural for orders ("طلب واحد/طلبان/٥ طلبات/١٠ طلبات/١١ طلبًا"). */
-export function arabicCount(n: number, singular: string, dual: string, plural: string, pluralMany?: string): string {
-  if (n === 0) return `لا ${singular}`;
-  if (n === 1) return `${singular} واحد`;
-  if (n === 2) return dual;
-  if (n >= 3 && n <= 10) return `${n} ${plural}`;
-  return `${n} ${pluralMany ?? singular}`;
 }

@@ -68,6 +68,12 @@ export default function OrdersPage() {
   const [payment, setPayment] = React.useState("ALL");
   const [fulfillment, setFulfillment] = React.useState("ALL");
   const [q, setQ] = React.useState("");
+  /* r132 (A2 F12): 300ms debounce — the twin the customers list got in
+     r131 (customers/page.tsx). Every keystroke used to fire a full
+     GET /api/orders (25-row pages + joins) and flicker meta.total
+     through stale values; the term now settles before it reaches the
+     fetch deps, and the page resets with the settled term. */
+  const [debouncedQ, setDebouncedQ] = React.useState("");
   const [page, setPage] = React.useState(1);
   const [meta, setMeta] = React.useState({ total: 0, totalPages: 1 });
   /* r131 (F3, A5 P1-2 / A11 SO-1): the old retry passed
@@ -75,6 +81,13 @@ export default function OrdersPage() {
  re-fired the fetch effect, so the retry button did nothing.
  reloadKey is consumed by the effect deps: bumping it refetches. */
   const [reloadKey, setReloadKey] = React.useState(0);
+  React.useEffect(() => {
+    const t = setTimeout(() => setDebouncedQ(q), 300);
+    return () => clearTimeout(t);
+  }, [q]);
+  React.useEffect(() => {
+    setPage(1);
+  }, [debouncedQ]);
 
   React.useEffect(() => {
     if (!businessId) return;
@@ -87,7 +100,7 @@ export default function OrdersPage() {
     if (status !== "ALL") sp.set("status", status);
     if (payment !== "ALL") sp.set("paymentStatus", payment);
     if (fulfillment !== "ALL") sp.set("fulfillment", fulfillment);
-    if (q.trim()) sp.set("q", q.trim());
+    if (debouncedQ.trim()) sp.set("q", debouncedQ.trim());
     api
       .get<OrderRow[]>(`/api/orders?${sp.toString()}`)
       .then((r) => {
@@ -100,7 +113,7 @@ export default function OrdersPage() {
         );
       })
       .catch(() => setError(true));
-  }, [businessId, status, payment, fulfillment, q, page, reloadKey]);
+  }, [businessId, status, payment, fulfillment, debouncedQ, page, reloadKey]);
 
   return (
     <div className="space-y-5">
@@ -145,10 +158,7 @@ export default function OrdersPage() {
             <Input
               placeholder="رقم الطلب، اسم أو هاتف العميل..."
               value={q}
-              onChange={(e) => {
-                setQ(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => setQ(e.target.value)}
               className="ps-9 bg-card"
               aria-label="بحث في الطلبات"
             />

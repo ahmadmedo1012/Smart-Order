@@ -4,8 +4,11 @@ import { Footer } from "@/components/layout/footer";
 import { Reveal } from "@/components/ui/scroll-reveal";
 
 export const metadata: Metadata = {
-  title: "شروط الاستخدام | سمارت أوردر",
+  /* r132 (F1c, A11 P1/P2): suffix stripped (root template appends it —
+     was rendering "… | سمارت أوردر | سمارت أوردر"); canonical added. */
+  title: "شروط الاستخدام",
   description: "شروط استخدام منصة سمارت أوردر — من عائلة الربط الذكي",
+  alternates: { canonical: "/terms" },
 };
 
 const SECTIONS = [

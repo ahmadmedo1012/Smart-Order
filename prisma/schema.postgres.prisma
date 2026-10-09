@@ -386,3 +386,19 @@ model AuditLog {
 
   @@index([businessId, createdAt])
 }
+
+// r132-F1a (A10 #4): DB-backed rate-limiter store — port of the
+// smart-menu-real twin (prisma/schema.prisma RateLimitEntry). The fixed
+// window is (key, windowEnd): @@unique backs the bucket upsert,
+// @@index(windowEnd) backs the expired-row sweep. Lives server-side
+// only (src/lib/rate-limit.ts).
+model RateLimitEntry {
+  id         String   @id @default(cuid())
+  key        String
+  count      Int      @default(1)
+  windowEnd  DateTime
+  createdAt  DateTime @default(now())
+
+  @@unique([key, windowEnd])
+  @@index([windowEnd])
+}

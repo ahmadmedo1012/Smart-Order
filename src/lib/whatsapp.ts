@@ -5,7 +5,7 @@ import { formatLyd } from "@/lib/money";
 import { formatPhoneDisplay } from "@/lib/phone";
 import { FULFILLMENT_AR, PAYMENT_TYPE_AR, type OrderStatus } from "@/lib/constants";
 
-export interface OrderMessageData {
+interface OrderMessageData {
   orderNumber: string;
   customerName: string;
   customerPhone: string;

@@ -15,6 +15,10 @@ name: CI
 #      تثبيت الإنتاج من bun إلى npm — سلسلة النشر التي شُفيت في
 #      fdd57ff لا تُقامر بها. bun --frozen-lockfile = نفس ما يثبّته
 #      الإنتاج، بالضبط.
+# r132 (W3-1): أضيفت وظيفة test — الـ e2e (tests/e2e/api-e2e.js) يقلع
+#      الآن في CI على قاعدة SQLite تجريبية بنفس حيلة الإقلاع من W3-B2
+#      (r130): prisma db push على المخطط التطويري ثم next start —
+#      السجل ذاتي التزويد (تسجيل أعمال + كتالوج + طلب) فلا حاجة لـ seed.
 on:
   push:
     branches: [main]
@@ -74,3 +78,72 @@ jobs:
       # force-dynamic ومحمية بـ try/catch (DEPLOYMENT.md §2)
       - name: Build (يضم tsc صارماً)
         run: npm run build
+
+  # r132 (W3-1): كانت العائلة تتحقق بصريًا فقط — الآن وظيفة اختبار حقيقية:
+  # الصحة، المصادقة، عزل المستأجرين (حرج)، حدود المعدل، دورة الطلب،
+  # الـ idempotency، والتحقق وإعادة تسعير الأموال — على خادم إنتاج حقيقي.
+  test:
+    name: E2E API (SQLite تجريبية)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: quality
+    env:
+      # مطابق للافتراضي التطويري في .env.example — ملف SQLite محلي،
+      # بلا خادم قاعدة بيانات خارجي (حيلة W3-B2 في r130 للإقلاع).
+      DATABASE_URL: "file:./db/smart-order.db"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Bun 1.3.14
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: Install dependencies (frozen)
+        run: bun install --frozen-lockfile
+
+      # المخطط التطويري (SQLite) — التوليد لا يحتاج قاعدة، والدفع
+      # ينشئ ملف القاعدة محليًا. لا seed: السجل ذاتي التزويد.
+      - name: Prisma generate + db push (SQLite)
+        run: |
+          npx prisma generate
+          npx prisma db push
+
+      - name: Build
+        run: npm run build
+
+      - name: Start server
+        run: |
+          npm run start > server.log 2>&1 &
+          echo $! > server.pid
+
+      - name: انتظار صحة الخادم
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/api/health > /dev/null; then
+              echo "الخادم صحي بعد ${i} محاولة"; exit 0
+            fi
+            sleep 2
+          done
+          echo "الخادم لم يصبح صحيًا"; cat server.log; exit 1
+
+      - name: E2E API suite
+        run: npm run test:e2e
+
+      - name: Stop server
+        if: always()
+        run: kill $(cat server.pid) 2>/dev/null || true
+
+      - name: Upload server log (عند الفشل فقط)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-server-log
+          path: server.log
+          retention-days: 7

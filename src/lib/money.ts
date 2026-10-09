@@ -45,14 +45,3 @@ export function tryParseLyd(input: string | number | null | undefined): number |
     return null;
   }
 }
-
-/** Convert millimes → float LYD ONLY for display charts (never for math). */
-export function toLydFloat(millimes: number): number {
-  return Math.round(millimes) / 1000;
-}
-
-export function sumMillimes(values: number[]): number {
-  let total = 0;
-  for (const v of values) total += Math.round(v);
-  return total;
-}

@@ -72,12 +72,16 @@ export interface StoreData {
 
 export function Storefront({
   slug,
-  business: _business,
+  initialData,
 }: {
   slug: string;
-  business: StoreData["business"];
+  /** r132-F1a (A9 SO-N1): server-queried payload from the ISR page —
+   * SSRs the whole menu so a QR scan renders products in the HTML
+   * (no skeleton-first client waterfall). The client fetch below stays
+   * as a post-mount freshness refresh only. */
+  initialData?: StoreData | null;
 }) {
-  const [data, setData] = React.useState<StoreData | null>(null);
+  const [data, setData] = React.useState<StoreData | null>(initialData ?? null);
   const [error, setError] = React.useState(false);
   const [q, setQ] = React.useState("");
   const [activeCategory, setActiveCategory] = React.useState<string>("ALL");
@@ -86,12 +90,23 @@ export function Storefront({
   const items = useCart((s) => s.items);
   const count = cartCount(items);
 
+  // Mirrors `data` for the failure branch below — a failed freshness
+  // refresh must never nuke SSR'd content back to an error state.
+  const hasDataRef = React.useRef(!!initialData);
+
   const load = React.useCallback(() => {
     setError(false);
     api
       .get<StoreData>(`/api/public/store/${slug}`)
-      .then((r) => setData(r.data))
-      .catch(() => setError(true));
+      .then((r) => {
+        hasDataRef.current = true;
+        setData(r.data);
+      })
+      .catch(() => {
+        // Only surface the error state when there is nothing on screen
+        // (the pre-r132 skeleton path); with initialData the menu stays.
+        if (!hasDataRef.current) setError(true);
+      });
   }, [slug]);
 
   React.useEffect(load, [load]);
@@ -248,8 +263,11 @@ export function Storefront({
                   <Badge className="bg-saffron/15 text-accent-foreground border-saffron/30 text-[11px]">اختيار المتجر</Badge>
                 </div>
                 <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
-                  {featured.map((p) => (
-                    <ProductCard key={p.id} product={p} slug={slug} businessName={data.business.name} />
+                  {featured.map((p, i) => (
+                    /* r132-F1a (A9 SO-9): first 4 above-the-fold images eager
+                        (+fetchPriority=high via next/image priority) — SM's
+                        MenuItemCard eager pattern; everything else stays lazy. */
+                    <ProductCard key={p.id} product={p} slug={slug} businessName={data.business.name} eager={i < 4} />
                   ))}
                 </div>
               </section>
@@ -259,8 +277,8 @@ export function Storefront({
                 <h2 className="font-heading font-bold text-sm mb-3">كل المنتجات</h2>
               )}
               <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
-                {regular.map((p) => (
-                  <ProductCard key={p.id} product={p} slug={slug} businessName={data.business.name} />
+                {regular.map((p, i) => (
+                  <ProductCard key={p.id} product={p} slug={slug} businessName={data.business.name} eager={featured.length === 0 && i < 4} />
                 ))}
               </div>
             </section>

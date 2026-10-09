@@ -4,8 +4,11 @@ import { Footer } from "@/components/layout/footer";
 import { Reveal } from "@/components/ui/scroll-reveal";
 
 export const metadata: Metadata = {
-  title: "سياسة الخصوصية | سمارت أوردر",
+  /* r132 (F1c, A11 P1/P2): suffix stripped (root template appends it —
+     was rendering "… | سمارت أوردر | سمارت أوردر"); canonical added. */
+  title: "سياسة الخصوصية",
   description: "كيف تجمع منصة سمارت أوردر بياناتك وتحميها — من عائلة الربط الذكي",
+  alternates: { canonical: "/privacy" },
 };
 
 const SECTIONS = [

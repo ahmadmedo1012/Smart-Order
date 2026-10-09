@@ -7,11 +7,11 @@ import { db } from "@/lib/db";
 import type { Role, Permission } from "@/lib/constants";
 import { ROLE_PERMISSIONS } from "@/lib/constants";
 
-export const SESSION_COOKIE = "smart-order-session";
+const SESSION_COOKIE = "smart-order-session";
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 const SESSION_ABSOLUTE_MS = 7 * 24 * 60 * 60 * 1000;
 
-export interface AuthUser {
+interface AuthUser {
   id: string;
   email: string;
   name: string;
@@ -28,7 +28,7 @@ function sha256(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
-export function permissionsFor(role: Role, extraPerms: string): Permission[] {
+function permissionsFor(role: Role, extraPerms: string): Permission[] {
   const base = ROLE_PERMISSIONS[role] ?? [];
   const extra = (extraPerms || "")
     .split(",")

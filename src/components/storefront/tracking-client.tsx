@@ -56,21 +56,43 @@ const FLOW_AR: Record<string, { label: string; icon: React.ElementType }> = {
 };
 
 export function TrackingClient({ order }: { order: TrackedOrder }) {
-  // light polling for live updates
+  // light polling for live updates — status AND paymentStatus (F13: the
+  // receipt's "الدفع" line used to stay on its SSR snapshot forever)
   const [status, setStatus] = React.useState(order.status);
+  const [paymentStatus, setPaymentStatus] = React.useState(order.paymentStatus);
+
+  const poll = React.useCallback(async () => {
+    try {
+      const res = await fetch(`/api/public/track/${window.location.pathname.split("/").pop()}`);
+      const body = await res.json();
+      if (body?.success) {
+        setStatus(body.data.order.status);
+        setPaymentStatus(body.data.order.paymentStatus);
+      }
+    } catch {
+      /* offline — keep last known */
+    }
+  }, []);
+
   React.useEffect(() => {
     if (["DELIVERED", "CANCELLED", "REJECTED"].includes(status)) return;
-    const t = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/public/track/${window.location.pathname.split("/").pop()}`);
-        const body = await res.json();
-        if (body?.success) setStatus(body.data.order.status);
-      } catch {
-        /* offline — keep last known */
-      }
+    /* r132 (A2 F13): visibility-gated polling — the same gate the
+       dashboard 20s poll got in r131 (dashboard/page.tsx): hidden tabs
+       skip the 15s fetch entirely (no battery/network waste on a phone
+       left open), and the first visibilitychange back to visible
+       refreshes immediately. */
+    const t = setInterval(() => {
+      if (!document.hidden) poll();
     }, 15000);
-    return () => clearInterval(t);
-  }, [status]);
+    const onVisible = () => {
+      if (!document.hidden) poll();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [status, poll]);
 
   const isCancelled = status === "CANCELLED" || status === "REJECTED";
   const currentIdx = TRACKING_FLOW.indexOf(status as (typeof TRACKING_FLOW)[number]);
@@ -217,7 +239,7 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
             <div className="flex justify-between text-muted-foreground pt-1 text-xs">
               <span>الدفع</span>
               <span>
-                {order.paymentMethod ?? "—"} · {PAYMENT_STATUS_AR[order.paymentStatus]}
+                {order.paymentMethod ?? "—"} · {PAYMENT_STATUS_AR[paymentStatus]}
               </span>
             </div>
           </div>

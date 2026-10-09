@@ -10,10 +10,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base: MetadataRoute.Sitemap = [
     { url: site, changeFrequency: "weekly", priority: 1 },
     { url: `${site}/pricing`, changeFrequency: "monthly", priority: 0.9 },
-    { url: `${site}/register`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${site}/terms`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${site}/privacy`, changeFrequency: "yearly", priority: 0.3 },
   ];
+  // r132 (F1c, A11 P2): /register dropped — robots.ts disallows it, so a
+  // sitemap entry told Google to index a URL it is told not to crawl
+  // (wasted entry + signal noise). Sign-up stays reachable via the nav.
 
   try {
     const businesses = await db.business.findMany({

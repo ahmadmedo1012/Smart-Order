@@ -2,6 +2,8 @@
 
 // Typed client-side API helper — uniform envelope unwrap + Arabic error extraction.
 
+import { toast } from "sonner";
+
 export class ApiError extends Error {
   status: number;
   code?: string;
@@ -17,6 +19,36 @@ interface Envelope<T> {
   data?: T;
   meta?: Record<string, unknown>;
   error?: { message: string; code?: string };
+}
+
+/* r132 (A2 F5): session-expiry handling lives HERE so every api.* consumer
+   inherits it. Before this branch a 401 surfaced as a manual-dismiss toast
+   ("يجب تسجيل الدخول للمتابعة") while the page stayed a dead surface —
+   every action kept failing identically and only a full navigation
+   recovered. Now the FIRST 401/UNAUTHENTICATED (outside /api/auth/*, so a
+   wrong password on login never triggers it):
+     1. clears the stale server session — the cookie is httpOnly, so only
+        the server can drop it: fire-and-forget POST /api/auth/logout with
+        keepalive (the request survives the navigation below);
+     2. tells the user why they are leaving (Arabic toast — error toasts
+        are manual-dismiss app-wide, so it stays readable);
+     3. lands on /login?expired=1 (replace(): the dead page never enters
+        Back history). The beat before replace() keeps the toast
+        perceivable; deduped once per page load so parallel failures
+        (poll + mutation) trigger a single redirect. */
+let sessionExpiryHandled = false;
+
+function handleSessionExpired(): void {
+  if (sessionExpiryHandled) return;
+  sessionExpiryHandled = true;
+  fetch("/api/auth/logout", { method: "POST", keepalive: true }).catch(() => {});
+  toast.error("انتهت الجلسة، يرجى تسجيل الدخول");
+  window.setTimeout(() => window.location.replace("/login?expired=1"), 1200);
+}
+
+function isSessionExpiry(path: string, status: number, code?: string): boolean {
+  if (path.startsWith("/api/auth/")) return false;
+  return status === 401 || code === "UNAUTHENTICATED";
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<{ data: T; meta?: Record<string, unknown> }> {
@@ -35,6 +67,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<{ data: T; 
     throw new ApiError("تعذر الاتصال بالخادم، تحقق من الشبكة", res.status);
   }
   if (!res.ok || !body.success) {
+    if (isSessionExpiry(path, res.status, body.error?.code)) handleSessionExpired();
     throw new ApiError(body.error?.message ?? "حدث خطأ غير متوقع", res.status, body.error?.code);
   }
   return { data: body.data as T, meta: body.meta };

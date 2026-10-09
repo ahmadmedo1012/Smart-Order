@@ -11,9 +11,9 @@ const ALLOWED: Array<[string, number[]]> = [
   ["image/gif", [0x47, 0x49, 0x46, 0x38]],
 ];
 
-export const MAX_MEDIA_BYTES = 500 * 1024;
+const MAX_MEDIA_BYTES = 500 * 1024;
 
-export interface StoredMedia {
+interface StoredMedia {
   id: string;
   url: string;
 }
@@ -58,8 +58,4 @@ export async function storeImage(
 
 export async function getMedia(id: string) {
   return db.media.findUnique({ where: { id } });
-}
-
-export async function deleteMedia(id: string) {
-  await db.media.deleteMany({ where: { id } });
 }

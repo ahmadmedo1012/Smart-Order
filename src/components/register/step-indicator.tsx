@@ -14,7 +14,7 @@ const STEP_LABELS: Record<WizardStep, string> = {
   account: "بيانات الحساب",
 };
 
-export function stepIndex(step: WizardStep) {
+function stepIndex(step: WizardStep) {
   return STEP_ORDER.indexOf(step);
 }
 
@@ -76,7 +76,11 @@ export function StepIndicator({
               <span
                 className={cn(
                   "hidden text-[11px] font-medium transition-colors sm:block sm:text-xs",
-                  isActive ? "font-bold text-accent-foreground" : isDone ? "text-foreground/70" : "text-muted-foreground/50"
+                  /* r132 (A1 finding 5 / A7 r131): pending-step label rides the
+                     FULL muted-foreground tier (#4F4D48 light / #C3C8DC dark,
+                     7.0:1) — the old /50 wash blended to ≈2.6:1 on the white
+                     register card, below the 4.5:1 floor for 11-12px text. */
+                  isActive ? "font-bold text-accent-foreground" : isDone ? "text-foreground/70" : "text-muted-foreground"
                 )}
               >
                 {STEP_LABELS[s]}

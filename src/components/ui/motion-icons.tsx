@@ -3,13 +3,6 @@
 import {
   Check,
   ArrowLeft,
-  ArrowRight,
-  Plus,
-  Minus,
-  Smartphone,
-  TrendingUp,
-  Store,
-  Crown,
 } from "lucide-react";
 import { m, useAnimate } from "motion/react";
 import { forwardRef, useImperativeHandle, type SVGProps } from "react";
@@ -68,11 +61,4 @@ function makeMotionIcon(Icon: typeof Check, label: string) {
 }
 
 export const MotionCheck = makeMotionIcon(Check, "Check");
-export const MotionArrowRight = makeMotionIcon(ArrowRight, "ArrowRight");
 export const MotionArrowLeft = makeMotionIcon(ArrowLeft, "ArrowLeft");
-export const MotionPlus = makeMotionIcon(Plus, "Plus");
-export const MotionMinus = makeMotionIcon(Minus, "Minus");
-export const MotionSmartphone = makeMotionIcon(Smartphone, "Smartphone");
-export const MotionTrendingUp = makeMotionIcon(TrendingUp, "TrendingUp");
-export const MotionStore = makeMotionIcon(Store, "Store");
-export const MotionCrown = makeMotionIcon(Crown, "Crown");

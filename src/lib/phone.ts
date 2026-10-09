@@ -3,12 +3,12 @@
 
 const ARABIC_DIGITS = "٠١٢٣٤٥٦٧٨٩";
 
-export function normalizeDigits(input: string): string {
+function normalizeDigits(input: string): string {
   return input.replace(/[٠-٩]/g, (d) => String(ARABIC_DIGITS.indexOf(d)));
 }
 
 /** Extract bare digits from any user-typed phone string. */
-export function phoneDigits(input: string): string {
+function phoneDigits(input: string): string {
   return normalizeDigits(String(input ?? "")).replace(/\D/g, "");
 }
 
@@ -41,9 +41,4 @@ export function formatPhoneDisplay(localPhone: string): string {
   const d = phoneDigits(localPhone);
   if (d.length !== 10) return localPhone;
   return `${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}`;
-}
-
-/** wa.me target (international format, no plus). */
-export function whatsappTarget(localPhone: string): string {
-  return toE164(localPhone);
 }

@@ -12,7 +12,7 @@ const RESERVED = new Set([
   "public", "assets", "fonts", "uploads", "vercel-admin", "terms", "privacy", "about",
 ]);
 
-export function slugifyArabic(input: string): string {
+function slugifyArabic(input: string): string {
   const transliterated = String(input || "")
     .split("")
     .map((ch) => (ARABIC_TO_SLUG[ch] !== undefined ? ARABIC_TO_SLUG[ch] : ch))
