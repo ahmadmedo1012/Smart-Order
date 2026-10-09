@@ -266,7 +266,7 @@ function DetailSkeleton() {
 
 export function DashboardSkeleton() {
   return (
-    <SkeletonPage label="جارٍ تحميل لوحة التحكم...">
+    <SkeletonPage label="جارٍ تحميل لوحة التحكم…">
       <HeaderSkeleton />
       <KpiGridSkeleton />
       <div className="grid gap-4 lg:grid-cols-3">
@@ -279,7 +279,7 @@ export function DashboardSkeleton() {
 
 export function OrdersSkeleton() {
   return (
-    <SkeletonPage label="جارٍ تحميل الطلبات...">
+    <SkeletonPage label="جارٍ تحميل الطلبات…">
       <HeaderSkeleton />
       <ToolbarSkeleton />
       <TableSkeleton rows={6} />
@@ -290,7 +290,7 @@ export function OrdersSkeleton() {
 
 export function ProductsSkeleton() {
   return (
-    <SkeletonPage label="جارٍ تحميل المنتجات...">
+    <SkeletonPage label="جارٍ تحميل المنتجات…">
       <HeaderSkeleton />
       <div className="max-w-72" aria-hidden="true">
         <Skeleton className="h-11 rounded-md" />
@@ -302,7 +302,7 @@ export function ProductsSkeleton() {
 
 export function CustomersSkeleton() {
   return (
-    <SkeletonPage label="جارٍ تحميل العملاء...">
+    <SkeletonPage label="جارٍ تحميل العملاء…">
       <HeaderSkeleton action={false} />
       <div className="max-w-72" aria-hidden="true">
         <Skeleton className="h-11 rounded-md" />
@@ -315,7 +315,7 @@ export function CustomersSkeleton() {
 
 export function CategoriesSkeleton() {
   return (
-    <SkeletonPage label="جارٍ تحميل الأقسام...">
+    <SkeletonPage label="جارٍ تحميل الأقسام…">
       <HeaderSkeleton />
       <CardGridSkeleton count={8} />
     </SkeletonPage>
@@ -324,7 +324,7 @@ export function CategoriesSkeleton() {
 
 export function DeliverySkeleton() {
   return (
-    <SkeletonPage label="جارٍ تحميل مناطق التوصيل..." className="max-w-2xl">
+    <SkeletonPage label="جارٍ تحميل مناطق التوصيل…" className="max-w-2xl">
       <HeaderSkeleton />
       <ListRowsSkeleton rows={3} />
     </SkeletonPage>
@@ -333,7 +333,7 @@ export function DeliverySkeleton() {
 
 export function PaymentsSkeleton() {
   return (
-    <SkeletonPage label="جارٍ تحميل طرق الدفع..." className="max-w-2xl">
+    <SkeletonPage label="جارٍ تحميل طرق الدفع…" className="max-w-2xl">
       <HeaderSkeleton action={false} />
       <ListRowsSkeleton rows={2} />
     </SkeletonPage>
@@ -342,7 +342,7 @@ export function PaymentsSkeleton() {
 
 export function StaffSkeleton() {
   return (
-    <SkeletonPage label="جارٍ تحميل فريق العمل..." className="max-w-2xl">
+    <SkeletonPage label="جارٍ تحميل فريق العمل…" className="max-w-2xl">
       <HeaderSkeleton />
       <ListRowsSkeleton rows={2} />
     </SkeletonPage>
@@ -351,7 +351,7 @@ export function StaffSkeleton() {
 
 export function SettingsSkeleton() {
   return (
-    <SkeletonPage label="جارٍ تحميل الإعدادات..." className="max-w-2xl">
+    <SkeletonPage label="جارٍ تحميل الإعدادات…" className="max-w-2xl">
       <HeaderSkeleton action={false} />
       <Skeleton className="h-36 rounded-xl" />
       <Skeleton className="h-[420px] rounded-xl" />
@@ -361,7 +361,7 @@ export function SettingsSkeleton() {
 
 export function OnboardingSkeleton() {
   return (
-    <SkeletonPage label="جارٍ تحميل الإعداد..." className="max-w-2xl">
+    <SkeletonPage label="جارٍ تحميل الإعداد…" className="max-w-2xl">
       <HeaderSkeleton action={false} />
       <Skeleton className="h-16 rounded-xl" />
       <Skeleton className="h-32 rounded-xl" />
@@ -381,7 +381,7 @@ export function CustomerDetailSkeleton() {
 
 export function AdminPaymentsSkeleton() {
   return (
-    <SkeletonPage label="جارٍ تحميل الموافقات...">
+    <SkeletonPage label="جارٍ تحميل الموافقات…">
       <HeaderSkeleton action={false} />
       <div className="flex gap-2" aria-hidden="true">
         {Array.from({ length: 3 }, (_, i) => (

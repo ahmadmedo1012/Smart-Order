@@ -55,7 +55,13 @@ const FLOW_AR: Record<string, { label: string; icon: React.ElementType }> = {
   DELIVERED: { label: "تم التسليم", icon: CheckCircle2 },
 };
 
-export function TrackingClient({ order }: { order: TrackedOrder }) {
+export function TrackingClient({
+  order,
+  placed = false,
+}: {
+  order: TrackedOrder;
+  placed?: boolean;
+}) {
   // light polling for live updates — status AND paymentStatus (F13: the
   // receipt's "الدفع" line used to stay on its SSR snapshot forever)
   const [status, setStatus] = React.useState(order.status);
@@ -116,7 +122,30 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
         </div>
       </header>
 
-      <main id="main" className="mx-auto max-w-lg px-4 py-6 space-y-4">
+      <main id="main" tabIndex={-1} className="mx-auto max-w-lg px-4 py-6 space-y-4 focus:outline-none">
+        {/* r133 (A1 F9): durable checkout confirmation — the success used
+            to live only in checkout component state; ?placed=1 in the URL
+            survives refresh/share. */}
+        {placed && !isCancelled && (
+          <div
+            role="status"
+            className="flex items-center gap-3 rounded-xl border border-success/30 bg-success/10 p-4"
+          >
+            <span
+              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-success/20 text-success-ink"
+              aria-hidden="true"
+            >
+              <CheckCircle2 className="size-5" aria-hidden="true" />
+            </span>
+            <div>
+              <div className="text-sm font-bold text-success-ink">تم استلام طلبك!</div>
+              <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                سنتبع حالة طلبك هنا — احفظ هذا الرابط للمتابعة لاحقاً.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Order header */}
         <div className="rounded-xl border border-border bg-card p-5 text-center">
           {/* r128-F8 (B22): mono numerals — order number + receipt figures ride
@@ -270,7 +299,7 @@ export function TrackingClient({ order }: { order: TrackedOrder }) {
         </div>
 
         <p className="text-center text-[11px] text-muted-foreground pb-6">
-          تُحدَّث الحالة تلقائياً كل ١٥ ثانية
+          تُحدَّث الحالة تلقائياً كل 15 ثانية
         </p>
       </main>
     </div>

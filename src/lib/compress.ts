@@ -16,7 +16,7 @@ export async function compressImage(
   if (!file.type.startsWith("image/")) throw new Error("الملف ليس صورة");
 
   const bitmap = await createImageBitmap(file).catch(() => {
-    throw new Error("تعذر قراءة الصورة — قد تكون تالفة");
+    throw new Error("تعذّر قراءة الصورة — قد تكون تالفة");
   });
 
   let { width, height } = bitmap;
@@ -28,7 +28,7 @@ export async function compressImage(
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("تعذر معالجة الصورة");
+  if (!ctx) throw new Error("تعذّر معالجة الصورة");
   ctx.drawImage(bitmap, 0, 0, width, height);
   bitmap.close();
 

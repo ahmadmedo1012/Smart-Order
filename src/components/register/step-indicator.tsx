@@ -10,7 +10,7 @@ export type WizardStep = "plan" | "account";
 const STEP_ORDER: WizardStep[] = ["plan", "account"];
 
 const STEP_LABELS: Record<WizardStep, string> = {
-  plan: "اختر الخطة",
+  plan: "اختر الباقة",
   account: "بيانات الحساب",
 };
 

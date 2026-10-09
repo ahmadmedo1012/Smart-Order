@@ -88,7 +88,7 @@ export default function OnboardingPage() {
         setZones(z.data.zones);
         setHasCod(p.data.methods.some((m) => m.type === "COD" && m.isActive));
       })
-      .catch(() => toast.error("تعذر تحميل بيانات الإعداد"))
+      .catch(() => toast.error("تعذّر تحميل بيانات الإعداد"))
       .finally(() => setLoading(false));
   }, [businessId]);
 
@@ -102,7 +102,7 @@ export default function OnboardingPage() {
       setCategories((c) => [...c, r.data.category]);
       setNewCat("");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذرت الإضافة");
+      toast.error(e instanceof Error ? e.message : "تعذّرت الإضافة");
     }
   }
 
@@ -117,7 +117,7 @@ export default function OnboardingPage() {
       setZones((z) => [...z, r.data.zone]);
       setZoneName("");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذرت الإضافة");
+      toast.error(e instanceof Error ? e.message : "تعذّرت الإضافة");
     }
   }
 
@@ -131,7 +131,7 @@ export default function OnboardingPage() {
       });
       toast.success("تم الحفظ");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذر الحفظ");
+      toast.error(e instanceof Error ? e.message : "تعذّر الحفظ");
     }
   }
 
@@ -156,7 +156,7 @@ export default function OnboardingPage() {
       }
     } catch (e) {
       toast.error(
-        e instanceof Error ? e.message : "تعذر النشر — أكمل الخطوات أولاً",
+        e instanceof Error ? e.message : "تعذّر النشر — أكمل الخطوات أولاً",
       );
     } finally {
       setPublishing(false);
@@ -350,7 +350,7 @@ export default function OnboardingPage() {
                       setCategories((cs) => cs.filter((x) => x.id !== c.id));
                     } catch (e) {
                       toast.error(
-                        e instanceof Error ? e.message : "تعذر الحذف",
+                        e instanceof Error ? e.message : "تعذّر الحذف",
                       );
                     }
                   }}
@@ -422,7 +422,7 @@ export default function OnboardingPage() {
                       );
                       setZones((zs) => zs.filter((x) => x.id !== z.id));
                     } catch {
-                      toast.error("تعذر الحذف");
+                      toast.error("تعذّر الحذف");
                     }
                   }}
                   aria-label={`حذف ${z.name}`}

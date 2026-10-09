@@ -11,8 +11,18 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function TrackPage({ params }: { params: Promise<{ token: string }> }) {
+export default async function TrackPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ token: string }>;
+  searchParams: Promise<{ placed?: string }>;
+}) {
   const { token } = await params;
+  /* r133 (A1 F9): ?placed=1 rides the redirect from checkout — the
+     confirmation is durable in the URL (refresh-safe), not component
+     state. */
+  const { placed } = await searchParams;
   if (!/^[0-9a-f-]{16,64}$/i.test(token)) notFound();
 
   const order = await db.order.findUnique({
@@ -29,6 +39,7 @@ export default async function TrackPage({ params }: { params: Promise<{ token: s
 
   return (
     <TrackingClient
+      placed={placed === "1"}
       order={{
         orderNumber: order.orderNumber,
         status: order.status as OrderStatus,

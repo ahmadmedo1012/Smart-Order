@@ -12,7 +12,7 @@ import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { ok, fail, handleError, readJson } from "@/lib/api";
 import { normalizeLibyanPhone, toE164 } from "@/lib/phone";
-import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { dbRateLimit, clientIp } from "@/lib/rate-limit";
 import { MAX_ORDER_ITEMS, MAX_ORDER_QUANTITY } from "@/lib/constants";
 import { buildOrderMessage } from "@/lib/whatsapp";
 import { Prisma } from "@prisma/client";
@@ -52,7 +52,9 @@ function orderNumberFor(date: Date, seq: number): string {
 export async function POST(req: NextRequest) {
   try {
     const ip = clientIp(req);
-    const rl = rateLimit(`order:${ip}`, 8, 60 * 1000);
+    /* r133 (A2 N2): awaited authoritative twin (fail-closed) — the
+       documented r132 handoff executed for the money path. */
+    const rl = await dbRateLimit(`order:${ip}`, 8, 60 * 1000);
     if (!rl.ok) return fail("طلبات كثيرة جداً في وقت قصير، انتظر قليلاً", 429);
 
     const input = createSchema.parse(await readJson(req));

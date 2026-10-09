@@ -19,7 +19,7 @@ interface HeaderProps {
 const DEMO_STORE_SLUG = "demo-store";
 
 const landingLinks = [
-  { href: "/pricing", label: "الخطط والأسعار" },
+  { href: "/pricing", label: "الباقات والأسعار" },
   { href: `/store/${DEMO_STORE_SLUG}`, label: "متجر تجريبي" },
   { href: "/login", label: "تسجيل الدخول" },
 ];

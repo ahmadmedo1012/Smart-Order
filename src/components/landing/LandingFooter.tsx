@@ -8,7 +8,7 @@ import Link from "next/link";
 const SUPPORT_WHATSAPP = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "218910089975";
 
 const QUICK_LINKS = [
-  { href: "/pricing", label: "الخطط" },
+  { href: "/pricing", label: "الباقات" },
   { href: "/store/demo-store", label: "متجر تجريبي" },
   { href: "/login", label: "تسجيل الدخول" },
   { href: "/register", label: "اشترك الآن" },

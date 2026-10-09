@@ -12,6 +12,7 @@ import { Reveal } from "@/components/ui/scroll-reveal";
 import { CountUp } from "@/components/ui/CountUp";
 import { useMagnetic } from "@/hooks/useMagnetic";
 import { PageScrollProgress } from "@/components/shared/page-scroll-progress";
+import { api } from "@/lib/client";
 import { type Plan, toArabicNumber } from "@/lib/plan-types";
 
 /** Plan metadata by name (not index) — family PLAN_META pattern.
@@ -191,12 +192,14 @@ export function PricingClient({ initialPlans }: { initialPlans: Plan[] | null })
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/plans");
-      const data = await res.json();
-      setPlans(data.data ?? []);
-      setError(null);
+      /* r133 (A2 §2-3): lib/client.ts api.get — envelope unwrap + res.ok
+         gate + Arabic network errors. The raw fetch answered a 500
+         {success:false} with plans=[] and error=null, rendering the
+         empty catalog as if it were the catalog (A2's sharper case). */
+      const r = await api.get<Plan[]>("/api/plans");
+      setPlans(r.data ?? []);
     } catch {
-      setError("فشل تحميل الخطط");
+      setError("تعذّر تحميل الباقات");
     } finally {
       setLoading(false);
     }
@@ -208,7 +211,9 @@ export function PricingClient({ initialPlans }: { initialPlans: Plan[] | null })
   }, []);
 
   return (
-    <div className="min-h-dvh overflow-x-clip bg-background">
+    /* r133 (A11 S3): the pricing page had no <main> landmark — axe
+       region rule fails and SR landmark nav finds nothing. */
+    <main className="min-h-dvh overflow-x-clip bg-background">
       {/* r128-F8 (B18): page-level scroll progress — quiet 2px flat ribbon */}
       <PageScrollProgress />
       <Header />
@@ -218,19 +223,19 @@ export function PricingClient({ initialPlans }: { initialPlans: Plan[] | null })
           {/* r128-F8 (B13/B18): chapter label — quiet mono eyebrow (ln-label
               pattern: mono 12px + 0.08em tracking, on product tokens) */}
           <p className="mb-4 font-mono text-xs font-medium tracking-[0.08em] text-accent-foreground">
-            01 — الخطط
+            01 — الباقات
           </p>
           {/* Family top pill — flame accent */}
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent-foreground/20 bg-accent-foreground/[0.06] px-4 py-1.5 text-sm text-accent-foreground">
             <AnimatedSparkles className="size-4" />
-            خطط تناسب جميع الأحجام
+            باقات تناسب جميع الأحجام
           </div>
           {/* Family typography §3 — font-heading + tracking-tight + text-balance */}
           <h1 className="mb-4 font-heading text-3xl font-bold leading-[1.15] tracking-tight text-balance sm:text-4xl md:text-5xl lg:text-6xl">
-            اختر خطتك
+            اختر باقتك
           </h1>
           <p className="mx-auto max-w-xl text-sm text-muted-foreground sm:text-base">
-            ابدأ برفع متجرك رقمياً واختر الخطة التي تناسب احتياجاتك — الترقية في أي وقت والفرق يُحسب تناسبياً
+            ابدأ برفع متجرك رقمياً واختر الباقة التي تناسب احتياجاتك — الترقية في أي وقت والفرق يُحسب تناسبياً
           </p>
 
           {/* Family monthly/yearly switch §5.7 — capsule (r128-F8: solid
@@ -304,7 +309,7 @@ export function PricingClient({ initialPlans }: { initialPlans: Plan[] | null })
           ) : plans.length === 0 ? (
             <div className="flex flex-col items-center gap-4 py-20 text-muted-foreground">
               <UtensilsCrossed className="size-10 opacity-40" aria-hidden="true" />
-              <p className="text-sm">لا توجد خطط متاحة حالياً</p>
+              <p className="text-sm">لا توجد باقات متاحة حالياً</p>
               <Button variant="outline" onClick={loadPlans}>
                 إعادة المحاولة
               </Button>
@@ -335,7 +340,7 @@ export function PricingClient({ initialPlans }: { initialPlans: Plan[] | null })
               },
               {
                 q: "هل يوجد فترة تجريبية؟",
-                a: "نعم، الخطة المجانية متاحة للأبد مع ميزات محدودة. يمكنك الترقية في أي وقت.",
+                a: "نعم، الباقة المجانية متاحة للأبد مع ميزات محدودة. يمكنك الترقية في أي وقت.",
               },
               {
                 q: "هل يمكنني إلغاء الاشتراك؟",
@@ -395,6 +400,6 @@ export function PricingClient({ initialPlans }: { initialPlans: Plan[] | null })
       </section>
 
       <Footer />
-    </div>
+    </main>
   );
 }

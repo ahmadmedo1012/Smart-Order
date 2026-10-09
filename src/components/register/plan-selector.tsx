@@ -44,7 +44,7 @@ export function PlanSelector({
 
   return (
     <div className="animate-fade-in">
-      <h2 className="mb-8 text-center font-heading text-2xl font-bold">اختر خطة تناسب متجرك</h2>
+      <h2 className="mb-8 text-center font-heading text-2xl font-bold">اختر باقة تناسب متجرك</h2>
       <div className="mx-auto mb-8 grid max-w-4xl gap-4 md:grid-cols-2 lg:grid-cols-4">
         {plans.map((plan, i) => {
           const meta = PLAN_META[plan.name] ?? DEFAULT_META;
@@ -118,7 +118,7 @@ export function PlanSelector({
       </div>
       <div className="text-center">
         <Button size="lg" variant={selected ? "flame" : "outline"} className="h-14 px-10 text-lg" disabled={!selectedPlan} onClick={onContinue}>
-          {selected ? `متابعة مع خطة ${selected.nameAr}` : "اختر خطة أولاً"}
+          {selected ? `متابعة مع باقة ${selected.nameAr}` : "اختر باقة أولاً"}
           <MotionArrowLeft className="ms-2 size-5" />
         </Button>
       </div>

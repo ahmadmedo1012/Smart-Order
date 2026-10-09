@@ -223,7 +223,7 @@ export function ProductEditor({
       setImageUrl(res.data.url);
       toast.success("تم رفع الصورة");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذر رفع الصورة");
+      toast.error(err instanceof Error ? err.message : "تعذّر رفع الصورة");
     } finally {
       setUploading(false);
     }
@@ -299,7 +299,7 @@ export function ProductEditor({
       }
       onClose(true);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذر الحفظ");
+      toast.error(err instanceof Error ? err.message : "تعذّر الحفظ");
     } finally {
       setSaving(false);
     }
@@ -313,7 +313,7 @@ export function ProductEditor({
       toast.success("تم أرشفة المنتج");
       onClose(true);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذر الأرشفة");
+      toast.error(err instanceof Error ? err.message : "تعذّر الأرشفة");
     } finally {
       setSaving(false);
     }

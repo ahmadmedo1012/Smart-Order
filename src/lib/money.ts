@@ -22,7 +22,10 @@ export function parseLyd(input: string | number): number {
   return whole * 1000 + fracNum;
 }
 
-/** Format millimes as "12.500" (Western digits, 3 decimals trimmed gracefully). */
+/** Format millimes as "12.500" (Western digits, 3 decimals trimmed
+ *  gracefully). RAW by design: the product/zone editor forms seed their
+ *  inputs from this and round-trip through parseLyd, whose single-dot
+ *  contract would reject a grouped "12.500.000". */
 export function formatLydAmount(millimes: number): string {
   const sign = millimes < 0 ? "-" : "";
   const abs = Math.abs(Math.round(millimes));
@@ -31,9 +34,24 @@ export function formatLydAmount(millimes: number): string {
   return `${sign}${whole}.${frac}`;
 }
 
-/** Format millimes as Arabic-natural currency string: "12.500 د.ل" */
+/** ar-LY dot grouping on integer strings ≥ 1,000 ("12500000" →
+ * "12.500.000") — hand-rolled, not Intl, so the output is
+ * byte-identical on server and client regardless of ICU build
+ * (hydration-safe family policy; matches Intl ar-LY exactly). */
+function groupDots(intStr: string): string {
+  return intStr.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+/** Format millimes as Arabic-natural currency string: "12.500 د.ل".
+ * r133 (A12 S2/R6): the DISPLAY seam now groups the whole part ≥ 1,000
+ * ("12.500.000 د.ل") like SB/madarek — KPI/table money rendered
+ * "12500000.000" ungrouped before. Forms keep raw formatLydAmount. */
 export function formatLyd(millimes: number): string {
-  return `${formatLydAmount(millimes)} د.ل`;
+  const raw = formatLydAmount(millimes);
+  const neg = raw.startsWith("-") ? "-" : "";
+  const body = neg ? raw.slice(1) : raw;
+  const [whole, frac] = body.split(".");
+  return `${neg}${groupDots(whole)}.${frac} د.ل`;
 }
 
 /** Parse Lyd input → millimes, or null when invalid/empty (for forms). */

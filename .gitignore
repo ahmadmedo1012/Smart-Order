@@ -56,4 +56,5 @@ coverage/
 tests-results/
 playwright-report/
 download/
-package-lock.json
+# r133 (A13 S-07): package-lock.json is the lockfile now (bun.lock
+# retired) — it must be tracked so Vercel resolves npm installs.

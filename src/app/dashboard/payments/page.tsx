@@ -27,6 +27,7 @@ import {
   type PaymentType,
 } from "@/lib/constants";
 import { toast } from "sonner";
+import { useDirtyClose } from "@/hooks/use-dirty-close";
 import { CreditCard, Plus, Trash2, Phone, X } from "lucide-react";
 
 interface Method {
@@ -148,7 +149,7 @@ export default function PaymentsPage() {
                           load();
                         } catch (e) {
                           toast.error(
-                            e instanceof Error ? e.message : "تعذر التحديث",
+                            e instanceof Error ? e.message : "تعذّر التحديث",
                           );
                         }
                       }}
@@ -215,7 +216,7 @@ export default function PaymentsPage() {
             setDeleting(null);
             load();
           } catch (e) {
-            toast.error(e instanceof Error ? e.message : "تعذر الحذف");
+            toast.error(e instanceof Error ? e.message : "تعذّر الحذف");
           } finally {
             setDeleteBusy(false);
           }
@@ -255,6 +256,27 @@ function MethodDialog({
   const [number, setNumber] = React.useState("");
   const [saving, setSaving] = React.useState(false);
 
+  /* r133 (A1 S6): dirty-draft guard (type/name/instructions/number —
+     incl. the transfer number) — ESC/scrim/X/إلغاء ask first
+     (product-editor recipe via useDirtyClose). */
+  const pristine = {
+    type: available[0],
+    name: PAYMENT_TYPE_AR[available[0]],
+    instructions: "",
+    number: "",
+  };
+  const dirty =
+    type !== pristine.type ||
+    name !== pristine.name ||
+    instructions !== pristine.instructions ||
+    number !== pristine.number;
+  const { requestClose, guard } = useDirtyClose({
+    dirty,
+    busy: saving,
+    close: () => onClose(false),
+    entityLabel: "طريقة الدفع",
+  });
+
   function onTypeChange(t: PaymentType) {
     setType(t);
     setName(PAYMENT_TYPE_AR[t]);
@@ -282,14 +304,14 @@ function MethodDialog({
       toast.success("تمت إضافة طريقة الدفع");
       onClose(true);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذر الحفظ");
+      toast.error(err instanceof Error ? err.message : "تعذّر الحفظ");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose(false)}>
+    <Dialog open onOpenChange={(v) => !v && requestClose()}>
       <DialogContent
         dir="rtl"
         showCloseButton={false}
@@ -400,6 +422,7 @@ function MethodDialog({
           </Button>
         </div>
       </DialogContent>
+      {guard}
     </Dialog>
   );
 }

@@ -38,6 +38,9 @@ function SelectTrigger({
       data-size={size}
       className={cn(
         "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-primary aria-invalid:border-destructive aria-invalid:shadow-(--state-input-error-halo) flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-4 text-base whitespace-nowrap transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none focus-visible:shadow-(--state-input-focus-halo) disabled:cursor-not-allowed disabled:opacity-60 data-[size=default]:h-11 data-[size=sm]:h-9 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        /* r133 (A10): hover border state (madarek components.css:721) —
+           invalid triggers keep their destructive border on hover. */
+        "hover:not-aria-invalid:border-foreground/25",
         className
       )}
       {...props}

@@ -31,6 +31,19 @@ export default function LoginPage() {
   const [showForgot, setShowForgot] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  /* r133 (A1 S5): /login?expired=1 arrives from the 401 session-expiry
+     funnel (lib/client.ts) — the toast there dies with the navigation,
+     so the login page finishes the story with a quiet banner. The flag
+     is consumed (replaceState) so refresh/share doesn't re-show it. */
+  const [expired, setExpired] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (new URLSearchParams(window.location.search).get("expired") === "1") {
+      setExpired(true);
+      window.history.replaceState(null, "", "/login");
+    }
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,7 +56,7 @@ export default function LoginPage() {
       // (family lesson: prevents blank screen in App Router rehydration)
       setTimeout(() => window.location.replace("/dashboard"), 150);
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "تعذر تسجيل الدخول، حاول مرة أخرى";
+      const message = err instanceof ApiError ? err.message : "تعذّر تسجيل الدخول، حاول مرة أخرى";
       setError(message);
     } finally {
       setLoading(false);
@@ -51,7 +64,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-dvh items-center justify-center px-4 py-20 sm:px-6">
+    <main className="relative flex min-h-dvh items-center justify-center px-4 py-20 sm:px-6">
       <div className="grain-overlay" aria-hidden="true" />
 
       {/* Back to home + ThemeToggle (family fixed corner cluster) */}
@@ -98,6 +111,14 @@ export default function LoginPage() {
 
         <div className="px-[clamp(2rem,4vw,3rem)] pb-[clamp(2rem,4vw,3rem)] pt-4">
           <form onSubmit={onSubmit} className="space-y-5" noValidate>
+            {expired && (
+              <p
+                role="alert"
+                className="rounded-lg border border-warning/25 bg-warning/15 px-4 py-3 text-sm text-warning-ink"
+              >
+                انتهت جلستك لأسباب أمنية — سجّل الدخول من جديد.
+              </p>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">البريد الإلكتروني</Label>
               {/* Family SmartBot input — bg-secondary/40 quiet well; the
@@ -161,7 +182,7 @@ export default function LoginPage() {
               {loading ? (
                 <span className="flex items-center gap-2">
                   <LogIn className="size-4 animate-pulse" aria-hidden="true" />
-                  جاري تسجيل الدخول...
+                  جارٍ تسجيل الدخول…
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
@@ -221,6 +242,6 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

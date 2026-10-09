@@ -15,6 +15,8 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
       data-slot="textarea"
       className={cn(
         "border-input placeholder:text-placeholder-text flex field-sizing-content min-h-24 w-full rounded-md border bg-transparent px-4 py-3 text-base leading-[1.65] transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none disabled:cursor-not-allowed disabled:opacity-60",
+        /* r133 (A10): hover border state (madarek components.css:721). */
+        "hover:not-aria-invalid:border-foreground/25",
         "focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)",
         "aria-invalid:border-destructive aria-invalid:shadow-(--state-input-error-halo)",
         className

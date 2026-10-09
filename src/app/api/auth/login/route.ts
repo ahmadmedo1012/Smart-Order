@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { verifyPassword, hashPassword } from "@/lib/password";
 import { createSession } from "@/lib/auth";
 import { ok, fail, handleError, readJson } from "@/lib/api";
-import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { dbRateLimit, clientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -16,7 +16,10 @@ const schema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const ip = clientIp(req);
-    const rl = rateLimit(`login:${ip}`, 10, 10 * 60 * 1000);
+    /* r133 (A2 N2): the awaited authoritative twin (SM check() verbatim,
+       fail-closed) — the documented r132 handoff executed; brute-force
+       damping no longer depends on which lambda answers. */
+    const rl = await dbRateLimit(`login:${ip}`, 10, 10 * 60 * 1000);
     if (!rl.ok) return fail("عدد كبير من محاولات الدخول، انتظر قليلاً ثم حاول مجدداً", 429);
 
     const input = schema.parse(await readJson(req));

@@ -40,7 +40,7 @@ export function ReceiptUpload({
               const file = e.target.files?.[0];
               if (!file) return;
               setUploading(true);
-              toast.info("جاري رفع الصورة...");
+              toast.info("جارٍ رفع الصورة…");
               try {
                 const compressed = await compressImage(file);
                 const res = await fetch("/api/subscriptions/receipt", {
@@ -50,13 +50,13 @@ export function ReceiptUpload({
                 });
                 const d = await res.json();
                 if (!res.ok) {
-                  toast.error(d?.error || "فشل رفع الصورة");
+                  toast.error(d?.error || "تعذّر رفع الصورة");
                   return;
                 }
                 if (d.data?.url) onReceiptChange(d.data.url);
-                else toast.error("فشل رفع الصورة");
+                else toast.error("تعذّر رفع الصورة");
               } catch (err) {
-                toast.error(err instanceof Error ? err.message : "فشل رفع الصورة");
+                toast.error(err instanceof Error ? err.message : "تعذّر رفع الصورة");
               } finally {
                 setUploading(false);
               }
@@ -67,7 +67,7 @@ export function ReceiptUpload({
           ) : (
             <Upload className="size-4 text-muted-foreground" aria-hidden="true" />
           )}
-          {uploading ? "جاري الرفع..." : "اختر صورة"}
+          {uploading ? "جارٍ الرفع…" : "اختر صورة"}
         </label>
         {receiptImageUrl && (
           <button

@@ -203,7 +203,7 @@ export function Storefront({
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="ابحث في المنتجات..."
+                placeholder="ابحث في المنتجات…"
                 aria-label="ابحث في المنتجات"
                 className="w-full h-11 rounded-md border border-input bg-card ps-9 pe-8 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"
               />
@@ -214,10 +214,14 @@ export function Storefront({
               )}
             </div>
             {categoriesWithProducts.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pb-0.5" role="tablist" aria-label="أقسام المنتجات">
+              /* r133 (A11 S4): a filter strip is NOT a tablist — the old
+                 role=tablist/tab/aria-selected promised tabpanels + arrow
+                 roving that never existed (the dashboard's underline-tabs
+                 adopted the same r131 downgrade: SM CategoryTabs recipe —
+                 role=group + aria-pressed). */
+              <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pb-0.5" role="group" aria-label="تصفية أقسام المنتجات">
                 <button
-                  role="tab"
-                  aria-selected={activeCategory === "ALL"}
+                  aria-pressed={activeCategory === "ALL"}
                   onClick={() => setActiveCategory("ALL")}
                   className={pillClasses(activeCategory === "ALL", "h-10 shrink-0 px-4")}
                 >
@@ -226,8 +230,7 @@ export function Storefront({
                 {categoriesWithProducts.map((c) => (
                   <button
                     key={c.id}
-                    role="tab"
-                    aria-selected={activeCategory === c.id}
+                    aria-pressed={activeCategory === c.id}
                     onClick={() => setActiveCategory(c.id)}
                     className={pillClasses(activeCategory === c.id, "h-10 shrink-0 px-4")}
                   >
@@ -240,8 +243,9 @@ export function Storefront({
         </div>
       </header>
 
-      {/* Menu */}
-      <main id="main" className="flex-1 mx-auto w-full max-w-4xl px-4 py-5">
+      {/* Menu — r133 (A11 S2): tabIndex={-1} on the skip-link target so
+          Safari/Firefox move keyboard focus into <main> on skip. */}
+      <main id="main" tabIndex={-1} className="flex-1 mx-auto w-full max-w-4xl px-4 py-5 focus:outline-none">
         {data.business.description && activeCategory === "ALL" && !q && (
           <p className="text-sm text-muted-foreground leading-relaxed mb-5 text-center max-w-lg mx-auto">
             {data.business.description}

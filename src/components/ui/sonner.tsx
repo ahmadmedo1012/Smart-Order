@@ -37,10 +37,27 @@ if (
     .__soManualDismiss
 ) {
   const original: SonnerError = toast.error
+  /* r133 (A11 S6): assertive announcement — sonner v2 renders every
+     card as role=status (the polite queue), so a persisting error
+     reason waited behind whatever the SR was reading. SM/SB tier
+     their premium-toast errors to role=alert; wrapping the message
+     here keeps every raw `toast.error` call site untouched while the
+     failure reason cuts through. */
   const widened: SonnerError & { __soManualDismiss?: boolean } = (
     message,
     data
-  ) => original(message, { duration: Infinity, ...data })
+  ) =>
+    original(
+      <span role="alert">
+        {/* sonner accepts render-function messages; SO call sites are
+            all strings — invoke eagerly so the wrapper keeps its type. */}
+        {typeof message === "function" ? message() : message}
+      </span>,
+      {
+        duration: Infinity,
+        ...data,
+      }
+    )
   widened.__soManualDismiss = true
   toast.error = widened
 }

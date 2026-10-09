@@ -34,6 +34,11 @@ const nextConfig: NextConfig = {
        * or re-points them — safe for immutable (smart-link r126 /
        * smart-menu round85-B7 pattern, exact). */
       { source: "/fonts/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+      /* r133 (A2 §2-11 / SO-N3): og-default.png (127KB, the store-OG
+       * fallback art) had no cache rule — every store page OG render
+       * revalidated it. Day + SWR (SM's og rule shape): the art only
+       * changes on a deliberate re-upload. */
+      { source: "/og-default.png", headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }] },
     ];
   },
 };

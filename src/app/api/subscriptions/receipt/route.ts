@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     const media = await storeImage(data, { businessId: null });
     return ok(media, { status: 201 });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "تعذر رفع الصورة";
+    const message = err instanceof Error ? err.message : "تعذّر رفع الصورة";
     if (message.includes("كبير") || message.includes("نوع") || message.includes("صيغة")) {
       return fail(message, 422, "VALIDATION");
     }

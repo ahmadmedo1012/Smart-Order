@@ -39,7 +39,7 @@ export function PlanUsageBadge({
   }, [plan, productCount, monthOrders]);
 
   if (!plan) {
-    // No plan yet — the family "بدون خطة" state with an upgrade nudge
+    // No plan yet — the family "بدون باقة" state with an upgrade nudge
     // (solid pastel copper chip — the canonical badge grammar)
     return (
       <a
@@ -50,7 +50,7 @@ export function PlanUsageBadge({
         )}
       >
         <Sparkles className="size-3.5" aria-hidden="true" />
-        اختر خطة لمتجرك
+        اختر باقة لمتجرك
       </a>
     );
   }
@@ -68,7 +68,7 @@ export function PlanUsageBadge({
         )}
       >
         <Sparkles className="size-3.5" aria-hidden="true" />
-        خطة {plan.nameAr}
+        باقة {plan.nameAr}
         {isFree && " — مجانية"}
       </span>
       {usage && usage.products > 0 && <UsageBar label="المنتجات" pct={usage.products} />}

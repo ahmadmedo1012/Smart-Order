@@ -19,7 +19,7 @@ export default function StoreError({
     <main dir="rtl" className="min-h-svh bg-background">
       <div className="mx-auto flex min-h-svh max-w-2xl flex-col items-center justify-center px-6">
         <ErrorState
-          title="تعذر تحميل المتجر"
+          title="تعذّر تحميل المتجر"
           description="حدث خطأ أثناء تحميل بيانات المتجر. تحقق من اتصالك وحاول مرة أخرى."
           retry={reset}
         />

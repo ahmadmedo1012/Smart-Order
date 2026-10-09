@@ -52,19 +52,33 @@ function isSessionExpiry(path: string, status: number, code?: string): boolean {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<{ data: T; meta?: Record<string, unknown> }> {
-  const res = await fetch(path, {
-    ...init,
-    headers: {
-      ...(init?.body ? { "Content-Type": "application/json" } : {}),
-      ...(init?.headers ?? {}),
-    },
-    cache: "no-store",
-  });
+  /* r133 (A2 N1): a network-level fetch failure (offline, DNS, dropped
+     mobile data) used to rethrow the raw engine TypeError — "Failed to
+     fetch" / "Load failed" — which the ~30 `e instanceof Error ?
+     e.message` catch sites then printed inside Arabic toasts (money
+     path included). Wrapped once HERE, every api.* consumer inherits
+     the Arabic ApiError (SM r120-U5 getErrorMessage twin, one seam). */
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      ...init,
+      headers: {
+        ...(init?.body ? { "Content-Type": "application/json" } : {}),
+        ...(init?.headers ?? {}),
+      },
+      cache: "no-store",
+    });
+  } catch {
+    throw new ApiError(
+      "تعذّر الاتصال بالشبكة — تحقّق من اتصالك وحاول مرة أخرى",
+      0,
+    );
+  }
   let body: Envelope<T>;
   try {
     body = (await res.json()) as Envelope<T>;
   } catch {
-    throw new ApiError("تعذر الاتصال بالخادم، تحقق من الشبكة", res.status);
+    throw new ApiError("تعذّر الاتصال بالخادم، تحقّق من الشبكة", res.status);
   }
   if (!res.ok || !body.success) {
     if (isSessionExpiry(path, res.status, body.error?.code)) handleSessionExpired();

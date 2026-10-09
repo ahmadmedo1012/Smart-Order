@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { ROLE_AR, ROLES, ROLE_PERMISSIONS, type Role } from "@/lib/constants";
 import { formatArabicDate } from "@/lib/arabic";
+import { useDirtyClose } from "@/hooks/use-dirty-close";
 import { toast } from "sonner";
 import { UserCog, Plus, Trash2, ShieldCheck, X } from "lucide-react";
 
@@ -142,7 +143,7 @@ export default function StaffPage() {
                         load();
                       } catch (err) {
                         toast.error(
-                          err instanceof Error ? err.message : "تعذر التحديث",
+                          err instanceof Error ? err.message : "تعذّر التحديث",
                         );
                       }
                     }}
@@ -216,7 +217,7 @@ export default function StaffPage() {
             setRemoving(null);
             load();
           } catch (e) {
-            toast.error(e instanceof Error ? e.message : "تعذرت الإزالة");
+            toast.error(e instanceof Error ? e.message : "تعذّرت الإزالة");
           } finally {
             setRemoveBusy(false);
           }
@@ -256,6 +257,22 @@ function StaffDialog({
   const [role, setRole] = React.useState<Role>("STAFF");
   const [saving, setSaving] = React.useState(false);
 
+  /* r133 (A1 S6): dirty-draft guard (name/email/temp-password/role) —
+     ESC/scrim/X/إلغاء ask first instead of discarding silently
+     (product-editor recipe via useDirtyClose). */
+  const pristine = { name: "", email: "", password: "", role: "STAFF" as Role };
+  const dirty =
+    name !== pristine.name ||
+    email !== pristine.email ||
+    password !== pristine.password ||
+    role !== pristine.role;
+  const { requestClose, guard } = useDirtyClose({
+    dirty,
+    busy: saving,
+    close: () => onClose(false),
+    entityLabel: "عضو الفريق",
+  });
+
   async function save() {
     const e: { name?: string; email?: string; password?: string } = {};
     if (!name.trim()) e.name = "أدخل الاسم";
@@ -276,14 +293,14 @@ function StaffDialog({
       toast.success("تمت إضافة العضو — يمكنه تسجيل الدخول الآن");
       onClose(true);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذر الحفظ");
+      toast.error(err instanceof Error ? err.message : "تعذّر الحفظ");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose(false)}>
+    <Dialog open onOpenChange={(v) => !v && requestClose()}>
       <DialogContent
         dir="rtl"
         showCloseButton={false}
@@ -394,6 +411,7 @@ function StaffDialog({
           </Button>
         </div>
       </DialogContent>
+      {guard}
     </Dialog>
   );
 }

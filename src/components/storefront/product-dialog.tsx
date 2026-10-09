@@ -230,8 +230,11 @@ export function ProductDialog({
                         key={o.id}
                         type="button"
                         onClick={() => toggleOption(g.id, o.id, g.maxSelect)}
-                        aria-checked={isSelected}
-                        role={g.maxSelect > 1 ? "checkbox" : "radio"}
+                        /* r133 (A11 S8): aria-pressed toggle buttons (SM
+                           OrderDialog chip recipe) — the old
+                           role=radio/checkbox promised APG roving arrows
+                           + group semantics that never existed. */
+                        aria-pressed={isSelected}
                         className={`w-full flex items-center gap-3 rounded-xl border px-3.5 h-11 text-start transition-colors ${
                           isSelected ? "border-primary bg-primary/10" : "border-border hover:bg-muted/60"
                         }`}
@@ -270,7 +273,7 @@ export function ProductDialog({
               id="item-note"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="مثال: بدون بصل، صوص زيادة..."
+              placeholder="مثال: بدون بصل، صوص زيادة…"
               maxLength={200}
               rows={2}
               className="w-full min-h-11 rounded-md border border-input bg-background px-4 py-2.5 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"

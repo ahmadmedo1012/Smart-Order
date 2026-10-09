@@ -102,7 +102,14 @@ export default function SettingsPage() {
     }
     setSaving(true);
     try {
-      await api.patch("/api/business", {
+      /* r133 (A1 M1): the publish gate answers 200 {published:false, reason}
+         when the store lacks a section + an available product — onboarding
+         already surfaces it; settings used to toast success regardless. */
+      const r = await api.patch<{
+        business: BusinessSettings;
+        published?: boolean;
+        reason?: string;
+      }>("/api/business", {
         businessId,
         name: form.name.trim(),
         description: form.description.trim() || null,
@@ -114,10 +121,16 @@ export default function SettingsPage() {
         logoUrl: form.logoUrl || null,
         ...(publish !== undefined ? { isPublished: publish } : {}),
       });
-      toast.success("تم حفظ الإعدادات");
+      if (publish === true && r.data.published === false) {
+        toast.error(
+          r.data.reason ?? "أضف قسماً واحداً ومنتجاً واحداً على الأقل قبل النشر",
+        );
+      } else {
+        toast.success("تم حفظ الإعدادات");
+      }
       load();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذر الحفظ");
+      toast.error(e instanceof Error ? e.message : "تعذّر الحفظ");
     } finally {
       setSaving(false);
     }
@@ -140,7 +153,7 @@ export default function SettingsPage() {
       setForm((f) => ({ ...f, logoUrl: r.data.url }));
       toast.success("تم رفع الشعار");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذر رفع الشعار");
+      toast.error(err instanceof Error ? err.message : "تعذّر رفع الشعار");
     } finally {
       setUploadingLogo(false);
     }
@@ -183,10 +196,20 @@ export default function SettingsPage() {
                 {storeUrl}
               </code>
               <button
-                onClick={() => {
-                  navigator.clipboard.writeText(storeUrl);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 1500);
+                onClick={async () => {
+                  /* r133 (A11 S5): SR announce — the icon swap was silent
+                     to screen readers; the toast rides sonner's live
+                     region. r133 (A1 N7): try/catch so an insecure
+                     context doesn't reject unhandled (the app's own
+                     copyToClipboard helper pattern). */
+                  try {
+                    await navigator.clipboard.writeText(storeUrl);
+                    setCopied(true);
+                    toast.success("تم نسخ الرابط");
+                    setTimeout(() => setCopied(false), 1500);
+                  } catch {
+                    toast.error("تعذّر النسخ");
+                  }
                 }}
                 className="rounded-lg border border-border p-2 hover:bg-muted transition-colors"
                 aria-label="نسخ الرابط"
@@ -380,7 +403,7 @@ export default function SettingsPage() {
                 setForm((f) => ({ ...f, address: e.target.value }))
               }
               maxLength={200}
-              placeholder="الشارع، المعلم القريب..."
+              placeholder="الشارع، المعلم القريب…"
             />
           </div>
           <div className="space-y-2 sm:col-span-2">

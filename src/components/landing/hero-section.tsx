@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { toArabicNumber } from "@/lib/plan-types";
 import { MagneticGoldLink } from "@/components/landing/MagneticGoldLink";
 import { HeroDepthLayer } from "@/components/landing/HeroDepthLayer";
 import { OrbitScene } from "@/components/landing/OrbitScene";
@@ -111,7 +112,10 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
                   style={{ background: "var(--ln-lime)" }}
                   aria-hidden="true"
                 />
-                أكثر من {trustCount.toLocaleString("en-US").replace(/,/g, "")} متجر يثقون بنا
+                {/* r133 (A12 S1/R6): ONE grouping regime — was en-US commas
+                    then stripped to ungrouped "1500"; now the ar-LY dots
+                    every other count surface uses (2.990-style). */}
+                أكثر من {toArabicNumber(trustCount)} متجر يثقون بنا
               </div>
             )}
           </div>

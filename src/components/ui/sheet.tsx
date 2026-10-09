@@ -134,7 +134,9 @@ function SheetContent({
         {children}
         <SheetPrimitive.Close
           data-slot="sheet-close"
-          className="absolute top-4 end-4 z-[2] rounded-xs p-1 opacity-70 transition-opacity duration-(--t-fast) ease-smooth hover:opacity-100 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+          /* r133 (A10): 44px close hit floor — was p-1 + size-4 ≈24px
+             (madarek components.css:3188 is the reference). */
+          className="absolute top-3.5 end-3.5 z-[2] flex size-11 items-center justify-center rounded-xs opacity-70 transition-opacity duration-(--t-fast) ease-smooth hover:opacity-100 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
         >
           <XIcon />
           <span className="sr-only">إغلاق</span>

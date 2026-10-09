@@ -92,11 +92,11 @@ export default function AdminPaymentsPage() {
     try {
       await api.post(`/api/subscriptions/${id}/review`, { action, note });
       toast.success(
-        action === "APPROVE" ? "تمت الموافقة وتفعيل الخطة" : "تم رفض الطلب",
+        action === "APPROVE" ? "تمت الموافقة وتفعيل الباقة" : "تم رفض الطلب",
       );
       setPayments((p) => (p ? p.filter((x) => x.id !== id) : p));
     } catch (e) {
-      toast.error(e instanceof ApiError ? e.message : "تعذر تنفيذ الإجراء");
+      toast.error(e instanceof ApiError ? e.message : "تعذّر تنفيذ الإجراء");
     } finally {
       setBusyId(null);
     }
@@ -162,7 +162,7 @@ export default function AdminPaymentsPage() {
                     </span>
                     <div>
                       <div className="text-sm font-bold">
-                        خطة {PLAN_AR[p.planName] ?? p.planName}
+                        باقة {PLAN_AR[p.planName] ?? p.planName}
                         <span
                           className="ms-2 text-accent-foreground tabular-nums"
                           dir="ltr"
@@ -283,7 +283,7 @@ export default function AdminPaymentsPage() {
         title={`رفض طلب "${rejecting?.business?.name ?? ""}"؟`}
         description="يظهر سبب الرفض للعميل — استخدمه ليصحّح التحويل ويعيد الإرسال."
         fieldLabel="سبب الرفض (يظهر للعميل)"
-        placeholder="مثال: المبلغ المستلم لا يطابق قيمة الخطة"
+        placeholder="مثال: المبلغ المستلم لا يطابق قيمة الباقة"
         confirmLabel="رفض الطلب"
         busy={!!rejecting && busyId === rejecting.id}
         onConfirm={(note) => {

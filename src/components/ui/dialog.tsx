@@ -77,7 +77,10 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 end-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            /* r133 (A10): 44px close hit floor (madarek components.css:3188)
+               — was a bare size-4 icon ≈24px; legacy ring utilities retired
+               for the ONE global :focus-visible outline. */
+            className="absolute top-3.5 end-3.5 flex size-11 items-center justify-center rounded-xs opacity-70 transition-opacity duration-(--t-fast) ease-smooth hover:opacity-100 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
             {/* r131-F1b (A11 SO-7): Arabic screen-reader label — the kit

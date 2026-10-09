@@ -32,17 +32,34 @@ export function formatArabicDate(date: Date | string): string {
   return `${d.getDate()} ${AR_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-/** Relative "منذ ٥ دقائق" style label for dashboard freshness. */
+/** Counted relative-time phrase — r133 (A12 S6): the «منذ 5 دقيقة»
+ * plural bug is fixed with the counted-plural engine (SB _unitPhrase /
+ * madarek countAr shape): 1 = واحد/واحدة, 2 = dual, 3-10 = plural,
+ * 11+ = singular accusative. Prefix stays «منذ» (fleet ruling R9). */
+function sincePhrase(
+  n: number,
+  one: string,
+  two: string,
+  few: string,
+  many: string,
+): string {
+  if (n === 1) return `منذ ${one}`;
+  if (n === 2) return `منذ ${two}`;
+  if (n >= 3 && n <= 10) return `منذ ${n} ${few}`;
+  return `منذ ${n} ${many}`;
+}
+
+/** Relative "منذ 5 دقائق" style label for dashboard freshness. */
 export function timeAgoAr(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
   const sec = Math.floor((Date.now() - d.getTime()) / 1000);
   if (sec < 60) return "الآن";
   const min = Math.floor(sec / 60);
-  if (min < 60) return `منذ ${min} دقيقة`;
+  if (min < 60) return sincePhrase(min, "دقيقة واحدة", "دقيقتين", "دقائق", "دقيقة");
   const hr = Math.floor(min / 60);
-  if (hr < 24) return `منذ ${hr} ساعة`;
+  if (hr < 24) return sincePhrase(hr, "ساعة واحدة", "ساعتين", "ساعات", "ساعة");
   const day = Math.floor(hr / 24);
-  if (day < 30) return `منذ ${day} يوم`;
+  if (day < 30) return sincePhrase(day, "يوم واحد", "يومين", "أيام", "يوم");
   return formatArabicDate(d);
 }
 

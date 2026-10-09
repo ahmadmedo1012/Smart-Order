@@ -85,7 +85,7 @@ export default function CustomerDetailPage() {
       toast.success("حُفظت الملاحظة");
       load();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذر الحفظ");
+      toast.error(e instanceof Error ? e.message : "تعذّر الحفظ");
     } finally {
       setSaving(false);
     }
@@ -214,7 +214,7 @@ export default function CustomerDetailPage() {
           <Textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="ملاحظاتك عن هذا العميل (تفضيلات، تاريخ تعامل...)"
+            placeholder="ملاحظاتك عن هذا العميل (تفضيلات، تاريخ تعامل…)"
             maxLength={500}
             rows={4}
             className="mt-3"

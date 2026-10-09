@@ -99,7 +99,7 @@ export default function ProductsPage() {
       });
       load();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذر التحديث");
+      toast.error(e instanceof Error ? e.message : "تعذّر التحديث");
     }
   }
 
@@ -137,7 +137,7 @@ export default function ProductsPage() {
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="ابحث عن منتج..."
+          placeholder="ابحث عن منتج…"
           aria-label="بحث في المنتجات"
           className="ps-9 bg-card"
         />

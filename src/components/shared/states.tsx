@@ -42,7 +42,7 @@ export function EmptyState({
 
 export function ErrorState({
   title = "حدث خطأ",
-  description = "تعذر تحميل البيانات. تحقق من اتصالك وحاول مرة أخرى.",
+  description = "تعذّر تحميل البيانات. تحقق من اتصالك وحاول مرة أخرى.",
   retry,
   className,
 }: {

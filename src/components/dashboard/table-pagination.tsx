@@ -32,9 +32,11 @@ function pageWindow(page: number, totalPages: number): Array<number | "gap"> {
 }
 
 /* r131 (F3): dropped the explicit ring (double focus indicator) —
- the ONE global :focus-visible outline contract covers these. */
+ the ONE global :focus-visible outline contract covers these.
+ r133 (A10): press feedback joins the app family (0.97 @ micro) —
+ pagination was the only chrome surface without it. */
 const stepBtn =
-  "inline-flex h-11 min-w-11 items-center justify-center rounded-md px-2 text-[13px] font-semibold transition-[color,background-color,border-color,box-shadow,opacity] duration-(--t-fast) disabled:pointer-events-none disabled:opacity-45 sm:h-9 sm:min-w-9";
+  "inline-flex h-11 min-w-11 items-center justify-center rounded-md px-2 text-[13px] font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-(--t-fast) ease-smooth active:scale-[0.97] active:duration-(--t-micro) disabled:pointer-events-none disabled:opacity-45 disabled:active:scale-100 sm:h-9 sm:min-w-9";
 
 export function TablePagination({
   page,

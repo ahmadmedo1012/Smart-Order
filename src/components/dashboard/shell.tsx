@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/client";
+import { EmptyState } from "@/components/shared/states";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -384,11 +385,41 @@ export function DashboardShell({
  --content-max-w 1280px (A5 P2-1): list tables stop
  stretching to viewport width on wide monitors. */}
             <BusinessContext.Provider value={{ businessId, business: biz }}>
+              {/* r133 (A11 S2): tabIndex={-1} on the skip-link target so
+                 Safari/Firefox move keyboard focus into <main> on skip. */}
               <main
                 id="main"
-                className="flex-1 mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8 min-w-0"
+                tabIndex={-1}
+                className="flex-1 mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8 min-w-0 focus:outline-none"
               >
-                {children}
+                {businesses.length === 0 &&
+                !pathname.startsWith("/dashboard/admin") ? (
+                  /* r133 (A1 M2): zero-membership accounts (platform admins,
+                     staff whose only membership was revoked) hit the page-level
+                     `if (!businessId) return;` guards and rendered the shape
+                     skeleton forever — surface a proper empty state instead. */
+                  <EmptyState
+                    icon={Store}
+                    title="لا يوجد عمل مرتبط بحسابك"
+                    description={
+                      user.isPlatformAdmin
+                        ? "لا يوجد متجر مرتبط بهذا الحساب — يمكنك متابعة موافقات الاشتراكات من قائمة إدارة المنصة."
+                        : "تواصل مع مدير المتجر لإضافتك إلى فريق العمل، أو أنشئ متجرك الخاص بالتسجيل من جديد."
+                    }
+                    action={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={logout}
+                      >
+                        <LogOut className="size-3.5" aria-hidden="true" />
+                        تسجيل الخروج
+                      </Button>
+                    }
+                  />
+                ) : (
+                  children
+                )}
               </main>
             </BusinessContext.Provider>
 

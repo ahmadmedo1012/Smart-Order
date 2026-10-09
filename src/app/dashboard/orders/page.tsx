@@ -156,7 +156,7 @@ export default function OrdersPage() {
               aria-hidden="true"
             />
             <Input
-              placeholder="رقم الطلب، اسم أو هاتف العميل..."
+              placeholder="رقم الطلب، اسم أو هاتف العميل…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className="ps-9 bg-card"
@@ -212,7 +212,7 @@ export default function OrdersPage() {
         /* r131 (F3, A5 P2-7): shape-matched — toolbar + table shell
  (desktop) + card list (mobile), not generic h-16 bars. */
         <div role="status" aria-live="polite" aria-busy="true">
-          <span className="sr-only">جارٍ تحميل الطلبات...</span>
+          <span className="sr-only">جارٍ تحميل الطلبات…</span>
           <ToolbarSkeleton />
           <div className="mt-5">
             <TableSkeleton rows={6} />

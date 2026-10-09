@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatLyd } from "@/lib/money";
+import { useDirtyClose } from "@/hooks/use-dirty-close";
 import { toast } from "sonner";
 import { Truck, Plus, Pencil, Trash2, X } from "lucide-react";
 
@@ -182,7 +183,7 @@ export default function DeliveryPage() {
             setDeleting(null);
             load();
           } catch (e) {
-            toast.error(e instanceof Error ? e.message : "تعذر الحذف");
+            toast.error(e instanceof Error ? e.message : "تعذّر الحذف");
           } finally {
             setDeleteBusy(false);
           }
@@ -228,6 +229,30 @@ function ZoneDialog({
   const [isActive, setIsActive] = React.useState(zone?.isActive ?? true);
   const [saving, setSaving] = React.useState(false);
 
+  /* r133 (A1 S6): dirty-draft guard (name/fee/min/active) — the same
+     mapping that seeded the useState drafts, so toggles and typos all
+     count as dirty (product-editor recipe via useDirtyClose). */
+  const pristine = {
+    name: zone?.name ?? "",
+    fee: zone ? (zone.fee / 1000).toFixed(3).replace(/\.?0+$/, "") : "",
+    minOrder:
+      zone && zone.minOrder > 0
+        ? (zone.minOrder / 1000).toFixed(3).replace(/\.?0+$/, "")
+        : "",
+    isActive: zone?.isActive ?? true,
+  };
+  const dirty =
+    name !== pristine.name ||
+    fee !== pristine.fee ||
+    minOrder !== pristine.minOrder ||
+    isActive !== pristine.isActive;
+  const { requestClose, guard } = useDirtyClose({
+    dirty,
+    busy: saving,
+    close: () => onClose(false),
+    entityLabel: zone ? "المنطقة" : "المنطقة الجديدة",
+  });
+
   async function save() {
     /* r131 (F3, A5 P1-6): field-level validation (aria-invalid recipe
        + inline messages), not toast-only. */
@@ -258,14 +283,14 @@ function ZoneDialog({
       }
       onClose(true);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذر الحفظ");
+      toast.error(err instanceof Error ? err.message : "تعذّر الحفظ");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose(false)}>
+    <Dialog open onOpenChange={(v) => !v && requestClose()}>
       <DialogContent
         dir="rtl"
         showCloseButton={false}
@@ -361,6 +386,7 @@ function ZoneDialog({
           </Button>
         </div>
       </DialogContent>
+      {guard}
     </Dialog>
   );
 }

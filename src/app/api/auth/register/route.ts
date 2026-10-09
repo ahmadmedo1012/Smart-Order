@@ -6,7 +6,7 @@ import { createSession } from "@/lib/auth";
 import { ok, fail, handleError, readJson } from "@/lib/api";
 import { uniqueSlug } from "@/lib/slug";
 import { normalizeLibyanPhone } from "@/lib/phone";
-import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { dbRateLimit, clientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -27,7 +27,9 @@ const schema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const ip = clientIp(req);
-    const rl = rateLimit(`register:${ip}`, 5, 60 * 60 * 1000);
+    /* r133 (A2 N2): awaited authoritative twin (fail-closed) — the
+       documented r132 handoff executed. */
+    const rl = await dbRateLimit(`register:${ip}`, 5, 60 * 60 * 1000);
     if (!rl.ok) return fail("عدد كبير من المحاولات، حاول بعد قليل", 429);
 
     const body = await readJson(req);

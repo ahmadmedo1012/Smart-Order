@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/client";
 import { useCart, cartEstimatedSubtotal } from "@/hooks/use-cart";
 import { formatLyd } from "@/lib/money";
@@ -79,6 +80,7 @@ export function CheckoutClient({
 }) {
   const items = useCart((s) => s.items);
   const clearCart = useCart((s) => s.clear);
+  const router = useRouter();
   const [data, setData] = React.useState<StoreData | null>(null);
   const [loadError, setLoadError] = React.useState(false);
   const [step, setStep] = React.useState<Step>("form");
@@ -204,9 +206,16 @@ export function CheckoutClient({
       setResult({ ...r.data.order, whatsapp: r.data.whatsapp });
       setStep("success");
       clearCart();
+      /* r133 (A1 F9): the success moment used to live only in component
+         state — a refresh (or an accidental back) landed on the
+         empty-cart branch with zero reference to the order just placed.
+         Redirect to the durable track URL (?placed=1 renders the
+         confirmation banner); the in-page success screen stays mounted
+         as the transition view while the navigation settles. */
+      router.replace(`/track/${r.data.order.publicToken}?placed=1`);
       window.scrollTo({ top: 0 });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذر إرسال الطلب، حاول مرة أخرى");
+      toast.error(e instanceof Error ? e.message : "تعذّر إرسال الطلب، حاول مرة أخرى");
       // key intentionally KEPT — the retry resubmits the same key and
       // the server replays the existing order if it actually committed.
     } finally {
@@ -307,7 +316,9 @@ export function CheckoutClient({
         </div>
       </header>
 
-      <main id="main" aria-busy={!data && !loadError} className="mx-auto max-w-2xl px-4 py-5 pb-32">
+      {/* r133 (A11 S2): tabIndex={-1} on the skip-link target so
+          Safari/Firefox move keyboard focus into <main> on skip. */}
+      <main id="main" tabIndex={-1} aria-busy={!data && !loadError} className="mx-auto max-w-2xl px-4 py-5 pb-32 focus:outline-none">
         <h1 className="font-heading text-xl font-bold">إتمام الطلب</h1>
 
         {/* Zones/payment fetch failed — explicit banner + retry (never a
@@ -316,7 +327,7 @@ export function CheckoutClient({
         {loadError && (
           <div role="alert" className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3.5">
             <div>
-              <div className="text-sm font-bold text-destructive-ink">تعذر تحميل بيانات المتجر</div>
+              <div className="text-sm font-bold text-destructive-ink">تعذّر تحميل بيانات المتجر</div>
               <p className="mt-0.5 text-xs text-muted-foreground">مناطق التوصيل وطرق الدفع غير متاحة — تحقق من اتصالك وأعد المحاولة.</p>
             </div>
             <Button variant="outline" size="sm" onClick={load} className="h-9 shrink-0">
@@ -524,7 +535,7 @@ export function CheckoutClient({
                 }}
                 rows={2}
                 maxLength={200}
-                placeholder="الشارع، أقرب معلم، رقم المنزل..."
+                placeholder="الشارع، أقرب معلم، رقم المنزل…"
                 aria-invalid={!!errors.address}
                 aria-describedby={errors.address ? "c-address-error" : undefined}
                 className="w-full min-h-11 rounded-md border border-input bg-background px-4 py-2.5 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo) aria-invalid:border-destructive aria-invalid:shadow-(--state-input-error-halo)"
@@ -633,7 +644,7 @@ export function CheckoutClient({
                         await navigator.clipboard.writeText(code);
                         toast.success("تم نسخ الرمز");
                       } catch {
-                        toast.error("فشل النسخ");
+                        toast.error("تعذّر النسخ");
                       }
                     }}
                     className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90"
@@ -663,7 +674,7 @@ export function CheckoutClient({
             onChange={(e) => setCustomerNote(e.target.value)}
             rows={2}
             maxLength={300}
-            placeholder="أي تفاصيل إضافية تريد إخبار المتجر بها..."
+            placeholder="أي تفاصيل إضافية تريد إخبار المتجر بها…"
             className="w-full min-h-11 rounded-md border border-input bg-transparent px-4 py-2.5 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"
           />
         </section>
@@ -724,7 +735,7 @@ export function CheckoutClient({
             {submitting ? (
               <>
                 <Loader2 className="size-5 animate-spin" aria-hidden="true" />
-                جارٍ الإرسال...
+                جارٍ الإرسال…
               </>
             ) : (
               "إرسال الطلب"

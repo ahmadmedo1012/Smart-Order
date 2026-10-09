@@ -9,8 +9,14 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
+    /* r133 (A2 §2-2): the weak-typing escape hatches are closed to match
+       the family (SM tsconfig) — noImplicitAny:false was the only place
+       the fleet-wide strict contract was disabled, and the 7 ghost
+       excludes pointed at dirs that only existed in the sandbox
+       workspace, never in this repo. */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noEmit": true,
-    "noImplicitAny": false,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -37,13 +43,6 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "refs",
-    "examples",
-    "skills",
-    "tool-results",
-    "mini-services",
-    "download",
-    "upload"
+    "node_modules"
   ]
 }

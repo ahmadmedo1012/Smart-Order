@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { ok, fail, handleError, readJson } from "@/lib/api";
 import { requireAuth } from "@/lib/auth";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { normalizeLibyanPhone } from "@/lib/phone";
 
 export const runtime = "nodejs";
 
@@ -33,16 +34,24 @@ export async function POST(req: NextRequest) {
     const input = schema.parse(await readJson(req));
 
     const plan = await db.plan.findUnique({ where: { id: input.planId } });
-    if (!plan || !plan.isActive) return fail("الخطة غير موجودة", 404);
+    if (!plan || !plan.isActive) return fail("الباقة غير موجودة", 404);
 
-    if (plan.price === 0) return fail("الخطة المجانية لا تحتاج دفعاً", 422, "VALIDATION");
+    if (plan.price === 0) return fail("الباقة المجانية لا تحتاج دفعاً", 422, "VALIDATION");
 
     // Amount must match the plan price (server is the source of truth)
-    if (input.amount !== plan.price) return fail("المبلغ لا يطابق سعر الخطة", 422, "VALIDATION");
+    if (input.amount !== plan.price) return fail("المبلغ لا يطابق سعر الباقة", 422, "VALIDATION");
 
-    // Wallet flow requires the sender phone; bank flow requires account fields
-    if (input.provider !== "bank" && !input.phone?.trim()) {
-      return fail("يرجى إدخال رقم هاتفك", 422, "VALIDATION");
+    // Wallet flow requires a valid Libyan sender phone; bank flow
+    // requires account fields. r133 (A1 F11): the twin merchant
+    // payment-methods route validated + normalized via
+    // normalizeLibyanPhone — this route only checked non-empty, so any
+    // string passed and stored raw.
+    let phone: string | null = null;
+    if (input.provider !== "bank") {
+      phone = input.phone ? normalizeLibyanPhone(input.phone) : null;
+      if (!phone) {
+        return fail("رقم الهاتف غير صحيح — مثال صحيح: 0912345678", 422, "VALIDATION");
+      }
     }
     if (input.provider === "bank") {
       if (!input.senderAccountName?.trim()) return fail("يرجى إدخال اسم صاحب الحساب", 422, "VALIDATION");
@@ -69,7 +78,7 @@ export async function POST(req: NextRequest) {
         planName: plan.name,
         amount: plan.price,
         provider: input.provider.toUpperCase(),
-        phone: input.phone?.trim() || null,
+        phone,
         senderAccountName: input.senderAccountName?.trim() || null,
         senderAccountNumber: input.senderAccountNumber?.trim() || null,
         receiptImageUrl: input.receiptImageUrl || null,

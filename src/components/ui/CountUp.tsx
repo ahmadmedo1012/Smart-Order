@@ -51,8 +51,19 @@ export function CountUp({ value, duration = 1100 }: { value: string; duration?: 
     const prefix = m[1] ?? '';
     const numStr = m[2];
     const suffix = m[3] ?? '';
-    const target = parseFloat(numStr.replace(/,/g, ''));
-    const decimals = numStr.includes('.') ? (numStr.split('.')[1]?.length ?? 0) : 0;
+    /* r133 (A12 S1): grouped numerals — pricing passes ar-LY dot-grouped
+       counts ("2.990"), landing passes plain integers. A numeral whose
+       separators each trail exactly 3 digits is GROUPED (strip them all,
+       0 decimals); otherwise commas stay decimal-folded (legacy
+       "1,5" → 1.5) and a lone dot keeps its decimals. The final write
+       always settles on the REAL value either way. */
+    const grouped = /^\d+([.,]\d{3})+$/.test(numStr);
+    const target = parseFloat(
+      grouped ? numStr.replace(/[.,]/g, '') : numStr.replace(/,/g, '.')
+    );
+    const decimals = !grouped && numStr.includes('.')
+      ? (numStr.split('.')[1]?.length ?? 0)
+      : 0;
     if (Number.isNaN(target)) return;
 
     const fmt = formatterFor(decimals);

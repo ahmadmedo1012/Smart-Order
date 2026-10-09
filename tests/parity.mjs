@@ -85,7 +85,7 @@
  * --ease-spring-snappy, --hover-lift, --gold-soft, --brand-purple, the
  * global --r-* ladder).
  */
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -846,6 +846,184 @@ const R_NAMES = {
   '--r-xl': '16px', '--r-2xl': '20px', '--r-3xl': '28px', '--r-full': '9999px',
 };
 pinAll(dark, 'r-names', R_NAMES);
+
+// ── r133 (G1): the Wave-2 fix-list pins ──────────────────────────────────────
+// F1 landed the A1/A2/A9/A10/A11/A12/A13 fix list (A→F) as an uncommitted
+// working tree; G1 byte-verified every diff and pins the regression-prone
+// seams here. Sources are read raw; comments are stripped for the
+// repo-wide microcopy sweeps so a fix-explanation comment can never
+// satisfy or break a pin (F3's r133 lesson).
+const R133_SRC = {
+  settings: readFileSync(new URL('../src/app/dashboard/settings/page.tsx', import.meta.url), 'utf8'),
+  shell: readFileSync(new URL('../src/components/dashboard/shell.tsx', import.meta.url), 'utf8'),
+  orderDetail: readFileSync(new URL('../src/app/dashboard/orders/[id]/page.tsx', import.meta.url), 'utf8'),
+  payDialog: readFileSync(new URL('../src/components/payment/payment-dialog.tsx', import.meta.url), 'utf8'),
+  subsRoute: readFileSync(new URL('../src/app/api/subscriptions/route.ts', import.meta.url), 'utf8'),
+  checkout: readFileSync(new URL('../src/components/storefront/checkout-client.tsx', import.meta.url), 'utf8'),
+  trackPage: readFileSync(new URL('../src/app/track/[token]/page.tsx', import.meta.url), 'utf8'),
+  trackClient: readFileSync(new URL('../src/components/storefront/tracking-client.tsx', import.meta.url), 'utf8'),
+  login: readFileSync(new URL('../src/app/login/page.tsx', import.meta.url), 'utf8'),
+  clientLib: readFileSync(new URL('../src/lib/client.ts', import.meta.url), 'utf8'),
+  loginRoute: readFileSync(new URL('../src/app/api/auth/login/route.ts', import.meta.url), 'utf8'),
+  registerRoute: readFileSync(new URL('../src/app/api/auth/register/route.ts', import.meta.url), 'utf8'),
+  publicOrders: readFileSync(new URL('../src/app/api/public/orders/route.ts', import.meta.url), 'utf8'),
+};
+// r133 (G1) helpers: raw reader + repo-file constants + the comment-stripped
+// microcopy sweep. The sweep walks every src/ ts/tsx/css/mjs file stripped of
+// /* */ and // comments, so fix-explanation comments (which legitimately say
+// فشل/تعذر) can never satisfy or break a pin — only shipped strings count.
+const exists = (u) => existsSync(u);
+const R = (p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
+const TSCONFIG = R('tsconfig.json');
+const PKG = R('package.json');
+const NEXTCFG = R('next.config.ts');
+const ENVEX = R('.env.example');
+const MICRO = (() => {
+  const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/\/\/[^\n]*/g, ' ');
+  const texts = [];
+  (function walkSrc(dir) {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walkSrc(p);
+      else if (/\.(tsx?|css|mjs)$/.test(e.name)) texts.push(strip(readFileSync(p, 'utf8')));
+    }
+  })(srcRoot);
+  return {
+    fashal: texts.some((t) => /فشل/.test(t)),
+    bareTaathur: texts.some((t) => /تعذر(?!ّ)/.test(t)),
+    ellipsis: texts.some((t) => /["'`][^"'`\n]*[\u0600-\u06FF][^"'`\n]*\.\.\.["'`]/.test(t)),
+    wrongMask: texts.some((t) => /09X{9,}/.test(t)),
+  };
+})();
+const R133_LAYER = [
+  // ── A (A1 musts) ──────────────────────────────────────────────────────────
+  ['A-M1 settings publish: reads the 200 {published:false,reason} answer (no false success)',
+    /r\.data\.published === false/.test(R133_SRC.settings) && /r\.data\.reason/.test(R133_SRC.settings)],
+  ['A-M2 zero-membership: shell EmptyState replaces the infinite skeleton',
+    /businesses\.length === 0/.test(R133_SRC.shell) && R133_SRC.shell.includes('لا يوجد عمل مرتبط بحسابك')],
+  // ── B (money/UX tail) ─────────────────────────────────────────────────────
+  ['B-F7 PAID/REFUNDED ride ConfirmDialog: 0 direct setPaymentStatus onClick, REFUNDED destructive',
+    (R133_SRC.orderDetail.match(/setConfirmPayment\(/g) || []).length >= 6 &&
+    !/onClick=\{\(\) => setPaymentStatus\(/.test(R133_SRC.orderDetail) &&
+    R133_SRC.orderDetail.includes('destructive={confirmPayment?.ps === "REFUNDED"}')],
+  ['B-F11 wallet phone client: normalizeLibyanPhone gate + role=alert inline error',
+    R133_SRC.payDialog.includes('const normalized = normalizeLibyanPhone(phone);') &&
+    R133_SRC.payDialog.includes('id="payment-phone-error" role="alert"')],
+  ['B-F11 wallet phone server: subscriptions route validates + normalizes (0912345678 example)',
+    R133_SRC.subsRoute.includes('phone = input.phone ? normalizeLibyanPhone(input.phone) : null;') &&
+    R133_SRC.subsRoute.includes('رقم الهاتف غير صحيح — مثال صحيح: 0912345678')],
+  ['B-F14 poll give-up retry: pollFailed state + pollNonce re-arm (no silent forever-pulse)',
+    R133_SRC.payDialog.includes('setPollFailed(true);') &&
+    R133_SRC.payDialog.includes('setPollNonce((n) => n + 1);') &&
+    /\[step, paymentId, pollNonce\]/.test(R133_SRC.payDialog)],
+  ['B-F9 checkout success durable: router.replace → /track/{token}?placed=1 + placed banner',
+    R133_SRC.checkout.includes('router.replace(`/track/${r.data.order.publicToken}?placed=1`)') &&
+    R133_SRC.trackPage.includes('placed={placed === "1"}') &&
+    R133_SRC.trackClient.includes('تم استلام طلبك!')],
+  ['B-S5 login ?expired=1: quiet banner + replaceState consume',
+    R133_SRC.login.includes('get("expired") === "1"') &&
+    R133_SRC.login.includes('انتهت جلستك لأسباب أمنية') &&
+    R133_SRC.login.includes('history.replaceState(null, "", "/login")')],
+  ['B-S6 dirty-guard ×4: useDirtyClose hook + categories/delivery/payments/staff consumers',
+    ['src/app/dashboard/categories/page.tsx', 'src/app/dashboard/delivery/page.tsx',
+     'src/app/dashboard/payments/page.tsx', 'src/app/dashboard/staff/page.tsx']
+      .every((p) => readFileSync(new URL(`../${p}`, import.meta.url), 'utf8').includes('useDirtyClose'))],
+  // ── C (A2 quality) ────────────────────────────────────────────────────────
+  ['C-N1 Arabic network errors: the one-seam fetch wrap in lib/client.ts (30 call sites inherit)',
+    R133_SRC.clientLib.includes('تعذّر الاتصال بالشبكة — تحقّق من اتصالك وحاول مرة أخرى') &&
+    /catch \{\s*throw new ApiError\(/.test(R133_SRC.clientLib)],
+  ['C-N2 dbRateLimit awaited on login + register + public-orders (the r132 handoff executed)',
+    R133_SRC.loginRoute.includes('await dbRateLimit(`login:${ip}`') &&
+    R133_SRC.registerRoute.includes('await dbRateLimit(`register:${ip}`') &&
+    R133_SRC.publicOrders.includes('await dbRateLimit(`order:${ip}`')],
+  ['C raw plans-fetch ×2 → api.get (pricing-client + register; no raw fetch("/api/plans"))',
+    !R('src/components/pricing/pricing-client.tsx').includes('fetch("/api/plans")') &&
+    !R('src/app/register/page.tsx').includes('fetch("/api/plans")') &&
+    R('src/components/pricing/pricing-client.tsx').includes('api.get<Plan[]>("/api/plans")') &&
+    R('src/app/register/page.tsx').includes('api.get<Plan[]>("/api/plans")')],
+  ['C tsconfig: noUnused* on, noImplicitAny escape closed, ghost excludes gone',
+    TSCONFIG.includes('"noUnusedLocals": true') && TSCONFIG.includes('"noUnusedParameters": true') &&
+    !TSCONFIG.includes('"noImplicitAny": false') && !TSCONFIG.includes('refs') && !TSCONFIG.includes('mini-services')],
+  ['C scripts purge: forensic one-offs + og-template/dev-server/rules.txt/showcase webp gone; README documents keepers',
+    !exists(new URL('../scripts/dev-server.sh', import.meta.url)) &&
+    !exists(new URL('../scripts/make-brand-icon.py', import.meta.url)) &&
+    !exists(new URL('../scripts/og-template.html', import.meta.url)) &&
+    !exists(new URL('../scripts/impeccable-61-rules.txt', import.meta.url)) &&
+    !exists(new URL('../scripts/make-og-manifest.py', import.meta.url)) &&
+    !exists(new URL('../public/showcase-store.webp', import.meta.url)) &&
+    exists(new URL('../scripts/README.md', import.meta.url))],
+  // ── D (A11 a11y) ──────────────────────────────────────────────────────────
+  ['D storefront filter strip: role=group + aria-pressed (the fake tablist is gone)',
+    R('src/components/storefront/storefront.tsx').includes('role="group" aria-label="تصفية أقسام المنتجات"') &&
+    R('src/components/storefront/storefront.tsx').includes('aria-pressed={activeCategory === "ALL"}') &&
+    !R('src/components/storefront/storefront.tsx').includes('role="tablist"')],
+  ['D dialog + sheet close: 44px hit floor (size-11 flex centering)',
+    R('src/components/ui/dialog.tsx').includes('flex size-11 items-center justify-center') &&
+    R('src/components/ui/sheet.tsx').includes('flex size-11 items-center justify-center')],
+  ['D MagneticGoldLink: internal hrefs ride next/link (external keeps raw anchor)',
+    R('src/components/landing/MagneticGoldLink.tsx').includes('import Link from "next/link"')],
+  ['D sonner error toasts: assertive role=alert wrapper (every raw toast.error inherits)',
+    R('src/components/ui/sonner.tsx').includes('<span role="alert">')],
+  ['D skip targets: tabIndex={-1} mains (storefront + checkout + tracking + dashboard shell)',
+    R('src/components/storefront/storefront.tsx').includes('<main id="main" tabIndex={-1}') &&
+    R('src/components/storefront/checkout-client.tsx').includes('<main id="main" tabIndex={-1}') &&
+    R133_SRC.trackClient.includes('<main id="main" tabIndex={-1}') &&
+    R133_SRC.shell.includes('tabIndex={-1}')],
+  ['D product-dialog options: aria-pressed chips (fake radio/checkbox roles gone)',
+    R('src/components/storefront/product-dialog.tsx').includes('aria-pressed={isSelected}') &&
+    !R('src/components/storefront/product-dialog.tsx').includes('role={g.maxSelect > 1 ? "checkbox" : "radio"}')],
+  // ── E (A12/A9/A10/A13 rulings) ────────────────────────────────────────────
+  ['E money grouping: formatLyd groups ≥1000 ar-LY dots (groupDots); formatLydAmount stays RAW for parseLyd round-trip',
+    R('src/lib/money.ts').includes('function groupDots(') &&
+    R('src/lib/money.ts').includes('groupDots(whole)') &&
+    R('src/lib/money.ts').includes('RAW by design')],
+  ['E toArabicNumber: hand-rolled dot grouping, no Intl (hydration-safe)',
+    R('src/lib/plan-types.ts').includes('replace(/\\B(?=(\\d{3})+(?!\\d))/g, ".")')],
+  ['E timeAgoAr: counted plurals (منذ دقيقة واحدة / دقيقتين / دقائق)',
+    R('src/lib/arabic.ts').includes('function sincePhrase(') &&
+    R('src/lib/arabic.ts').includes('"دقيقتين"') && R('src/lib/arabic.ts').includes('"ساعتين"')],
+  ['E DELIVERED = تم التسليم (R4 fleet ruling)',
+    R('src/lib/constants.ts').includes('DELIVERED: "تم التسليم"')],
+  ['E og:locale = ar_AR ×2 (root layout + store generateMetadata)',
+    R('src/app/layout.tsx').includes('locale: "ar_AR"') &&
+    R('src/app/store/[slug]/page.tsx').includes('locale: "ar_AR"')],
+  ['E autofill/caret port (madarek base.css browser surfaces, globals.css)',
+    R('src/app/globals.css').includes('caret-color: var(--primary);') &&
+    R('src/app/globals.css').includes('-webkit-box-shadow: 0 0 0 1000px var(--background) inset')],
+  ['E input/select/textarea hover borders (invalid keeps destructive on hover)',
+    R('src/components/ui/input.tsx').includes('hover:not-aria-invalid:border-foreground/25') &&
+    R('src/components/ui/select.tsx').includes('hover:not-aria-invalid:border-foreground/25') &&
+    R('src/components/ui/textarea.tsx').includes('hover:not-aria-invalid:border-foreground/25')],
+  ['E wallet phone mask 09XXXXXXXX (9 X — the R10 spelling)',
+    R133_SRC.payDialog.includes('placeholder="09XXXXXXXX"')],
+  ['E+F lucide ^1.43 + engines node>=22 + packageManager npm@11.19.0',
+    PKG.includes('"lucide-react": "^1.43.0"') && PKG.includes('"node": ">=22"') &&
+    PKG.includes('"packageManager": "npm@11.19.0"')],
+  ['E og-default.png day + SWR cache rule (SO-N3)',
+    NEXTCFG.includes('source: "/og-default.png"') && NEXTCFG.includes('stale-while-revalidate=604800')],
+  ['E global-error.tsx: the root boundary exists (A13 S-05)',
+    exists(new URL('../src/app/global-error.tsx', import.meta.url))],
+  ['E .env.example: bank/WhatsApp/seed/proxy vars documented',
+    ENVEX.includes('NEXT_PUBLIC_BANK_NAME') && ENVEX.includes('NEXT_PUBLIC_SUPPORT_WHATSAPP') &&
+    ENVEX.includes('SEED_SECRET') && ENVEX.includes('TRUST_PROXY_DEPTH')],
+  ['E lockfile conversion: package-lock.json present, bun.lock gone, .gitignore rule flipped',
+    exists(new URL('../package-lock.json', import.meta.url)) &&
+    !exists(new URL('../bun.lock', import.meta.url)) &&
+    R('.gitignore').includes('r133 (A13 S-07)')],
+  // ── E microcopy sweeps (comment-stripped, src-wide — F3's r133 recipe) ────
+  ['E فشل-ban sweep: 0 user-facing فشل in src (R3)',
+    !MICRO.fashal],
+  ['E تعذّر shadda sweep: 0 bare تعذر in src',
+    !MICRO.bareTaathur],
+  ['E ellipsis sweep: 0 "..." inside Arabic strings in src (R6 «…»)',
+    !MICRO.ellipsis],
+  ['E mask sweep: 0 09XXXXXXXXX (10-X) placeholders in src',
+    !MICRO.wrongMask],
+];
+for (const [name, okFlag] of R133_LAYER) {
+  if (okFlag) passed += 1;
+  else failures.push(`r133 (G1) layer gate FAILED: ${name}`);
+}
 
 // ── report ───────────────────────────────────────────────────────────────────
 

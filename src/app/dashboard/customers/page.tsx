@@ -102,7 +102,7 @@ export default function CustomersPage() {
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="اسم أو رقم هاتف..."
+          placeholder="اسم أو رقم هاتف…"
           aria-label="بحث في العملاء"
           className="ps-9 bg-card"
         />
@@ -111,7 +111,7 @@ export default function CustomersPage() {
       {customers === null ? (
         /* r131 (F3, A5 P2-7): shape-matched table shell + mobile cards. */
         <div role="status" aria-live="polite" aria-busy="true">
-          <span className="sr-only">جارٍ تحميل العملاء...</span>
+          <span className="sr-only">جارٍ تحميل العملاء…</span>
           <TableSkeleton rows={5} />
           <div className="mt-2.5">
             <CardListSkeleton rows={4} className="md:hidden" />

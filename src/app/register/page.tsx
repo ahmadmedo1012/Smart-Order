@@ -13,7 +13,7 @@ import { PaymentDialog } from "@/components/payment/payment-dialog";
 import { StepIndicator, type WizardStep } from "@/components/register/step-indicator";
 import { PlanSelector } from "@/components/register/plan-selector";
 import { FieldError } from "@/components/dashboard/form-field";
-import { ErrorState } from "@/components/shared/states";
+import { EmptyState, ErrorState } from "@/components/shared/states";
 import { api, ApiError } from "@/lib/client";
 import { cn } from "@/lib/utils";
 import { normalizeLibyanPhone } from "@/lib/phone";
@@ -93,7 +93,9 @@ function RegisterWizard() {
 
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((f) => ({ ...f, [key]: e.target.value }));
-    if (errors[key]) setErrors((x) => ({ ...x, [key]: undefined }));
+    /* r133 (A2 §2-2): city has no FieldError — only the six keys the
+       errors record owns can be cleared (noImplicitAny narrowing). */
+    if (key !== "city" && errors[key]) setErrors((x) => ({ ...x, [key]: undefined }));
   };
 
   /* Client-side mirror of the server Zod contract
@@ -116,14 +118,17 @@ function RegisterWizard() {
     return e;
   }
 
-  // Load plan catalog (deep-link ?plan= preselects) — retryable (F8)
+  // Load plan catalog (deep-link ?plan= preselects) — retryable (F8).
+  // r133 (A2 §2-3): rides lib/client.ts api.get (envelope unwrap +
+  // res.ok gate + Arabic network errors) — the raw fetch answered a
+  // 500 {success:false} with plans=[] and error=null.
   const loadPlans = React.useCallback(
     async (signal?: { cancelled: boolean }) => {
       setPlansError(false);
       setPlansLoading(true);
       try {
-        const data = await fetch("/api/plans").then((r) => r.json());
-        const list: Plan[] = data.data ?? [];
+        const r = await api.get<Plan[]>("/api/plans");
+        const list: Plan[] = r.data ?? [];
         if (signal?.cancelled) return;
         setPlans(list);
         const pre = searchParams.get("plan");
@@ -136,7 +141,7 @@ function RegisterWizard() {
       } catch {
         if (!signal?.cancelled) {
           setPlansError(true);
-          toast.error("فشل تحميل الخطط");
+          toast.error("تعذّر تحميل الباقات");
         }
       } finally {
         if (!signal?.cancelled) setPlansLoading(false);
@@ -190,10 +195,10 @@ function RegisterWizard() {
 
       // Paid plan → account is live on free limits; payment activates the plan
       setCreatedBusinessId(res.data.business.id);
-      toast.success("تم إنشاء متجرك! أكمل الدفع لتفعيل الخطة");
+      toast.success("تم إنشاء متجرك! أكمل الدفع لتفعيل الباقة");
       setPaymentOpen(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "تعذر إنشاء الحساب، حاول مرة أخرى");
+      setError(err instanceof ApiError ? err.message : "تعذّر إنشاء الحساب، حاول مرة أخرى");
     } finally {
       setLoading(false);
     }
@@ -255,10 +260,56 @@ function RegisterWizard() {
                 ))}
               </div>
             ) : plansError ? (
-              <ErrorState
-                title="تعذر تحميل الخطط"
-                description="تحقق من اتصالك وأعد المحاولة — يمكنك المتابعة أيضاً بدون خطة (مجانية للأبد)."
-                retry={() => loadPlans()}
+              /* r133 (A1 S2): the copy promised "متابعة بدون باقة" but the
+                 only action was retry — StepIndicator blocks forward nav,
+                 so the planless path needs its own affordance (the app
+                 supports planless signup: onSubmit treats !selectedPlan
+                 as the free path). */
+              <div className="space-y-2">
+                <ErrorState
+                  title="تعذّر تحميل الباقات"
+                  description="تحقّق من اتصالك وأعد المحاولة — يمكنك المتابعة أيضاً بدون باقة (مجانية للأبد)."
+                  retry={() => loadPlans()}
+                />
+                <div className="flex justify-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedPlan(null);
+                      setStep("account");
+                    }}
+                  >
+                    المتابعة بدون باقة
+                  </Button>
+                </div>
+              </div>
+            ) : plans.length === 0 ? (
+              /* r133 (A1 S1): /api/plans converts its own DB failure into
+                 a 200 {success:true, data:[]} — the empty four-column
+                 grid with a dead CTA was the REACHABLE failure mode; the
+                 empty branch now offers retry + the planless path. */
+              <EmptyState
+                icon={Sparkles}
+                title="لا توجد باقات متاحة الآن"
+                description="تعذّر جلب قائمة الباقات — أعد المحاولة، أو تابع التسجيل بدون باقة وابدأ مجاناً."
+                action={
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => loadPlans()}>
+                      إعادة المحاولة
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedPlan(null);
+                        setStep("account");
+                      }}
+                    >
+                      متابعة بدون باقة
+                    </Button>
+                  </div>
+                }
               />
             ) : (
               <PlanSelector
@@ -294,7 +345,7 @@ function RegisterWizard() {
                     )}
                   </span>
                   <div>
-                    <div className="text-sm font-bold">خطة {selectedPlan.nameAr}</div>
+                    <div className="text-sm font-bold">باقة {selectedPlan.nameAr}</div>
                     <div className="text-xs text-muted-foreground">
                       {selectedPlan.price === 0 ? "مجانية للأبد" : `${selectedPlan.price} د.ل / شهرياً`}
                     </div>
@@ -305,7 +356,7 @@ function RegisterWizard() {
                   onClick={() => setStep("plan")}
                   className="text-xs font-medium text-accent-foreground underline-offset-4 hover:underline"
                 >
-                  تغيير الخطة
+                  تغيير الباقة
                 </button>
               </div>
             )}
@@ -493,12 +544,12 @@ function RegisterWizard() {
                   ) : (
                     <Rocket className="size-5" aria-hidden="true" />
                   )}
-                  {loading ? "جارٍ إنشاء المتجر..." : isPaid ? "إنشاء المتجر والدفع" : "إنشاء المتجر"}
+                  {loading ? "جارٍ إنشاء المتجر…" : isPaid ? "إنشاء المتجر والدفع" : "إنشاء المتجر"}
                 </Button>
 
                 {isPaid && (
                   <p className="text-center text-[11px] text-muted-foreground">
-                    يُنشأ متجرك فوراً ويعمل بحدود الخطة المجانية حتى تفعيل الدفع — لن تفقد أي شيء
+                    يُنشأ متجرك فوراً ويعمل بحدود الباقة المجانية حتى تفعيل الدفع — لن تفقد أي شيء
                   </p>
                 )}
               </form>

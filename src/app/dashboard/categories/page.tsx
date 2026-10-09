@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { compressImage } from "@/lib/compress";
+import { useDirtyClose } from "@/hooks/use-dirty-close";
 import { toast } from "sonner";
 import { LayoutGrid, Plus, Trash2, Pencil, ImagePlus, X } from "lucide-react";
 import type { Category } from "@/app/dashboard/products/page";
@@ -162,7 +163,7 @@ export default function CategoriesPage() {
             setDeleting(null);
             load();
           } catch (e) {
-            toast.error(e instanceof Error ? e.message : "تعذر الحذف");
+            toast.error(e instanceof Error ? e.message : "تعذّر الحذف");
           } finally {
             setDeleteBusy(false);
           }
@@ -202,6 +203,25 @@ function CategoryDialog({
   const [uploading, setUploading] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
 
+  /* r133 (A1 S6): dirty-draft guard — ESC/scrim/X/إلغاء on a dirty
+     draft (name/description/uploaded image) ask first instead of
+     discarding silently (product-editor recipe via useDirtyClose). */
+  const pristine = {
+    name: category?.name ?? "",
+    description: category?.description ?? "",
+    imageUrl: category?.imageUrl ?? "",
+  };
+  const dirty =
+    name !== pristine.name ||
+    description !== pristine.description ||
+    imageUrl !== pristine.imageUrl;
+  const { requestClose, guard } = useDirtyClose({
+    dirty,
+    busy: saving,
+    close: () => onClose(false),
+    entityLabel: category ? "القسم" : "القسم الجديد",
+  });
+
   async function onImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -215,7 +235,7 @@ function CategoryDialog({
       });
       setImageUrl(r.data.url);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذر رفع الصورة");
+      toast.error(err instanceof Error ? err.message : "تعذّر رفع الصورة");
     } finally {
       setUploading(false);
     }
@@ -249,14 +269,14 @@ function CategoryDialog({
       }
       onClose(true);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذر الحفظ");
+      toast.error(err instanceof Error ? err.message : "تعذّر الحفظ");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose(false)}>
+    <Dialog open onOpenChange={(v) => !v && requestClose()}>
       <DialogContent
         dir="rtl"
         showCloseButton={false}
@@ -362,6 +382,7 @@ function CategoryDialog({
           </Button>
         </div>
       </DialogContent>
+      {guard}
     </Dialog>
   );
 }

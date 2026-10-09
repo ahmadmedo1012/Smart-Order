@@ -16,6 +16,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { pageTitleClass } from "@/components/dashboard/page-header";
 import { OrderDetailSkeleton } from "@/components/dashboard/skeletons";
+import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
 import {
   Dialog,
   DialogContent,
@@ -162,6 +163,14 @@ export default function OrderDetailPage() {
     to: OrderStatus;
     label: string;
   } | null>(null);
+  /* r133 (A1 F7): PAID/REFUNDED are money mutations — REFUNDED is
+     irreversible (no UNPAID restore path anywhere), so both ride the
+     same in-app ConfirmDialog grammar as destructive transitions
+     instead of firing directly from the dropdown/card button. */
+  const [confirmPayment, setConfirmPayment] = React.useState<{
+    ps: PaymentStatus;
+    label: string;
+  } | null>(null);
   const [actionNote, setActionNote] = React.useState("");
   const [internalNote, setInternalNote] = React.useState("");
 
@@ -192,7 +201,7 @@ export default function OrderDetailPage() {
       setActionNote("");
       load();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذر تحديث الحالة");
+      toast.error(e instanceof Error ? e.message : "تعذّر تحديث الحالة");
     } finally {
       setBusy(false);
     }
@@ -203,9 +212,10 @@ export default function OrderDetailPage() {
     try {
       await api.patch(`/api/orders/${id}`, { businessId, paymentStatus: ps });
       toast.success("تم تحديث حالة الدفع");
+      setConfirmPayment(null);
       load();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذر التحديث");
+      toast.error(e instanceof Error ? e.message : "تعذّر التحديث");
     } finally {
       setBusy(false);
     }
@@ -218,7 +228,7 @@ export default function OrderDetailPage() {
       toast.success("حُفظت الملاحظة الداخلية");
       load();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذر الحفظ");
+      toast.error(e instanceof Error ? e.message : "تعذّر الحفظ");
     } finally {
       setBusy(false);
     }
@@ -337,7 +347,12 @@ export default function OrderDetailPage() {
                             order.status !== "CANCELLED" &&
                             order.status !== "REJECTED" && (
                               <DropdownMenuItem
-                                onClick={() => setPaymentStatus("PAID")}
+                                onClick={() =>
+                                  setConfirmPayment({
+                                    ps: "PAID",
+                                    label: "تأكيد استلام الدفع",
+                                  })
+                                }
                               >
                                 <Check
                                   className="size-4 me-2"
@@ -348,7 +363,12 @@ export default function OrderDetailPage() {
                             )}
                           {order.paymentStatus === "PAID" && (
                             <DropdownMenuItem
-                              onClick={() => setPaymentStatus("REFUNDED")}
+                              onClick={() =>
+                                setConfirmPayment({
+                                  ps: "REFUNDED",
+                                  label: "تسجيل استرجاع المبلغ",
+                                })
+                              }
                             >
                               <Check
                                 className="size-4 me-2"
@@ -376,7 +396,12 @@ export default function OrderDetailPage() {
               <DropdownMenuContent align="end">
                 {order.paymentStatus === "PAID" && (
                   <DropdownMenuItem
-                    onClick={() => setPaymentStatus("REFUNDED")}
+                    onClick={() =>
+                      setConfirmPayment({
+                        ps: "REFUNDED",
+                        label: "تسجيل استرجاع المبلغ",
+                      })
+                    }
                   >
                     تسجيل استرجاع المبلغ
                   </DropdownMenuItem>
@@ -578,7 +603,12 @@ export default function OrderDetailPage() {
                   variant="outline"
                   size="sm"
                   className="mt-4 w-full text-success-ink border-success/40 hover:bg-success/10"
-                  onClick={() => setPaymentStatus("PAID")}
+                  onClick={() =>
+                    setConfirmPayment({
+                      ps: "PAID",
+                      label: "تأكيد استلام الدفع",
+                    })
+                  }
                   disabled={busy}
                 >
                   <Check className="size-4" aria-hidden="true" />
@@ -736,6 +766,33 @@ export default function OrderDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* r133 (A1 F7): money-mutation confirm — REFUNDED is destructive
+          (irreversible, no UNPAID restore), PAID changes the money story. */}
+      <ConfirmDialog
+        open={!!confirmPayment}
+        onOpenChange={(v) => !v && setConfirmPayment(null)}
+        title={confirmPayment?.label ?? ""}
+        description={
+          confirmPayment?.ps === "REFUNDED" ? (
+            <>
+              سيتم تسجيل استرجاع المبلغ للطلب {order.orderNumber}. لا يمكن
+              التراجع عن هذا الإجراء لاحقاً، وسيُسجل في سجل الطلب.
+            </>
+          ) : (
+            <>
+              سيتم تسجيل استلام الدفع للطلب {order.orderNumber}. سيُسجل
+              التغيير في سجل الطلب.
+            </>
+          )
+        }
+        confirmLabel={confirmPayment?.label ?? "تأكيد"}
+        destructive={confirmPayment?.ps === "REFUNDED"}
+        busy={busy}
+        onConfirm={() => {
+          if (confirmPayment) setPaymentStatus(confirmPayment.ps);
+        }}
+      />
     </div>
   );
 }

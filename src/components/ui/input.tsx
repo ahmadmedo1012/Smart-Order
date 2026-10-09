@@ -26,6 +26,10 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       dir="auto"
       className={cn(
         "border-input placeholder:text-placeholder-text selection:bg-primary selection:text-primary-foreground file:text-foreground flex h-11 w-full min-w-0 rounded-md border bg-transparent px-4 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60",
+        /* r133 (A10): hover border state (madarek components.css:721) —
+           inputs sat inert until focus; invalid inputs keep their
+           destructive border on hover. */
+        "hover:not-aria-invalid:border-foreground/25",
         "focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)",
         "aria-invalid:border-destructive aria-invalid:shadow-(--state-input-error-halo)",
         className

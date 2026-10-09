@@ -30,7 +30,8 @@ export const metadata: Metadata = {
   keywords: ["طلبات", "متجر رقمي", "ليبيا", "توصيل", "طلب أونلاين", "سمارت أوردر", "Smart Order"],
   openGraph: {
     type: "website",
-    locale: "ar_LY",
+    /* r133 (R11 / A12 S13): ar_AR — Facebook scrapers drop ar_LY. */
+    locale: "ar_AR",
     url: "/",
     siteName: "سمارت أوردر",
     title: "سمارت أوردر — منصة الطلبات الرقمية",

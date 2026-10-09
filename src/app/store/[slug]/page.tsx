@@ -144,7 +144,8 @@ export async function generateMetadata({
         title,
         description,
         type: "website",
-        locale: "ar_LY",
+        /* r133 (R11 / A12 S13): ar_AR — Facebook scrapers drop ar_LY. */
+        locale: "ar_AR",
         images: ogImage ? [{ url: ogImage }] : undefined,
       },
       twitter: { card: "summary_large_image", title, description },

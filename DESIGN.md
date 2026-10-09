@@ -31,8 +31,8 @@ brand assets (the dead `shared/brand.tsx` component, zero consumers, was
 removed in r132). `text-gradient-orange` rides gold → hover-gold at 135° in dark,
 copper `#B57438 → #9A5F25` in light. Raster brand assets (favicon,
 icon-192/512, apple-touch-icon, brand-icon, favicon.ico, og-default.png) are
-night+gold. `public/showcase-store.webp` was recolored to the same identity in
-r125 — the flame-era original is gone.
+night+gold. (The flame-era `public/showcase-store.webp` showcase asset —
+recolored once in r125, zero consumers — was removed in r133.)
 
 ## Color
 

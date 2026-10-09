@@ -11,6 +11,7 @@ import { AnimatedCopy } from "@/components/ui/animated-icons";
 import { ProviderPicker } from "@/components/payment/provider-picker";
 import { ReceiptUpload } from "@/components/payment/receipt-upload";
 import { api, ApiError } from "@/lib/client";
+import { normalizeLibyanPhone } from "@/lib/phone";
 import {
   WALLET_CAP_LYD,
   MADAR_PHONE_FALLBACK,
@@ -62,6 +63,10 @@ export function PaymentDialog({
   }, [requiresBank, provider]);
 
   const [phone, setPhone] = useState("");
+  /* r133 (A1 F11/S7): inline field error for the wallet phone (the
+     aria-invalid + role=alert grammar) — validation rides
+     normalizeLibyanPhone, matching the server twin. */
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const bankAmountId = useId();
   const senderNameId = useId();
   const senderNumberId = useId();
@@ -73,6 +78,11 @@ export function PaymentDialog({
   const [resolutionMsg, setResolutionMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [paymentId, setPaymentId] = useState<string | null>(null);
+  /* r133 (A1 F14): after ~2 minutes of consecutive poll failures the
+     timer used to stop rescheduling silently while the UI kept the
+     live "waiting" pulse forever — pollFailed surfaces a retry state. */
+  const [pollFailed, setPollFailed] = useState(false);
+  const [pollNonce, setPollNonce] = useState(0);
 
   const providerPhone = provider === "libyana" ? LIBYANA_PHONE_FALLBACK : MADAR_PHONE_FALLBACK;
   const providerName = provider === "libyana" ? "ليبيانا" : "مدار";
@@ -90,7 +100,7 @@ export function PaymentDialog({
       toast.success("تم النسخ");
       return true;
     } catch {
-      toast.error("فشل النسخ");
+      toast.error("تعذّر النسخ");
       return false;
     }
   };
@@ -100,11 +110,18 @@ export function PaymentDialog({
     if (sentRef.current) return; // block double-click double-payment
     const isBank = provider === "bank";
     // Validate BEFORE latching the guard — failure must leave the button usable
-    if (!isBank && !phone.trim()) {
-      toast.error("يرجى إدخال رقم هاتفك");
-      return;
-    }
-    if (isBank) {
+    if (!isBank) {
+      /* r133 (A1 F11): the helper text promised “10 أرقام تبدأ بـ 09” but
+         only non-empty was checked — normalizeLibyanPhone is the single
+         validation seam (same twin as the server route). */
+      const normalized = normalizeLibyanPhone(phone);
+      if (!normalized) {
+        const msg = "رقم الهاتف غير صحيح — مثال صحيح: 0912345678";
+        setPhoneError(msg);
+        toast.error(msg);
+        return;
+      }
+    } else {
       if (!senderAccountName.trim()) {
         toast.error("يرجى إدخال اسم صاحب الحساب");
         return;
@@ -121,23 +138,27 @@ export function PaymentDialog({
         planId,
         provider,
         amount: isBank ? bankAmount : price,
-        phone: isBank ? undefined : phone.trim(),
+        phone: isBank ? undefined : (normalizeLibyanPhone(phone) ?? phone.trim()),
         senderAccountName: isBank ? senderAccountName.trim() : undefined,
         senderAccountNumber: isBank ? senderAccountNumber.trim() : undefined,
         receiptImageUrl: receiptImageUrl || undefined,
         businessId,
       });
       setPaymentId(res.data?.id ?? null);
+      setPollFailed(false);
       setStep("waiting");
     } catch (e) {
-      toast.error(e instanceof ApiError ? e.message : "فشل إرسال طلب الدفع");
+      toast.error(e instanceof ApiError ? e.message : "تعذّر إرسال طلب الدفع");
       sentRef.current = false; // allow retry on failure
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Status poll — pauses when the tab is hidden, gives up after 15 minutes
+  // Status poll — pauses when the tab is hidden; after 30 consecutive
+  // failures (~2 minutes) it stops rescheduling and surfaces pollFailed
+  // (r133 A1 F14 — previously the give-up was silent while the UI kept
+  // promising active waiting; pollNonce restarts the loop on retry).
   useEffect(() => {
     if (step !== "waiting" || !paymentId) return;
     let stopped = false;
@@ -153,7 +174,7 @@ export function PaymentDialog({
         failures = 0;
         const status = res.data?.status;
         if (status === "APPROVED") {
-          setResolutionMsg("تم الموافقة على اشتراكك بنجاح! سيتم تفعيل الخطة على متجرك الآن.");
+          setResolutionMsg("تم الموافقة على اشتراكك بنجاح! سيتم تفعيل الباقة على متجرك الآن.");
           setStep("approved");
           onApproved?.();
           return;
@@ -168,9 +189,11 @@ export function PaymentDialog({
       } catch {
         failures += 1;
       }
-      if (failures < 30) {
-        timer = setTimeout(tick, 4000);
+      if (failures >= 30) {
+        setPollFailed(true);
+        return;
       }
+      timer = setTimeout(tick, 4000);
     };
     let timer: ReturnType<typeof setTimeout> = setTimeout(tick, 2500);
     return () => {
@@ -178,7 +201,7 @@ export function PaymentDialog({
       clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, paymentId]);
+  }, [step, paymentId, pollNonce]);
 
   // Reset-on-open — clean form on every open or plan switch
   useEffect(() => {
@@ -187,12 +210,14 @@ export function PaymentDialog({
       setStep("form");
       setBankAmount(price);
       setPhone("");
+      setPhoneError(null);
       setSenderAccountName("");
       setSenderAccountNumber("");
       setReceiptImageUrl("");
       setPaymentId(null);
       setResolutionMsg("");
       setSubmitting(false);
+      setPollFailed(false);
     }
   }, [open, planId, price]);
 
@@ -201,11 +226,13 @@ export function PaymentDialog({
       sentRef.current = false;
       setStep("form");
       setPhone("");
+      setPhoneError(null);
       setBankAmount(price);
       setSenderAccountName("");
       setSenderAccountNumber("");
       setReceiptImageUrl("");
       setPaymentId(null);
+      setPollFailed(false);
     }
     onOpenChange(next);
   };
@@ -304,16 +331,27 @@ export function PaymentDialog({
                     <Input
                       id="payment-phone"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="09XXXXXXXXX"
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        if (phoneError) setPhoneError(null);
+                      }}
+                      placeholder="09XXXXXXXX"
                       inputMode="numeric"
                       maxLength={10}
+                      aria-invalid={!!phoneError}
+                      aria-describedby={phoneError ? "payment-phone-error" : undefined}
                       className="mt-1.5 text-start font-mono"
                       dir="ltr"
                     />
-                    <p className="mt-1 text-[11px] text-muted-foreground">
-                      ١٠ أرقام تبدأ بـ 09 — حتى نتمكن من التأكد من استلام التحويل
-                    </p>
+                    {phoneError ? (
+                      <p id="payment-phone-error" role="alert" className="mt-1 text-[11px] font-medium text-destructive-ink">
+                        {phoneError}
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        10 أرقام تبدأ بـ 09 — حتى نتمكن من التأكد من استلام التحويل
+                      </p>
+                    )}
                   </div>
                 </>
               )}
@@ -408,9 +446,14 @@ export function PaymentDialog({
                 size="lg"
                 className="w-full"
                 onClick={handleSent}
-                disabled={submitting || (provider !== "bank" && !phone.trim())}
+                disabled={
+                  submitting ||
+                  (provider !== "bank" && !phone.trim()) ||
+                  (provider === "bank" &&
+                    (!senderAccountName.trim() || !senderAccountNumber.trim()))
+                }
               >
-                {submitting ? "جاري الإرسال..." : "إرسال طلب الدفع"}
+                {submitting ? "جارٍ الإرسال…" : "إرسال طلب الدفع"}
               </Button>
             </>
           )}
@@ -435,15 +478,38 @@ export function PaymentDialog({
                 </p>
               </div>
 
-              {/* Live status indicator */}
-              <div className="flex items-center gap-2 rounded-full border border-border/20 bg-muted/30 px-4 py-2">
-                <span className="relative flex size-2">
-                  <span className="relative size-2 animate-pulse-soft rounded-full bg-orange" />
-                </span>
-                <span className="text-[11px] text-muted-foreground">
-                  {provider === "libyana" ? "بانتظار تأكيد التحويل" : "بانتظار موافقة الإدارة"}
-                </span>
-              </div>
+              {/* Live status indicator — r133 (A1 F14): after ~2 minutes
+                  of consecutive poll failures the waiting state surfaces a
+                  retry affordance instead of pulsing forever. */}
+              {pollFailed ? (
+                <div
+                  className="space-y-2 rounded-2xl border border-border/20 bg-muted/30 px-4 py-3"
+                  role="alert"
+                >
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    تعذّر التحقق من حالة الدفع — تحقّق من اتصالك بالإنترنت ثم أعد الفحص.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setPollFailed(false);
+                      setPollNonce((n) => n + 1);
+                    }}
+                  >
+                    إعادة الفحص
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 rounded-full border border-border/20 bg-muted/30 px-4 py-2">
+                  <span className="relative flex size-2">
+                    <span className="relative size-2 animate-pulse-soft rounded-full bg-orange" />
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">
+                    {provider === "libyana" ? "بانتظار تأكيد التحويل" : "بانتظار موافقة الإدارة"}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
@@ -520,11 +586,13 @@ export function PaymentDialog({
                     setStep("form");
                     setResolutionMsg("");
                     setPhone("");
+                    setPhoneError(null);
                     setBankAmount(price);
                     setSenderAccountName("");
                     setSenderAccountNumber("");
                     setReceiptImageUrl("");
                     setPaymentId(null);
+                    setPollFailed(false);
                   }}
                 >
                   إعادة المحاولة

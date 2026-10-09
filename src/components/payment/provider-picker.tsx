@@ -60,7 +60,7 @@ export function ProviderPicker({
       {requiresBank && (
         /* Family payment notice — accent-foreground (AA 5.42:1) */
         <p className="mt-2 text-xs text-accent-foreground">
-          المبالغ فوق ٩٩ د.ل تتطلب تحويل بنكي — اختر &quot;تحويل بنكي&quot; لإتمام الدفع
+          المبالغ فوق 99 د.ل تتطلب تحويل بنكي — اختر &quot;تحويل بنكي&quot; لإتمام الدفع
         </p>
       )}
     </div>

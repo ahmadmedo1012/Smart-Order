@@ -34,11 +34,11 @@ const SECTIONS = [
   },
   {
     title: "الاحتفاظ والحذف",
-    body: "نحتفظ ببيانات حسابك طوال فترة نشاط متجرك. عند طلب حذف الحساب نحذف بياناتك الشخصية خلال ٣٠ يوماً، مع الاحتفاظ بسجلات الطلبات المالية للمدة التي يوجبها القانون الضريبي الليبي.",
+    body: "نحتفظ ببيانات حسابك طوال فترة نشاط متجرك. عند طلب حذف الحساب نحذف بياناتك الشخصية خلال 30 يوماً، مع الاحتفاظ بسجلات الطلبات المالية للمدة التي يوجبها القانون الضريبي الليبي.",
   },
   {
     title: "حقوقك",
-    body: "يحق لك طلب نسخة من بياناتك، تصحيحها، أو حذف حسابك بالكامل في أي وقت عبر الدعم الفني على واتساب. سنستجيب خلال مدة معقولة لا تتجاوز ١٤ يوماً.",
+    body: "يحق لك طلب نسخة من بياناتك، تصحيحها، أو حذف حسابك بالكامل في أي وقت عبر الدعم الفني على واتساب. سنستجيب خلال مدة معقولة لا تتجاوز 14 يوماً.",
   },
   {
     title: "أمن البيانات",
@@ -52,7 +52,7 @@ export default function PrivacyPage() {
       <Header />
       <main className="mx-auto max-w-3xl px-4 pb-20 pt-28 sm:px-6">
         <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">سياسة الخصوصية</h1>
-        <p className="mt-3 text-sm text-muted-foreground">آخر تحديث: سبتمبر ٢٠٢٦ — منصة سمارت أوردر، من عائلة الربط الذكي</p>
+        <p className="mt-3 text-sm text-muted-foreground">آخر تحديث: سبتمبر 2026 — منصة سمارت أوردر، من عائلة الربط الذكي</p>
         {/* r128-F8 (B23): legal = quiet — mono chapter labels per section,
             hairline rhythm separation, prose measure (62ch) at 15px/1.75,
             and the shared SSR-visible Reveal on each section block. */}

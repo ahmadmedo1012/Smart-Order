@@ -34,7 +34,11 @@ const buttonVariants = cva(
         default:
           "bg-orange text-orange-foreground shadow-sm hover:-translate-y-[2px] hover:shadow-(--shadow-card-h) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-[linear-gradient(105deg,transparent_30%,oklch(1_0_0/0.22)_50%,transparent_70%)] before:-translate-x-full before:transition-transform before:duration-(--t-cinema) before:ease-out hover:before:translate-x-full",
         flame:
-          "bg-[linear-gradient(135deg,var(--c-ember),var(--c-saffron)_50%,var(--c-ember))] text-espresso shadow-sm hover:-translate-y-[2px] hover:brightness-110 hover:shadow-(--shadow-card-h) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-[linear-gradient(105deg,transparent_30%,oklch(1_0_0/0.22)_50%,transparent_70%)] before:-translate-x-full before:transition-transform before:duration-(--t-cinema) before:ease-out hover:before:translate-x-full",
+          /* r133 (A10 §2): hover:brightness-110 retired — the reference
+             flame-equivalents lift + neutral shadow, never a filter
+             (lift + shadow already on the class; zero brightness hovers
+             exist anywhere in madarek). */
+          "bg-[linear-gradient(135deg,var(--c-ember),var(--c-saffron)_50%,var(--c-ember))] text-espresso shadow-sm hover:-translate-y-[2px] hover:shadow-(--shadow-card-h) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-[linear-gradient(105deg,transparent_30%,oklch(1_0_0/0.22)_50%,transparent_70%)] before:-translate-x-full before:transition-transform before:duration-(--t-cinema) before:ease-out hover:before:translate-x-full",
         outline:
           "border-border/70 bg-transparent text-foreground hover:border-foreground/25 hover:bg-foreground/5 dark:hover:bg-foreground/10",
         secondary:

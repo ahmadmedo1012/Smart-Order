@@ -118,7 +118,7 @@ export default function DashboardOverview() {
         aria-live="polite"
         aria-busy="true"
       >
-        <span className="sr-only">جارٍ تحميل لوحة التحكم...</span>
+        <span className="sr-only">جارٍ تحميل لوحة التحكم…</span>
         <HeaderSkeleton action />
         <KpiGridSkeleton />
         <div className="grid gap-4 lg:grid-cols-3">

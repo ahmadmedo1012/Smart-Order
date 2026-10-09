@@ -18,7 +18,10 @@ export const ORDER_STATUS_AR: Record<OrderStatus, string> = {
   PREPARING: "قيد التحضير",
   READY: "جاهز",
   OUT_FOR_DELIVERY: "في الطريق للتوصيل",
-  DELIVERED: "تم التوصيل",
+  /* r133 (R4 / A9 V5): تم التسليم — was «تم التوصيل», an internal split
+     vs order-machine.ts + tracking-client.tsx (owner timeline and the
+     customer tracking page showed two labels for the same state). */
+  DELIVERED: "تم التسليم",
   CANCELLED: "ملغي",
   REJECTED: "مرفوض",
 };

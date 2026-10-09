@@ -8,7 +8,7 @@ export const metadata: Metadata = {
      suffix "… | سمارت أوردر | سمارت أوردر" in tabs + SERP). Canonical
      added (marketing pages had none). */
   title: "الباقات والأسعار",
-  description: "خطط سمارت أوردر — ابدأ مجاناً وارتقِ متى ما كبر عملك. أسعار بالدينار الليبي.",
+  description: "باقات سمارت أوردر — ابدأ مجاناً وارتقِ متى ما كبر عملك. أسعار بالدينار الليبي.",
   alternates: { canonical: "/pricing" },
 };
 
