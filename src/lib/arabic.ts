@@ -15,6 +15,34 @@ const AR_MONTHS = [
   "ديسمبر",
 ];
 
+/* r136 (السوق الليبي أولاً): ليبيا = UTC+2 ثابت بلا توقيت صيفي منذ 2013
+ * (نفس حكم SmartBot pdf_reports_engine._tripoli_now). على Vercel (TZ=UTC)
+ * كان «اليوم» يتبدل 02:00 طرابلس: طلب 01:30 يحمل تاريخ الأمس في رقمه،
+ * و«إيراد اليوم» والتسلسل اليومي يصفران متأخرين ساعتين. كل حدود اليوم
+ * في المسار الخادمي تمر من هنا الآن. */
+const TRIPOLI_OFFSET_MS = 2 * 60 * 60 * 1000;
+
+/** بداية اليوم الحالي بتوقيت طرابلس (كقيمة UTC صالحة للمقارنات ≥/≤). */
+export function tripoliDayStart(now: Date = new Date()): Date {
+  const shifted = new Date(now.getTime() + TRIPOLI_OFFSET_MS);
+  shifted.setUTCHours(0, 0, 0, 0);
+  return new Date(shifted.getTime() - TRIPOLI_OFFSET_MS);
+}
+
+/** بداية الشهر الحالي بتوقيت طرابلس (نفس صنف خطأ الحد اليومي). */
+export function tripoliMonthStart(now: Date = new Date()): Date {
+  const shifted = new Date(now.getTime() + TRIPOLI_OFFSET_MS);
+  shifted.setUTCDate(1);
+  shifted.setUTCHours(0, 0, 0, 0);
+  return new Date(shifted.getTime() - TRIPOLI_OFFSET_MS);
+}
+
+/** أجزاء التاريخ (سنة/شهر/يوم) بتوقيت طرابلس — لأرقام الطلبات SO-YYYYMMDD. */
+export function tripoliDateParts(now: Date = new Date()): { y: number; m: number; d: number } {
+  const shifted = new Date(now.getTime() + TRIPOLI_OFFSET_MS);
+  return { y: shifted.getUTCFullYear(), m: shifted.getUTCMonth() + 1, d: shifted.getUTCDate() };
+}
+
 export function formatArabicDateTime(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
   const day = d.getDate();

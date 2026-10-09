@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/scroll-reveal";
 import { Sparkles, Star, Crown, Building2, Flame, type LucideIcon } from "lucide-react";
 import type { Plan } from "@/lib/plan-types";
+import { toArabicNumber } from "@/lib/plan-types";
 
 /** Plan metadata by name (family PLAN_META pattern — survives reordering).
  *  r128-F8 (B20): icon chips flat — no gradient grounds (§7 discipline). */
@@ -92,7 +93,7 @@ export function PlanSelector({
               <h3 className="mb-1 font-heading text-lg font-bold">{plan.nameAr}</h3>
               <div className="mb-3 flex items-baseline gap-1">
                 <span className="text-2xl font-bold tabular-nums">
-                  {Number(plan.price) === 0 ? "مجاني" : plan.price}
+                  {Number(plan.price) === 0 ? "مجاني" : toArabicNumber(plan.price)}
                 </span>
                 {Number(plan.price) > 0 && <span className="text-xs text-muted-foreground">د.ل/شهر</span>}
               </div>

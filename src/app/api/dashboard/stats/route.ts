@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, requireBusiness, requirePermission } from "@/lib/auth";
 import { ok, handleError } from "@/lib/api";
+import { tripoliDayStart, tripoliMonthStart } from "@/lib/arabic";
 
 export const runtime = "nodejs";
 
@@ -15,12 +16,10 @@ export async function GET(req: NextRequest) {
     requirePermission(member, "orders.read");
     const businessId = member.businessId;
 
-    const dayStart = new Date();
-    dayStart.setHours(0, 0, 0, 0);
-
-    const monthStart = new Date();
-    monthStart.setDate(1);
-    monthStart.setHours(0, 0, 0, 0);
+    /* r136: حد اليوم والشهر بوقت طرابلس — كان منتصف الليل بتوقيت الخادم
+     * (UTC على Vercel = 02:00 ليبيا) فتتصفر «إيرادات اليوم/الشهر» متأخرة ساعتين. */
+    const dayStart = tripoliDayStart();
+    const monthStart = tripoliMonthStart();
 
     const [
       todayOrders,

@@ -71,6 +71,10 @@
  * Suite: 231 (197 product + 34 r128-F8 landing-layer pins: 25 .landing
  * token values + 9 raw gates — marquee keyframes/gap/loop/RM, --sp consumer,
  * scroll-spy ids, .ln-grain, and the .landing scope-isolation negatives).
+ * ⚠ r136 header-truth: 231 هو العدد التاريخي لحقبة r128 — العدد الحي
+ * 347 (r133 الكنسوز الدقيقة 276→346 + مسمار button-lg لـ r134). السطر
+ * يبقى كما هو أعلاه لأنه جزء من السرد، والحساب الفعلي يطبع في نهاية
+ * التشغيل (passed=347).
  *
  * r129 (F4): 231 → 276. The r129-A7 audit proved the suite's blind spot —
  * 231/231 green while 7 bridge tokens (--sp-3/-4/-7/-8, --r-2xl,

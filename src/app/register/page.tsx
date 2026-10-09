@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { normalizeLibyanPhone } from "@/lib/phone";
 import { LIBYA_CITIES } from "@/lib/constants";
 import type { Plan } from "@/lib/plan-types";
+import { toArabicNumber } from "@/lib/plan-types";
 import { toast } from "sonner";
 import { Loader2, Rocket, Sparkles, Star, Crown, Building2, Flame } from "lucide-react";
 
@@ -347,7 +348,7 @@ function RegisterWizard() {
                   <div>
                     <div className="text-sm font-bold">باقة {selectedPlan.nameAr}</div>
                     <div className="text-xs text-muted-foreground">
-                      {selectedPlan.price === 0 ? "مجانية للأبد" : `${selectedPlan.price} د.ل / شهرياً`}
+                      {selectedPlan.price === 0 ? "مجانية للأبد" : `${toArabicNumber(selectedPlan.price)} د.ل / شهرياً`}
                     </div>
                   </div>
                 </div>

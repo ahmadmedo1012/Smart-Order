@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { api, ApiError } from "@/lib/client";
+import { toArabicNumber } from "@/lib/plan-types";
 import { Button } from "@/components/ui/button";
 import { EmptyState, ErrorState } from "@/components/shared/states";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -167,7 +168,8 @@ export default function AdminPaymentsPage() {
                           className="ms-2 text-accent-foreground tabular-nums"
                           dir="ltr"
                         >
-                          {p.amount} د.ل
+                          {/* r136: عبر نقطة الوصل — تجميع ar-LY عند ≥1,000 */}
+                          {toArabicNumber(p.amount)} د.ل
                         </span>
                       </div>
                       <div className="text-xs text-muted-foreground">

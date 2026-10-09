@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useId } from "react";
 import { Smartphone, Landmark, CheckCircle2, XCircle } from "lucide-react";
 import { m } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { toArabicNumber } from "@/lib/plan-types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -266,7 +267,8 @@ export function PaymentDialog({
                 {planNameAr}
               </span>
               <span className="text-lg font-bold text-accent-foreground tabular-nums" dir="ltr">
-                {price} د.ل
+                {/* r136: عبر نقطة الوصل العائلية — تجميع ar-LY عند ≥1,000 */}
+                {toArabicNumber(price)} د.ل
               </span>
             </div>
             <p className="mt-0.5 text-xs text-muted-foreground">اشتراك شهري</p>
@@ -437,7 +439,7 @@ export function PaymentDialog({
                 <div className="flex items-center justify-between rounded-xl border border-border/20 bg-muted/30 p-3">
                   <span className="text-sm text-muted-foreground">المبلغ المطلوب</span>
                   <span className="text-lg font-bold text-accent-foreground tabular-nums" dir="ltr">
-                    {price} د.ل
+                    {toArabicNumber(price)} د.ل
                   </span>
                 </div>
               )}

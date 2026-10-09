@@ -15,6 +15,7 @@ import { normalizeLibyanPhone, toE164 } from "@/lib/phone";
 import { dbRateLimit, clientIp } from "@/lib/rate-limit";
 import { MAX_ORDER_ITEMS, MAX_ORDER_QUANTITY } from "@/lib/constants";
 import { buildOrderMessage } from "@/lib/whatsapp";
+import { tripoliDayStart, tripoliDateParts } from "@/lib/arabic";
 import { Prisma } from "@prisma/client";
 
 export const runtime = "nodejs";
@@ -43,10 +44,10 @@ const createSchema = z.object({
 });
 
 function orderNumberFor(date: Date, seq: number): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `SO-${y}${m}${d}-${String(seq).padStart(4, "0")}`;
+  /* r136: أجزاء التاريخ بتوقيت طرابلس — كان يقرأ ساعة الخادم المحلية
+   * (UTC على Vercel) فيحمل طلب 01:30 طرابلس تاريخ الأمس في رقمه. */
+  const { y, m, d } = tripoliDateParts(date);
+  return `SO-${y}${String(m).padStart(2, "0")}${String(d).padStart(2, "0")}-${String(seq).padStart(4, "0")}`;
 }
 
 export async function POST(req: NextRequest) {
@@ -209,9 +210,9 @@ export async function POST(req: NextRequest) {
     const runOrderTx = () =>
       db.$transaction(
         async (tx) => {
-          // daily sequence per business
-          const dayStart = new Date();
-          dayStart.setHours(0, 0, 0, 0);
+          // daily sequence per business — r136: الحد بوقت طرابلس (كان
+          // يتبدل 02:00 ليبيا على خادم UTC)
+          const dayStart = tripoliDayStart();
           const todayCount = await tx.order.count({
             where: { businessId: business.id, createdAt: { gte: dayStart } },
           });
