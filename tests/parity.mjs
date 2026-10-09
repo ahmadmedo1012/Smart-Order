@@ -996,9 +996,9 @@ const R133_LAYER = [
     R('src/components/ui/textarea.tsx').includes('hover:not-aria-invalid:border-foreground/25')],
   ['E wallet phone mask 09XXXXXXXX (9 X — the R10 spelling)',
     R133_SRC.payDialog.includes('placeholder="09XXXXXXXX"')],
-  ['E+F lucide ^1.43 + engines node>=22 + packageManager npm@11.19.0',
+  ['E+F lucide ^1.43 + engines node>=22 + packageManager bun@1.3.14 (CI/Vercel contract — never npm)',
     PKG.includes('"lucide-react": "^1.43.0"') && PKG.includes('"node": ">=22"') &&
-    PKG.includes('"packageManager": "npm@11.19.0"')],
+    PKG.includes('"packageManager": "bun@1.3.14"')],
   ['E og-default.png day + SWR cache rule (SO-N3)',
     NEXTCFG.includes('source: "/og-default.png"') && NEXTCFG.includes('stale-while-revalidate=604800')],
   ['E global-error.tsx: the root boundary exists (A13 S-05)',

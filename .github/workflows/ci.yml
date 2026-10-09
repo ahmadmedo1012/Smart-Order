@@ -47,6 +47,10 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 22
+          # r133: packageManager=bun@1.3.14 — setup-node's auto-cache would demand
+          # package-lock.json (fatal: repo is bun.lock by contract). The bun cache
+          # itself is handled by oven-sh/setup-bun below (bun.lock fingerprint).
+          package-manager-cache: false
 
       # bun 1.3.14 = الإصدار الذي اجتازت البوابات الثلاث عليه محلياً
       # (r127-F7)؛ أي رفع لهذا الرقم يستوجب إعادة تشغيل البوابات.
@@ -99,6 +103,8 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 22
+          # r133: same as above — bun.lock repo, setup-bun owns the cache.
+          package-manager-cache: false
 
       - name: Bun 1.3.14
         uses: oven-sh/setup-bun@v2
