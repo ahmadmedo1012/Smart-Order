@@ -1006,10 +1006,9 @@ const R133_LAYER = [
   ['E .env.example: bank/WhatsApp/seed/proxy vars documented',
     ENVEX.includes('NEXT_PUBLIC_BANK_NAME') && ENVEX.includes('NEXT_PUBLIC_SUPPORT_WHATSAPP') &&
     ENVEX.includes('SEED_SECRET') && ENVEX.includes('TRUST_PROXY_DEPTH')],
-  ['E lockfile conversion: package-lock.json present, bun.lock gone, .gitignore rule flipped',
-    exists(new URL('../package-lock.json', import.meta.url)) &&
-    !exists(new URL('../bun.lock', import.meta.url)) &&
-    R('.gitignore').includes('r133 (A13 S-07)')],
+  ['E lockfile convention: bun.lock present (CI/Vercel frozen contract), no package-lock.json (ci.yml documents the npm-detector trap)',
+    exists(new URL('../bun.lock', import.meta.url)) &&
+    !exists(new URL('../package-lock.json', import.meta.url))],
   // ── E microcopy sweeps (comment-stripped, src-wide — F3's r133 recipe) ────
   ['E فشل-ban sweep: 0 user-facing فشل in src (R3)',
     !MICRO.fashal],
