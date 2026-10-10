@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
        call sites. This is a PUBLIC surface (receipt upload needs no
        session) — fail-closed matters most here. */
     const rl = await dbRateLimit(`receipt:${ip}`, 20, 10 * 60 * 1000);
-    if (!rl.ok) return fail("عدد كبير من الرفعات، انتظر قليلاً", 429);
+    // (r138) Retry-After من قيمة dbRateLimit المحسوبة أصلًا (كانت تُهدر)
+    if (!rl.ok) return fail("عدد كبير من الرفعات، انتظر قليلاً", 429, undefined, { "retry-after": String(rl.retryAfterSec) });
 
     const body = await req.json().catch(() => null);
     const data = typeof body?.data === "string" ? body.data : "";

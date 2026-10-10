@@ -21,7 +21,9 @@ of the Smart family (`order.smart-link.ly`). Full product context: `PRODUCT.md`.
   `package-lock.json` must never exist (Vercel package-manager detection +
   CI frozen install; pinned by parity). Node >= 22.
 - Money = **integer millimes** everywhere (1 LYD = 1000; `lib/money.ts`
-  parse/format — never floats). Phones = normalized Libyan 09x (`lib/phone.ts`).
+  parse/format — never floats). Phones = normalized Libyan numbers
+  (`lib/phone.ts`): **r138 unified wider contract** — mobile `09` at 9–10
+  digits (short operators, Smart-Link parity) and landline `0[1-9]` at 10.
 
 ## Commands
 
@@ -31,7 +33,7 @@ of the Smart family (`order.smart-link.ly`). Full product context: `PRODUCT.md`.
 | `npm run lint` | ESLint — must be 0 errors / 0 warnings |
 | `npx tsc --noEmit` | Typecheck — must be 0 errors |
 | `npm run test:parity` | Madarek parity snapshot (`tests/parity.mjs`, dependency-free node) |
-| `npm run test:unit` | node:test unit suite — Libyan money/phone seams + client-only display guard (`tests/unit/`, dependency-free; Node ≥ 22.18 type-strips the TS natively) |
+| `npm run test:unit` | node:test unit suite — Libyan money/phone seams + Tripoli day-boundary helpers + client-only display guard (`tests/unit/`, dependency-free; Node ≥ 22.18 type-strips the TS natively) |
 | `npm run test:e2e` | API E2E suite — needs a LIVE server (`node tests/e2e/api-e2e.js [baseUrl]`); CI boots one on a scratch SQLite |
 | `npm run build` | Production build (no DB needed — DB routes are force-dynamic) |
 | `npm run dev` / `db:push` / `db:generate` | Dev server / schema push / client generate |
@@ -64,7 +66,9 @@ contracts). Rules:
   CSS (physical = sanctioned scrollbar/centering cases only).
 - **فشل is banned** in user-facing copy — use **تعذّر** (WITH shadda).
   Ellipsis in Arabic strings is **«…»**, never `...`.
-- **Money display** = `formatLyd` (ar-LY dot grouping ≥ 1000, `12.500.000 د.ل`);
+- **Money display** = `formatLyd` (ar-LY dot grouping ≥ 1000; **r138 decision,
+  Smart-Link twin**: whole dinars clean `19 د.ل`, fractions at dirham
+  precision `19.500 د.ل` — trailing `.000` zeros are gone);
   raw `formatLydAmount` only inside form round-trips.
 - **`WALLET_CAP_LYD = 99`** (`lib/payment-constants.ts`): libyana/madar
   single transfers above the cap are impossible — subscriptions auto-switch

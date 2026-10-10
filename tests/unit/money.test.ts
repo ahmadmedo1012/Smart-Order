@@ -73,7 +73,8 @@ test("parseLyd ⇄ WALLET_CAP_LYD: the 99 LYD wallet cap crosses the seam exactl
   // exact millimes boundary, and the first step above must be +1 millime.
   assert.equal(parseLyd("99.000"), WALLET_CAP_LYD * 1000);
   assert.equal(parseLyd("99.001"), WALLET_CAP_LYD * 1000 + 1);
-  assert.equal(formatLyd(WALLET_CAP_LYD * 1000), "99.000 د.ل");
+  // (r138) قرار العرض الأنظف: الصحيح نظيف (كان «99.000 د.ل» بأصفار ذيلية)
+  assert.equal(formatLyd(WALLET_CAP_LYD * 1000), "99 د.ل");
 });
 
 test("formatLydAmount: raw form seeding — always 3 decimals", () => {
@@ -88,20 +89,38 @@ test("formatLydAmount: negatives keep the sign", () => {
   assert.equal(formatLydAmount(-12500), "-12.500");
 });
 
+test("formatLyd (r138 display decision): whole dinars clean, fractions at dirham precision", () => {
+  // (r138 — اتساق الأسطولة) توأم Smart-Link حرفيًا: الصحيح بلا «.000»
+  // والكسر بدقة الدرهم الثلاثية. القاعدة السابقة (3 منازل دائمًا) لم
+  // يوثق أحد سببها — وُثق القرار الجديد في money.ts وCLAUDE.md.
+  assert.equal(formatLyd(19000), "19 د.ل"); // صحيح نظيف
+  assert.equal(formatLyd(19500), "19.500 د.ل"); // كسر درهمي
+  assert.equal(formatLyd(19050), "19.050 د.ل"); // الصفر الأوسط يبقى
+  assert.equal(formatLyd(0), "0 د.ل");
+  assert.equal(formatLyd(-19000), "-19 د.ل");
+});
+
 test("formatLyd: ar-LY display — dot grouping from 1,000, then « د.ل»", () => {
-  assert.equal(formatLyd(999), "0.999 د.ل"); // below 1,000 — ungrouped
-  assert.equal(formatLyd(1000), "1.000 د.ل"); // grouping boundary
+  assert.equal(formatLyd(999), "0.999 د.ل"); // كسر — دقة الدرهم
+  assert.equal(formatLyd(1000), "1 د.ل"); // (r138) حد التجميع أصبح صحيحًا نظيفًا
+  assert.equal(formatLyd(1250000), "1.250 د.ل"); // صحيح مجمّع ≥ 1000 — نقطة التجميع
   assert.equal(formatLyd(12500), "12.500 د.ل");
-  assert.equal(formatLyd(12500000), "12.500.000 د.ل");
-  assert.equal(formatLyd(-12500000), "-12.500.000 د.ل");
+  assert.equal(formatLyd(12500000), "12.500 د.ل"); // (r138) 12,500 د.ل صحيح — لا «.000» ذيلية
+  assert.equal(formatLyd(12500500), "12.500.500 د.ل"); // تجميع + كسر معًا
+  assert.equal(formatLyd(-12500000), "-12.500 د.ل");
 });
 
 test("two-seam contract: forms round-trip formatLydAmount, NOT formatLyd", () => {
   // formatLydAmount output re-parses exactly …
   assert.equal(tryParseLyd(formatLydAmount(12500000)), 12500000);
-  // … while the grouped display string is deliberately NOT form-parseable
-  // (why the r133 grouping lives in formatLyd only).
-  assert.equal(tryParseLyd(formatLyd(12500000)), null);
+  // … while the GROUPED display string stays NOT form-parseable (two
+  // dots = invalid — why the r133 grouping lives in formatLyd only).
+  // (r138) صيغة مجمّعة + كسر ترفضها parseLyd (نقطتان):
+  assert.equal(tryParseLyd(formatLyd(12500500)), null);
+  // الصحيح الصغير النظيف يعود بالنفس القيمة (بلا فساد) لو دخل نموذجًا
+  // يوماً — لكن الصحيح المجمّع «12.500 د.ل» (12,500) يُقرأ 12.5 لو دخل
+  // نموذجًا — لهذا تُغذّى النماذج من formatLydAmount حصرًا (عقد الدرجتين).
+  assert.equal(tryParseLyd(formatLyd(19000)), 19000);
 });
 
 test("tryParseLyd: null-safe form variant", () => {

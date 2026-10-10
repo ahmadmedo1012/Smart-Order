@@ -21,8 +21,18 @@ export function ok<T>(data: T, opts?: OkOptions): NextResponse {
   });
 }
 
-export function fail(message: string, status = 400, code?: string): NextResponse {
-  return NextResponse.json({ success: false, error: { message, code } }, { status });
+/* (r138) headers اختيارية — استعمال وحيد اليوم: Retry-After لحالات 429
+   (dbRateLimit يحسب retryAfterSec أصلًا وكان يُهدر في كل موضع استدعاء) */
+export function fail(
+  message: string,
+  status = 400,
+  code?: string,
+  headers?: Record<string, string>,
+): NextResponse {
+  return NextResponse.json(
+    { success: false, error: { message, code } },
+    { status, ...(headers ? { headers } : {}) },
+  );
 }
 
 /* r134 (W2): a fail()-shaped error that can be thrown from INSIDE a

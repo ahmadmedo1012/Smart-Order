@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
     /* r133 (A2 N2): awaited authoritative twin (fail-closed) — the
        documented r132 handoff executed for the money path. */
     const rl = await dbRateLimit(`order:${ip}`, 8, 60 * 1000);
-    if (!rl.ok) return fail("طلبات كثيرة جداً في وقت قصير، انتظر قليلاً", 429);
+    // (r138) Retry-After من قيمة dbRateLimit المحسوبة أصلًا (كانت تُهدر)
+    if (!rl.ok) return fail("طلبات كثيرة جداً في وقت قصير، انتظر قليلاً", 429, undefined, { "retry-after": String(rl.retryAfterSec) });
 
     const input = createSchema.parse(await readJson(req));
 

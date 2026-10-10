@@ -35,7 +35,8 @@ function makeCtx() {
     absorb(res);
     let body = null;
     try { body = await res.json(); } catch { /* non-json */ }
-    return { status: res.status, body };
+    // (r138) headers مع الرد — لفحص Retry-After على 429
+    return { status: res.status, body, headers: res.headers };
   };
   return { call };
 }
@@ -188,11 +189,16 @@ async function main() {
   // ---------- 8. rate limiting (order path) ----------
   console.log("— تحديد المعدل");
   let got429 = false;
+  let retryAfter = "";
   for (let i = 0; i < 12; i++) {
     const r = await anon.call("/api/public/orders", { method: "POST", body: JSON.stringify({ ...orderPayload, idempotencyKey: rnd("e2e-rl-") }) });
-    if (r.status === 429) { got429 = true; break; }
+    if (r.status === 429) { got429 = true; retryAfter = String(r.headers?.get?.("retry-after") ?? ""); break; }
   }
-  if (got429) ok("order rate limit (429) triggers", true);
+  if (got429) {
+    ok("order rate limit (429) triggers", true);
+    // (r138) 429 يعلن مهلة الانتظار لعملاء HTTP — قيمة dbRateLimit المُهدرة سابقًا
+    ok("429 carries a numeric Retry-After (r138)", /^\d+$/.test(retryAfter) && Number(retryAfter) > 0, `retry-after="${retryAfter}"`);
+  }
   else { skipped++; console.log("  - order rate limit not reached (may be shared IP bucket) — skipped"); }
 
   console.log(`\nالنتيجة: ${pass} ناجح · ${fail} فاشل · ${skipped} متجاهل\n`);

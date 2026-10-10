@@ -31,7 +31,8 @@ export async function POST(req: NextRequest) {
        fail-closed) — the documented r132 handoff executed for all six
        call sites. */
     const rl = await dbRateLimit(`subpay:${ip}`, 10, 10 * 60 * 1000);
-    if (!rl.ok) return fail("عدد كبير من المحاولات، انتظر قليلاً", 429);
+    // (r138) Retry-After من قيمة dbRateLimit المحسوبة أصلًا (كانت تُهدر)
+    if (!rl.ok) return fail("عدد كبير من المحاولات، انتظر قليلاً", 429, undefined, { "retry-after": String(rl.retryAfterSec) });
 
     const user = await requireAuth();
     const input = schema.parse(await readJson(req));

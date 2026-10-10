@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, requireBusiness, requirePermission } from "@/lib/auth";
 import { ok, handleError } from "@/lib/api";
-import { tripoliDayStart, tripoliMonthStart } from "@/lib/arabic";
+import { tripoliDayStart, tripoliMonthStart, tripoliDateParts } from "@/lib/arabic";
 
 export const runtime = "nodejs";
 
@@ -85,9 +85,15 @@ export async function GET(req: NextRequest) {
        function — SQLite dev (DATABASE_URL file:, strftime) vs
        PostgreSQL prod (to_char), discriminated by the .env.example
        contract. Response shape is IDENTICAL: zero-filled
-       {day: "d/m", revenue, orders}, oldest → newest. */
-    const weekStart = new Date(dayStart);
-    weekStart.setDate(weekStart.getDate() - 6);
+       {day: "d/m", revenue, orders}, oldest → newest.
+       (r138 — تسرب منطقة الخادم): كلا الطرفين كان يقصّ اليوم بتوقيت
+       الخادم — strftime/to_char على UTC الخام، والمفاتيح بقراءات
+       getFullYear/getDate المحلية — فكانت دلو الرسم البياني تتبدل
+       02:00 طرابلس على Vercel (نفس صنف خطأ r136 للأرقام والإيراد).
+       الحد الآن بتوقيت طرابلس في الطرفين: SQL بإزاحة +2h الثابتة
+       (بلا توقيت صيفي منذ 2013 — نفس حكم TRIPOLI_OFFSET_MS)، والمفاتيح
+       عبر tripoliDateParts (درزة r136 المعتمدة). */
+    const weekStart = new Date(dayStart.getTime() - 6 * 24 * 60 * 60 * 1000);
     const isSqlite = (process.env.DATABASE_URL ?? "").startsWith("file:");
     const weekRows = isSqlite
       ? await db.$queryRaw<
@@ -95,8 +101,9 @@ export async function GET(req: NextRequest) {
         >`
           /* Prisma stores SQLite DateTime as epoch-ms INTEGER — divide to
              unix seconds, then the 'unixepoch' modifier (a bare integer
-             would be read as a Julian day and strftime would return NULL). */
-          SELECT strftime('%Y-%m-%d', "createdAt"/1000, 'unixepoch') AS day,
+             would be read as a Julian day and strftime would return NULL).
+             (r138) +7200s = إزاحة طرابلس الثابتة قبل قصّ اليوم */
+          SELECT strftime('%Y-%m-%d', "createdAt"/1000 + 7200, 'unixepoch') AS day,
                  COALESCE(SUM("total"), 0) AS revenue,
                  COUNT(*) AS orders
           FROM "Order"
@@ -107,7 +114,9 @@ export async function GET(req: NextRequest) {
       : await db.$queryRaw<
           Array<{ day: string; revenue: number | bigint; orders: number | bigint }>
         >`
-          SELECT to_char("createdAt", 'YYYY-MM-DD') AS day,
+          /* (r138) interval '2 hours' = إزاحة طرابلس الثابتة قبل قصّ اليوم
+             (العمود timestamp بلا منطقة — Prisma يخزن UTC) */
+          SELECT to_char("createdAt" + interval '2 hours', 'YYYY-MM-DD') AS day,
                  COALESCE(SUM("total"), 0)::int AS revenue,
                  COUNT(*)::int AS orders
           FROM "Order"
@@ -120,12 +129,12 @@ export async function GET(req: NextRequest) {
     );
     const weekSeries: Array<{ day: string; revenue: number; orders: number }> = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date(dayStart);
-      d.setDate(d.getDate() - i);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      // (r138) المفتاح والتسمية عبر tripoliDateParts — لا قراءات محلية
+      const { y, m, d: dd } = tripoliDateParts(new Date(dayStart.getTime() - i * 24 * 60 * 60 * 1000));
+      const key = `${y}-${String(m).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
       const bucket = weekMap.get(key);
       weekSeries.push({
-        day: `${d.getDate()}/${d.getMonth() + 1}`,
+        day: `${dd}/${m}`,
         revenue: bucket?.revenue ?? 0,
         orders: bucket?.orders ?? 0,
       });

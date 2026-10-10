@@ -46,16 +46,25 @@ function groupDots(intStr: string): string {
   return intStr.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-/** Format millimes as Arabic-natural currency string: "12.500 د.ل".
- * r133 (A12 S2/R6): the DISPLAY seam now groups the whole part ≥ 1,000
- * ("12.500.000 د.ل") like SB/madarek — KPI/table money rendered
- * "12500000.000" ungrouped before. Forms keep raw formatLydAmount. */
+/** Format millimes as Arabic-natural currency string.
+ * r133 (A12 S2/R6): the DISPLAY seam started grouping the whole part ≥ 1,000
+ * (then «12.500.000 د.ل» — grouping plus the old «.000» tail) like SB/madarek
+ * — KPI/table money rendered "12500000.000" ungrouped before. Forms keep raw
+ * formatLydAmount.
+ * r138 (اتساق الأسطولة، تدقيق r138-e) — قرار عرض موثق: الصحيح نظيف
+ * («19 د.ل») والكسر وحده بدقة الدرهم الأصيلة («19.500 د.ل»)، توأمًا مع
+ * Smart-Link حرفيًا (توثيقه: «Whole dinars stay clean…») وروح Smart-Menu.
+ * قبل r138 كان الصحيح يُعرض «19.000 د.ل» بأصفار ذيلية بلا قرار موثق —
+ * عبارات المثبتات القديمة وصفت السلوك ولم تعلّله. النماذج تظل عبر
+ * formatLydAmount الخام (3 منازل دائمًا — عقد الذهاب/العودة للنماذج). */
 export function formatLyd(millimes: number): string {
   const raw = formatLydAmount(millimes);
   const neg = raw.startsWith("-") ? "-" : "";
   const body = neg ? raw.slice(1) : raw;
   const [whole, frac] = body.split(".");
-  return `${neg}${groupDots(whole)}.${frac} د.ل`;
+  // (r138) «.000» الذيلية تسقط؛ أي كسر فعلي يبقى بدقة الدرهم الثلاثية
+  const fracPart = frac === "000" ? "" : `.${frac}`;
+  return `${neg}${groupDots(whole)}${fracPart} د.ل`;
 }
 
 /** Parse Lyd input → millimes, or null when invalid/empty (for forms). */
