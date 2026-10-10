@@ -2,14 +2,18 @@
 // Libyan dinar uses 3 decimal places (dirham), so millimes is the native minor unit.
 // NEVER convert through floats: parse/format via string manipulation only.
 
-/** Parse user-entered price string ("12.5" / "12,500" / "12.500") into millimes. Throws on invalid. */
+/** Parse user-entered price string ("12.5" / "12,500" / "12.500" / "٣٫٥٠")
+ * into millimes. Throws on invalid. r137: Arabic decimal separator ٫ (U+066B)
+ * and Arabic comma ، (U+060C) map to "." like the Western comma — before, they
+ * were STRIPPED by the [^\d.] cleanup, so «٣٫٥٠» parsed as 350 LYD instead of
+ * 3.50 (100× overcharge on Arabic keyboards, where ٫ is the native decimal). */
 export function parseLyd(input: string | number): number {
   if (typeof input === "number") {
     if (!Number.isFinite(input)) throw new Error("قيمة غير صالحة");
     return Math.round(input * 1000);
   }
   const cleaned = input.replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
-    .replace(/,/g, ".")
+    .replace(/[,،٫]/g, ".")
     .replace(/[^\d.]/g, "")
     .trim();
   if (!cleaned) throw new Error("أدخل قيمة صحيحة");

@@ -107,11 +107,10 @@ bun run build                 # بناء الإنتاج
 | `bun run start:selfhost` | تشغيل حزمة standalone (`NODE_ENV=production`) |
 | `bun run lint` | ESLint |
 | `bun run test:parity` | اختبارات تكافؤ مدارك (الألوان، نصف القطر، الحركة، z-index، الارتفاعات + بوابات الاستهلاك) |
+| `bun run test:unit` | اختبارات وحدة node:test بلا تبعيات لدرزات المال والهاتف الليبية (الأرقام الشرقية ٠٩١٢٣٤٥٦٧٨، الفواصل ٫/،، بادئات +218/00218، سقف المحفظة 99 د.ل) + حارس عرض التواريخ للعميل فقط |
 | `bun run test:e2e` | مجموعة E2E للـ API: المصادقة، عزل المستأجرين، دورة حياة الطلب، إعادة التسعير، حدود المعدل — تعمل ضد أي Base URL |
 | `bun run db:push` | دفع مخطط Prisma إلى قاعدة البيانات (`--accept-data-loss`) |
 | `bun run db:generate` | توليد عميل Prisma |
-| `bun run db:migrate` | إنشاء/تطبيق ترحيلات للتطوير |
-| `bun run db:reset` | تصفير قاعدة البيانات وإعادة الترحيل |
 
 > أعداد الاختبارات تُوثَّق في [`CHANGELOG.md`](CHANGELOG.md) لكل جولة — لا تُثبَّت أرقام في هذا الملف (عقيدة هندسة التوثيق: لا أرقام تتقادم).
 
@@ -160,7 +159,7 @@ src/
   components/  dashboard/ storefront/ shared/ ui/
   lib/         constants, auth, order-machine, money, phone, whatsapp, storage, api, …
 prisma/        schema.prisma (SQLite للتطوير) + schema.postgres.prisma (PostgreSQL للإنتاج)
-tests/         parity.mjs + e2e/api-e2e.js
+tests/         unit/ (node:test) + parity.mjs + e2e/api-e2e.js
 ```
 
 ---

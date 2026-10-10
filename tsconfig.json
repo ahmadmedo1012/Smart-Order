@@ -14,6 +14,10 @@
        the fleet-wide strict contract was disabled, and the 7 ghost
        excludes pointed at dirs that only existed in the sandbox
        workspace, never in this repo. */
+    /* r137: tests/unit/*.test.ts import the lib seams with explicit .ts
+       specifiers (required by node --test type stripping); tsc must accept
+       them (noEmit is already true — the flag requires exactly that). */
+    "allowImportingTsExtensions": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noEmit": true,

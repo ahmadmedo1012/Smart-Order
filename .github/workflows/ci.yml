@@ -67,6 +67,12 @@ jobs:
       - name: Lint (ESLint صفر أخطاء)
         run: npm run lint
 
+      # r137: اختبارات الوحدة — درزات المال والهاتف الليبية (node:test بلا
+      # تبعيات) + حارس مساعدات عرض التاريخ للعميل فقط. Node 22.18+ يشغّل
+      # الـ TS مباشرة (type stripping) — نفس ما يشغّله المطور محليًا.
+      - name: Unit tests (node:test)
+        run: npm run test:unit
+
       # r134 (W2 #7): حارس التوأمين — prisma/schema.prisma (SQLite تطوير)
       # و schema.postgres.prisma (PostgreSQL إنتاج) يُبقيان يدوياً؛ أي
       # انحراف في النماذج يفشل الدفعة قبل البناء. كتلا generator/datasource

@@ -14,11 +14,10 @@
     "start:selfhost": "NODE_ENV=production node .next/standalone/server.js",
     "test:e2e": "node tests/e2e/api-e2e.js http://localhost:3000",
     "test:parity": "node tests/parity.mjs",
+    "test:unit": "node --test \"tests/unit/*.test.ts\"",
     "lint": "eslint .",
     "db:push": "prisma db push --accept-data-loss",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:reset": "prisma migrate reset"
+    "db:generate": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.11.1",

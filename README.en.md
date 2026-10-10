@@ -107,11 +107,10 @@ The canonical source is [`.env.example`](.env.example) — the table shows the r
 | `bun run start:selfhost` | Run the standalone bundle (`NODE_ENV=production`) |
 | `bun run lint` | ESLint |
 | `bun run test:parity` | Madarek parity tests (colors / radius / motion / z / elevations + consumption gates) |
+| `bun run test:unit` | Dependency-free node:test unit suite for the Libyan money/phone seams (Eastern digits, ٫/، separators, +218/00218 prefixes, the 99 LYD wallet cap) + client-only date-display guard |
 | `bun run test:e2e` | API E2E suite: auth, tenant isolation, order lifecycle, money re-pricing, rate limits — runs against any base URL |
 | `bun run db:push` | Push the Prisma schema to the database (`--accept-data-loss`) |
 | `bun run db:generate` | Generate the Prisma client |
-| `bun run db:migrate` | Create/apply dev migrations |
-| `bun run db:reset` | Reset the database and re-migrate |
 
 > Test counts are documented per round in [`CHANGELOG.md`](CHANGELOG.md) — no hard numbers in this file (doc-engineering doctrine: no stale numbers).
 
@@ -160,7 +159,7 @@ src/
   components/  dashboard/ storefront/ shared/ ui/
   lib/         constants, auth, order-machine, money, phone, whatsapp, storage, api, ...
 prisma/        schema.prisma (SQLite dev) + schema.postgres.prisma (PostgreSQL prod)
-tests/         parity.mjs + e2e/api-e2e.js
+tests/         unit/ (node:test) + parity.mjs + e2e/api-e2e.js
 ```
 
 ---

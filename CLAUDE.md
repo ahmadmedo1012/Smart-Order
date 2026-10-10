@@ -31,6 +31,7 @@ of the Smart family (`order.smart-link.ly`). Full product context: `PRODUCT.md`.
 | `npm run lint` | ESLint — must be 0 errors / 0 warnings |
 | `npx tsc --noEmit` | Typecheck — must be 0 errors |
 | `npm run test:parity` | Madarek parity snapshot (`tests/parity.mjs`, dependency-free node) |
+| `npm run test:unit` | node:test unit suite — Libyan money/phone seams + client-only display guard (`tests/unit/`, dependency-free; Node ≥ 22.18 type-strips the TS natively) |
 | `npm run test:e2e` | API E2E suite — needs a LIVE server (`node tests/e2e/api-e2e.js [baseUrl]`); CI boots one on a scratch SQLite |
 | `npm run build` | Production build (no DB needed — DB routes are force-dynamic) |
 | `npm run dev` / `db:push` / `db:generate` | Dev server / schema push / client generate |
