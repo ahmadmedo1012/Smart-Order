@@ -824,17 +824,16 @@
 .landing .ln-station.from-start .ln-station-card { margin-inline-end: auto; }
 .landing .ln-station.from-end .ln-station-card { margin-inline-start: auto; }
 
-/* nodes anchor to the CARD so they hug the center-facing edge; geometry
-   is load-bearing (JourneyLightPath measures these boxes) */
+/* r142: the r141 13px journey dot is RETIRED — the stations chapter's
+   vertical-tab buttons carry .ln-station-node now (they are the route
+   stops the spine threads). The legacy absolute-dot anatomy below is
+   neutralized; the r142 button anatomy is authored in the 15d layer. */
 .landing .ln-station-node {
-  position: absolute;
-  top: 30px;
-  inline-size: 13px;
-  block-size: 13px;
-  display: grid;
-  place-items: center;
-  border-radius: var(--ln-radius-pill);
-  background: var(--ln-cream); /* stations are content, not accent */
+  position: static;
+  inline-size: auto;
+  block-size: auto;
+  border-radius: 13px;
+  background: transparent;
   box-shadow: 0 0 0 4px rgb(245 243 231 / 0.16); /* crisp flat ring, no glow */
   z-index: 2;
 }
@@ -845,13 +844,9 @@
   border-radius: var(--ln-radius-pill);
   background: inherit;
 }
-.landing .ln-station.from-start .ln-station-card .ln-station-node { inset-inline-end: -40px; }
-.landing .ln-station.from-end .ln-station-card .ln-station-node { inset-inline-start: -40px; }
-.landing .ln-station:last-child .ln-station-node {
-  inline-size: 17px;
-  block-size: 17px;
-  box-shadow: 0 0 0 5px rgb(245 243 231 / 0.2);
-}
+/* retired with the r141 dot anatomy (r142) */
+/* retired with the r141 dot anatomy (r142) */
+/* retired with the r141 dot anatomy (r142) */
 
 .landing .ln-station-card {
   position: relative;
@@ -1363,11 +1358,8 @@
   .landing .ln-journey-path-base { stroke-width: 2; }
   .landing .ln-journey-path-light { stroke-width: 2.5; }
   .landing .ln-journey-stage { padding-inline-start: 30px; }
-  .landing .ln-station .ln-station-node {
-    top: 34px;
-    inset-inline-start: -23px;
-    inset-inline-end: auto;
-    inline-size: 11px;
+  /* retired with the r141 dot anatomy (r142) */
+  .landing .ln-station-node {
     block-size: 11px;
   }
   .landing .ln-station.from-start .ln-station-card .ln-station-node,
@@ -2030,4 +2022,859 @@
   .landing .ln-ship-route-lit { transition: none; }
   .landing .ln-ship-card-inner { animation: none; }
   .landing .ln-logistics-grid .ln-logistics-img { transition: none; }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   r142 «الخط» — the rebuilt chapter layer.
+   The road IS the page: RouteSpine paints one continuous dashed line
+   from the hero origin through every chapter stop to the finale
+   terminus. Token-only colors, logical-property RTL, every animation
+   with its explicit reduced-motion off-switch.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── 15a · hazard token + the route spine layer ────────────────────── */
+.landing {
+  --ln-amber:      #E8B45A;  /* road-sign amber — large text/decor · 7.0:1 on ink */
+  --ln-glass:      rgba(28, 32, 50, 0.66);
+  --ln-glass-strong: rgba(28, 32, 50, 0.86);
+}
+/* the page wrapper — the road paints OVER the chapters, never pushes
+   them (the first Vercel build shipped this static: the 9.5k px canvas
+   sat in flow and buried the hero below the fold). */
+.landing .ln-route-root { position: relative; }
+.landing .ln-route-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+.landing .ln-route-svg {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  overflow: visible;
+}
+.landing .ln-route-base {
+  stroke: var(--ln-line);
+  stroke-width: 2;
+  stroke-dasharray: 10 14;
+  stroke-linecap: round;
+}
+.landing .ln-route-lit {
+  stroke: var(--ln-lime);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--sp, 0));
+  filter: drop-shadow(0 0 6px rgba(223, 237, 178, 0.45));
+}
+/* the kraft parcel — a CSS-drawn box with tape, glued to the drawn path */
+.landing .ln-route-parcel {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 26px;
+  block-size: 26px;
+  border-radius: 6px;
+  background: linear-gradient(145deg, #C89B6A, #A87C4F);
+  box-shadow: 0 6px 18px rgba(7, 11, 22, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transform: translate(-50%, -50%);
+  opacity: 0; /* the engine lifts this on first placement (no-JS: stays hidden) */
+  z-index: 3;
+}
+.landing .ln-route-parcel-tape {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 50%;
+  block-size: 6px;
+  margin-block-start: -3px;
+  background: rgba(245, 243, 231, 0.55);
+}
+/* chapter station nodes — zero-size anchors rendered as road nodes;
+   absolute at their static position keeps the engine's center reading */
+.landing .ln-route-stop {
+  position: absolute;
+  inline-size: 12px;
+  block-size: 12px;
+  margin-inline-start: -6px;
+  margin-block-start: -6px;
+  border-radius: var(--ln-radius-pill);
+  background: var(--ln-ink);
+  border: 2px solid var(--ln-lime);
+  box-shadow: 0 0 12px rgba(223, 237, 178, 0.35);
+  z-index: 2;
+}
+
+/* ── 15b · الهيرو — the dimensional road scene ─────────────────────── */
+.landing .ln-hero-scene {
+  aspect-ratio: 1 / 1.02;
+}
+.landing .ln-hero-scene-backdrop {
+  position: absolute;
+  inset: 6% 0 auto 0;
+  inline-size: 100%;
+  aspect-ratio: 1;
+  opacity: 0.5;
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 72%);
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 72%);
+}
+.landing .ln-hero-scene-backdrop-img {
+  object-fit: cover;
+}
+/* the r142 assets are OPAQUE renders (baked backgrounds) — honest
+   editorial framing beats fake transparency: the package rides a tilted
+   photo card, the scooter a cinematic masked strip. */
+.landing .ln-hero-scene-scooter {
+  position: absolute;
+  inset-inline: 4%;
+  inset-block-end: 3%;
+  aspect-ratio: 2.1;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--ln-line);
+  box-shadow: 0 26px 44px rgba(7, 11, 22, 0.55);
+  -webkit-mask-image: linear-gradient(to top, black 78%, transparent 100%);
+  mask-image: linear-gradient(to top, black 78%, transparent 100%);
+}
+.landing .ln-hero-scene-scooter-img {
+  object-fit: cover;
+  opacity: 0.92;
+}
+.landing .ln-hero-scene-package {
+  position: absolute;
+  inset-block-start: 6%;
+  inset-inline-end: 6%;
+  inline-size: 56%;
+  aspect-ratio: 1;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--ln-line);
+  box-shadow: 0 30px 50px rgba(7, 11, 22, 0.6);
+  transform: rotate(-2deg);
+  animation: ln-package-float 7s var(--ln-ease-soft) infinite;
+}
+.landing .ln-hero-scene-package-img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+@keyframes ln-package-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+.landing .ln-hero-scene-origin { inset-block-end: -6px; }
+
+/* ── 15c · لوحة علامات الطريق — the live figures board ─────────────── */
+.landing .ln-roadmark {
+  border-block: 1px solid var(--ln-line);
+  background: rgba(7, 11, 22, 0.42);
+}
+.landing .ln-roadmark-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(var(--sp-6), 5vw, 56px);
+  max-inline-size: var(--marketing-max-w);
+  margin-inline: auto;
+  padding: var(--sp-5) var(--page-gutter-mobile);
+}
+.landing .ln-roadmark-item {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+}
+.landing .ln-roadmark-item .ln-mono {
+  font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+  font-weight: var(--fw-semibold);
+  color: var(--ln-lime);
+}
+.landing .ln-roadmark-label {
+  font-size: 0.82rem;
+  color: var(--ln-cream-dim);
+}
+
+/* ── 15d · المحطات الست — the interactive state timeline ───────────── */
+.landing .ln-stations-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(var(--sp-6), 4vw, 52px);
+  max-inline-size: var(--marketing-max-w);
+  margin-inline: auto;
+}
+.landing .ln-stations-list {
+  display: grid;
+  gap: var(--sp-2);
+}
+.landing .ln-stations-item { display: grid; }
+.landing .ln-station-node {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 54px;
+  padding: 10px 14px;
+  border-radius: 13px;
+  border: 1px solid var(--ln-line-soft);
+  background: transparent;
+  color: var(--ln-cream-dim);
+  text-align: start;
+  cursor: pointer;
+  transition: border-color var(--ln-t-fast) var(--ln-ease),
+              background var(--ln-t-fast) var(--ln-ease),
+              color var(--ln-t-fast) var(--ln-ease);
+}
+.landing .ln-station-node:hover { border-color: var(--ln-line); color: var(--ln-cream); }
+.landing .ln-station-node.is-passed { border-color: var(--ln-line); }
+.landing .ln-station-node.is-active {
+  border-color: var(--ln-lime);
+  background: rgba(223, 237, 178, 0.06);
+  color: var(--ln-cream);
+}
+.landing .ln-station-node:focus-visible {
+  outline: 2px solid var(--ln-lime);
+  outline-offset: 2px;
+}
+.landing .ln-station-sign {
+  display: grid;
+  place-items: center;
+  inline-size: 38px;
+  block-size: 38px;
+  border-radius: 11px;
+  border: 1px solid var(--ln-line-soft);
+  background: rgba(7, 11, 22, 0.35);
+  color: var(--ln-cream-dim);
+  flex-shrink: 0;
+}
+.landing .ln-station-node.is-active .ln-station-sign {
+  border-color: color-mix(in srgb, var(--ln-lime) 55%, transparent);
+  color: var(--ln-lime);
+}
+.landing .ln-station-node.is-passed .ln-station-sign { color: var(--ln-lime); opacity: 0.8; }
+.landing .ln-station-name {
+  flex: 1;
+  font-size: 0.98rem;
+  font-weight: var(--fw-semibold);
+}
+.landing .ln-station-index {
+  font-size: 0.72rem;
+  opacity: 0.6;
+}
+.landing .ln-stations-panel {
+  position: relative;
+}
+.landing .ln-stations-panel:focus-visible {
+  outline: 2px solid var(--ln-lime);
+  outline-offset: 4px;
+}
+.landing .ln-stations-panel-inner {
+  display: grid;
+  gap: var(--sp-3);
+  padding: clamp(var(--sp-5), 3vw, 32px);
+  border-radius: 18px;
+  border: 1px solid var(--ln-line);
+  background: var(--ln-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: ln-panel-in 280ms var(--ln-ease-out);
+}
+@keyframes ln-panel-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.landing .ln-stations-kicker {
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--ln-cream-dim);
+}
+.landing .ln-stations-statusrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.landing .ln-stations-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 13px;
+  border-radius: var(--ln-radius-pill);
+  border: 1px solid color-mix(in srgb, var(--ln-lime) 50%, transparent);
+  font-size: 0.85rem;
+  font-weight: var(--fw-semibold);
+  color: var(--ln-lime);
+}
+.landing .ln-stations-chip-dot {
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: var(--ln-radius-pill);
+  background: var(--ln-lime);
+  box-shadow: 0 0 10px rgba(223, 237, 178, 0.6);
+}
+.landing .ln-stations-statusrow .ln-mono {
+  font-size: 0.66rem;
+  color: var(--ln-cream-dim);
+  opacity: 0.7;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.landing .ln-stations-title {
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: var(--fw-bold);
+}
+.landing .ln-stations-desc {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--ln-cream);
+}
+.landing .ln-stations-actor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  border-radius: 13px;
+  border: 1px dashed color-mix(in srgb, var(--ln-lime) 40%, transparent);
+  background: rgba(223, 237, 178, 0.045);
+}
+.landing .ln-stations-actor-ico {
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: var(--ln-radius-pill);
+  background: rgba(223, 237, 178, 0.12);
+  color: var(--ln-lime);
+  flex-shrink: 0;
+}
+.landing .ln-stations-actor-body {
+  display: grid;
+  gap: 2px;
+  line-height: 1.5;
+}
+.landing .ln-stations-actor-body strong { font-size: 0.88rem; }
+.landing .ln-stations-actor-body span { font-size: 0.82rem; color: var(--ln-cream-dim); }
+.landing .ln-stations-actor-stage {
+  margin-inline-start: auto;
+  color: var(--ln-cream-dim);
+  opacity: 0.7;
+}
+.landing .ln-stations-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--ln-cream-dim);
+}
+.landing .ln-stations-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin-block-start: var(--sp-2);
+}
+.landing .ln-stations-cta-warm {
+  border-color: color-mix(in srgb, var(--ln-lime) 55%, transparent);
+  color: var(--ln-lime);
+}
+.landing .ln-stations-cta-warm:hover {
+  background: rgba(223, 237, 178, 0.08);
+}
+
+/* ── 15e · المتجر — storefront scene placements ────────────────────── */
+.landing .ln-store-proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-5);
+  margin-block: var(--sp-4) var(--sp-5);
+}
+.landing .ln-store-proof-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--ln-cream);
+}
+.landing .ln-store-proof-item::before {
+  content: "";
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: var(--ln-radius-pill);
+  background: var(--ln-lime);
+  opacity: 0.85;
+}
+.landing .ln-store-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+.landing .ln-store-scene {
+  position: relative;
+  display: grid;
+  place-items: center;
+  max-inline-size: 560px;
+  margin-inline: auto;
+  padding-block: var(--sp-6);
+}
+.landing .ln-store-phone {
+  position: relative;
+  z-index: 1;
+  inline-size: min(300px, 78vw);
+}
+.landing .ln-store-qr {
+  position: absolute;
+  inset-block-start: 4%;
+  inset-inline-start: 0;
+  inline-size: min(150px, 36vw);
+  z-index: 2;
+}
+.landing .ln-store-cart {
+  position: absolute;
+  inset-block-end: 6%;
+  inset-inline-end: 0;
+  inline-size: min(230px, 52vw);
+  z-index: 2;
+}
+.landing .ln-store-wa {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 4%;
+  z-index: 3;
+}
+.landing .ln-store-qr-frame {
+  inline-size: 84px;
+  block-size: 84px;
+  margin-inline: auto;
+  color: var(--ln-ink);
+  background: var(--ln-cream);
+  border-radius: 12px;
+  padding: 8px;
+}
+
+/* ── 15f · لوحة التاجر — the live state-machine console ────────────── */
+.landing .ln-dash-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: clamp(var(--sp-5), 3.5vw, 40px);
+  max-inline-size: var(--marketing-max-w);
+  margin-inline: auto;
+  align-items: start;
+}
+.landing .ln-dash-console {
+  display: grid;
+  gap: var(--sp-4);
+  padding: clamp(var(--sp-5), 3vw, 30px);
+  border-radius: 18px;
+  border: 1px solid var(--ln-line);
+  background: var(--ln-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.landing .ln-dash-console-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding-block-end: var(--sp-3);
+  border-block-end: 1px solid var(--ln-line-soft);
+}
+.landing .ln-dash-console-title { font-weight: var(--fw-bold); font-size: 1.02rem; }
+.landing .ln-dash-console-sub {
+  font-size: 0.7rem;
+  color: var(--ln-cream-dim);
+  margin-block-start: 2px;
+}
+.landing .ln-dash-demo-chip {
+  padding: 4px 11px;
+  border-radius: var(--ln-radius-pill);
+  border: 1px solid color-mix(in srgb, var(--ln-amber) 55%, transparent);
+  color: var(--ln-amber);
+  font-size: 0.72rem;
+  font-weight: var(--fw-semibold);
+}
+.landing .ln-dash-fulfillment {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--sp-2);
+  padding: var(--sp-1);
+  border-radius: 12px;
+  border: 1px solid var(--ln-line-soft);
+  background: rgba(7, 11, 22, 0.3);
+}
+.landing .ln-dash-fulfillment-btn {
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ln-cream-dim);
+  font-size: 0.85rem;
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: color var(--ln-t-fast) var(--ln-ease),
+              background var(--ln-t-fast) var(--ln-ease);
+}
+.landing .ln-dash-fulfillment-btn.is-active {
+  background: rgba(223, 237, 178, 0.1);
+  border-color: color-mix(in srgb, var(--ln-lime) 45%, transparent);
+  color: var(--ln-lime);
+}
+.landing .ln-dash-fulfillment-btn:focus-visible {
+  outline: 2px solid var(--ln-lime);
+  outline-offset: 2px;
+}
+.landing .ln-dash-stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.landing .ln-dash-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 11px;
+  border-radius: var(--ln-radius-pill);
+  border: 1px solid var(--ln-line-soft);
+  font-size: 0.78rem;
+  color: var(--ln-cream-dim);
+}
+.landing .ln-dash-step-dot {
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: var(--ln-radius-pill);
+  background: var(--ln-line);
+}
+.landing .ln-dash-step.is-passed { color: var(--ln-cream); }
+.landing .ln-dash-step.is-passed .ln-dash-step-dot { background: var(--ln-lime); opacity: 0.75; }
+.landing .ln-dash-step.is-current {
+  border-color: var(--ln-lime);
+  color: var(--ln-lime);
+  background: rgba(223, 237, 178, 0.06);
+}
+.landing .ln-dash-step.is-current .ln-dash-step-dot {
+  background: var(--ln-lime);
+  box-shadow: 0 0 10px rgba(223, 237, 178, 0.55);
+}
+.landing .ln-dash-step.is-skipped { opacity: 0.55; }
+.landing .ln-dash-step-skip { font-size: 0.6rem; opacity: 0.7; }
+.landing .ln-dash-order { display: grid; gap: var(--sp-2); }
+.landing .ln-dash-order-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: 0.88rem;
+  color: var(--ln-cream-dim);
+}
+.landing .ln-dash-order-row strong { color: var(--ln-cream); }
+.landing .ln-dash-items {
+  display: grid;
+  gap: var(--sp-1);
+  padding: var(--sp-3);
+  border-radius: 12px;
+  border: 1px solid var(--ln-line-soft);
+  background: rgba(7, 11, 22, 0.3);
+}
+.landing .ln-dash-items li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: 0.86rem;
+  color: var(--ln-cream);
+}
+.landing .ln-dash-item-fee { color: var(--ln-cream-dim) !important; font-size: 0.8rem !important; }
+.landing .ln-dash-item-total {
+  border-block-start: 1px dashed var(--ln-line);
+  padding-block-start: var(--sp-2) !important;
+  font-weight: var(--fw-bold) !important;
+}
+.landing .ln-dash-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.landing .ln-dash-terminal {
+  font-size: 0.85rem;
+  color: var(--ln-lime);
+  align-self: center;
+}
+.landing .ln-dash-action {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 9px 14px;
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--ln-lime) 40%, transparent);
+  background: rgba(223, 237, 178, 0.05);
+  color: var(--ln-cream);
+  font-size: 0.85rem;
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: background var(--ln-t-fast) var(--ln-ease),
+              border-color var(--ln-t-fast) var(--ln-ease);
+}
+.landing .ln-dash-action:hover {
+  background: rgba(223, 237, 178, 0.1);
+  border-color: var(--ln-lime);
+}
+.landing .ln-dash-action:focus-visible {
+  outline: 2px solid var(--ln-lime);
+  outline-offset: 2px;
+}
+.landing .ln-dash-action.is-destructive {
+  border-color: color-mix(in srgb, #E07856 45%, transparent);
+  background: rgba(224, 120, 86, 0.06);
+  color: #E8A18A;
+}
+.landing .ln-dash-action.is-destructive:hover {
+  background: rgba(224, 120, 86, 0.12);
+  border-color: #E07856;
+}
+.landing .ln-dash-action-next {
+  font-size: 0.6rem;
+  font-weight: 400;
+  color: var(--ln-cream-dim);
+}
+.landing .ln-dash-payment {
+  display: grid;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border-radius: 12px;
+  border: 1px dashed var(--ln-line);
+}
+.landing .ln-dash-payment-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 0.86rem;
+}
+.landing .ln-dash-payment-label { color: var(--ln-cream-dim); }
+.landing .ln-dash-payment-method {
+  font-weight: var(--fw-semibold);
+  color: var(--ln-lime);
+}
+.landing .ln-dash-pay-btn {
+  justify-self: start;
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--ln-lime) 50%, transparent);
+  background: rgba(223, 237, 178, 0.07);
+  color: var(--ln-lime);
+  font-size: 0.8rem;
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+  transition: background var(--ln-t-fast) var(--ln-ease);
+}
+.landing .ln-dash-pay-btn:hover { background: rgba(223, 237, 178, 0.13); }
+.landing .ln-dash-pay-btn:focus-visible { outline: 2px solid var(--ln-lime); outline-offset: 2px; }
+.landing .ln-dash-payment-note { font-size: 0.75rem; color: var(--ln-cream-dim); }
+.landing .ln-dash-reset {
+  justify-self: start;
+  background: none;
+  border: none;
+  color: var(--ln-cream-dim);
+  font-size: 0.78rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.landing .ln-dash-reset:hover { color: var(--ln-cream); }
+.landing .ln-dash-reset:focus-visible { outline: 2px solid var(--ln-lime); outline-offset: 2px; }
+.landing .ln-dash-roles {
+  display: grid;
+  gap: var(--sp-3);
+  padding: clamp(var(--sp-5), 3vw, 30px);
+  border-radius: 18px;
+  border: 1px solid var(--ln-line);
+  background: rgba(7, 11, 22, 0.35);
+}
+.landing .ln-dash-roles-title {
+  font-size: 0.92rem;
+  font-weight: var(--fw-semibold);
+  color: var(--ln-cream);
+}
+.landing .ln-dash-roles-list { display: grid; gap: var(--sp-2); }
+.landing .ln-dash-role {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  padding: 10px 13px;
+  border-radius: 11px;
+  border: 1px solid var(--ln-line-soft);
+}
+.landing .ln-dash-role-key {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--ln-lime);
+  direction: ltr;
+  unicode-bidi: isolate;
+  align-self: center;
+}
+.landing .ln-dash-role-name {
+  font-size: 0.85rem;
+  font-weight: var(--fw-semibold);
+  color: var(--ln-cream);
+}
+.landing .ln-dash-role-can {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--ln-cream-dim);
+}
+.landing .ln-dash-roles-status { font-size: 0.8rem; color: var(--ln-cream); }
+.landing .ln-dash-roles-status-hint { font-size: 0.72rem; color: var(--ln-cream-dim); }
+.landing .ln-dash-roles-cta { margin-block-start: var(--sp-2); }
+
+/* ── 15g · محطات الدفع — the payment lane ──────────────────────────── */
+.landing .ln-pay-lane {
+  display: grid;
+  gap: var(--sp-3);
+  max-inline-size: 880px;
+  margin-inline: auto;
+}
+.landing .ln-pay-station {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-3) var(--sp-4);
+  align-items: start;
+  padding: clamp(var(--sp-4), 2.6vw, 24px);
+  border-radius: 16px;
+  border: 1px solid var(--ln-line-soft);
+  background: rgba(7, 11, 22, 0.32);
+  transition: border-color var(--ln-t-fast) var(--ln-ease);
+}
+.landing .ln-pay-station:hover { border-color: var(--ln-line); }
+.landing .ln-pay-index {
+  display: grid;
+  place-items: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: var(--ln-radius-pill);
+  border: 1.5px dashed color-mix(in srgb, var(--ln-amber) 60%, transparent);
+  color: var(--ln-amber);
+  font-size: 0.8rem;
+}
+.landing .ln-pay-ico {
+  display: grid;
+  place-items: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: 12px;
+  background: rgba(223, 237, 178, 0.09);
+  color: var(--ln-lime);
+}
+.landing .ln-pay-body { display: grid; gap: 3px; }
+.landing .ln-pay-name { font-size: 1rem; font-weight: var(--fw-semibold); }
+.landing .ln-pay-desc { font-size: 0.86rem; line-height: 1.65; color: var(--ln-cream-dim); }
+.landing .ln-pay-key {
+  justify-self: end;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--ln-cream-dim);
+  opacity: 0.75;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.landing .ln-pay-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-3);
+  max-inline-size: 880px;
+  margin-inline: auto;
+  margin-block-start: var(--sp-5);
+}
+.landing .ln-pay-fact {
+  padding: var(--sp-4);
+  border-radius: 13px;
+  border: 1px solid var(--ln-line-soft);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--ln-cream);
+  background: rgba(7, 11, 22, 0.28);
+}
+
+/* ── 15h · الوصول — the terminus + crosswalk ───────────────────────── */
+.landing .ln-cta {
+  position: relative;
+  overflow: clip;
+}
+.landing .ln-cta-crossing {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 88px;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(223, 237, 178, 0.09) 0 22px,
+    transparent 22px 48px
+  );
+  pointer-events: none;
+}
+.landing .ln-cta-inner {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-4);
+  padding-block: clamp(72px, 11vh, 120px) clamp(120px, 16vh, 170px);
+  text-align: center;
+}
+.landing .ln-cta-terminus {
+  position: static;
+  margin-block: 0;
+}
+.landing .ln-cta-title {
+  font-size: clamp(2.4rem, 6.2vw, 4.6rem);
+  font-weight: var(--fw-bold);
+  line-height: 1.1;
+}
+.landing .ln-cta-title em {
+  font-style: normal;
+  color: var(--ln-lime);
+}
+.landing .ln-cta-lede {
+  max-inline-size: 56ch;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--ln-cream-dim);
+}
+.landing .ln-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-3);
+  margin-block-start: var(--sp-2);
+}
+.landing .ln-cta-meta {
+  margin-block-start: var(--sp-3);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--ln-cream-dim);
+  opacity: 0.8;
+}
+
+/* ── 15i · mobile — the deliberate 320-390px road ──────────────────── */
+@media (max-width: 920px) {
+  .landing .ln-stations-grid { grid-template-columns: 1fr; }
+  .landing .ln-dash-grid { grid-template-columns: 1fr; }
+  .landing .ln-pay-facts { grid-template-columns: 1fr; }
+  .landing .ln-store-qr { inline-size: 120px; }
+  .landing .ln-store-cart { inline-size: 200px; }
+}
+@media (max-width: 640px) {
+  .landing .ln-hero-scene { aspect-ratio: auto; min-block-size: 380px; }
+  .landing .ln-hero-scene-package { inline-size: 62%; transform: rotate(-1.5deg); }
+  .landing .ln-station-node { min-block-size: 48px; padding: 8px 11px; }
+  .landing .ln-station-sign { inline-size: 32px; block-size: 32px; }
+  .landing .ln-stations-panel-inner { padding: var(--sp-4); }
+  .landing .ln-store-cart { inline-size: 46vw; inset-block-end: 0; }
+  .landing .ln-store-qr { inset-block-start: 0; }
+  .landing .ln-dash-roles { padding: var(--sp-4); }
+  .landing .ln-roadmark-inner { gap: var(--sp-4); }
+}
+
+/* ── 15j · reduced motion — the road goes completely still ─────────── */
+@media (prefers-reduced-motion: reduce) {
+  .landing .ln-hero-scene-package { animation: none; }
+  .landing .ln-stations-panel-inner { animation: none; }
+  .landing .ln-route-lit { transition: none; }
+  .landing .ln-route-parcel { transition: none; }
+  .landing .ln-dash-action,
+  .landing .ln-dash-fulfillment-btn,
+  .landing .ln-dash-pay-btn,
+  .landing .ln-station-node,
+  .landing .ln-pay-station { transition: none; }
 }
