@@ -76,13 +76,62 @@ export async function POST(req: NextRequest) {
       return fail("أدخل المدينة والعنوان لطلب التوصيل", 422, "VALIDATION");
     }
 
-    // Idempotency: replay the same order back instead of duplicating
+    /* Idempotency: replay the same order back instead of duplicating.
+     * r140 (P2-1): الرد عند إعادة الإرسال كان بلا مبالغ ولا رابط واتساب
+     * (select ناقص + `business` خام) فشاشة النجاح رسمت «NaN.NaN د.ل»
+     * واختفت زر واتساب في سيناريو انقطاع الشبكة بعد commit — نفس
+     * النافذة التي صُمم مفتاح cart-session لأجلها. الآن الشكل يطابق
+     * رد المسار الأول (201) مع replay: true، ورابط واتساب يُعاد
+     * بناؤه من الطلب المحفوظ (الصفوف الأصلية المخزنة) بنفس منطق
+     * المسار الأول حرفيًا. */
     const idem = await db.order.findFirst({
       where: { businessId: business.id, idempotencyKey: input.idempotencyKey },
-      select: { id: true, orderNumber: true, publicToken: true, status: true },
+      include: {
+        items: {
+          select: { productName: true, variantName: true, optionsJson: true, quantity: true, lineTotal: true },
+        },
+      },
     });
     if (idem) {
-      return ok({ order: { ...idem, replay: true }, business });
+      const waMessage = buildOrderMessage({
+        orderNumber: idem.orderNumber,
+        customerName: idem.customerName,
+        customerPhone: idem.customerPhone,
+        items: idem.items.map((l) => ({
+          productName: l.productName,
+          variantName: l.variantName,
+          options: l.optionsJson ? (JSON.parse(l.optionsJson) as Array<{ name: string }>).map((o) => o.name).join("، ") : null,
+          quantity: l.quantity,
+          lineTotal: l.lineTotal,
+        })),
+        fulfillmentType: idem.fulfillmentType as "DELIVERY" | "PICKUP",
+        city: idem.city,
+        area: idem.area,
+        addressLine: idem.addressLine,
+        subtotal: idem.subtotal,
+        deliveryFee: idem.deliveryFee,
+        total: idem.total,
+        paymentName: idem.paymentMethodName,
+        paymentType: idem.paymentType,
+        customerNote: idem.customerNote,
+      });
+      return ok(
+        {
+          order: {
+            id: idem.id,
+            orderNumber: idem.orderNumber,
+            publicToken: idem.publicToken,
+            subtotal: idem.subtotal,
+            deliveryFee: idem.deliveryFee,
+            total: idem.total,
+            replay: true,
+          },
+          whatsapp: business.whatsappNumber
+            ? { number: toE164(business.whatsappNumber), message: waMessage }
+            : null,
+        },
+        { status: 200 }
+      );
     }
 
     // ---- Server-side re-pricing (never trust client money) ----

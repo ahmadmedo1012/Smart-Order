@@ -2,7 +2,7 @@
 
 import { Smartphone, Landmark } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { PaymentProvider } from "@/lib/payment-constants";
+import { WALLET_CAP_LYD, type PaymentProvider } from "@/lib/payment-constants";
 
 /**
  * ProviderPicker — family twin (Smart Menu payment/ProviderPicker.tsx):
@@ -58,9 +58,11 @@ export function ProviderPicker({
         })}
       </div>
       {requiresBank && (
-        /* Family payment notice — accent-foreground (AA 5.42:1) */
+        /* Family payment notice — accent-foreground (AA 5.42:1).
+           r140 (P3-3): القالب يتبع الثابت — نفس صنف checkout-client، النص
+           الحرفي «99» كان يكذب لو تغيّر السقف يومًا. */
         <p className="mt-2 text-xs text-accent-foreground">
-          المبالغ فوق 99 د.ل تتطلب تحويل بنكي — اختر &quot;تحويل بنكي&quot; لإتمام الدفع
+          المبالغ فوق {WALLET_CAP_LYD} د.ل تتطلب تحويل بنكي — اختر &quot;تحويل بنكي&quot; لإتمام الدفع
         </p>
       )}
     </div>

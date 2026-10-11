@@ -154,6 +154,27 @@ async function main() {
 
   const order2 = await anon.call("/api/public/orders", { method: "POST", body: JSON.stringify({ ...orderPayload, customerName: "عميل آخر" }) });
   ok("idempotency: same key replays same order", rateLimited || order2.body?.data?.order?.id === created?.id, `got ${order2.body?.data?.order?.id}, want ${created?.id}`);
+  // (r140 P2-1) شكل رد الـreplay الكامل — شاشة النجاح تعتمد المبالغ
+  // (formatLyd(result.total)) ورابط واتساب؛ الرد القديم كان id فقط
+  // فالشاشة كانت ترسم «NaN.NaN د.ل» وتخفي زر واتساب
+  const ro = order2.body?.data?.order;
+  ok(
+    "idempotent replay carries the full success shape (r140)",
+    rateLimited || (
+      ro?.replay === true &&
+      ro?.subtotal === created?.subtotal &&
+      ro?.deliveryFee === created?.deliveryFee &&
+      ro?.total === created?.total &&
+      typeof ro?.publicToken === "string" && ro.publicToken.length > 0 &&
+      // مفتاح whatsapp حاضر في الشكل (null صادق إن لم يضبط المتجر رقمًا —
+      // القديم كان يرسل `business` خامًا بلا whatsapp أصلًا)
+      order2.body?.data?.whatsapp !== undefined &&
+      (order2.body?.data?.whatsapp === null ||
+        (typeof order2.body?.data?.whatsapp?.number === "string" &&
+          typeof order2.body?.data?.whatsapp?.message === "string"))
+    ),
+    JSON.stringify({ order: ro, whatsapp: order2.body?.data?.whatsapp }).slice(0, 200)
+  );
 
   // ---------- 6. state machine ----------
   console.log("— آلة حالات الطلب");

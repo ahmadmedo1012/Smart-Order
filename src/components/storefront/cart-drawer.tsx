@@ -133,6 +133,10 @@ export function CartDrawer({
                   {items.filter((i) => !i.note).map((i) => (
                     <input
                       key={i.key}
+                      /* r140 (P3-7): الplaceholder وحده ليس تسمية (WCAG
+                         3.3.2) — يختفي عند الكتابة ولا يوصل لقارئ الشاشة
+                         إلا عرضًا؛ aria-label يسمّي الحقل بعنصره. */
+                      aria-label={`ملاحظة: ${i.productName}`}
                       placeholder={`ملاحظة: ${i.productName}`}
                       maxLength={200}
                       onBlur={(e) => updateNote(i.key, e.target.value.trim())}

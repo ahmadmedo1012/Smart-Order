@@ -6,7 +6,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { api } from "@/lib/client";
-import { useCart, cartCount, cartEstimatedSubtotal } from "@/hooks/use-cart";
+import { useCart, useCartHydrated, cartCount, cartEstimatedSubtotal } from "@/hooks/use-cart";
 import { StorefrontSkeleton } from "@/components/storefront/skeletons";
 import { ProductCard } from "@/components/storefront/product-card";
 import { CartDrawer } from "@/components/storefront/cart-drawer";
@@ -89,6 +89,10 @@ export function Storefront({
 
   const items = useCart((s) => s.items);
   const count = cartCount(items);
+  /* r140 (P2-2): بوابة اكتمال الترطيب — كل ما يعتمد على count يعرض
+     بعد اكتمال rehydrate (لا ومضة شارة/شريط لحظة وصول زائر عائد
+     بسلة محفوظة). راجع cart-hydrator.tsx. */
+  const hydrated = useCartHydrated();
 
   // Mirrors `data` for the failure branch below — a failed freshness
   // refresh must never nuke SSR'd content back to an error state.
@@ -191,10 +195,10 @@ export function Storefront({
               <SheetTrigger asChild>
                 <button
                   className="relative rounded-md bg-primary text-primary-foreground size-10 flex items-center justify-center font-semibold transition-[color,background-color,transform] duration-(--t-fast) hover:bg-primary/90 active:scale-[0.97] active:duration-(--t-micro)"
-                  aria-label={`عرض السلة (${count} عنصر)`}
+                  aria-label={hydrated ? `عرض السلة (${count} عنصر)` : "عرض السلة"}
                 >
                   <ShoppingBag className="size-5" aria-hidden="true" />
-                  {count > 0 && (
+                  {hydrated && count > 0 && (
                     <span className="absolute -top-1.5 -end-1.5 min-w-5 h-5 rounded-full bg-saffron text-espresso text-[11px] font-bold flex items-center justify-center px-1 tabular-nums">
                       {count}
                     </span>
@@ -313,8 +317,9 @@ export function Storefront({
         </p>
       </main>
 
-      {/* Sticky cart bar (mobile) */}
-      {count > 0 && (
+      {/* Sticky cart bar (mobile) — r140 (P2-2): مقفلة على اكتمال
+          الترطيب مع الشارة أعلاه (نفس البوابة) */}
+      {hydrated && count > 0 && (
         <div className="lg:hidden sticky bottom-0 z-(--z-dropdown) border-t border-border bg-background/95 backdrop-blur-md safe-bottom">
           <div className="px-4 py-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">

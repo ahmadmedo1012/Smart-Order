@@ -3,8 +3,39 @@
 // Cart store — per-business single cart, persisted to localStorage.
 // Client holds ONLY product choices; all money math is re-done server-side at checkout.
 
+import { useSyncExternalStore } from "react";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
+
+/* r140 (P2-2): غلاف آمن للخادم — توأم Smart-Menu cart.ts: على الخادم
+   يعيد مخزنًا فارغًا (getItem=null) فلا يُسقط persist خاصيته
+   (createJSONStorage(() => localStorage) في بيئة node يجعل storage
+   undefined فيخرج persistImpl بمسار الإرجاع المبكر بلا api.persist)،
+   وفي المتصفح يقرأ/يكتب localStorage الحقيقي. */
+const ssrSafeStorage = () => ({
+  getItem: (name: string) => {
+    if (typeof window === "undefined") return null;
+    try {
+      return localStorage.getItem(name);
+    } catch {
+      return null;
+    }
+  },
+  setItem: (name: string, value: string) => {
+    try {
+      localStorage.setItem(name, value);
+    } catch {
+      /* noop */
+    }
+  },
+  removeItem: (name: string) => {
+    try {
+      localStorage.removeItem(name);
+    } catch {
+      /* noop */
+    }
+  },
+});
 
 interface CartOption {
   id: string;
@@ -99,10 +130,30 @@ export const useCart = create<CartState>()(
     {
       name: "smart-order-cart",
       version: 1,
-      skipHydration: false,
+      /* r140 (P2-2): الترطيب يُدار مركزيًا (توأم Smart-Menu cart.ts) —
+         skipHydration يمنع persist من قراءة localStorage تزامنيًا عند
+         إنشاء المخزن، فكانت القراءة تجري قبل أول رسم عميل بينما HTML
+         الـISR رُسم بسلة فارغة → انعدام تطابق React 19 على الشارة
+         وaria-label والشريط اللاصق وفرع «سلتك فارغة». الآن
+         CartHydrator (جذر Providers) يعيد الترطيب بعد الطلاء الأول. */
+      skipHydration: true,
+      storage: createJSONStorage(ssrSafeStorage),
     }
   )
 );
+
+/** r140 (P2-2): بوابة «اكتمل الترطيب» — توأم useCartHydrated في
+ *  Smart-Menu (cart.ts r123): getServerSnapshot يرجع false دائمًا
+ *  فطبقة الترطيب في React تستخدم قيمة الخادم (مطابقة مضمونة البنية)،
+ *  ثم تتصالح مع اللقطة الحية بعد الطلاء. المستهلكات تبقي عرض أي شيء
+ *  يعتمد على count حتى يكتمل rehydrate (لا ومضة «سلة فارغة» كاذبة). */
+export function useCartHydrated(): boolean {
+  return useSyncExternalStore(
+    (onStoreChange) => useCart.persist.onFinishHydration(onStoreChange),
+    () => useCart.persist.hasHydrated(),
+    () => false,
+  );
+}
 
 export function cartEstimatedSubtotal(items: CartItem[]): number {
   return items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);

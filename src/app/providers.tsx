@@ -6,6 +6,9 @@ import { MotionConfig } from "motion/react";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { LazyMotionProvider } from "@/components/motion/lazy-motion-provider";
 import { ThemeColorSync } from "@/components/theme-color-sync";
+/* r140 (P2-2): مرطّب السلة — توأم Smart-Menu (CartHydrator في جذر
+   التخطيط). يركّب مرة واحدة فوق كل مسارات المتجر؛ راجع الملف. */
+import { CartHydrator } from "@/components/storefront/cart-hydrator";
 
 /*
  * r131 (F1) — the single client boundary above the whole tree.
@@ -36,6 +39,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <MotionConfig reducedMotion="user">
         <LazyMotionProvider>{children}</LazyMotionProvider>
         <ThemeColorSync />
+        <CartHydrator />
         <Toaster />
       </MotionConfig>
     </ThemeProvider>

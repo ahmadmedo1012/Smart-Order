@@ -26,7 +26,13 @@ const patchSchema = z.object({
   variants: z.array(z.object({
     id: z.string().optional(),
     name: z.string().trim().min(1).max(60),
-    priceDelta: z.union([z.string(), z.number()]).transform((v) => { try { return parseLyd(v); } catch { throw new Error("سعر غير صحيح"); } }),
+    priceDelta: z.union([z.string(), z.number()]).transform((v) => {
+      // r140 (P3-2): سقف الحجم في مسار التعديل — نفس سقف الإنشاء
+      let m: number;
+      try { m = parseLyd(v); } catch { throw new Error("سعر غير صحيح"); }
+      if (m > 999_999_000) throw new Error("السعر الإضافي كبير جداً");
+      return m;
+    }),
   })).max(20).optional(),
   optionGroups: z.array(z.object({
     id: z.string().optional(),
@@ -37,7 +43,13 @@ const patchSchema = z.object({
     options: z.array(z.object({
       id: z.string().optional(),
       name: z.string().trim().min(1).max(60),
-      priceDelta: z.union([z.string(), z.number()]).transform((v) => { try { return parseLyd(v); } catch { throw new Error("سعر غير صحيح"); } }),
+      priceDelta: z.union([z.string(), z.number()]).transform((v) => {
+        // r140 (P3-2): سقف الإضافة في مسار التعديل — نفس سقف الإنشاء
+        let m: number;
+        try { m = parseLyd(v); } catch { throw new Error("سعر غير صحيح"); }
+        if (m > 999_999_000) throw new Error("سعر الإضافة كبير جداً");
+        return m;
+      }),
     })).max(20),
   })).max(10).optional(),
 });

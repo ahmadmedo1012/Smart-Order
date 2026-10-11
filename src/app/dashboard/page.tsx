@@ -286,20 +286,31 @@ export default function DashboardOverview() {
             <CardTitle className="text-base">إيراد آخر 7 أيام</CardTitle>
           </CardHeader>
           <CardContent>
+            {/* r140 (P2-4): المخطط كان بديلًا نصيًا بلا — القيم الوحيدة في
+                title (تحويم فقط) والعدد opacity-0 (فأرة فقط): قارئ الشاشة
+                ومستخدم لوحة المفاتيح كانا يريان 7 أعمدة بلا معنى
+                (WCAG 1.1.1 + 1.4.13). الآن: كل عمود قابل للتركيز بتسمية
+                كاملة، والقيمة تظهر عند focus-visible أيضًا، وجدول sr-only
+                يحمل البيانات كاملة للقارئ. */}
             <div
               className="flex items-end justify-between gap-2 h-36"
               dir="ltr"
+              role="group"
+              aria-label="مخطط أعمدة إيراد آخر 7 أيام — البيانات الكاملة في الجدول التالي"
             >
               {data.weekSeries.map((d) => (
                 <div
                   key={d.day}
-                  className="flex-1 flex flex-col items-center gap-1.5 group"
+                  className="flex-1 flex flex-col items-center gap-1.5 group rounded-t-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  tabIndex={0}
+                  role="img"
+                  aria-label={`${d.day}: إيراد ${formatLyd(d.revenue)} — ${d.orders} طلب`}
                 >
-                  <span className="text-[11px] text-muted-foreground tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-[11px] text-muted-foreground tabular-nums opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
                     {d.orders} طلب
                   </span>
                   <div
-                    className="w-full rounded-t-md bg-primary/85 group-hover:bg-primary transition-colors min-h-[3px]"
+                    className="w-full rounded-t-md bg-primary/85 group-hover:bg-primary group-focus-visible:bg-primary transition-colors min-h-[3px]"
                     style={{
                       height: `${Math.max(4, (d.revenue / maxRevenue) * 100)}%`,
                     }}
@@ -311,6 +322,26 @@ export default function DashboardOverview() {
                 </div>
               ))}
             </div>
+            {/* البديل النصي الكامل — يوم ← إيراد ← طلبات */}
+            <table className="sr-only">
+              <caption>إيراد وطلبات آخر 7 أيام</caption>
+              <thead>
+                <tr>
+                  <th scope="col">اليوم</th>
+                  <th scope="col">الإيراد</th>
+                  <th scope="col">الطلبات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.weekSeries.map((d) => (
+                  <tr key={d.day}>
+                    <th scope="row">{d.day}</th>
+                    <td>{formatLyd(d.revenue)}</td>
+                    <td>{d.orders}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
             <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">عملاء جدد اليوم</span>
               <span className="font-bold tabular-nums flex items-center gap-1.5">

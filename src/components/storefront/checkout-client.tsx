@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/client";
-import { useCart, cartEstimatedSubtotal } from "@/hooks/use-cart";
+import { useCart, useCartHydrated, cartEstimatedSubtotal } from "@/hooks/use-cart";
 import { formatLyd } from "@/lib/money";
 import { normalizeLibyanPhone, formatPhoneDisplay } from "@/lib/phone";
 import { FULFILLMENT_AR, LIBYA_CITIES } from "@/lib/constants";
@@ -80,6 +80,10 @@ export function CheckoutClient({
 }) {
   const items = useCart((s) => s.items);
   const clearCart = useCart((s) => s.clear);
+  /* r140 (P2-2): بوابة اكتمال ترطيب السلة — زائر عائد بسلة محفوظة
+     (skipHydration + CartHydrator في الجذر) لا يرى ومضة «سلتك
+     فارغة» الكاذبة قبل اكتمال rehydrate؛ نمط Smart-Menu /cart. */
+  const hydrated = useCartHydrated();
   const router = useRouter();
   const [data, setData] = React.useState<StoreData | null>(null);
   const [loadError, setLoadError] = React.useState(false);
@@ -312,6 +316,31 @@ export function CheckoutClient({
             <span dir="ltr" className="tabular-nums">{trackUrl}</span>
           </p>
         </div>
+      </div>
+    );
+  }
+
+  // ===== PRE-HYDRATION HOLD (r140 P2-2) =====
+  // سلة مخزنة لم تُرطّب بعد: احتفظ بهيكل محايد حتى يكتمل rehydrate —
+  // HTML الخادم والإطار الأول للعميل كلاهما يمر من هنا، فلا فرع
+  // «سلتك فارغة» قبل أن تُقرأ localStorage.
+  if (!hydrated) {
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <header className="bg-background border-b border-border safe-top sticky top-0 z-(--z-dropdown)">
+          <div className="mx-auto max-w-2xl px-4 h-14 flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <ArrowRight className="size-4" aria-hidden="true" />
+              العودة
+            </div>
+            <div className="ms-auto font-heading font-bold text-sm">{business.name}</div>
+          </div>
+        </header>
+        <main className="mx-auto max-w-2xl px-4 py-5 space-y-4" aria-busy="true">
+          <Skeleton className="h-7 w-40" />
+          <Skeleton className="h-40 w-full rounded-xl" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </main>
       </div>
     );
   }
@@ -666,7 +695,9 @@ export function CheckoutClient({
                   dead code, the manual transfer target above stays. */}
               {overWalletCap ? (
                 <p className="text-xs text-accent-foreground">
-                  المبالغ فوق 99 د.ل لا تُدعم عبر رمز التحويل السريع — حوّل المبلغ يدوياً إلى الرقم أعلاه
+                  {/* r140 (P3-3): القالب يتبع الثابت — النص الحرفي «99» كان
+                      يكذب لو تغيّر WALLET_CAP_LYD يومًا (المنطق يستخدمه سطر 139). */}
+                  المبالغ فوق {WALLET_CAP_LYD} د.ل لا تُدعم عبر رمز التحويل السريع — حوّل المبلغ يدوياً إلى الرقم أعلاه
                 </p>
               ) : (
                 <div className="rounded-xl border border-success/25 bg-success/10 p-3">
@@ -758,11 +789,12 @@ export function CheckoutClient({
       <div className="fixed bottom-0 inset-x-0 z-(--z-dropdown) border-t border-border bg-background/95 backdrop-blur-md safe-bottom">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center gap-3">
           <div className="flex-1 min-w-0">
-            {deliveryFee > 0 && (
-              <div className="text-[11px] text-muted-foreground tabular-nums truncate">
-                المنتجات {formatLyd(subtotal)} + توصيل {formatLyd(deliveryFee)}
-              </div>
-            )}
+            {/* r140 (P3-11): صدق مالي — هذا تقدير عميل (الخادم يعيد
+                التسعير عند الإرسال)؛ السلة نفسها تقول «المجموع التقديري»
+                (cart-drawer) فالشريط يطابقها بدل «الإجمالي» المطلق. */}
+            <div className="text-[11px] text-muted-foreground tabular-nums truncate">
+              الإجمالي التقديري{deliveryFee > 0 ? ` — المنتجات ${formatLyd(subtotal)} + توصيل ${formatLyd(deliveryFee)}` : ""}
+            </div>
             <div className="font-heading font-bold text-lg tabular-nums">{formatLyd(total)}</div>
           </div>
           {/* r131-F2 (P0-1): type=submit + form= — the sticky bar stays

@@ -20,7 +20,11 @@ export const LIBYANA_PHONE_FALLBACK = "0942119637";
 
 /** USSD quick-transfer code for the LIBYANA wallet (fils in the amount). */
 export function libyanaUssdCode(phone: string, amountLyD: number): string {
-  return `*122*218${phone.slice(1)}*${amountLyD * 1000}*1#`;
+  /* r140 (P2-3): التقريب يحيّد كسور الفاصلة العائمة — جبرًا كاملًا
+   * 1472 قيمة millimes بين 1 و100000 كانت تنتج رمزًا ميتًا (total=1001
+   * ← «1000.9999999999999») ينسخه الزبون فلا يتصل. النقاط السعرية
+   * الشائعة (.000/.250/.500/.750) آمنة لكن أي درهم فردي كان يكسر بصمت. */
+  return `*122*218${phone.slice(1)}*${Math.round(amountLyD * 1000)}*1#`;
 }
 
 /** USSD quick-transfer code for the MADAR wallet. */

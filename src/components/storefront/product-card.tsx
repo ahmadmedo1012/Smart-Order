@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { useCart } from "@/hooks/use-cart";
 import { formatLyd } from "@/lib/money";
+import { countedArabicPhrase } from "@/lib/arabic-plural";
 import type { StoreProduct } from "@/components/storefront/storefront";
 import { ProductDialog } from "@/components/storefront/product-dialog";
 import { toast } from "sonner";
@@ -121,8 +122,23 @@ export function ProductCard({
               onClick={() => setOpen(true)}
               className="mt-1.5 text-[11px] text-accent-foreground font-medium hover:underline"
             >
-              {product.variants.length > 0 && `${product.variants.length} أحجام · `}
-              {product.optionGroups.length > 0 && `${product.optionGroups.length} إضافات`}
+              {/* r140 (P3-6): جمع معدود مصروف — «1 أحجام · 1 إضافات» كانت
+                  غير نحوية؛ محرك العائلة (توأم arabic-plural.ts):
+                  «حجم واحد»/«حجمان»/«3 أحجام» (نمط SM cartCountPhrase). */}
+              {product.variants.length > 0 &&
+                `${countedArabicPhrase(product.variants.length, "حجم", {
+                  one: "حجم واحد",
+                  two: "حجمان",
+                  few: "أحجام",
+                  many: "حجمًا",
+                })} · `}
+              {product.optionGroups.length > 0 &&
+                countedArabicPhrase(product.optionGroups.length, "إضافة", {
+                  one: "إضافة واحدة",
+                  two: "إضافتان",
+                  few: "إضافات",
+                  many: "إضافة",
+                })}
             </button>
           )}
         </div>

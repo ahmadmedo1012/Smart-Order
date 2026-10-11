@@ -339,7 +339,12 @@ export function PaymentDialog({
                       }}
                       placeholder="09XXXXXXXX"
                       inputMode="numeric"
-                      maxLength={10}
+                      /* r140: 10 ← 16 — السقف القديم كان يقص «+218 91 234 5678»
+                         عند المحرف العاشر قبل أن يبلغ التطبيع (normalize يعرف
+                         +218/00218/الجذع 0) فيرفض النموذج رقمًا هو في الحقيقة
+                         صحيح. نفس إصلاح r138 في SmartBot payment-instructions
+                         (16 محرفًا تتسع لأطول شكل مقبول). */
+                      maxLength={16}
                       aria-invalid={!!phoneError}
                       aria-describedby={phoneError ? "payment-phone-error" : undefined}
                       className="mt-1.5 text-start font-mono"

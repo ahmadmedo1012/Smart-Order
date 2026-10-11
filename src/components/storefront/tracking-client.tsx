@@ -69,7 +69,11 @@ export function TrackingClient({
 
   const poll = React.useCallback(async () => {
     try {
-      const res = await fetch(`/api/public/track/${window.location.pathname.split("/").pop()}`);
+      /* r140 (P3-5): الشرطة المائلة الذيلية كانت تنتج "" من split/pop
+         فيستطلع /api/public/track/ (404 تبتلع بصمت) — تجريد الشرطات
+         الذيلية قبل الانشقاق. */
+      const token = window.location.pathname.replace(/\/+$/, "").split("/").pop();
+      const res = await fetch(`/api/public/track/${token}`);
       const body = await res.json();
       if (body?.success) {
         setStatus(body.data.order.status);
@@ -167,6 +171,12 @@ export function TrackingClient({
               {/* Solid pastel status chip — the canonical badge family
                   (W1-F P2-16): -bg ground + -deep ink, no alpha wash. */}
               <span
+                /* r140 (P3-10): الحالة تتغير كل 15 ثانية بالاستطلاع — بلا
+                   aria-live كان الانتقال صامتًا لقارئ الشاشة (لافتة
+                   placed=1 عندها role=status منذ r133؛ الشريحة نفسها لم
+                   تكن معلنة). */
+                role="status"
+                aria-live="polite"
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.06)]",
                   ORDER_STATUS_CHIP[status]

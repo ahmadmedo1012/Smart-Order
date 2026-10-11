@@ -130,9 +130,13 @@ export default async function LandingPage() {
           lime pill (centered, z-2100 above the grain veil); see
           landing.css §r129-b. */}
       <SkipLink className="ln-skip-link" />
+      {/* r140 (P3-9): تهريب «<» — نفس نمط store/[slug]/page.tsx (الدرس
+          العائلي: قيمة يتحكم فيها المالك تحمل </script> كانت تكسر
+          السكربت المضمّن وتنفذ (XSS مخزّن). المحتوى ثابت اليوم؛ هذا
+          تحصين الاتساق ضد أي قيم ديناميكية مستقبلًا. */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(landingJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(landingJsonLd).replace(/</g, "\\u003c") }}
       />
 
       <LandingHeader />

@@ -467,7 +467,8 @@
   --shadow-card-h: 0 1px 2px rgba(2, 4, 12, 0.50), 0 8px 22px rgba(2, 4, 12, 0.55), 0 0 0 1px rgba(142, 151, 184, 0.08);
   --shadow-pop: 0 2px 4px rgba(2, 4, 12, 0.55), 0 10px 28px rgba(2, 4, 12, 0.62), 0 0 0 1px rgba(142, 151, 184, 0.10);
   --shadow-modal: 0 12px 32px rgba(2, 4, 12, 0.66), 0 32px 80px rgba(2, 4, 12, 0.70), 0 0 0 1px rgba(142, 151, 184, 0.12);
-  --shadow-glow: 0 8px 24px rgb(233 180 76 / 0.16); /* gold halo */
+  /* r140: ‏--shadow-glow حُذف كاملًا — التوهج خارج الكنون الأسطولي
+     (مبدأ de-glow) ولا مستهلك باقي له بعد تنظيف رفعة البطاقة. */
   --shadow-glass: 0 1px 2px rgba(2, 4, 12, 0.50), 0 8px 22px rgba(2, 4, 12, 0.55), 0 0 0 1px rgba(142, 151, 184, 0.08);
   --shadow-glass-lg: 0 12px 32px rgba(2, 4, 12, 0.66), 0 32px 80px rgba(2, 4, 12, 0.70), 0 0 0 1px rgba(142, 151, 184, 0.12);
 
@@ -477,9 +478,11 @@
   --surface-sunken: #070B16;
 
   /* ── Glass — Madarek §1.8 dark: rgba(11,16,32,0.78) + 16px blur +
-       neutral hairline; strong = the 94% topbar surface. ── */
+       neutral hairline; strong = the topbar surface. ── */
   --glass-bg: rgba(11, 16, 32, 0.78);
-  --glass-bg-strong: rgba(11, 16, 32, 0.94);
+  /* r140: ‏0.94 ← 0.92 توحيدًا مع الكنون (قرار r140 الموحد:
+     0.92 + 16px) — التباين مع madarek player.css rgb(11 16 32 / 0.92) */
+  --glass-bg-strong: rgba(11, 16, 32, 0.92);
   --glass-border: rgba(142, 151, 184, 0.12);
   --glass-border-strong: rgba(142, 151, 184, 0.28);
 
@@ -669,7 +672,7 @@
   --shadow-card-h: 0 1px 2px rgba(15, 15, 15, 0.04), 0 6px 18px rgba(15, 15, 15, 0.06);
   --shadow-pop: 0 1px 2px rgba(15, 15, 15, 0.04), 0 8px 24px rgba(15, 15, 15, 0.08);
   --shadow-modal: 0 12px 36px rgba(15, 15, 15, 0.10), 0 32px 80px rgba(15, 15, 15, 0.14);
-  --shadow-glow: 0 8px 24px rgb(181 116 56 / 0.10); /* copper halo */
+  /* r140: هالة النحاس المحذوفة مع توأمها الداكن — نفس قرار de-glow */
   --shadow-glass: 0 1px 2px rgba(15, 15, 15, 0.04), 0 6px 18px rgba(15, 15, 15, 0.06);
   --shadow-glass-lg: 0 12px 36px rgba(15, 15, 15, 0.10), 0 32px 80px rgba(15, 15, 15, 0.14);
 
@@ -905,8 +908,10 @@
     /* r130 (W2-1, fix 7): the semantic layer zeroes with the raw
        ladder (canonical tokens.css :1074-1077 pattern) so canonical-
        named consumers complete instantly too. */
-    --motion-duration-page: 0ms;
-    --motion-duration-reveal: 0ms;
+    /* r140: page/reveal تحفظ 80ms تقاطعًا (الكنون يحفظ تباينًا
+       واضحًا للانتقال تحت الحركة المخففة) — توأما SM:1704 وSL:998. */
+    --motion-duration-page: 80ms;
+    --motion-duration-reveal: 80ms;
     --motion-duration-stat: 0ms;
     --motion-duration-skeleton: 0ms;
   }
@@ -1269,8 +1274,10 @@
     transform var(--t-base) var(--ease-out);
 }
 .card-premium:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  /* r140: الرفعة تخف إلى -1px (سجل الكنون) والتوهج حُذف من هنا
+     ومعه تعريف --shadow-glow أعلاه — de-glow أسطولي. */
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
   border-color: color-mix(in oklab, var(--orange) 40%, var(--border));
 }
 
@@ -1285,8 +1292,10 @@
 }
 .glass-strong {
   background: var(--glass-bg-strong);
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  /* r140: الضباب 20px ← 16px (قرار الكنون الموحد r140 — الكنون
+     الأساسي: سطوح 16px / ستائر 4px، والمشطوفات 20px غير قانونية) */
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
   border: 1px solid var(--glass-border-strong);
   box-shadow: var(--shadow-glass-lg);
 }

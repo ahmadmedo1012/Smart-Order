@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { ok, fail, handleError } from "@/lib/api";
 import { getAuthUser } from "@/lib/auth";
+import { dbRateLimit, clientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -21,6 +22,14 @@ const DEMO_PRODUCTS = [
 
 export async function POST(req: NextRequest) {
   try {
+    /* r140 (P3-8): حد معدل قبل أي بحث جلسة/قاعدة — المسار الوحيد من
+       المسارات الحساسة السبعة الذي كان مفتوحًا لكل طلب مجهول (بقية
+       المسارات محدودة؛ نفس نمط media/upload مع Retry-After من r138). */
+    const rl = await dbRateLimit(`seed:${clientIp(req)}`, 5, 10 * 60 * 1000);
+    if (!rl.ok) {
+      return fail("عدد كبير من المحاولات، انتظر قليلاً", 429, undefined, { "retry-after": String(rl.retryAfterSec) });
+    }
+
     const secret = req.nextUrl.searchParams.get("secret");
     const envSecret = process.env.SEED_SECRET;
     let authorized = !!(envSecret && secret && secret === envSecret);

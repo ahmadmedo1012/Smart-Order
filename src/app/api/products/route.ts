@@ -11,7 +11,17 @@ const variantSchema = z.object({
   id: z.string().optional(),
   name: z.string().trim().min(1, "أدخل اسم الحجم/الخيار").max(60),
   priceDelta: z.union([z.string(), z.number()]).transform((v) => {
-    try { return parseLyd(v); } catch { throw new Error("سعر إضافي غير صحيح"); }
+    /* r140 (P3-2): سقف مثل سقف السعر — بلا سقف كان تاجر يدخل
+       «999999999999999» فيتجاوز lineTotal (unit×99) حد
+       MAX_SAFE_INTEGER ويفسد العرض والإجماليات. */
+    let m: number;
+    try {
+      m = parseLyd(v);
+    } catch {
+      throw new Error("سعر إضافي غير صحيح");
+    }
+    if (m > 999_999_000) throw new Error("السعر الإضافي كبير جداً");
+    return m;
   }),
 });
 
@@ -19,7 +29,15 @@ const optionItemSchema = z.object({
   id: z.string().optional(),
   name: z.string().trim().min(1).max(60),
   priceDelta: z.union([z.string(), z.number()]).transform((v) => {
-    try { return parseLyd(v); } catch { throw new Error("سعر إضافي غير صحيح"); }
+    // r140 (P3-2): نفس سقف السعر 999_999_000 — نفس صنف الحماية أعلاه
+    let m: number;
+    try {
+      m = parseLyd(v);
+    } catch {
+      throw new Error("سعر إضافي غير صحيح");
+    }
+    if (m > 999_999_000) throw new Error("سعر الإضافة كبير جداً");
+    return m;
   }),
 });
 

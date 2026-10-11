@@ -153,13 +153,18 @@ export default function PaymentsPage() {
                           );
                         }
                       }}
+                      /* r140 (P3-4): التسمية كانت تعرض الحالة الراهنة
+                         («مفعّلة») بينما نقرها يعطّل — التسمية لا توافق
+                         النتيجة. الآن نص الزر فعل ما سيحدثه + الحالة
+                         معلنة بaria-pressed (نمط r133 role=group). */
+                      aria-pressed={m.isActive}
                       className={`inline-flex h-8 items-center rounded-full border border-transparent px-3 text-xs font-semibold transition-colors duration-(--t-fast) active:scale-[0.97] ${
                         m.isActive
                           ? "bg-(--c-mint-bg) text-(--c-mint-deep)"
                           : "bg-(--c-grey-bg) text-(--c-grey-deep)"
                       }`}
                     >
-                      {m.isActive ? "مفعّلة" : "معطلة"}
+                      {m.isActive ? "تعطيل" : "تفعيل"}
                     </button>
                     <button
                       onClick={() => setDeleting(m)}

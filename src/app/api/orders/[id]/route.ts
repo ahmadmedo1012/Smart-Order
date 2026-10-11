@@ -116,7 +116,15 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
          orders updateMany recipe). updateMany returns only a count —
          the row is re-read for the response. */
       const cas = await tx.order.updateMany({
-        where: { id, status: order.status },
+        /* r140 (P3-1): يمتد CAS إلى paymentStatus عند تحديث الدفع —
+           اللقطة القديمة كانت تحرس status فقط، فتحديثان متزامنان
+           لpaymentStatus من نفس اللقطة كانا ينجحان معًا (آخر كتابة
+           تفوز بصمت + سطرا history مكرران لنفس التغيير). */
+        where: {
+          id,
+          status: order.status,
+          ...(updates.paymentStatus ? { paymentStatus: order.paymentStatus } : {}),
+        },
         data: updates,
       });
       if (cas.count !== 1) {
