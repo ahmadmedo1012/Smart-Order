@@ -1722,3 +1722,312 @@
   animation-duration: var(--ln-t-fast);
   animation-delay: 0s;
 }
+
+/* ═════════════════════════════════════════════════════════════════════
+   §r141-ship — the shipping layer (task 3-a: the logistics identity)
+   Smart-Order's own chapter surface: the order's REAL tracking flow
+   drawn as a moving route + the editorial logistics band. Everything
+   below is scoped under .landing and introduces NEW token names only —
+   the canonical --ln-* canon above is untouched (parity pins intact).
+   ═════════════════════════════════════════════════════════════════════ */
+.landing {
+  /* the ship family — warm route gold on ink (large-text/icon duty);
+     the deep pair is for glass fills, not text (contrast discipline) */
+  --ln-ship-amber: #F2C48D;      /* route/leg accent — large text only */
+  --ln-ship-amber-deep: #3A2E1E; /* warm glass fill under cream text */
+  --ln-ship-glow: rgba(242, 196, 141, 0.16);
+  --ln-ship-line: rgba(242, 196, 141, 0.45);
+}
+
+/* ── the stage tabs — a horizontal route strip (RTL: newest at right) ── */
+.landing .ln-ship-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end; /* RTL start */
+  gap: 8px;
+  margin-block: 34px 0;
+}
+.landing .ln-ship-tab {
+  --_tab-ink: var(--ln-cream-dim);
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 10px 14px 8px;
+  border: 1px solid var(--ln-line-soft);
+  border-radius: var(--r-lg, 12px);
+  background: transparent;
+  color: var(--_tab-ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    color var(--ln-t-base) var(--ln-ease),
+    border-color var(--ln-t-base) var(--ln-ease),
+    background var(--ln-t-base) var(--ln-ease),
+    transform var(--ln-t-fast) var(--ln-ease);
+}
+.landing .ln-ship-tab:hover { color: var(--ln-cream); border-color: var(--ln-line); }
+.landing .ln-ship-tab:active { transform: scale(0.97); }
+.landing .ln-ship-tab.is-passed { --_tab-ink: var(--ln-cream); }
+.landing .ln-ship-tab.is-active {
+  color: var(--ln-cream);
+  border-color: var(--ln-ship-amber);
+  background: var(--ln-ship-amber-deep);
+}
+.landing .ln-ship-tab:focus-visible {
+  outline: 2px solid var(--ring, var(--ln-ship-amber));
+  outline-offset: 2px;
+}
+.landing .ln-ship-tab-dot {
+  inline-size: 9px;
+  block-size: 9px;
+  border-radius: 50%;
+  background: var(--ln-line);
+  transition: background var(--ln-t-base) var(--ln-ease);
+}
+.landing .ln-ship-tab.is-passed .ln-ship-tab-dot { background: var(--ln-ship-line); }
+.landing .ln-ship-tab.is-active .ln-ship-tab-dot {
+  background: var(--ln-ship-amber);
+  box-shadow: 0 0 10px var(--ln-ship-glow);
+}
+.landing .ln-ship-tab-cue {
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--ln-cream-dim);
+  opacity: 0.75;
+}
+
+/* ── the panel grid ── */
+.landing .ln-ship-panel { margin-block-start: 26px; }
+.landing .ln-ship-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 26px;
+  align-items: stretch;
+}
+
+/* ── the route stage — ink-2 well with the SVG route + package ── */
+.landing .ln-ship-stage {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--ln-line-soft);
+  border-radius: 28px;
+  background: var(--ln-ink-2);
+  min-block-size: 340px;
+}
+/* the generated night-map as a whisper-deep backdrop (masked, 14%) */
+.landing .ln-ship-stage-media {
+  position: absolute;
+  inset: 0;
+  opacity: 0.14;
+  -webkit-mask-image: radial-gradient(120% 90% at 50% 40%, #000 30%, transparent 78%);
+  mask-image: radial-gradient(120% 90% at 50% 40%, #000 30%, transparent 78%);
+}
+.landing .ln-ship-stage-img { object-fit: cover; }
+
+.landing .ln-ship-route-wrap {
+  position: absolute;
+  inset: 0;
+}
+.landing .ln-ship-route {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+}
+.landing .ln-ship-route-base {
+  stroke: var(--ln-line);
+  stroke-width: 2;
+  stroke-dasharray: 5 7;
+  stroke-linecap: round;
+}
+.landing .ln-ship-route-lit {
+  stroke: var(--ln-ship-amber);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 100 100;
+  transition: stroke-dashoffset var(--ln-t-cinema) var(--ln-ease-out);
+  filter: drop-shadow(0 0 6px var(--ln-ship-glow));
+}
+/* gates + wells */
+.landing .ln-ship-gate rect {
+  fill: #1D2338;
+  stroke: var(--ln-line);
+}
+.landing .ln-ship-gate.is-lit rect,
+.landing .ln-ship-gate--home rect { stroke: var(--ln-ship-line); }
+.landing .ln-ship-gate path { fill: var(--ln-cream-dim); }
+.landing .ln-ship-gate--home path { fill: var(--ln-ship-amber); }
+.landing .ln-ship-gate text {
+  fill: var(--ln-cream-dim);
+  font-size: 15px;
+  font-family: var(--ln-mono);
+}
+.landing .ln-ship-well {
+  fill: var(--ln-ink);
+  stroke: var(--ln-line);
+  stroke-width: 1.5;
+  transition: fill var(--ln-t-base) var(--ln-ease), stroke var(--ln-t-base) var(--ln-ease);
+}
+.landing .ln-ship-well.is-passed {
+  fill: var(--ln-ship-amber);
+  stroke: var(--ln-ship-amber);
+}
+
+/* the package marker — kraft square with a gold tape seam; the component
+   effect positions it ON the drawn route path (getPointAtLength + screen
+   CTM — physical px, RTL-safe, scale-proof). left/top come from JS;
+   CSS owns the ease and the hidden-until-placed start. */
+.landing .ln-ship-package {
+  position: absolute;
+  inset-inline-start: auto;
+  inline-size: 30px;
+  block-size: 30px;
+  margin: -15px; /* center on the path point */
+  border-radius: 7px;
+  background: linear-gradient(160deg, #C89A6B, #A97C4F);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(242, 196, 141, 0.35),
+    0 0 22px var(--ln-ship-glow);
+  opacity: 0;
+  z-index: 2; /* above the masked map backdrop */
+  transition:
+    left var(--ln-t-cinema) var(--ln-ease-out),
+    top var(--ln-t-cinema) var(--ln-ease-out);
+  will-change: left, top;
+}
+.landing .ln-ship-package-tape {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 50%;
+  block-size: 4px;
+  translate: 0 -50%;
+  background: var(--ln-ship-amber);
+  opacity: 0.85;
+}
+
+/* ── the status card — warm glass, keyed re-entrance ── */
+.landing .ln-ship-card {
+  border: 1px solid var(--ln-line-soft);
+  border-radius: 28px;
+  background: var(--ln-ship-amber-deep);
+  display: grid;
+  align-content: center;
+  padding: 30px 28px;
+}
+.landing .ln-ship-card-inner {
+  display: grid;
+  gap: 14px;
+  animation: ln-ship-card-in var(--ln-t-slow) var(--ln-ease-out) both;
+}
+@keyframes ln-ship-card-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.landing .ln-ship-kicker {
+  font-size: 12px;
+  color: var(--ln-ship-amber);
+  letter-spacing: 0.03em;
+}
+.landing .ln-ship-status {
+  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+  font-weight: 700;
+  color: var(--ln-cream);
+  line-height: 1.15;
+}
+.landing .ln-ship-desc {
+  color: var(--ln-cream-dim);
+  line-height: 1.85;
+  font-size: 15px;
+}
+.landing .ln-ship-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1px dashed var(--ln-line);
+  border-radius: 12px;
+  color: var(--ln-cream-dim);
+  font-size: 12.5px;
+  line-height: 1.8;
+}
+.landing .ln-ship-note svg { flex: none; margin-block-start: 3px; color: var(--ln-ship-amber); }
+.landing .ln-ship-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.landing .ln-ship-cta-warm {
+  border-color: var(--ln-ship-line);
+  color: var(--ln-ship-amber);
+}
+.landing .ln-ship-cta-warm:hover { background: var(--ln-ship-glow); }
+
+/* ── the logistics band — asymmetric editorial grid ── */
+.landing .ln-logistics-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  grid-template-areas:
+    'package wide'
+    'door   wide';
+  gap: 18px;
+}
+.landing .ln-logistics-package { grid-area: package; }
+.landing .ln-logistics-wide { grid-area: wide; }
+.landing .ln-logistics-door { grid-area: door; }
+.landing .ln-logistics-package,
+.landing .ln-logistics-wide,
+.landing .ln-logistics-door {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--ln-line-soft);
+  border-radius: 28px;
+  background: var(--ln-ink-2);
+  min-block-size: 240px;
+}
+.landing .ln-logistics-wide { min-block-size: 0; } /* spans both rows */
+.landing .ln-logistics-img { object-fit: cover; }
+.landing .ln-logistics-package::after,
+.landing .ln-logistics-wide::after,
+.landing .ln-logistics-door::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(28, 32, 50, 0.92) 0%, rgba(28, 32, 50, 0.25) 45%, transparent 70%);
+  pointer-events: none;
+}
+.landing .ln-logistics-cap {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 1;
+  display: grid;
+  gap: 4px;
+  padding: 18px 20px;
+}
+.landing .ln-logistics-cap strong { color: var(--ln-cream); font-size: 16px; }
+.landing .ln-logistics-cap span { color: var(--ln-cream-dim); font-size: 13px; line-height: 1.75; }
+
+/* ── responsive: ≤920px the route stacks above the card ── */
+@media (max-width: 920px) {
+  .landing .ln-ship-grid { grid-template-columns: 1fr; }
+  .landing .ln-ship-stage { min-block-size: 300px; }
+  .landing .ln-ship-tabs { justify-content: flex-start; }
+  .landing .ln-ship-tab { padding: 8px 10px 7px; }
+  .landing .ln-ship-tab-cue { display: none; }
+  .landing .ln-logistics-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'package'
+      'wide'
+      'door';
+  }
+  .landing .ln-logistics-wide { min-block-size: 240px; }
+}
+
+/* ── reduced-motion: the ship layer stands still (marker jumps between
+   stages, card re-entrance renders final, route leg snaps) ── */
+@media (prefers-reduced-motion: reduce) {
+  .landing .ln-ship-package { transition: none; }
+  .landing .ln-ship-route-lit { transition: none; }
+  .landing .ln-ship-card-inner { animation: none; }
+  .landing .ln-logistics-grid .ln-logistics-img { transition: none; }
+}

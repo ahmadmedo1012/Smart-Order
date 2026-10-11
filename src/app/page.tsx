@@ -9,6 +9,8 @@ import { HeroSection } from "@/components/landing/hero-section";
 import { LandingMarquee } from "@/components/landing/LandingMarquee";
 import { SectorsSection } from "@/components/landing/SectorsSection";
 import { JourneySection } from "@/components/landing/JourneySection";
+import { OrderJourneySection } from "@/components/landing/OrderJourneySection";
+import { LogisticsBand } from "@/components/landing/LogisticsBand";
 import { ProgressSection } from "@/components/landing/ProgressSection";
 import { VenuesSection } from "@/components/landing/VenuesSection";
 import { RolesSection } from "@/components/landing/RolesSection";
@@ -171,8 +173,19 @@ export default async function LandingPage() {
         {/* ═══ الفصل ٣ — رحلة الطلب (5 stations + light path) ═══ */}
         <JourneySection />
 
+        {/* ═══ الفصل ٠٢+ — الطريق: رحلة الطلب الحقيقية (r141 task 3-a) ═══
+            the interactive order-lifecycle route — the REAL state machine
+            (TRACKING_FLOW + ORDER_STATUS_AR from lib/constants) drawn as a
+            moving package on a store→home route. */}
+        <OrderJourneySection />
+
         {/* ═══ الفصل ٤ — قصّة التقدّم (--sp rings + real CountUp) ═══ */}
         <ProgressSection stores={stats.totalStores} orders={stats.totalOrders} />
+
+        {/* ═══ الفصل ٠٣+ — على الأرض: الطرود والطريق (r141 task 3-a) ═══
+            the editorial logistics band — package / city leg / door
+            handoff, captions mapped to real shipped capabilities. */}
+        <LogisticsBand />
 
         {/* ═══ الفصل ٥ — الأرض: شركاؤنا على الأرض (venues plate) ═══ */}
         <VenuesSection />
