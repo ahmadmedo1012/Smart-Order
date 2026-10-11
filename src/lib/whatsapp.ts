@@ -60,9 +60,23 @@ export function buildOrderMessage(o: OrderMessageData, opts?: { trackUrl?: strin
   return lines.join("\n");
 }
 
-/** Confirmation message the BUSINESS sends to the CUSTOMER (dashboard action). */
-export function buildCustomerConfirmationMessage(o: OrderMessageData, businessName: string): string {
-  return `شكراً لطلبك من ${businessName} 🙏\n\nطلبك ${o.orderNumber} قيد المعالجة وسنوافيك بالتحديثات.\nالإجمالي: ${formatLyd(o.total)}`;
+/** Confirmation message the BUSINESS sends to the CUSTOMER (dashboard action).
+ * (phase4) opts.trackUrl — the direct tracking link rides the confirmation
+ * message itself: the FAQ promise «مشاركة رابط التتبع المباشر معه» is now
+ * backed by code (the publicToken was already in the detail API, unused). */
+export function buildCustomerConfirmationMessage(
+  o: OrderMessageData,
+  businessName: string,
+  opts?: { trackUrl?: string },
+): string {
+  const lines = [
+    `شكراً لطلبك من ${businessName} 🙏`,
+    "",
+    `طلبك ${o.orderNumber} قيد المعالجة وسنوافيك بالتحديثات.`,
+    `الإجمالي: ${formatLyd(o.total)}`,
+  ];
+  if (opts?.trackUrl) lines.push("", `🔗 تابِع طلبك لحظة بلحظة: ${opts.trackUrl}`);
+  return lines.join("\n");
 }
 
 /** Status update message for the customer. */

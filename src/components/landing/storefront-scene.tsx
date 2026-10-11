@@ -47,13 +47,15 @@ function StorefrontMiniUI() {
         ))}
       </div>
 
-      {/* Product rows */}
+      {/* Product rows — prices ride the r138 clean-dinar seam (formatLyd
+          contract, CLAUDE.md:69-72): whole dinars clean, fractions at the
+          3-decimal dirham precision — matching the dashboard mock beside it. */}
       <div className="flex-1 space-y-2 overflow-hidden px-3 py-2.5">
         {[
-          { name: "بيتزا مارغريتا", price: "45.00", tag: "الأكثر طلباً" },
-          { name: "برجر دجاج كبير", price: "23.50", tag: "" },
-          { name: "عصير برتقال طازج", price: "9.00", tag: "" },
-          { name: "بطاطس بالجبنة", price: "12.00", tag: "" },
+          { name: "بيتزا مارغريتا", price: "45", tag: "الأكثر طلباً" },
+          { name: "برجر دجاج كبير", price: "23.500", tag: "" },
+          { name: "عصير برتقال طازج", price: "9", tag: "" },
+          { name: "بطاطس بالجبنة", price: "12", tag: "" },
         ].map((p) => (
           <div key={p.name} className="flex items-center gap-2.5 rounded-xl border border-border/50 bg-card p-2">
             <div className="size-11 shrink-0 rounded-lg bg-gradient-to-br from-accent-foreground/15 to-accent-foreground/5" />
@@ -83,7 +85,7 @@ function StorefrontMiniUI() {
           <div>
             <div className="text-[8px] text-muted-foreground">الإجمالي</div>
             <div className="text-[11px] font-black tabular-nums text-foreground" dir="ltr">
-              108.00 د.ل
+              108 د.ل
             </div>
           </div>
           <span className="whatsapp-btn flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[10px] font-bold">
@@ -176,13 +178,13 @@ export function StorefrontScene() {
             <div className="flex items-center justify-between gap-3 rounded-xl border border-border/40 bg-background/70 px-3 py-1.5">
               <span className="text-[10px] font-bold text-foreground">بيتزا مارغريتا ×2</span>
               <span className="text-[10px] font-bold text-accent-foreground" dir="ltr">
-                90.00 د.ل
+                90 د.ل
               </span>
             </div>
             <div className="flex items-center justify-between gap-3 rounded-xl border border-border/40 bg-background/70 px-3 py-1.5">
               <span className="text-[10px] font-bold text-foreground">عصير برتقال ×2</span>
               <span className="text-[10px] font-bold text-accent-foreground" dir="ltr">
-                18.00 د.ل
+                18 د.ل
               </span>
             </div>
             {/* the real local payment methods, as the storefront offers them */}

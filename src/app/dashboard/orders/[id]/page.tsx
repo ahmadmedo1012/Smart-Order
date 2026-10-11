@@ -273,6 +273,10 @@ export default function OrderDetailPage() {
         total: order.total,
       },
       order.business.name,
+      /* (phase4 W1-SO): رابط التتبع المباشر يُشارك مع العميل فعليًا —
+         publicToken كان يصل من الـAPI بلا مستهلك والـFAQ يعدّ بالمشاركة.
+         النافذة الحالية هي أصل الرابط (اللوحة تُخدم من نطاق المنتج نفسه). */
+      { trackUrl: `${window.location.origin}/track/${order.publicToken}` },
     ),
   );
 

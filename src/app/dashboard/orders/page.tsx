@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
+import { countedArabicPhrase } from "@/lib/arabic-plural";
+import { toast } from "sonner";
 import {
   OrderStatusBadge,
   PaymentStatusBadge,
@@ -36,7 +38,7 @@ import {
   type OrderStatus,
   type PaymentStatus,
 } from "@/lib/constants";
-import { ClipboardList, Search, ArrowLeft, RotateCcw } from "lucide-react";
+import { ClipboardList, Search, ArrowLeft, RotateCcw, Bell } from "lucide-react";
 
 interface OrderRow {
   id: string;
@@ -89,6 +91,90 @@ export default function OrdersPage() {
     setPage(1);
   }, [debouncedQ]);
 
+  /* (phase4 W1-SO) تنبيه الطلبات الجديدة — وعد الـFAQ «كل طلب يصل فوراً
+     إلى لوحة التحكم مع تنبيه» صار وظيفة حقيقية على هذه الصفحة: استطلاع
+     كل 20 ثانية ببوابة الظهور (السابقة الموثقة dashboard/page.tsx —
+     التبويبات الخفية لا تجلب شيئًا) يجلب الصفحة الأولى بلا فلاتر، وكل
+     طلب غريب عن المجموعة المعروفة يُعلَن بتوست ويحصى في وسم الرأس، ويُدمَج
+     في القائمة مباشرة إن كانت العرضة الحالية ستُظهره (الكل/جديد، صفحة 1،
+     بلا بحث أو فلاتر أخرى). بذرة الـIDs من أول جلب، والفشل صامت —
+     الاستطلاع مساعد لا يُعطّل الصفحة. */
+  const router = useRouter();
+  const [newCount, setNewCount] = React.useState(0);
+  const seenIdsRef = React.useRef<Set<string> | null>(null);
+
+  const loadFeed = React.useCallback(() => {
+    if (!businessId) return;
+    api
+      .get<OrderRow[]>(`/api/orders?businessId=${businessId}&page=1&pageSize=25`)
+      .then((r) => {
+        const rows = r.data;
+        const seen = seenIdsRef.current;
+        if (seen === null) {
+          seenIdsRef.current = new Set(rows.map((o) => o.id));
+          return;
+        }
+        const arrivals = rows.filter((o) => !seen.has(o.id));
+        if (arrivals.length === 0) return;
+        for (const o of rows) seen.add(o.id);
+        setNewCount((c) => c + arrivals.length);
+        const canMerge =
+          page === 1 &&
+          !debouncedQ.trim() &&
+          payment === "ALL" &&
+          fulfillment === "ALL" &&
+          (status === "ALL" || status === "NEW");
+        if (canMerge) {
+          setOrders((prev) =>
+            prev === null
+              ? prev
+              : [...arrivals.filter((a) => !prev.some((p) => p.id === a.id)), ...prev],
+          );
+          setMeta((m) => ({ ...m, total: m.total + arrivals.length }));
+        }
+        if (arrivals.length === 1) {
+          const o = arrivals[0];
+          toast("وصل طلب جديد", {
+            description: `${o.orderNumber} — ${o.customerName} · ${formatLyd(o.total)}`,
+            action: {
+              label: "عرض",
+              onClick: () => router.push(`/dashboard/orders/${o.id}`),
+            },
+          });
+        } else {
+          toast("وصلت طلبات جديدة", {
+            description: `${countedArabicPhrase(arrivals.length, "طلب جديد", {
+              two: "طلبان جديدان",
+              few: "طلبات جديدة",
+              many: "طلبًا جديدًا",
+            })} بانتظار المعالجة`,
+          });
+        }
+      })
+      .catch(() => {}); // silent — the poll is auxiliary, errors surface on the main fetch
+  }, [businessId, status, payment, fulfillment, debouncedQ, page, router]);
+
+  React.useEffect(() => {
+    loadFeed(); // seed the known-IDs snapshot immediately, then poll
+    const t = setInterval(() => {
+      if (!document.hidden) loadFeed();
+    }, 20_000);
+    const onVisible = () => {
+      if (!document.hidden) loadFeed();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [loadFeed]);
+
+  /* the badge counts arrivals not yet reviewed in the «جديد» tab —
+     opening that tab IS the review, so it clears the count */
+  React.useEffect(() => {
+    if (status === "NEW") setNewCount(0);
+  }, [status]);
+
   React.useEffect(() => {
     if (!businessId) return;
     setError(false);
@@ -121,20 +207,39 @@ export default function OrdersPage() {
         title="الطلبات"
         subtitle={<span className="tabular-nums">{meta.total} طلب</span>}
         actions={
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setStatus("ALL");
-              setPayment("ALL");
-              setFulfillment("ALL");
-              setQ("");
-              setPage(1);
-            }}
-          >
-            <RotateCcw className="size-4 me-1.5" aria-hidden="true" />
-            تصفير الفلاتر
-          </Button>
+          <>
+            {newCount > 0 && (
+              <Button
+                size="sm"
+                onClick={() => {
+                  setStatus("NEW");
+                  setPage(1);
+                  setNewCount(0);
+                }}
+              >
+                <Bell className="size-4 me-1.5" aria-hidden="true" />
+                {countedArabicPhrase(newCount, "طلب جديد", {
+                  two: "طلبان جديدان",
+                  few: "طلبات جديدة",
+                  many: "طلبًا جديدًا",
+                })}
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setStatus("ALL");
+                setPayment("ALL");
+                setFulfillment("ALL");
+                setQ("");
+                setPage(1);
+              }}
+            >
+              <RotateCcw className="size-4 me-1.5" aria-hidden="true" />
+              تصفير الفلاتر
+            </Button>
+          </>
         }
       />
 

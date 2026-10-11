@@ -235,7 +235,7 @@ export function PricingClient({ initialPlans }: { initialPlans: Plan[] | null })
             اختر باقتك
           </h1>
           <p className="mx-auto max-w-xl text-sm text-muted-foreground sm:text-base">
-            ابدأ برفع متجرك رقمياً واختر الباقة التي تناسب احتياجاتك — الترقية في أي وقت والفرق يُحسب تناسبياً
+            ابدأ برفع متجرك رقمياً واختر الباقة التي تناسب احتياجاتك — الترقية في أي وقت وتُفعَّل الباقة الجديدة بدورة كاملة تبدأ من تأكيد الدفع
           </p>
 
           {/* Family monthly/yearly switch §5.7 — capsule (r128-F8: solid
@@ -336,7 +336,7 @@ export function PricingClient({ initialPlans }: { initialPlans: Plan[] | null })
             {[
               {
                 q: "هل يمكنني الترقية لاحقاً؟",
-                a: "نعم، يمكنك الترقية في أي وقت. سيتم احتساب الفرق بشكل تناسبي.",
+                a: "نعم، يمكنك الترقية في أي وقت. تُفعَّل الباقة الجديدة بعد تأكيد الدفع بفترة كاملة تبدأ من لحظتها.",
               },
               {
                 q: "هل يوجد فترة تجريبية؟",

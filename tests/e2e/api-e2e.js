@@ -191,6 +191,16 @@ async function main() {
   const hist = detail.body?.data?.order?.history || [];
   ok("full audit history (creation + 5 transitions)", rateLimited || hist.length >= 6, `got ${hist.length}`);
 
+  // (phase4 W1-SO) الخصوصية: ملاحظات المشغّل الداخلية لا تُشحن عبر التتبع العام —
+  // حامل التوكن (أي من يملك الرابط) يرى الحالات والتواريخ فقط.
+  const track = await anon.call(`/api/public/track/${created?.publicToken}`);
+  const trackHist = track.body?.data?.order?.history || [];
+  ok(
+    "public track omits internal operator notes (privacy)",
+    rateLimited || (track.status === 200 && trackHist.length > 0 && trackHist.every((h) => !("note" in h))),
+    JSON.stringify(track.body).slice(0, 120),
+  );
+
   const xTenantOrder = await B.call(`/api/orders/${orderId}`);
   ok("B cannot read A's order", rateLimited || xTenantOrder.status === 404 || xTenantOrder.body?.error?.code === "NOT_FOUND");
 

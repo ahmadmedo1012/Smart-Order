@@ -25,7 +25,10 @@ export function HeroSection({
 }) {
   const showTrustBadge = !!trustCount && trustCount > 0;
 
-  /* the roadmark board — live DB figures, the "+" rides non-zero counts */
+  /* the roadmark board — live DB figures, the "+" rides non-zero counts.
+     (phase4) «3 مدن» سقطت: رقم ثابت بلا مصدر بين جارين أحيا من DB —
+     حلّ محلها حقيقة المنتج القابلة للتحقق: الطرق الست الحقيقية
+     (constants.ts PAYMENT_TYPES — نفس الستة في محطة الدفع أسفل الصفحة). */
   const roadmarks = [
     {
       value: trustCount && trustCount > 0 ? `+${trustCount}` : `${trustCount ?? 0}`,
@@ -35,7 +38,7 @@ export function HeroSection({
       value: totalOrders && totalOrders > 0 ? `+${totalOrders}` : `${totalOrders ?? 0}`,
       label: "طلب عبر المنصّة",
     },
-    { value: "3", label: "مدن" },
+    { value: "6", label: "طرق دفع" },
   ];
 
   return (

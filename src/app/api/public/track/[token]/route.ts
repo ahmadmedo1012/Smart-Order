@@ -34,7 +34,10 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ token: str
         },
         history: {
           orderBy: { createdAt: "asc" },
-          select: { toStatus: true, note: true, createdAt: true },
+          /* (phase4) الخصوصية: ملاحظات المشغّل الداخلية (سبب الرفض، «نفدت
+             المكونات»…) لا تُشحن للعامة — حامل التوكن الوحيد صاحب الرابط.
+             الواجهة لم ترسمها أصلًا؛ كان الـAPI يشحنها بلا داعٍ. */
+          select: { toStatus: true, createdAt: true },
         },
         business: {
           select: { name: true, slug: true, phone: true, whatsappNumber: true, logoUrl: true },

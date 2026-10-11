@@ -2035,6 +2035,11 @@
 /* ── 15a · hazard token + the route spine layer ────────────────────── */
 .landing {
   --ln-amber:      #E8B45A;  /* road-sign amber — large text/decor · 7.0:1 on ink */
+  --ln-danger:     #E07856;  /* destructive action ink — the peach-ink family hue,
+                              baked at the landing's fixed ink ground (the landing
+                              is theme-locked dark, so the LIGHT-theme peach ink
+                              value is the truthful one here) */
+  --ln-danger-deep:#E8A18A;  /* destructive soft ink — hover/quiet variant */
   --ln-glass:      rgba(28, 32, 50, 0.66);
   --ln-glass-strong: rgba(28, 32, 50, 0.86);
 }
@@ -2073,7 +2078,11 @@
 .landing .ln-route-parcel {
   position: absolute;
   inset-block-start: 0;
-  inset-inline-start: 0;
+  /* (phase4) NO inset-inline-start here: in RTL it resolves to right:0,
+     over-constraining the box (left+width+right) so the physical left
+     RouteSpine.paint() writes every frame is ignored per the CSS spec
+     (over-constrained → left is dropped in RTL) — the parcel rode the
+     screen edge instead of the line. top/left come from the JS painter. */
   inline-size: 26px;
   block-size: 26px;
   border-radius: 6px;
@@ -2615,13 +2624,13 @@
   outline-offset: 2px;
 }
 .landing .ln-dash-action.is-destructive {
-  border-color: color-mix(in srgb, #E07856 45%, transparent);
-  background: rgba(224, 120, 86, 0.06);
-  color: #E8A18A;
+  border-color: color-mix(in srgb, var(--ln-danger) 45%, transparent);
+  background: color-mix(in srgb, var(--ln-danger) 6%, transparent);
+  color: var(--ln-danger-deep);
 }
 .landing .ln-dash-action.is-destructive:hover {
-  background: rgba(224, 120, 86, 0.12);
-  border-color: #E07856;
+  background: color-mix(in srgb, var(--ln-danger) 12%, transparent);
+  border-color: var(--ln-danger);
 }
 .landing .ln-dash-action-next {
   font-size: 0.6rem;

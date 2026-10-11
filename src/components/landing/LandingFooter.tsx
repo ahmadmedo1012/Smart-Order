@@ -22,6 +22,16 @@ const SERVICES = [
   "تتبع مباشر للعميل",
 ];
 
+/* (phase4 W1-SO) صف الأشقاء — المنظومة كاملة: Smart Order كان يعيش معزولاً
+ * عن أخوته رغم أن JSON-LD يعلنهم (sameAs). الأوصاف من Metadata كل منتج
+ * نفسه — لا ادعاءات جديدة: SmartLink «منصة رقمية متكاملة»، Smart Menu
+ * «المنيو الرقمي التفاعلي»، SmartBot «منصة إدارة فيسبوك الذكية». */
+const ECOSYSTEM = [
+  { href: "https://smart-link.ly", label: "الربط الذكي — منصة الأعمال المتكاملة" },
+  { href: "https://menu.smart-link.ly", label: "سمارت منيو — قوائم QR التفاعلية" },
+  { href: "https://bot.smart-link.ly", label: "سمارت بوت — بوت فيسبوك الذكي" },
+];
+
 export function LandingFooter() {
   const year = new Date().getFullYear();
 
@@ -66,6 +76,21 @@ export function LandingFooter() {
               <span key={label}>{label}</span>
             ))}
           </div>
+        </div>
+
+        <div className="landing-footer-col">
+          <h3 className="landing-footer-heading">منظومة الربط الذكي</h3>
+          {ECOSYSTEM.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="landing-footer-link"
+            >
+              {l.label}
+            </a>
+          ))}
         </div>
       </div>
 
