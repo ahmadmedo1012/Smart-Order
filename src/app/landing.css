@@ -2864,6 +2864,19 @@
   .landing .ln-store-qr { inset-block-start: 0; }
   .landing .ln-dash-roles { padding: var(--sp-4); }
   .landing .ln-roadmark-inner { gap: var(--sp-4); }
+  /* r143: أدلة المتجر تُكتب سطرًا لا عمودًا — على 390/360 كان inline-flex
+     يبقى أفقيًا فيُسحق العنوان <strong> إلى عمود كلمة-كلمة (~55px) بينما
+     الوصف يحتزل الباقي؛ الآن النقطة الليمونية والعنوان سطرٌ واحد والوصف
+     يمتد سطرًا كاملًا تحتهما (شبكة auto 1fr + span عبر العمودين). */
+  .landing .ln-store-proof { flex-direction: column; gap: var(--sp-3); }
+  .landing .ln-store-proof-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 10px;
+    row-gap: 3px;
+    align-items: center;
+  }
+  .landing .ln-store-proof-item span { grid-column: 1 / -1; }
 }
 
 /* ── 15j · reduced motion — the road goes completely still ─────────── */
