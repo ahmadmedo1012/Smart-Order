@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, ArrowLeft, UtensilsCrossed, Route, BarChart3, MapPin } from "lucide-react";
+import { Menu, X, ChevronDown, ArrowLeft, Route, BarChart3, Banknote, ShoppingBag } from "lucide-react";
 
 /* r128 Stage B (F4b) — the landing header, converted from the product
    MainNav to the canonical Madarek chrome (PORT-KIT §4, smart-link
@@ -15,14 +15,14 @@ import { Menu, X, ChevronDown, ArrowLeft, UtensilsCrossed, Route, BarChart3, Map
    · scroll-spy (r128 R2): IntersectionObserver thresholds [0,.35,.5,.65,1],
      rootMargin -20% 0px -40% 0px, candidates ratio > .35, winner by most
      viewport coverage → header.dataset.activeSection (the landing.css
-     rules read it there) — ids in lockstep with the Stage-A contract:
-     trust/sectors/journey/progress/venues/roles;
+     rules read it there) — ids in lockstep with the r142 «الخط»
+     narrative: stations/store/dashboard/payments;
    · megamenu with tone-coded icon wells (Escape + onBlur close, focus
      return to the trigger);
    · burger + mobile drawer ≤1024px.
    The product MainNav keeps serving every non-landing surface. */
 
-const SPY_SECTIONS = "#trust, #sectors, #journey, #progress, #venues, #roles";
+const SPY_SECTIONS = "#stations, #store, #dashboard, #payments";
 
 export function LandingHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -146,39 +146,40 @@ export function LandingHeader() {
                 <ChevronDown size={14} aria-hidden="true" />
               </button>
               <div className="landing-megamenu" onClick={closeMegamenu}>
-                <a href="#sectors" className="landing-megamenu-item">
-                  <span className="ln-menu-ico gold" aria-hidden="true"><UtensilsCrossed size={20} /></span>
+                <a href="#stations" className="landing-megamenu-item">
+                  <span className="ln-menu-ico gold" aria-hidden="true"><Route size={20} /></span>
                   <span className="landing-megamenu-item-body">
-                    <span className="landing-megamenu-item-title">القطاعات</span>
-                    <span className="landing-megamenu-item-desc">من المطعم إلى المتجر</span>
+                    <span className="landing-megamenu-item-title">المحطات الست</span>
+                    <span className="landing-megamenu-item-desc">من «جديد» إلى باب العميل</span>
                   </span>
                 </a>
-                <a href="#journey" className="landing-megamenu-item">
-                  <span className="ln-menu-ico azure" aria-hidden="true"><Route size={20} /></span>
+                <a href="#store" className="landing-megamenu-item">
+                  <span className="ln-menu-ico azure" aria-hidden="true"><ShoppingBag size={20} /></span>
                   <span className="landing-megamenu-item-body">
-                    <span className="landing-megamenu-item-title">رحلة الطلب</span>
-                    <span className="landing-megamenu-item-desc">من التصفح إلى التتبع</span>
+                    <span className="landing-megamenu-item-title">متجر يعمل فوراً</span>
+                    <span className="landing-megamenu-item-desc">واجهة حقيقية وسلة وطلب</span>
                   </span>
                 </a>
-                <a href="#progress" className="landing-megamenu-item">
+                <a href="#dashboard" className="landing-megamenu-item">
                   <span className="ln-menu-ico mist" aria-hidden="true"><BarChart3 size={20} /></span>
                   <span className="landing-megamenu-item-body">
-                    <span className="landing-megamenu-item-title">قصة التقدّم</span>
-                    <span className="landing-megamenu-item-desc">أرقام المنصّة الحقيقية</span>
+                    <span className="landing-megamenu-item-title">لوحة التاجر</span>
+                    <span className="landing-megamenu-item-desc">آلة الحالات الحقيقية حيّة</span>
                   </span>
                 </a>
-                <a href="#venues" className="landing-megamenu-item">
-                  <span className="ln-menu-ico gold" aria-hidden="true"><MapPin size={20} /></span>
+                <a href="#payments" className="landing-megamenu-item">
+                  <span className="ln-menu-ico gold" aria-hidden="true"><Banknote size={20} /></span>
                   <span className="landing-megamenu-item-body">
-                    <span className="landing-megamenu-item-title">شركاؤنا</span>
-                    <span className="landing-megamenu-item-desc">متاجر حقيقية على الأرض</span>
+                    <span className="landing-megamenu-item-title">محطات الدفع</span>
+                    <span className="landing-megamenu-item-desc">طرق ليبيا الست الحقيقية</span>
                   </span>
                 </a>
               </div>
             </div>
-            <a href="#sectors" className="landing-nav-link">القطاعات</a>
-            <a href="#journey" className="landing-nav-link">الرحلة</a>
-            <a href="#progress" className="landing-nav-link">النتائج</a>
+            <a href="#stations" className="landing-nav-link">المحطات</a>
+            <a href="#store" className="landing-nav-link">المتجر</a>
+            <a href="#dashboard" className="landing-nav-link">اللوحة</a>
+            <a href="#payments" className="landing-nav-link">الدفع</a>
           </nav>
 
           <div className="landing-header-cta">
@@ -202,11 +203,10 @@ export function LandingHeader() {
 
         {menuOpen && (
           <nav className="landing-mobile-menu" aria-label="قائمة الجوال" onClick={() => setMenuOpen(false)}>
-            <a href="#sectors" className="ln-btn-ghost">القطاعات</a>
-            <a href="#journey" className="ln-btn-ghost">رحلة الطلب</a>
-            <a href="#progress" className="ln-btn-ghost">النتائج</a>
-            <a href="#venues" className="ln-btn-ghost">شركاؤنا</a>
-            <a href="#roles" className="ln-btn-ghost">الأدوار</a>
+            <a href="#stations" className="ln-btn-ghost">المحطات الست</a>
+            <a href="#store" className="ln-btn-ghost">متجر يعمل فوراً</a>
+            <a href="#dashboard" className="ln-btn-ghost">لوحة التاجر</a>
+            <a href="#payments" className="ln-btn-ghost">محطات الدفع</a>
             <Link href="/login" className="ln-btn-ghost">تسجيل الدخول</Link>
             <Link href="/register" className="ln-btn-gold">
               أنشئ متجرك

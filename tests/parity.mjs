@@ -769,38 +769,45 @@ for (const [name, okFlag] of R129_LAYER) {
   else failures.push(`r129 layer gate FAILED: ${name}`);
 }
 
-// ── r129 (F4): OrbitScene port pins — the canvas engine, port-faithful ──────
-const orbitSceneSrc = readFileSync(new URL('../src/components/landing/OrbitScene.tsx', import.meta.url), 'utf8');
+// ── r142 «الخط»: the RouteSpine page-road pins (the OrbitScene port
+//    retires with the orbit identity; the same craft discipline is
+//    re-asserted on the page-scale road engine) ─────────────────────────
+const routeSpineSrc = readFileSync(new URL('../src/components/landing/RouteSpine.tsx', import.meta.url), 'utf8');
 const heroSectionSrc = readFileSync(new URL('../src/components/landing/hero-section.tsx', import.meta.url), 'utf8');
 const pageSrc = readFileSync(new URL('../src/app/page.tsx', import.meta.url), 'utf8');
-const ORBIT_SCENE = [
-  ['OrbitScene palette: CREAM triplet 245, 243, 231 (canvas-side of --ln-cream)',
-    orbitSceneSrc.includes('const CREAM = [245, 243, 231] as const;')],
-  ['OrbitScene palette: LIME triplet 223, 237, 178 (canvas-side of --ln-lime)',
-    orbitSceneSrc.includes('const LIME = [223, 237, 178] as const;')],
-  ['OrbitScene palette: VIOLET triplet 122, 107, 242 (canvas-side of --ln-violet)',
-    orbitSceneSrc.includes('const VIOLET = [122, 107, 242] as const;')],
-  ['OrbitScene omega stays RADIANS PER MILLISECOND (0.00016 inner ring — never convert without rescaling dt)',
-    orbitSceneSrc.includes('omega: 0.00016,') && orbitSceneSrc.includes('omega: 0.00011,') && orbitSceneSrc.includes('omega: 0.00006,')],
-  ['OrbitScene DPR hard cap 1.5 (Math.min(devicePixelRatio, 1.5))',
-    orbitSceneSrc.includes('Math.min(window.devicePixelRatio || 1, 1.5)')],
-  ['OrbitScene dt clamp 48ms + intro bloom 1400ms',
-    orbitSceneSrc.includes('Math.min(48, now - last || 16)') && orbitSceneSrc.includes('dtGlobal / 1400')],
-  ['OrbitScene IO pause band 80px + visibilitychange gating',
-    orbitSceneSrc.includes('rootMargin:') && orbitSceneSrc.includes('80px 0px') && orbitSceneSrc.includes('visibilitychange')],
-  ['OrbitScene RM path: single composed drawStatic() frame, never loops',
-    orbitSceneSrc.includes('function drawStatic()') && /if \(reducedMotion\) return; \/\/ static path never loops/.test(orbitSceneSrc)],
-  ['hero mounts the canvas exactly like canonical: biasX -0.35, class ln-hero-canvas, above depth, aria-hidden sky',
-    heroSectionSrc.includes('<OrbitScene className="ln-hero-canvas" biasX={-0.35} />') &&
-    heroSectionSrc.indexOf('<HeroDepthLayer />') < heroSectionSrc.indexOf('<OrbitScene')],
+const journeySrc = readFileSync(new URL('../src/components/landing/OrderJourneySection.tsx', import.meta.url), 'utf8');
+const constantsSrc = readFileSync(new URL('../src/lib/constants.ts', import.meta.url), 'utf8');
+const ROUTE_SPINE = [
+  ['RouteSpine: the road IS the page — one SVG line from the hero origin through every chapter to the finale',
+    pageSrc.includes('<RouteSpine />') && routeSpineSrc.includes('getPointAtLength') && routeSpineSrc.includes('screenCTM')],
+  ['RouteSpine: the parcel is GLUED to the drawn path (physical px, RTL-safe, scale-proof — the OrderJourney r141 kit at page scale)',
+    routeSpineSrc.includes('getScreenCTM') && routeSpineSrc.includes('parcelRef')],
+  ['RouteSpine: the shared-belt doctrine — ONE passive scroll listener + ONE rAF (imperative DOM writes, no render per frame)',
+    (routeSpineSrc.match(/passive: true/g) || []).length >= 2 && routeSpineSrc.includes('requestAnimationFrame')],
+  ['RouteSpine: waypoints are REAL anchors — every chapter plants a [data-route-stop] marker in document order',
+    routeSpineSrc.includes('[data-route-stop]') || routeSpineSrc.includes("data-route-stop")],
+  ['RouteSpine: gentle drawn-road sway (SWAY 18px on runs ≥ 320px, clamped to the corridor)',
+    routeSpineSrc.includes('SWAY = 18') && routeSpineSrc.includes('SWAY_MIN = 320') && routeSpineSrc.includes('EDGE = 14')],
+  ['RouteSpine: reduced-motion = COMPLETELY static road — no scroll listener, --sp pinned to 1, parcel parked',
+    /prefers-reduced-motion/.test(routeSpineSrc) && routeSpineSrc.includes('--sp')],
+  ['RouteSpine: no-JS degrades cleanly — the road paints nothing until first placement (opacity-gated)',
+    routeSpineSrc.includes('opacity') && routeSpineSrc.includes('ResizeObserver')],
+  ['hero: the dimensional road scene — package floats over the scooter on the route backdrop, the LINE originates under the box',
+    heroSectionSrc.includes('/images/shipping/package-hero.webp') && heroSectionSrc.includes('/images/shipping/scooter.webp') && heroSectionSrc.includes('/images/shipping/route.webp') && heroSectionSrc.includes('ln-hero-scene-origin')],
+  ['hero: the LCP doctrine holds — h1 server-rendered via the r92 settle (never opacity 0)',
+    heroSectionSrc.includes('r92-hero-settle') && heroSectionSrc.includes('priority')],
+  ['hero: the roadmark board — mono live figures with CountUp (the trust band folded into the hero chapter)',
+    heroSectionSrc.includes('ln-roadmark') && heroSectionSrc.includes('<CountUp')],
+  ['journey: the six stations derive from TRACKING_FLOW (lib/constants) — the REAL state machine, never a duplicated list',
+    journeySrc.includes('TRACKING_FLOW') && constantsSrc.includes('TRACKING_FLOW: OrderStatus[]')],
+  ['journey: the FULL union is covered — NEW → CONFIRMED → PREPARING → READY → OUT_FOR_DELIVERY → DELIVERED',
+    /NEW:/.test(constantsSrc) && /CONFIRMED:/.test(constantsSrc) && /PREPARING:/.test(constantsSrc) && /READY:/.test(constantsSrc) && /OUT_FOR_DELIVERY:/.test(constantsSrc) && /DELIVERED:/.test(constantsSrc)],
   ['intro-seen key is product-scoped: smartorder.intro.seen (never the madarek key)',
     pageSrc.includes('smartorder.intro.seen') && !pageSrc.includes('madarek.intro.seen')],
-  ['sectors pins ride ON the rings: ring index + angle trig (SectorsConstellation), not hand-placed %',
-    readFileSync(new URL('../src/components/landing/SectorsConstellation.tsx', import.meta.url), 'utf8').includes('const RING_RADII = [130, 200, 270] as const;')],
 ];
-for (const [name, okFlag] of ORBIT_SCENE) {
+for (const [name, okFlag] of ROUTE_SPINE) {
   if (okFlag) passed += 1;
-  else failures.push(`OrbitScene gate FAILED: ${name}`);
+  else failures.push(`RouteSpine gate FAILED: ${name}`);
 }
 
 // ── r129 (F4): health API mirror pins (smart-menu-real route.ts:15-79) ──────

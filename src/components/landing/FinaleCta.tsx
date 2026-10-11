@@ -1,43 +1,40 @@
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
 import { RevealCssClass } from "@/hooks/useReveal";
 import { MagneticGoldLink } from "@/components/landing/MagneticGoldLink";
 
-/* r128 Stage B (F4b) — Chapter 06 «الوصول»: the starting point
- * (canonical anatomy, smart-link FinaleCta form). Converging orbit
- * rings, magnetic gold CTA (useMagnetic(7)) + ghost. Copy folds the
- * home's shipped final-CTA section (مستعد لاستقبال طلبك الأول
- * الليلة؟ / ابدأ مجاناً بدون بطاقة ائتمان / شاهد متجراً تجريبياً). */
+/* r142 «الخط» — FinaleCta «الوصول»: the road's terminus.
+ * The converging orbit rings retire with the orbit identity; the line
+ * (RouteSpine) ends HERE at the terminus node ([data-route-stop]), and
+ * a crosswalk stripe band marks the arrival. Two verbs, one fork:
+ * اطلب (the storefront) — أو اصنع متجرك (register). */
 
 export function FinaleCta() {
-  const year = new Date().getFullYear();
-
   return (
     <section className="ln-cta" aria-label="ابدأ رحلتك">
-      {/* converging orbits */}
-      <div className="ln-cta-orbits" aria-hidden="true">
-        <span className="ln-cta-orbit o0" />
-        <span className="ln-cta-orbit o1" />
-        <span className="ln-cta-orbit o2" />
-      </div>
+      {/* the crosswalk — arrival stripes over the asphalt */}
+      <div className="ln-cta-crossing" aria-hidden="true" />
+
       <div className="ln-cta-inner">
-        <span className="ln-label">{"06 — الوصول · ACCESS"}</span>
+        {/* the terminus node — the line ends here */}
+        <span className="ln-cta-terminus ln-route-stop" data-route-stop aria-hidden="true" />
+
+        <span className="ln-label">{'05 — الوصول · ACCESS'}</span>
         <RevealCssClass as="h2" className="ln-cta-title" delay={1}>
-          مستعد لاستقبال <em>طلبك الأول</em> الليلة؟
+          اطلب — <em>أو اصنع متجرك</em>
         </RevealCssClass>
         <RevealCssClass as="p" className="ln-cta-lede" delay={2}>
-          ابدأ مجاناً بدون بطاقة ائتمان — متجرك يجهز في نفس الجلسة،
-          والطلبات تصلك منظمة من اللحظة الأولى.
+          الطريق يسع الجميع: عميل يطلب من متجر على المنصّة، وتاجر يفتح
+          متجره الليلة. ابدأ مجاناً بدون بطاقة ائتمان — والطلبات تصلك
+          منظمة من اللحظة الأولى.
         </RevealCssClass>
         <RevealCssClass as="div" className="ln-cta-actions" delay={3}>
           <MagneticGoldLink href="/register" xl withArrow ariaLabel="أنشئ متجرك مجاناً — التسجيل">
-            أنشئ متجرك مجاناً
+            اصنع متجرك مجاناً
           </MagneticGoldLink>
-          <Link href="/store/demo-store" className="ln-btn-ghost xl">شاهد متجراً تجريبياً</Link>
+          <Link href="/store/demo-store" className="ln-btn-ghost xl">اطلب من متجر تجريبي</Link>
         </RevealCssClass>
         <RevealCssClass as="p" className="ln-cta-meta" delay={4}>
-          <Sparkles size={13} aria-hidden="true" />
-          Smart Order · {year}
+          <span className="ln-mono">{`SMART ORDER · THE LINE · ${new Date().getFullYear()}`}</span>
         </RevealCssClass>
       </div>
     </section>

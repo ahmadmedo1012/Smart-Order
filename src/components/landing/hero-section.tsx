@@ -1,34 +1,43 @@
-"use client";
-
+import Image from "next/image";
 import Link from "next/link";
 import { toArabicNumber } from "@/lib/plan-types";
 import { MagneticGoldLink } from "@/components/landing/MagneticGoldLink";
 import { HeroDepthLayer } from "@/components/landing/HeroDepthLayer";
-import { OrbitScene } from "@/components/landing/OrbitScene";
-import { HeroPhone } from "@/components/landing/hero-phone";
+import { CountUp } from "@/components/ui/CountUp";
 
-/**
- * HeroSection — the split hero KEPT (r128 Stage B): start column = the
- * editorial text stack (eyebrow → h1 → sub → magnetic CTA pair → trust
- * pill), end column = the phone "order moment". What changed on the
- * Orbit-Ink stage (F4b):
- * · BEHIND it — the sky: HeroDepthLayer (parallax starfield, resting
- *   opacity .5 + the ONE sanctioned violet depth radial) + the r129
- *   OrbitScene canvas (the living orbital system — Madarek port,
- *   mounted exactly like canonical LandingPage.tsx: above the depth
- *   plane, below the content, pointer-events none) — content sits at
- *   z1 over decor z0;
- * · the product warmth/glow layers retire (§7 no-glow discipline) —
- *   the flat HeroOrbits chart retires with the canvas port (r129);
- * · CTAs convert to the landing pill system — magnetic gold
- *   (useMagnetic(7) via MagneticGoldLink) + ghost.
+/* r142 «الخط» — HeroSection «الطريق مفتوح»: the logistics hero.
+ * The old orbit sky retires — the hero is now a DIMENSIONAL ROAD SCENE:
+ * package-hero.webp floats over scooter.webp (layered depth on the ink
+ * stage, route.webp as a whisper-deep backdrop) and the page's route
+ * line (RouteSpine) ORIGINS under the package. The h1 stays the instant
+ * LCP (family r92 doctrine: server-rendered, CSS settle, never opacity
+ * 0); the scene is CSS-only (no JS island) — float dies under RM.
  *
- * LCP doctrine (family r92) UNTOUCHED: the h1 entrance stays pure CSS,
- * starts VISIBLE (translate-only, opacity never 0) — the LCP text never
- * waits for JS, and stays server-rendered in the instant-paint HTML.
- */
-export function HeroSection({ trustCount }: { trustCount?: number }) {
+ * The hero keeps its honest live figures as a ROADMARK board (mono, the
+ * trust band folded into the hero chapter): متجر على الطريق / طلب عبر
+ * المنصّة / مدن — SSR'd finals + CountUp on view (honesty policy). */
+
+export function HeroSection({
+  trustCount,
+  totalOrders,
+}: {
+  trustCount?: number;
+  totalOrders?: number;
+}) {
   const showTrustBadge = !!trustCount && trustCount > 0;
+
+  /* the roadmark board — live DB figures, the "+" rides non-zero counts */
+  const roadmarks = [
+    {
+      value: trustCount && trustCount > 0 ? `+${trustCount}` : `${trustCount ?? 0}`,
+      label: "متجر على الطريق",
+    },
+    {
+      value: totalOrders && totalOrders > 0 ? `+${totalOrders}` : `${totalOrders ?? 0}`,
+      label: "طلب عبر المنصّة",
+    },
+    { value: "3", label: "مدن" },
+  ];
 
   return (
     <section className="ln-keep-hero relative isolate overflow-clip">
@@ -37,44 +46,27 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
         {'@keyframes r92-hero-settle{from{transform:translateY(12px)}to{transform:translateY(0)}}.r92-hero-settle{animation:r92-hero-settle .6s var(--ease-out-quart,ease-out) both}'}
       </style>
 
-      {/* r129 — the sky behind everything: starfield depth plane (z −1,
-          resting opacity .5) + the living OrbitScene canvas (the Madarek
-          engine: DPR-capped, IO+visibility paused, RM composed still).
-          Same mount order as canonical LandingPage.tsx: depth layer
-          first, canvas after (paints above it), content at z1 above both. */}
+      {/* the night-asphalt sky: starfield depth plane stays (the road at
+          night); the orbit canvas retires with the orbit identity */}
       <div className="ln-keep-sky" aria-hidden="true">
         <HeroDepthLayer />
-        <OrbitScene className="ln-hero-canvas" biasX={-0.35} />
       </div>
 
-      {/* Family container rhythm (§4) — r132 (A1 finding 4): the frame canon
-          is 1280px (r131 ruling) — dashboard shell.tsx + landing.css chapters
-          landed it; the marketing frame (hero/header/footer) follows. */}
-      <div className="mx-auto max-w-[1280px] px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-32 lg:px-10 lg:pt-36 lg:pb-24">
-        <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-10">
-          {/* Start column — editorial text stack */}
+      {/* Family container rhythm (§4) — frame canon 1280px (r131 ruling) */}
+      <div className="mx-auto max-w-[1280px] px-4 pb-10 pt-28 sm:px-6 sm:pb-14 sm:pt-32 lg:px-10 lg:pt-36">
+        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-8">
+          {/* Start column — editorial text stack (server-rendered LCP) */}
           <div className="text-center lg:text-start">
-            {/* Eyebrow — above the fold, on the mono machine-voice.
-                r129 S-11: ln-mono dim (canonical LandingPage.tsx:352 —
-                "the lime word below is the only pop"); the former lime
-                .ln-label was a 2nd lime pop above the h1 (roster
-                violation) */}
             <div className="ln-keep-eyebrow animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              <span className="ln-mono">{"Smart Order · متجر رقمي · ليبيا"}</span>
+              <span className="ln-mono">{"Smart Order · الطريق مفتوح · ليبيا"}</span>
             </div>
 
-            {/* h1 — CSS settle (family r92), visible in SSR HTML on first paint.
-                r131-F2: the fixed 36→68px Tailwind ladder retires — the
-                title now rides the canonical --ln-h1 scale
-                (clamp 44px→108px, SL/SB/SM pattern; landing.css .ln-keep-title).
-                The ONE lime word rides flat color — no gradient-text.
-                r129 S-12: tracking-normal (letter-spacing 0) — Arabic
-                joins; negative tracking breaks cursive connection
-                (canonical landing.css:591 hard rule). */}
+            {/* h1 — the road claim, instant paint. ONE lime word (flat
+                color); tracking-normal keeps the Arabic joined (r129 S-12). */}
             <h1 className="r92-hero-settle ln-keep-title text-balance font-bold tracking-normal">
-              <span className="block">متجر رقمي لمتجرك</span>
+              <span className="block">الطريق مفتوح:</span>
               <span className="block">
-                <span className="ln-keep-word">الطلبات تصلك</span> في لوحة واحدة
+                متجرك يستقبل <span className="ln-keep-word">ويوصّل</span>
               </span>
             </h1>
 
@@ -82,13 +74,10 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
               className="ln-keep-sub animate-fade-in mx-auto mb-8 max-w-xl text-balance text-lg leading-relaxed lg:mx-0 md:text-xl"
               style={{ animationDelay: "0.27s" }}
             >
-              أنشئ متجرك بصور وأسعار، استقبل الطلبات فوراً، نظّم التوصيل بمناطقك، وتابع أداء يومك من لوحة
-              تحكم واحدة.
+              أنشئ متجرك بصور وأسعار، استقبل الطلبات فوراً، نظّم التوصيل بمناطقك، وتابع الطلب خطوة بخطوة
+              من لوحة تحكم واحدة — حتى باب العميل.
             </p>
 
-            {/* CTA pair — magnetic gold + ghost (the landing pill system).
-                r131-F2: ln-keep-actions — the 560px full-width hook
-                (canonical .ln-hero-actions rule, landing.css §13). */}
             <div
               className="ln-keep-actions animate-fade-in flex flex-wrap justify-center gap-3 sm:gap-4 lg:justify-start"
               style={{ animationDelay: "0.39s" }}
@@ -97,11 +86,10 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
                 ابدأ مجاناً
               </MagneticGoldLink>
               <Link href="/store/demo-store" className="ln-btn-ghost">
-                شاهد متجراً تجريبياً
+                اطلب من متجر تجريبي
               </Link>
             </div>
 
-            {/* Trust badge — real count only (family honesty policy) */}
             {showTrustBadge && (
               <div
                 className="ln-keep-pill animate-fade-in mt-6 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-medium"
@@ -112,20 +100,64 @@ export function HeroSection({ trustCount }: { trustCount?: number }) {
                   style={{ background: "var(--ln-lime)" }}
                   aria-hidden="true"
                 />
-                {/* r133 (A12 S1/R6): ONE grouping regime — was en-US commas
-                    then stripped to ungrouped "1500"; now the ar-LY dots
-                    every other count surface uses (2.990-style). */}
                 أكثر من {toArabicNumber(trustCount)} متجر يثقون بنا
               </div>
             )}
           </div>
 
-          {/* End column — the order moment (phone + floating proof), kept.
-              r131-F2: ln-keep-phone — the landscape-phone guard hides the
-              proof column so the whole value story fits the 390px fold. */}
-          <div className="ln-keep-phone relative z-10 flex justify-center sm:px-4 md:px-0">
-            <HeroPhone />
+          {/* End column — the dimensional road scene (CSS-only depth:
+              scooter on the asphalt, the kraft package floating above,
+              the route whisper behind, the LINE origin under the box) */}
+          <div className="ln-hero-scene relative z-10 mx-auto w-full max-w-[520px]">
+            <div className="ln-hero-scene-backdrop" aria-hidden="true">
+              <Image
+                src="/images/shipping/route.webp"
+                alt=""
+                fill
+                sizes="(max-width: 1024px) 88vw, 480px"
+                className="ln-hero-scene-backdrop-img"
+              />
+            </div>
+
+            <div className="ln-hero-scene-scooter" aria-hidden="true">
+              <Image
+                src="/images/shipping/scooter.webp"
+                alt=""
+                fill
+                sizes="(max-width: 1024px) 88vw, 480px"
+                className="ln-hero-scene-scooter-img"
+              />
+            </div>
+
+            <div className="ln-hero-scene-package">
+              <Image
+                src="/images/shipping/package-hero.webp"
+                alt="طرد كرتوني بإضاءة كهرمانية دافئة يطفو فوق دراجة توصيل على أرض داكنة"
+                width={480}
+                height={480}
+                priority
+                sizes="(max-width: 1024px) 62vw, 340px"
+                className="ln-hero-scene-package-img"
+              />
+            </div>
+
+            {/* the LINE origin — the road starts under the package */}
+            <span className="ln-hero-scene-origin ln-route-stop" data-route-stop aria-hidden="true" />
           </div>
+        </div>
+      </div>
+
+      {/* the roadmark board — the live figures as road signage (mono) */}
+      <div className="ln-roadmark" role="group" aria-label="أرقام المنصّة الحقيقية">
+        <div className="ln-roadmark-inner">
+          {roadmarks.map((m) => (
+            <span key={m.label} className="ln-roadmark-item">
+              <span className="ln-mono">
+                <CountUp value={m.value} />
+              </span>
+              <span className="ln-roadmark-label">{m.label}</span>
+            </span>
+          ))}
         </div>
       </div>
     </section>

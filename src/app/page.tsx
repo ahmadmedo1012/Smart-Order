@@ -1,19 +1,14 @@
 import "./landing.css";
-import { Fragment } from "react";
 import { SkipLink } from "@/components/shared/skip-link";
 import { db } from "@/lib/db";
 import { SITE_URL } from "@/app/layout";
-import { CountUp } from "@/components/ui/CountUp";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroSection } from "@/components/landing/hero-section";
-import { LandingMarquee } from "@/components/landing/LandingMarquee";
-import { SectorsSection } from "@/components/landing/SectorsSection";
-import { JourneySection } from "@/components/landing/JourneySection";
+import { RouteSpine } from "@/components/landing/RouteSpine";
 import { OrderJourneySection } from "@/components/landing/OrderJourneySection";
-import { LogisticsBand } from "@/components/landing/LogisticsBand";
-import { ProgressSection } from "@/components/landing/ProgressSection";
-import { VenuesSection } from "@/components/landing/VenuesSection";
-import { RolesSection } from "@/components/landing/RolesSection";
+import { StorefrontSection } from "@/components/landing/StorefrontSection";
+import { DashboardSection } from "@/components/landing/DashboardSection";
+import { PaymentsSection } from "@/components/landing/PaymentsSection";
 import { FinaleCta } from "@/components/landing/FinaleCta";
 import { LandingFaq } from "@/components/landing/LandingFaq";
 import { LandingFooter } from "@/components/landing/LandingFooter";
@@ -63,65 +58,47 @@ async function getLandingStats(): Promise<{ totalStores: number; totalOrders: nu
   }
 }
 
-/* Marquee vocabulary — the REAL partner/sector names from the shipped
-   Local/Clients domain data (8 partners + 5 sectors), ×2 by the marquee
-   kit for the seamless 42s RTL loop. */
-const MARQUEE_ITEMS = [
-  "متجر الواحة",
-  "مطعم الأصيل",
-  "بيتزا روما",
-  "SOHO",
-  "Telepizza",
-  "The Cheese",
-  "Empire",
-  "Kubaba",
-  "مطاعم",
-  "مقاهي",
-  "بيتزيريا",
-  "برغر",
-  "متاجر تجزئة",
-];
+/* ═══════════════════════════════════════════════════════════════════════
+   r142 «الخط» — the page IS the road.
+   ─────────────────────────────────────────────────────────────────────
+   One continuous route line (RouteSpine) runs from under the hero
+   package down through EVERY chapter — each chapter head plants a
+   [data-route-stop] station node, the six order states thread the line
+   through themselves, and the road terminates at the finale. The
+   narrative is the logistics one, end to end:
 
+     00 — الطريق مفتوح (hero: dimensional package/scooter scene + the
+          live roadmark board)
+     01 — المحطات الست (the REAL TRACKING_FLOW as interactive stations
+          with مَن يتصرف: الزبون/التاجر/مندوب التوصيل)
+     02 — المتجر (the storefront actually working: phone + QR + cart)
+     03 — لوحة التاجر (the REAL state machine, interactive + payments)
+     04 — محطات الدفع (the REAL PAYMENT_TYPES as toll plates + USSD)
+     05 — الوصول (اطلب — أو اصنع متجرك) → FAQ
+
+   The page stays a SERVER component — the h1 and hero scene render
+   inline (instant-paint LCP doctrine, r8/r9). Client islands are
+   exactly: LandingHeader (chrome/spy/menus), RouteSpine (the line +
+   the scroll parcel), OrderJourneySection (stations tabs),
+   StorefrontScene + DashboardSection (motion/machine islands), CountUp
+   (hero roadmark) and the RevealCssClass observers.
+
+   The Madarek-generic chapters of r128–r141 (sectors constellation,
+   journey light path, progress story, venues, roles, logistics band,
+   marquee, orbit canvas) retire with this redesign — the logistics
+   identity now owns the WHOLE page.
+   ═══════════════════════════════════════════════════════════════════════ */
 export default async function LandingPage() {
   const stats = await getLandingStats();
 
-  /* Trust band — the live DB figures the home has always published,
-     plus the three cities the shipped testimonials name (SSR'd final +
-     CountUp on view). The "+" rides only non-zero counts (honesty). */
-  const trustStats = [
-    {
-      value: stats.totalStores > 0 ? `+${stats.totalStores}` : `${stats.totalStores}`,
-      label: "متجر مسجل",
-    },
-    {
-      value: stats.totalOrders > 0 ? `+${stats.totalOrders}` : `${stats.totalOrders}`,
-      label: "طلب مستقبَل",
-    },
-    { value: "3", label: "مدن" },
-  ];
-
-  /* r128 Stage B (F4b) — the landing assembled as the Madarek journey
-     (PORT-KIT §5, §6 Order column): المدار (kept split hero + the sky
-     behind it) → شريط الشركاء (marquee) → الثقة → قطاعات المتاجر →
-     رحلة الطلب (5 stations + light path --sp) → قصة التقدّم (--sp
-     rings + live CountUp) → شركاؤنا على الأرض → الأدوار → نقطة
-     البداية → الأسئلة الشائعة. The page stays a SERVER component —
-     the h1 and hero sub render inline (instant-paint LCP doctrine,
-     r8/r9); client islands are exactly: LandingHeader (chrome/spy/
-     menus), HeroSection's sky (parallax + magnetic CTA), JourneySection
-     (light path + --sp), ProgressSection (--sp + CountUp), CountUp, and
-     the RevealCssClass observers. r129 adds two more islands: the
-     OrbitScene canvas engine (hero sky) and SectorsConstellation
-     (on-ring pins + the 4s resting-life cycle). */
   return (
     <div className="landing relative flex min-h-dvh flex-col overflow-x-clip">
       {/* r129 — returning-visitor calm (canonical LandingPage.tsx:102-120,
           adapted for a server page): a blocking inline script marks
           .landing[data-intro-seen] from sessionStorage
-          'smartorder.intro.seen' BEFORE the canvas ever paints — later
-          visits this session snap the hero canvas in fast (160ms, zero
-          delay) instead of replaying the full 380ms fade. Product-scoped
-          key per the port spec §9.2 item 6. */}
+          'smartorder.intro.seen' BEFORE the first paint — later visits
+          this session snap the hero scene in fast instead of replaying
+          the full fade. Product-scoped key per the port spec §9.2 item 6. */}
       <script
         dangerouslySetInnerHTML={{
           __html:
@@ -147,57 +124,33 @@ export default async function LandingPage() {
           LandingPage.tsx:340); without it the focus jump lands on main
           without an AT-announced landmark change */}
       <main id="main" tabIndex={-1} className="flex-1">
-        {/* ═══ الفصل ٠ — المدار: the kept split hero on the Orbit-Ink sky ═══ */}
-        <HeroSection trustCount={stats.totalStores} />
+        {/* ═══ «الخط» — the route root: every chapter below is a station
+            on ONE continuous road; RouteSpine draws the road and rides
+            the parcel along it (fully static under reduced-motion). ═══ */}
+        <div className="ln-route-root relative">
+          <RouteSpine />
 
-        {/* ═══ شريط الشركاء — مدار واحد تنتظم فيه الأسماء (marquee) ═══ */}
-        <LandingMarquee items={MARQUEE_ITEMS} />
+          {/* ═══ 00 — الطريق مفتوح: the dimensional road scene + h1 LCP ═══ */}
+          <HeroSection trustCount={stats.totalStores} totalOrders={stats.totalOrders} />
 
-        {/* ═══ الفصل ١ — الثقة (quiet mono DATA band, live figures) ═══ */}
-        <section id="trust" className="ln-trust" aria-label="أرقام المنصّة">
-          <div className="ln-trust-inner">
-            {trustStats.map((s, i) => (
-              <Fragment key={s.label}>
-                {i > 0 && <span className="ln-trust-sep" aria-hidden="true" />}
-                <span className="ln-mono">
-                  <CountUp value={s.value} /> {s.label}
-                </span>
-              </Fragment>
-            ))}
-          </div>
-        </section>
+          {/* ═══ 01 — المحطات الست: the REAL TRACKING_FLOW as stations ═══ */}
+          <OrderJourneySection />
 
-        {/* ═══ الفصل ٢ — قطاعات المتاجر (sectors constellation) ═══ */}
-        <SectorsSection />
+          {/* ═══ 02 — المتجر: the storefront working (phone + QR + cart) ═══ */}
+          <StorefrontSection />
 
-        {/* ═══ الفصل ٣ — رحلة الطلب (5 stations + light path) ═══ */}
-        <JourneySection />
+          {/* ═══ 03 — لوحة التاجر: the REAL machine, interactive ═══ */}
+          <DashboardSection />
 
-        {/* ═══ الفصل ٠٢+ — الطريق: رحلة الطلب الحقيقية (r141 task 3-a) ═══
-            the interactive order-lifecycle route — the REAL state machine
-            (TRACKING_FLOW + ORDER_STATUS_AR from lib/constants) drawn as a
-            moving package on a store→home route. */}
-        <OrderJourneySection />
+          {/* ═══ 04 — محطات الدفع: the REAL PAYMENT_TYPES as toll plates ═══ */}
+          <PaymentsSection />
 
-        {/* ═══ الفصل ٤ — قصّة التقدّم (--sp rings + real CountUp) ═══ */}
-        <ProgressSection stores={stats.totalStores} orders={stats.totalOrders} />
+          {/* ═══ 05 — الوصول: اطلب — أو اصنع متجرك (the line ends here) ═══ */}
+          <FinaleCta />
 
-        {/* ═══ الفصل ٠٣+ — على الأرض: الطرود والطريق (r141 task 3-a) ═══
-            the editorial logistics band — package / city leg / door
-            handoff, captions mapped to real shipped capabilities. */}
-        <LogisticsBand />
-
-        {/* ═══ الفصل ٥ — الأرض: شركاؤنا على الأرض (venues plate) ═══ */}
-        <VenuesSection />
-
-        {/* ═══ الفصل ٦ — الأدوار ═══ */}
-        <RolesSection />
-
-        {/* ═══ الفصل ٧ — نقطة البداية ═══ */}
-        <FinaleCta />
-
-        {/* ═══ الأسئلة الشائعة — compact, ln-styled, zero JS ═══ */}
-        <LandingFaq />
+          {/* ═══ الأسئلة الشائعة — compact, ln-styled, zero JS ═══ */}
+          <LandingFaq />
+        </div>
       </main>
 
       <LandingFooter />
