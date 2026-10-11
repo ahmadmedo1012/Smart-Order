@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { toArabicNumber } from "@/lib/plan-types";
 import { MagneticGoldLink } from "@/components/landing/MagneticGoldLink";
 import { HeroDepthLayer } from "@/components/landing/HeroDepthLayer";
 import { CountUp } from "@/components/ui/CountUp";
@@ -100,7 +99,10 @@ export function HeroSection({
                   style={{ background: "var(--ln-lime)" }}
                   aria-hidden="true"
                 />
-                أكثر من {toArabicNumber(trustCount)} متجر يثقون بنا
+                {/* أرقام غربية حية (سياسة format.ts) — كانت عبر toArabicNumber
+                    من وحدة client فانفجر الترطيب الخادمي على Vercel فقط
+                    (محلياً trustCount=0 لم ينفّذ السطر). */}
+                أكثر من {trustCount} متجر يثقون بنا
               </div>
             )}
           </div>
