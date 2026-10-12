@@ -9,12 +9,19 @@ import { cn } from "@/lib/utils"
  * r130 (W2-1): type snapped to the canonical badge role — 11px/600
  * (W1-I §3.6: `.badge` 11px/600 tabular) and the transition duration
  * rides the ladder --t-fast (was a raw duration-200; W1-F P1-12).
- * The solid-pastel status mapping (bg = family -bg, text = family
- * -deep, no border) is flagged W1-F P1-3 and lands with the
- * status-badges.tsx sweep (W2-2 scope).
+ * r148 (19-AUDIT-CROSS R3): the status variants land the fleet's
+ * solid-pastel ruling (r131-F4 "status=solid pastel" — SM badge.tsx
+ * is the canonical recipe): OPAQUE family ground (`--c-*-bg`) +
+ * family deep ink (`--c-*-deep`), borderless, px-2.5. The old /15
+ * translucent washes + /25 borders rendered as ghost chips next to
+ * the SM/SB solid twins. `saffron` maps onto the yellow family (same
+ * warm hue, pastel tokens — the SM spelling), so existing variant
+ * props keep compiling. Status chips (shared/status-badges.tsx)
+ * already rode the solid families via className — now the variants
+ * themselves speak the same language.
  */
 const badgeVariants = cva(
-  "inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2 py-0.5 text-[11px] font-semibold tabular-nums whitespace-nowrap transition-[color,background-color,border-color,box-shadow] duration-(--t-fast) focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3",
+  "inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full border border-transparent px-2.5 py-0.5 text-[11px] font-semibold tabular-nums whitespace-nowrap transition-[color,background-color,border-color,box-shadow] duration-(--t-fast) focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3",
   {
     variants: {
       variant: {
@@ -23,15 +30,18 @@ const badgeVariants = cva(
         secondary:
           "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
         destructive:
-          "bg-destructive/15 text-destructive-ink [a&]:hover:bg-destructive/25 focus-visible:ring-destructive/20 dark:bg-destructive/20",
+          "bg-(--c-rose-bg) text-(--c-rose-deep) [a&]:hover:opacity-90",
         outline:
           "border-border text-foreground [a&]:hover:bg-muted [a&]:hover:text-muted-foreground",
         ghost: "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
-        gold: "border-orange/25 bg-orange/15 text-accent-foreground",
-        success: "border-success/25 bg-success/15 text-success-ink",
-        warning: "border-warning/25 bg-warning/15 text-warning-ink dark:text-saffron",
-        info: "border-info/25 bg-info/15 text-info-ink",
-        saffron: "border-saffron/25 bg-saffron/15 text-accent-foreground",
+        gold: "bg-(--c-copper-bg) text-(--c-copper-deep) [a&]:hover:opacity-90",
+        success:
+          "bg-(--c-mint-bg) text-(--c-mint-deep) [a&]:hover:opacity-90",
+        warning:
+          "bg-(--c-yellow-bg) text-(--c-yellow-deep) [a&]:hover:opacity-90",
+        info: "bg-(--c-sky-bg) text-(--c-sky-deep) [a&]:hover:opacity-90",
+        saffron:
+          "bg-(--c-yellow-bg) text-(--c-yellow-deep) [a&]:hover:opacity-90",
         muted: "border-border bg-muted text-muted-foreground",
       },
     },

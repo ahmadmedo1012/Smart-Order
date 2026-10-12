@@ -8,8 +8,9 @@ import { api } from "@/lib/client";
 import type { StoreProduct, StoreData } from "@/components/storefront/storefront";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Minus, Plus, Package, ShoppingBag, X, Check } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Minus, Plus, ShoppingBag, X, Check } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ProductPlaceholder } from "@/components/storefront/product-placeholder";
 
 export function ProductDialog({
   product,
@@ -139,17 +140,27 @@ export function ProductDialog({
     >
       <DialogContent
         showCloseButton={false}
-        aria-label={product.name}
         className="top-auto bottom-0 inset-x-0 mx-auto flex max-h-[92vh] w-full translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-t-2xl border p-0 pb-0 max-w-[calc(100%-1.5rem)] sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:max-w-md sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-2xl data-[state=open]:slide-in-from-bottom-4 data-[state=open]:zoom-in-100 sm:data-[state=open]:slide-in-from-bottom-2 sm:data-[state=open]:zoom-in-95"
       >
+      {/* r148 (SO-D1): the Radix DialogTitle/Description contract — the
+          dialog used to ride aria-label only, which threw an ERROR-level
+          console message on EVERY open ("DialogContent requires a
+          DialogTitle") plus the missing-Description warning. Both are
+          sr-only (the visible body keeps its own <h2>): the product name
+          is the accessible name, the description states the dialog's
+          purpose for screen-reader users. */}
+      <DialogTitle className="sr-only">{product.name}</DialogTitle>
+      <DialogDescription className="sr-only">
+        حدّد الخيارات والكمية ثم أضف المنتج إلى السلة
+      </DialogDescription>
       {/* Product header */}
       <div className="relative h-40 shrink-0 rounded-t-2xl bg-muted sm:h-44">
           {product.imageUrl ? (
             <Image src={product.imageUrl} alt={product.name} fill sizes="(min-width: 640px) 448px, 100vw" className="object-cover rounded-t-2xl" />
           ) : (
-            <span className="size-full flex items-center justify-center text-muted-foreground/30">
-              <Package className="size-12" aria-hidden="true" />
-            </span>
+            /* r148 (SO-D3): same designed placeholder as the card — one
+               no-photo language across the funnel. */
+            <ProductPlaceholder name={product.name} size="dialog" />
           )}
           <button
             onClick={onClose}
@@ -285,19 +296,36 @@ export function ProductDialog({
 
         {/* Footer: quantity + add */}
         <div className="border-t border-border p-4 pb-5 sm:pb-4 safe-bottom shrink-0 bg-card rounded-b-2xl">
+          {/* r148 (SO-D5): the disabled CTA's reason, INLINE — a disabled
+              button can't fire toasts, so when a required option group is
+              unmet the blocking reason surfaces here (the checkout's
+              inline-error idiom), leaving the CTA truthfully disabled.
+              The add() toasts stay as defense-in-depth. */}
+          {available && !groupsValid && (
+            <p className="pb-2 text-center text-xs font-medium text-destructive-ink">
+              أكمل الاختيارات المطلوبة أولاً
+            </p>
+          )}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-1 rounded-xl border border-border">
+              {/* r148 (SO-D4): stepper rides the cart's 44px canon
+                  (cart-drawer size-11, r131-F1b) — was size-10 40px, one
+                  gesture in two sizes across one funnel. */}
               <button
                 onClick={() => setQuantity((q) => Math.min(MAX_CART_QUANTITY, q + 1))}
-                className="size-10 flex items-center justify-center hover:bg-muted rounded-s-xl transition-colors"
+                className="size-11 flex items-center justify-center hover:bg-muted rounded-s-xl transition-colors"
                 aria-label="زيادة الكمية"
               >
                 <Plus className="size-4" aria-hidden="true" />
               </button>
               <span className="w-10 text-center font-bold tabular-nums" aria-live="polite">{quantity}</span>
+              {/* r148 (SO-D4): the dead decrement at q=1 gets the honest
+                  disabled state (same grammar as the card's disabled CTA) —
+                  the silent Math.max(1,…) gave no feedback. */}
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="size-10 flex items-center justify-center hover:bg-muted rounded-e-xl transition-colors"
+                disabled={quantity <= 1}
+                className="size-11 flex items-center justify-center hover:bg-muted rounded-e-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                 aria-label="إنقاص الكمية"
               >
                 <Minus className="size-4" aria-hidden="true" />

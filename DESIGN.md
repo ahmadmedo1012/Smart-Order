@@ -119,8 +119,11 @@ is left mid-air.
   `rounded-lg`, `active:scale-[0.97]`, gold/copper focus rings
   (`--state-input-focus-halo` color-mix recipe, no raw oklch).
 - **Status chips** (`shared/status-badges.tsx`, `ui/badge.tsx`):
-  `bg-<status>/15 + text-<status>-ink + border-<status>/25` — soft tint +
-  deep text + family border, plus a base-colored dot.
+  SOLID pastel family grounds — `bg-(--c-<family>-bg) + text-(--c-<family>-deep)`,
+  borderless (r148, fleet r131-F4 ruling; the old `/15` translucent washes
+  are retired), plus a base-colored dot on status chips. `ui/badge.tsx`
+  variants (destructive/gold/success/warning/info/saffron) speak the same
+  language; `saffron` maps onto the yellow family.
 - **Empty states** (`shared/states.tsx`): accent-tinted icon ring
   (`--orange` 8% wash + 20% border), never hand-rolled.
 - Icons: lucide named imports only. Forward motion in RTL points LEFT
@@ -144,6 +147,14 @@ Persuade surfaces (landing, auth) may carry the full gold identity
 (gradients, glow, showcase). Operate surfaces (dashboard) get a thin header
 accent AT MOST — never port marketing ambience into CRUD density.
 
+**Landing theme-invariance (r148, 19-AUDIT-SO SO-D8):** the landing
+homepage is a FIXED night world — `.landing` carries no `.light`
+overrides by design, and the theme toggle appears on store/dashboard
+surfaces only («الصفحة الهبوطية عالم ثابت — الوضع الليلي/النهاري يبدأ من
+المتجر»). The parity gates enforce this isolation (landing scope
+isolation) — do NOT add `.light` overrides to landing.css. Product
+surfaces (store/checkout/dashboard) are full dual-lightness.
+
 ## SEO/metadata conventions
 
 Title template `%s | سمارت أوردر`. Open Graph cards point at
@@ -156,9 +167,9 @@ unset — an empty string crashes `new URL()` in `layout.tsx` metadata (dev
 ## Do's and Don'ts
 
 - Do keep WhatsApp green off non-WhatsApp surfaces.
-- Do render status as soft tint + `-ink` text + base border/dot — the
-  canonical split; text NEVER rides the base mid-tones (they fail AA in
-  light).
+- Do render status as a SOLID pastel family ground + `-deep` text
+  (r148 fleet ruling) — text NEVER rides the base mid-tones (they fail
+  AA in light) and status is never a translucent alpha wash.
 - Do use the gold metal gradient only on the brand mark and primary CTAs.
 - Don't introduce a second accent family (no blues, purples, emeralds —
   families outside the 9 pastel set are for charts/illustration only).

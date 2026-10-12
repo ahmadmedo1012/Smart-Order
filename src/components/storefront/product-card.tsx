@@ -7,8 +7,9 @@ import { formatLyd } from "@/lib/money";
 import { countedArabicPhrase } from "@/lib/arabic-plural";
 import type { StoreProduct } from "@/components/storefront/storefront";
 import { ProductDialog } from "@/components/storefront/product-dialog";
+import { ProductPlaceholder } from "@/components/storefront/product-placeholder";
 import { toast } from "sonner";
-import { Plus, Package } from "lucide-react";
+import { Plus } from "lucide-react";
 
 export function ProductCard({
   product,
@@ -78,9 +79,10 @@ export function ProductCard({
               className="object-cover transition-transform group-hover:scale-105"
             />
           ) : (
-            <span className="size-full flex items-center justify-center text-muted-foreground/30">
-              <Package className="size-9" aria-hidden="true" />
-            </span>
+            /* r148 (SO-D3): the designed no-photo tile — copper gradient +
+               product-initial monogram + package glyph (was the bare
+               Package icon that read as unfinished). */
+            <ProductPlaceholder name={product.name} size="card" />
           )}
           {product.isFeatured && (
             <span className="absolute top-2 start-2 rounded-full bg-saffron/95 px-2 py-0.5 text-[11px] font-bold text-espresso shadow">
@@ -97,7 +99,16 @@ export function ProductCard({
         </button>
 
         <div className="p-3 flex flex-col flex-1">
-          <button onClick={() => canOpen && setOpen(true)} disabled={!canOpen} className="text-start disabled:cursor-not-allowed">
+          {/* r148 (SO-D2): the title row is the card's primary tap target —
+              a bare <h3> measured 19px tall, far under the fleet 44px
+              touch floor. min-h-11 + centered column lifts the hit area
+              to 44px (1-line and 2-line names alike) without disturbing
+              the card rhythm. */}
+          <button
+            onClick={() => canOpen && setOpen(true)}
+            disabled={!canOpen}
+            className="flex min-h-11 w-full flex-col justify-center text-start disabled:cursor-not-allowed"
+          >
             <h3 className="font-semibold text-sm leading-snug line-clamp-2">{product.name}</h3>
           </button>
           {product.description && (

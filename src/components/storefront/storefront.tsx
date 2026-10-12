@@ -227,9 +227,16 @@ export function Storefront({
                 aria-label="ابحث في المنتجات"
                 className="w-full h-11 rounded-md border border-input bg-card ps-9 pe-8 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"
               />
+              {/* r148 (SO-D2): the clear button rides the 44px touch canon
+                  (was p-1 + size-3.5 ≈ 22px). size-11 centered exactly
+                  spans the h-11 input — full-height target, no overhang. */}
               {q && (
-                <button onClick={() => setQ("")} className="absolute end-2.5 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted" aria-label="مسح البحث">
-                  <X className="size-3.5 text-muted-foreground" aria-hidden="true" />
+                <button
+                  onClick={() => setQ("")}
+                  className="absolute end-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full hover:bg-muted"
+                  aria-label="مسح البحث"
+                >
+                  <X className="size-4 text-muted-foreground" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -284,7 +291,7 @@ export function Storefront({
               <section aria-label="منتجات مميزة" className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
                   <h2 className="font-heading font-bold text-sm">مميز</h2>
-                  <Badge className="bg-saffron/15 text-accent-foreground border-saffron/30 text-[11px]">اختيار المتجر</Badge>
+                  <Badge variant="saffron">اختيار المتجر</Badge>
                 </div>
                 <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
                   {featured.map((p, i) => (
@@ -313,7 +320,16 @@ export function Storefront({
           <p className="mt-10 text-center text-xs text-muted-foreground">{data.business.receiptFooter}</p>
         )}
         <p className="mt-3 text-center text-xs text-muted-foreground">
-          متجر رقمي بواسطة <Link href="/" className="hover:text-accent-foreground">سمارت أوردر</Link>
+          {/* r148 (SO-D2): the credit link rides the fleet footer-link floor
+              (SL .landing-footer-link rows) — was an 18px bare inline
+              target; min-h-10 inline-flex gives the 40px tap well. */}
+          متجر رقمي بواسطة{" "}
+          <Link
+            href="/"
+            className="inline-flex min-h-10 items-center px-1 align-middle hover:text-accent-foreground"
+          >
+            سمارت أوردر
+          </Link>
         </p>
       </main>
 

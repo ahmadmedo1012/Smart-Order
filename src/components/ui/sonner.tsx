@@ -78,7 +78,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       dir={isLtr ? "ltr" : "rtl"}
       position={isLtr ? "bottom-right" : "bottom-left"}
-      containerAriaLabel="التنبيهات"
+      /* r148 (CROSS R10.6): «الإشعارات» — the fleet majority term (SM/SB
+         app-toaster use it; «التنبيهات» was the SO-only outlier). */
+      containerAriaLabel="الإشعارات"
       /* quiet cards — the loud rich-colors mode REMOVED (its solid
        * fills bypassed the token layer); the card skin lives in
        * globals.css under [data-styled="false"]. NOTE: in sonner v2

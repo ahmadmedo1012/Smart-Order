@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CurrentYear } from "@/components/current-year";
 
 /* r128 Stage B (F4b) — the landing footer: the ground plate
  * (canonical landing.css:1486-1552 form, smart-link LandingFooter
@@ -25,14 +26,20 @@ const SERVICES = [
 /* (phase4 W1-SO) صف الأشقاء — المنظومة كاملة: Smart Order كان يعيش معزولاً
  * عن أخوته رغم أن JSON-LD يعلنهم (sameAs). الأوصاف من Metadata كل منتج
  * نفسه — لا ادعاءات جديدة: SmartLink «منصة رقمية متكاملة»، Smart Menu
- * «المنيو الرقمي التفاعلي»، SmartBot «منصة إدارة فيسبوك الذكية». */
+ * «المنيو الرقمي التفاعلي»، SmartBot «منصة إدارة فيسبوك الذكية».
+ * r148 (19-AUDIT-CROSS R8): وصف سمارت بوت يركب كونون الأسطول حرفياً
+ * (SL LandingFooter:29 · SM:15) — كان «بوت فيسبوك الذكي» وصفًا منحرفًا
+ * لنفس المنتج في السطر الذي تعلن فيه العائلة وحدتها. */
 const ECOSYSTEM = [
   { href: "https://smart-link.ly", label: "الربط الذكي — منصة الأعمال المتكاملة" },
   { href: "https://menu.smart-link.ly", label: "سمارت منيو — قوائم QR التفاعلية" },
-  { href: "https://bot.smart-link.ly", label: "سمارت بوت — بوت فيسبوك الذكي" },
+  { href: "https://bot.smart-link.ly", label: "سمارت بوت — منصة إدارة فيسبوك الذكية" },
 ];
 
 export function LandingFooter() {
+  /* buildYear — يُخبَز في HTML (زوّار بلا JS تبقى لهم سنة صالحة)،
+   * وجزيرة CurrentYear (توأم Smart-Link r126/r140) تُرطّب السنة الحية
+   * بعد الترطيب — السنة لم تعد تتجمد زمن البناء (19-AUDIT-CROSS R8). */
   const year = new Date().getFullYear();
 
   return (
@@ -103,7 +110,7 @@ export function LandingFooter() {
 
         <div className="landing-footer-bottom">
           <span>
-            &copy; {year} الربط الذكي | Smart Order. جميع الحقوق محفوظة.
+            &copy; <CurrentYear buildYear={year} /> الربط الذكي | Smart Order. جميع الحقوق محفوظة.
           </span>
           <span className="landing-footer-bottom-links">
             <Link href="/terms" className="landing-footer-link">الشروط</Link>

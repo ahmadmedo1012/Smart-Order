@@ -44,7 +44,9 @@ export function ThemeToggle({ className }: { className?: string }) {
         "relative size-11 rounded-full",
         "bg-card/80 border border-border/60 backdrop-blur-sm shadow-sm",
         "hover:bg-orange/10 hover:border-orange/40 hover:shadow-md",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange/50",
+        /* r148 (SO-D6): the private ring is retired — focus rides the ONE
+           global :focus-visible outline contract (globals.css @layer base,
+           --state-focus-ring-*) like every sibling control in the header. */
         "cursor-pointer",
         "flex items-center justify-center",
         "overflow-hidden",

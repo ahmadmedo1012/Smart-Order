@@ -1389,6 +1389,18 @@
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* ── Product placeholder tile (r148 SO-D3) — gradient ground for the
+   no-photo state (stores whose owners haven't uploaded media yet —
+   photos live in the DB, not the repo). Copper-family token washes
+   only (no raw hexes; --c-copper-* flips with the theme); the radial
+   is anchored top-CENTER so the composition is identical in RTL and
+   LTR. Consumed by storefront/product-placeholder.tsx. ── */
+.product-placeholder {
+  background:
+    radial-gradient(140% 100% at 50% 0%, color-mix(in srgb, var(--c-copper-ink) 10%, transparent), transparent 55%),
+    linear-gradient(to bottom, var(--c-copper-bg), var(--muted));
+}
+
 /* Safe-area padding for mobile checkout bars */
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);

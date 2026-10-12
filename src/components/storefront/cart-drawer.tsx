@@ -63,7 +63,11 @@ export function CartDrawer({
         />
       ) : (
         <>
-          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5">
+          {/* r148 (SO-D7): no-scrollbar — the sheet's edge is a hairline,
+              not a scrollbar gutter (the storefront's category strip runs
+              the same convention; the fleet thin-rail recipe stays on the
+              page-level scroll containers). */}
+          <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-3 space-y-2.5">
             {items.map((item) => (
               <div key={item.key} className="rounded-xl border border-border bg-card p-3">
                 <div className="flex items-start gap-3">
