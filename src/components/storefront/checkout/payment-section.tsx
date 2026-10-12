@@ -106,7 +106,7 @@ export function PaymentSection({
                   navigator.clipboard.writeText(paymentConfig.number!);
                   toast.success("تم نسخ الرقم");
                 }}
-                className="flex size-10 items-center justify-center rounded-md border border-border/30 transition-colors hover:bg-muted"
+                className="flex size-11 items-center justify-center rounded-md border border-border/30 transition-colors hover:bg-muted"
                 title="نسخ الرقم"
                 aria-label="نسخ الرقم"
               >

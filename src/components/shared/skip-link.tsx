@@ -22,9 +22,13 @@ export function SkipLink({
       href={href}
       className={cn(
         "sr-only focus:not-sr-only focus:fixed focus:top-3 focus:start-3 focus:z-(--z-toast)",
-        "focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2.5",
+        /* r149 (SO1/C3): the focused chip takes the fleet 44px floor —
+           text-sm's 20px line + py-3 lands exactly 44 (was py-2.5 → 40),
+           and the ring rides the fleet geometry 2px @ offset 3 (the SB
+           layout.tsx recipe). */
+        "focus:rounded-lg focus:bg-primary focus:px-4 focus:py-3",
         "focus:text-sm focus:font-bold focus:text-primary-foreground focus:shadow-lg",
-        "focus:outline-none",
+        "focus:outline-offset-3",
         className
       )}
     >

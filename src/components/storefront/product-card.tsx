@@ -116,14 +116,14 @@ export function ProductCard({
           )}
           <div className="mt-auto pt-2.5 flex items-center justify-between gap-2">
             <span className="font-bold text-sm tabular-nums">{formatLyd(product.price)}</span>
-            {/* r131-F2 (P1-3): the canonical icon-button recipe — 40px/r10/
-                600-grammar press 0.97 (the 44px/r12/700/scale-95 spelling
-                is retired; matches ui/button size="icon"). */}
+            {/* r149 (SO5): the quick-add rides the 44px touch canon
+                (size-11; the r131 40px icon-button recipe is retired by
+                the r149 fleet floor — same grammar otherwise). */}
             <button
               onClick={quickAdd}
               disabled={!product.isAvailable}
               aria-label={`إضافة ${product.name} إلى السلة`}
-              className="rounded-md bg-primary text-primary-foreground size-10 flex items-center justify-center font-semibold transition-[color,background-color,transform] duration-(--t-fast) hover:bg-primary/90 active:scale-[0.97] active:duration-(--t-micro) disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-md bg-primary text-primary-foreground size-11 flex items-center justify-center font-semibold transition-[color,background-color,transform] duration-(--t-fast) hover:bg-primary/90 active:scale-[0.97] active:duration-(--t-micro) disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Plus className="size-5" aria-hidden="true" />
             </button>

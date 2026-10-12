@@ -183,18 +183,20 @@ export function Storefront({
                 href={waLink(toE164(data.business.whatsappNumber))}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="whatsapp-btn rounded-lg size-10 flex items-center justify-center"
+                className="whatsapp-btn rounded-lg size-11 flex items-center justify-center"
                 aria-label="تواصل مع المتجر عبر واتساب"
               >
                 <MessageCircle className="size-5" aria-hidden="true" />
               </a>
             )}
-            <ThemeToggle className="size-10" />
+            {/* r149 (SO5): no size-10 override — the toggle's native size-11
+                (the family twin's 44px chip) is the touch canon. */}
+            <ThemeToggle />
             {/* Cart button */}
             <Sheet open={cartOpen} onOpenChange={setCartOpen}>
               <SheetTrigger asChild>
                 <button
-                  className="relative rounded-md bg-primary text-primary-foreground size-10 flex items-center justify-center font-semibold transition-[color,background-color,transform] duration-(--t-fast) hover:bg-primary/90 active:scale-[0.97] active:duration-(--t-micro)"
+                  className="relative rounded-md bg-primary text-primary-foreground size-11 flex items-center justify-center font-semibold transition-[color,background-color,transform] duration-(--t-fast) hover:bg-primary/90 active:scale-[0.97] active:duration-(--t-micro)"
                   aria-label={hydrated ? `عرض السلة (${count} عنصر)` : "عرض السلة"}
                 >
                   <ShoppingBag className="size-5" aria-hidden="true" />
@@ -250,7 +252,7 @@ export function Storefront({
                 <button
                   aria-pressed={activeCategory === "ALL"}
                   onClick={() => setActiveCategory("ALL")}
-                  className={pillClasses(activeCategory === "ALL", "h-10 shrink-0 px-4")}
+                  className={pillClasses(activeCategory === "ALL", "h-11 shrink-0 px-4")}
                 >
                   الكل
                 </button>
@@ -259,7 +261,7 @@ export function Storefront({
                     key={c.id}
                     aria-pressed={activeCategory === c.id}
                     onClick={() => setActiveCategory(c.id)}
-                    className={pillClasses(activeCategory === c.id, "h-10 shrink-0 px-4")}
+                    className={pillClasses(activeCategory === c.id, "h-11 shrink-0 px-4")}
                   >
                     {c.name}
                   </button>
@@ -320,13 +322,12 @@ export function Storefront({
           <p className="mt-10 text-center text-xs text-muted-foreground">{data.business.receiptFooter}</p>
         )}
         <p className="mt-3 text-center text-xs text-muted-foreground">
-          {/* r148 (SO-D2): the credit link rides the fleet footer-link floor
-              (SL .landing-footer-link rows) — was an 18px bare inline
-              target; min-h-10 inline-flex gives the 40px tap well. */}
+          {/* r149 (SO5): the credit link rides the 44px fleet floor
+              (min-h-11; was min-h-10/40 from r148). */}
           متجر رقمي بواسطة{" "}
           <Link
             href="/"
-            className="inline-flex min-h-10 items-center px-1 align-middle hover:text-accent-foreground"
+            className="inline-flex min-h-11 items-center px-1 align-middle hover:text-accent-foreground"
           >
             سمارت أوردر
           </Link>
@@ -342,7 +343,7 @@ export function Storefront({
               <div className="text-xs text-muted-foreground tabular-nums">{count} عنصر في السلة</div>
               <div className="font-bold text-sm tabular-nums">{formatLyd(cartEstimatedSubtotal(items))}</div>
             </div>
-            <Button onClick={() => setCartOpen(true)} className="font-semibold">
+            <Button onClick={() => setCartOpen(true)} className="h-11 font-semibold">
               <ShoppingBag className="size-4 me-1.5" aria-hidden="true" />
               عرض السلة
             </Button>
