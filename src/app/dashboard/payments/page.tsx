@@ -352,7 +352,7 @@ function MethodDialog({
                   type="button"
                   onClick={() => onTypeChange(t)}
                   aria-pressed={type === t}
-                  className={pillClasses(type === t, "h-10")}
+                  className={pillClasses(type === t, "h-11")}
                 >
                   {PAYMENT_TYPE_AR[t]}
                 </button>

@@ -285,11 +285,12 @@ export default function OrderDetailPage() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          {/* Canonical back chip (training.css:218-242): 40px hit,
- r-sm, negative inline-start inset, hover surface-2. */}
+          {/* Canonical back chip (training.css:218-242): r150 §8 —
+ the 44px touch floor (was the 40px hit), r-sm, negative
+ inline-start inset, hover surface-2. */}
           <Link
             href="/dashboard/orders"
-            className="-ms-2 inline-flex h-10 items-center gap-1.5 rounded-md px-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="-ms-2 inline-flex h-11 items-center gap-1.5 rounded-md px-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <ArrowRight className="size-4" aria-hidden="true" />
             العودة للطلبات

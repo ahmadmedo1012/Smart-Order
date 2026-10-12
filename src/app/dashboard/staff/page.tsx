@@ -394,7 +394,7 @@ function StaffDialog({
                   type="button"
                   onClick={() => setRole(r)}
                   aria-pressed={role === r}
-                  className={pillClasses(role === r, "h-10")}
+                  className={pillClasses(role === r, "h-11")}
                 >
                   {ROLE_AR[r]}
                 </button>

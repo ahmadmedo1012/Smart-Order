@@ -137,7 +137,11 @@ is left mid-air.
 Arabic RTL-first (`lang="ar" dir="rtl"`); numeric/Latin runs (phones, order
 codes, URLs) get `dir="ltr"` or `bdi` isolation. 1220px landing column;
 mobile-first storefront with bottom nav + sticky order bar + safe-area
-insets (`safe-bottom`). Touch targets ≥ 44px. Film-grain atmosphere overlay
+insets (`safe-bottom`). Touch targets ≥ 44px — the family 44/48/52
+control canon (r150 §8): ordinary buttons ride `h-11` 44 / `h-12` 48 /
+52; the r131 `h-10` 40px CTA rung is retired (default Button = `h-11`,
+pinned by parity in sync with Smart-Link); sanctioned compact rungs
+(sm 32 / icon 40 square) never carry primary CTAs. Film-grain atmosphere overlay
 at 2.2%/1.2% opacity (pointer-events none). Sticky footer discipline:
 `min-h-dvh flex-col` + `mt-auto`.
 

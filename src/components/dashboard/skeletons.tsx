@@ -42,7 +42,7 @@ export function HeaderSkeleton({ action = true }: { action?: boolean }) {
         <Skeleton className="h-8 w-44 max-w-[60%]" />
         <Skeleton className="h-3.5 w-72 max-w-full" />
       </div>
-      {action && <Skeleton className="h-10 w-28 rounded-md" />}
+      {action && <Skeleton className="h-11 w-28 rounded-md" />}
     </div>
   );
 }
@@ -73,7 +73,7 @@ export function KpiGridSkeleton({ count = 4 }: { count?: number }) {
 export function ToolbarSkeleton() {
   return (
     <div className="flex flex-col gap-3" aria-hidden="true">
-      <Skeleton className="h-10 w-full max-w-md rounded-md" />
+      <Skeleton className="h-11 w-full max-w-md rounded-md" />
       <div className="flex gap-2 flex-wrap">
         <Skeleton className="h-11 flex-1 min-w-44 max-w-72 rounded-md" />
         <Skeleton className="h-11 w-36 rounded-md" />
@@ -238,8 +238,8 @@ function DetailSkeleton() {
           <Skeleton className="h-3.5 w-56" />
         </div>
         <div className="flex gap-2">
-          <Skeleton className="h-10 w-24 rounded-md" />
-          <Skeleton className="h-10 w-24 rounded-md" />
+          <Skeleton className="h-11 w-24 rounded-md" />
+          <Skeleton className="h-11 w-24 rounded-md" />
         </div>
       </div>
       <div className="grid grid-cols-3 gap-3">

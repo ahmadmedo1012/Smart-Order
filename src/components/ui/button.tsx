@@ -6,10 +6,14 @@ import { Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 /*
- * r130 (W2-1, fix 3) — re-based on the canonical Madarek .btn recipe
- * (components.css:258-415; W1-I §3.1; W1-F P0-3):
- *   · height 40px default (h-10) · label 13px / weight 600 · radius
- *     10px (rounded-md = --radius-md) · padding-inline 20px (px-5).
+ * r150 (20-IDEAL-CTA completion, §8 of the r150 mission) — re-based on
+ * the family 44/48/52 control canon (r149) + the canonical Madarek .btn
+ * recipe (components.css:258-415; W1-I §3.1; W1-F P0-3):
+ *   · height 44px default (h-11) — the r131 h-10 40px CTA rung is
+ *     RETIRED (the last family-wide h-10 CTA debt, resolved in sync
+ *     with Smart-Link's inner-page set) · label 13px / weight 600 ·
+ *     radius 10px (rounded-md = --radius-md) · padding-inline 20px
+ *     (px-5).
  *   · hover (filled CTAs) = translateY(-2px) + the NEUTRAL premium
  *     card shadow (hover:shadow-(--shadow-card-h), theme-aware) —
  *     no colored glow on any variant; the radial ::after glow layer
@@ -18,8 +22,10 @@ import { cn } from "@/lib/utils"
  *     PRIMARY CTA family ONLY (default + flame — Madarek sheens
  *     .primary/.accent); quiet variants stay flat.
  *   · press = scale(0.97) @ --t-micro (80ms); disabled opacity .55.
- *   · sizes: sm 32px/h-8/12px · default 40px/h-10/13px ·
- *     lg 44px/h-11/14px · icon 40px · icon-sm 32px.
+ *   · sizes: sm 32px/h-8/12px (sanctioned dense-interface rung —
+ *     never a primary CTA) · default 44px/h-11/13px · lg 48px/h-12
+ *     · icon 40px square (utility rung; touch floor via hit
+ *     patterns) · icon-sm 32px.
  *   · focus = the ONE global :focus-visible outline ring
  *     (globals.css, token-driven); the old double ring-offset
  *     indicator is gone (W1-F P2-11).
@@ -54,7 +60,10 @@ const buttonVariants = cva(
       },
       size: {
         sm: "h-8 gap-1.5 px-3 text-xs",
-        default: "h-10 px-5",
+        /* r150 (§8): default = the family 44px CTA rung (h-11) — the
+           r131 h-10 40px rung retired in sync with Smart-Link's
+           inner-page canon (SL parity C3 pins the same contract). */
+        default: "h-11 px-5",
         /* r134 (W2 #19): lg = the canon 48px rung (madarek
            components.css .btn.lg block-size 48px; Smart-Menu button.tsx
            h-12) — was h-11 (44px), caught by the sibling canon-check. */

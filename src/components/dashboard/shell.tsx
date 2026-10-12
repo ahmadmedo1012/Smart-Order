@@ -328,7 +328,7 @@ export function DashboardShell({
                 >
                   <SelectTrigger
                     aria-label="اختيار العمل"
-                    className="h-10 max-w-40 sm:max-w-52 bg-card text-sm"
+                    className="h-11 max-w-40 sm:max-w-52 bg-card text-sm"
                   >
                     <SelectValue />
                   </SelectTrigger>

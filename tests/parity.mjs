@@ -1040,9 +1040,16 @@ for (const [name, okFlag] of R133_LAYER) {
 // here so the next drift fails the batch before the build, like every other
 // canon value. Canon: madarek components.css .btn.lg block-size 48px
 // (Smart-Menu button.tsx h-12 mirrors it).
+// ── r150 (§8, 20-IDEAL-CTA completion): the family 44/48/52 control canon
+// retires the r131 h-10 40px CTA rung — default = h-11 (44px), pinned in
+// sync with Smart-Link's inner-page CTA canon (SL parity C3 pins the same
+// 44/13/600/r10 contract). One canonical definition, two repositories.
 const R134_LAYER = [
   ['r134 button lg rung: h-12 = 48px canon (madarek .btn.lg block-size 48px; Smart-Menu h-12)',
     R('src/components/ui/button.tsx').includes('lg: "h-12 gap-2.5 px-6 text-sm"')],
+  ['r150 CTA canon: default h-11 = 44px — the h-10 40px CTA rung is RETIRED (§8; SL twin contract)',
+    R('src/components/ui/button.tsx').includes('default: "h-11 px-5"') &&
+    !R('src/components/ui/button.tsx').includes('default: "h-10')],
 ];
 for (const [name, okFlag] of R134_LAYER) {
   if (okFlag) passed += 1;
