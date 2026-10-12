@@ -147,8 +147,18 @@
 /* (.ln-mono-eyebrow deleted — dead since the .ln-label rename; zero TSX
    consumers, verified by grep before the premium-polish purge) */
 
-/* (r129 P3-2: .marketing-container deleted — zero TSX consumers, verified
-   by grep; the chapters ship their own max-inline-size containers) */
+/* (r129 P3-2 deleted .marketing-container — zero TSX consumers then.
+   phase4 15-SO restores it with ONE consumer: the landing footer's
+   ground plate (canonical landing.css:1486-1552) — max 1200px, centered,
+   48px gutters → 20px ≤920px. Without it the footer shipped full-bleed
+   (h3 flush to the viewport edge at 390/360 while every chapter stands
+   on the page gutters). Geometry identical to the family's accepted
+   form: content box 1104px at 1440, 350px at 390. */
+.landing .marketing-container {
+  max-inline-size: var(--marketing-max-w);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+}
 
 /* ── 1 · marquee — one slow pass (PORT-KIT §3 verbatim) ────────────── */
 .landing .ln-marquee {
@@ -422,6 +432,13 @@
   margin-block-end: clamp(32px, 4.5vh, 56px);
   display: grid;
   gap: var(--sp-5);
+  /* (phase4 15-SO) صوت الفصل فوق الزينة — الطبقة z-2 ترفع نصّ الرأس
+     (التسمية/العنوان/المدخل) فوق لوحة الطريق z-1، فيمرّ الطرد خلف محارف
+     الكلام لا فوقها (الخلفيات شفافة فيبقى مرئيًا بين السطور). هندسة
+     الركوب بلا مساس: مسار paint() ونقاط [data-route-stop] كما هي —
+     عقدة المحطة نفسها تُرفع مع الرأس فتبقى ظاهرة على الخط. */
+  position: relative;
+  z-index: 2;
 }
 .landing .ln-chapter-title {
   margin: 0;
@@ -458,6 +475,8 @@
 /* ── 0i · mobile rhythm — canonical landing.css:1612/1618/1639-1640 ── */
 @media (max-width: 920px) {
   .landing .ln-chapter { padding-inline: var(--page-gutter-mobile); }
+  /* (phase4 15-SO) الفوتر المحتوى يركب رحاب الصفحة المحمولة (20px) */
+  .landing .marketing-container { padding-inline: var(--page-gutter-mobile); }
 }
 @media (max-width: 768px) {
   /* GAP-5 · mobile density pass — the desktop 96–140px chapter rhythm

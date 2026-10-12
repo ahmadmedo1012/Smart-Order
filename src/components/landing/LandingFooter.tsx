@@ -37,71 +37,79 @@ export function LandingFooter() {
 
   return (
     <footer className="landing-footer">
-      <div className="landing-footer-grid">
-        <div className="landing-footer-about">
-          <Link href="/" className="landing-brand" aria-label="سمارت أوردر — الرئيسية">
-            <span className="landing-brand-mark" aria-hidden="true">S</span>
-            <span className="landing-brand-text">
-              <span className="landing-brand-name">Smart Order</span>
-              <span className="landing-brand-sub">منصّة الطلبات الرقمية</span>
-            </span>
-          </Link>
-          <p className="landing-footer-desc">
-            منصة الطلبات الرقمية للأعمال في ليبيا — متجر رقمي، طلبات عبر
-            الويب وواتساب، لوحة تحكم كاملة.
-          </p>
-          <a
-            href={`https://wa.me/${SUPPORT_WHATSAPP}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="landing-footer-link"
-          >
-            واتساب الدعم — على مدار الساعة
-          </a>
-        </div>
-
-        <div className="landing-footer-col">
-          <h3 className="landing-footer-heading">روابط سريعة</h3>
-          {QUICK_LINKS.map((l) => (
-            <Link key={l.href} href={l.href} className="landing-footer-link">
-              {l.label}
+      {/* (phase4 15-SO) الغلاف القانوني — canonical landing.css:1486-1552:
+          الشريحة الأرضية تُحتوى بـ .marketing-container (مقاس أقصى 1200px +
+          هوامش تلقائية + مزلاج 48px/20px) تمامًا كأصل العائلة. النقل في
+          r128 أغفل هذا الغلاف فخرج الفوتر ممتلئًا بلا رحاب (h3 على x=0 في
+          390/360) بينما سائر المحتوى يقف على رحاب الصفحة — والأعمدة الآن
+          تشارك نفس الحيازة على كل المقاسات. */}
+      <div className="marketing-container">
+        <div className="landing-footer-grid">
+          <div className="landing-footer-about">
+            <Link href="/" className="landing-brand" aria-label="سمارت أوردر — الرئيسية">
+              <span className="landing-brand-mark" aria-hidden="true">S</span>
+              <span className="landing-brand-text">
+                <span className="landing-brand-name">Smart Order</span>
+                <span className="landing-brand-sub">منصّة الطلبات الرقمية</span>
+              </span>
             </Link>
-          ))}
-        </div>
-
-        <div className="landing-footer-col">
-          <h3 className="landing-footer-heading">الخدمات</h3>
-          <div className="ln-footer-cluster">
-            {SERVICES.map((label) => (
-              <span key={label}>{label}</span>
-            ))}
-          </div>
-        </div>
-
-        <div className="landing-footer-col">
-          <h3 className="landing-footer-heading">منظومة الربط الذكي</h3>
-          {ECOSYSTEM.map((l) => (
+            <p className="landing-footer-desc">
+              منصة الطلبات الرقمية للأعمال في ليبيا — متجر رقمي، طلبات عبر
+              الويب وواتساب، لوحة تحكم كاملة.
+            </p>
             <a
-              key={l.href}
-              href={l.href}
+              href={`https://wa.me/${SUPPORT_WHATSAPP}`}
               target="_blank"
               rel="noopener noreferrer"
               className="landing-footer-link"
             >
-              {l.label}
+              واتساب الدعم — على مدار الساعة
             </a>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      <div className="landing-footer-bottom">
-        <span>
-          &copy; {year} الربط الذكي | Smart Order. جميع الحقوق محفوظة.
-        </span>
-        <span className="landing-footer-bottom-links">
-          <Link href="/terms" className="landing-footer-link">الشروط</Link>
-          <Link href="/privacy" className="landing-footer-link">الخصوصية</Link>
-        </span>
+          <div className="landing-footer-col">
+            <h3 className="landing-footer-heading">روابط سريعة</h3>
+            {QUICK_LINKS.map((l) => (
+              <Link key={l.href} href={l.href} className="landing-footer-link">
+                {l.label}
+              </Link>
+            ))}
+          </div>
+
+          <div className="landing-footer-col">
+            <h3 className="landing-footer-heading">الخدمات</h3>
+            <div className="ln-footer-cluster">
+              {SERVICES.map((label) => (
+                <span key={label}>{label}</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="landing-footer-col">
+            <h3 className="landing-footer-heading">منظومة الربط الذكي</h3>
+            {ECOSYSTEM.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="landing-footer-link"
+              >
+                {l.label}
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <div className="landing-footer-bottom">
+          <span>
+            &copy; {year} الربط الذكي | Smart Order. جميع الحقوق محفوظة.
+          </span>
+          <span className="landing-footer-bottom-links">
+            <Link href="/terms" className="landing-footer-link">الشروط</Link>
+            <Link href="/privacy" className="landing-footer-link">الخصوصية</Link>
+          </span>
+        </div>
       </div>
     </footer>
   );
