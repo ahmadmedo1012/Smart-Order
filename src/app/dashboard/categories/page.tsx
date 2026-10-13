@@ -92,8 +92,12 @@ export default function CategoriesPage() {
               key={c.id}
               className="group rounded-xl border border-border bg-card p-4 flex items-center gap-3"
             >
+              {/* Phase 6: route-numbered list — the ordinal rides IBM
+                  Plex Mono inside a route NODE dot (the
+                  .route-divider-node geometry grown to hold its number):
+                  the category list reads as stations in storefront order. */}
               <span
-                className="text-xs text-muted-foreground/60 tabular-nums shrink-0"
+                className="flex size-6 items-center justify-center rounded-full border-2 border-primary/55 bg-card font-mono text-[10px] font-semibold tabular-nums text-muted-foreground shrink-0"
                 aria-hidden="true"
               >
                 {i + 1}
@@ -113,7 +117,7 @@ export default function CategoriesPage() {
               )}
               <div className="min-w-0 flex-1">
                 <div className="font-semibold text-sm truncate">{c.name}</div>
-                <div className="text-xs text-muted-foreground mt-0.5 tabular-nums">
+                <div className="text-xs text-muted-foreground mt-0.5 font-mono tabular-nums">
                   {c._count?.products ?? 0} منتج
                 </div>
               </div>
@@ -282,7 +286,9 @@ function CategoryDialog({
         showCloseButton={false}
         className="max-w-md gap-0 overflow-hidden rounded-xl border-border bg-card p-0 shadow-xl"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-border/60 p-5">
+        {/* Phase 6: dialog header hairline normalized to the full 1px
+            border (the ConfirmDialog chrome hairline idiom). */}
+        <div className="flex items-start justify-between gap-3 border-b border-border p-5">
           <div>
             <DialogTitle className="font-heading text-lg font-semibold text-foreground">
               {category ? "تعديل القسم" : "قسم جديد"}

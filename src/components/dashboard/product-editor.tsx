@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { FieldError } from "@/components/dashboard/form-field";
 import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
+import { RouteNodeDot } from "@/components/dashboard/skeletons";
 import {
   Dialog,
   DialogContent,
@@ -364,6 +365,8 @@ export function ProductEditor({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="p-price">السعر (د.ل) *</Label>
+                {/* Phase 6: money figures ride IBM Plex Mono in the editor
+                    too — the same operational code voice as the card grid. */}
                 <Input
                   id="p-price"
                   value={price}
@@ -375,7 +378,7 @@ export function ProductEditor({
                   placeholder="12.500"
                   inputMode="decimal"
                   dir="ltr"
-                  className="text-start tabular-nums"
+                  className="font-mono text-start tabular-nums"
                   aria-invalid={!!fieldErrors.price}
                   aria-describedby={
                     fieldErrors.price ? "p-price-error" : undefined
@@ -440,6 +443,10 @@ export function ProductEditor({
                       </button>
                     </>
                   ) : (
+                    /* Phase 6: the empty upload tile reads as a STATION on
+                       the route — node dots flank the call-to-action with
+                       a dashed hairline road (states.tsx
+                       RouteStationRoad idiom, scaled to the tile). */
                     <label className="size-full flex flex-col items-center justify-center gap-1.5 text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
                       {uploading ? (
                         <span
@@ -449,7 +456,13 @@ export function ProductEditor({
                       ) : (
                         <ImagePlus className="size-6" aria-hidden="true" />
                       )}
-                      <span className="text-[11px]">اختر صورة</span>
+                      <span className="flex items-center gap-1.5" aria-hidden="true">
+                        <RouteNodeDot className="border-primary/55" />
+                        <span className="h-0 w-4 border-t-2 border-dashed border-primary/45" />
+                        <span className="text-[11px]">اختر صورة</span>
+                        <span className="h-0 w-4 border-t-2 border-dashed border-primary/45" />
+                        <RouteNodeDot className="border-primary/55" />
+                      </span>
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
@@ -519,22 +532,26 @@ export function ProductEditor({
                     min={0}
                     value={stockQuantity}
                     onChange={(e) => setStockQuantity(e.target.value)}
-                    className="w-32 tabular-nums"
+                    className="w-32 font-mono tabular-nums"
                     dir="ltr"
                   />
                 </div>
               )}
             </section>
 
-            {/* Variants */}
+            {/* Variants — Phase 6: the section header carries the stamp
+                rhythm (copper family stamp well on the icon) and closes
+                with the quiet route divider (the chapter break). */}
             <section className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-heading font-semibold text-sm flex items-center gap-2">
-                    <Layers
-                      className="size-4 text-accent-foreground"
+                    <span
+                      className="flex size-8 items-center justify-center rounded-sm border border-(--c-copper-ink)/35 bg-(--c-copper-bg) text-(--c-copper-ink)"
                       aria-hidden="true"
-                    />
+                    >
+                      <Layers className="size-4" />
+                    </span>
                     الأحجام / الخيارات الأساسية
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -556,6 +573,10 @@ export function ProductEditor({
                   إضافة
                 </Button>
               </div>
+              <div
+                aria-hidden="true"
+                className="route-divider route-divider-quiet"
+              />
               {variants.length > 0 && (
                 <ul className="space-y-2">
                   {variants.map((v, i) => (
@@ -592,7 +613,7 @@ export function ProductEditor({
                           }
                           inputMode="decimal"
                           dir="ltr"
-                          className="text-start tabular-nums ps-2"
+                          className="font-mono text-start tabular-nums ps-2"
                           aria-label={`سعر إضافي للحجم ${i + 1}`}
                         />
                       </div>
@@ -616,15 +637,18 @@ export function ProductEditor({
               )}
             </section>
 
-            {/* Option groups */}
+            {/* Option groups — Phase 6: same stamp rhythm + quiet route
+                divider as the Variants chapter above. */}
             <section className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-heading font-semibold text-sm flex items-center gap-2">
-                    <Layers
-                      className="size-4 text-accent-foreground"
+                    <span
+                      className="flex size-8 items-center justify-center rounded-sm border border-(--c-copper-ink)/35 bg-(--c-copper-bg) text-(--c-copper-ink)"
                       aria-hidden="true"
-                    />
+                    >
+                      <Layers className="size-4" />
+                    </span>
                     مجموعات الإضافات
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -653,6 +677,10 @@ export function ProductEditor({
                   مجموعة
                 </Button>
               </div>
+              <div
+                aria-hidden="true"
+                className="route-divider route-divider-quiet"
+              />
               {groups.map((g) => (
                 <div key={g.key} className="rounded-xl border p-4 space-y-3">
                   <div className="flex items-center gap-2">
@@ -714,7 +742,7 @@ export function ProductEditor({
                         <SelectTrigger
                           size="sm"
                           aria-label="أقصى عدد اختيارات"
-                          className="w-16 tabular-nums"
+                          className="w-16 font-mono tabular-nums"
                         >
                           <SelectValue />
                         </SelectTrigger>
@@ -795,7 +823,7 @@ export function ProductEditor({
                           }
                           inputMode="decimal"
                           dir="ltr"
-                          className="w-24 text-start tabular-nums shrink-0"
+                          className="w-24 font-mono text-start tabular-nums shrink-0"
                           aria-label="السعر الإضافي"
                         />
                         <Button

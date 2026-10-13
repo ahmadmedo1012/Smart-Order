@@ -121,11 +121,15 @@ export default function ProductsPage() {
     <div className="space-y-5">
       <PageHeader
         title="المنتجات"
-        subtitle={
-          <span className="tabular-nums">
+        /* Phase 6 (route grammar): the operational counts moved from the
+           subtitle to the MONO meta line (the dispatcher's code voice)
+           and the header row ends in the quiet route divider. */
+        meta={
+          <span>
             {products?.length ?? "…"} منتج · {categories.length} قسم
           </span>
         }
+        divider
         actions={
           <Button onClick={() => setEditing("new")}>
             <Plus className="size-4.5" aria-hidden="true" />
@@ -192,13 +196,17 @@ export default function ProductsPage() {
                   </div>
                 )}
                 <div className="absolute top-2 end-2 flex gap-1.5">
+                  {/* Phase 6: the featured/unavailable chips speak the
+                      squared shipping-stamp idiom (status-badges
+                      language: 1px family border over the pastel family
+                      ground + family deep ink). */}
                   {p.isFeatured && (
-                    <span className="rounded-full bg-(--c-yellow-bg)/95 px-2 py-0.5 text-[11px] font-bold text-(--c-yellow-deep) shadow">
+                    <span className="rounded-sm border border-(--c-yellow-ink)/40 bg-(--c-yellow-bg) px-2 py-0.5 text-[11px] font-bold text-(--c-yellow-deep)">
                       مميز
                     </span>
                   )}
                   {!p.isAvailable && (
-                    <span className="rounded-full bg-background/90 px-2 py-0.5 text-[11px] font-bold text-muted-foreground shadow">
+                    <span className="rounded-sm border border-(--c-grey-ink)/35 bg-(--c-grey-bg) px-2 py-0.5 text-[11px] font-bold text-(--c-grey-deep)">
                       غير متاح
                     </span>
                   )}
@@ -219,7 +227,10 @@ export default function ProductsPage() {
                         })}`}
                     </p>
                   </div>
-                  <span className="font-bold text-sm tabular-nums shrink-0">
+                  {/* Phase 6: money figures ride IBM Plex Mono — the
+                      operational code voice (tabular-nums kept for
+                      alignment). */}
+                  <span className="font-mono font-bold text-sm tabular-nums shrink-0">
                     {formatLyd(p.price)}
                   </span>
                 </div>
