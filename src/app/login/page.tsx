@@ -69,10 +69,20 @@ export default function LoginPage() {
 
       {/* Back to home + ThemeToggle (family fixed corner cluster) */}
       <div className="fixed start-4 top-4 z-(--z-dropdown) flex items-center gap-2">
-        <Link href="/">
-          <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground/80 hover:text-foreground">
-            العودة للرئيسية
-          </Button>
+        {/* r151 (LIVE-AUDIT-SO1 P1-1): ONE anchor carrying the full
+            ghost-button recipe (button.tsx r150 canon) at the 44px
+            default rung. The old <Link><Button size="sm"> nesting was
+            a double tab-stop on one label, invalid HTML (interactive
+            inside interactive), a 32px touch target, and the inner
+            button rendered with NO focus indicator (its outline-none
+            utility kills the base :focus-visible ring — measured live
+            in the r151 audit Tab loop). A plain anchor keeps the ONE
+            global focus contract (globals.css @layer base). */}
+        <Link
+          href="/"
+          className="inline-flex h-11 shrink-0 select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-transparent bg-transparent px-5 font-sans text-[13px] font-semibold text-muted-foreground/80 transition-colors duration-(--t-fast) ease-smooth hover:bg-foreground/10 hover:text-foreground active:scale-[0.97] active:duration-(--t-micro) dark:hover:bg-foreground/15"
+        >
+          العودة للرئيسية
         </Link>
         <ThemeToggle />
       </div>

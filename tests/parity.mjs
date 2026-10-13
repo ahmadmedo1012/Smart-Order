@@ -545,7 +545,10 @@ const LANDING_TOKENS = {
   '--ln-grain-op': '0.075',
   '--ln-radius-pill': '9999px', // resolves the scoped --r-full bridge
   '--ln-h1': 'clamp(2.75rem, 8.2vw, 6.75rem)',
-  '--ln-h1-lh': '1.04',
+  // r151 (LIVE-AUDIT-SO1 P2-2): the nail rides the licensed floor change —
+  // hero Arabic leading 1.04 → 1.15 (the family Arabic heading floor,
+  // r131-F2; live audit measured 88px/91.52px clashing diacritics).
+  '--ln-h1-lh': '1.15',
   '--ln-t-fast': '160ms',
   '--ln-t-base': '240ms',
   '--ln-t-slow': '380ms',

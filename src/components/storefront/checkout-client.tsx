@@ -212,7 +212,12 @@ export function CheckoutClient({
       <SkipLink />
       <header className="bg-background border-b border-border safe-top sticky top-0 z-(--z-dropdown)">
         <div className="mx-auto max-w-2xl px-4 h-14 flex items-center gap-3">
-          <Link href={`/store/${slug}`} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors" aria-label="العودة للمتجر">
+          {/* r151 (LIVE-AUDIT-SO1 P2-3): the primary phone escape route
+              rides the 44px touch floor — a 20px text box inside the 56px
+              header was the thinnest target on the money path (r151 live
+              eval: h=20). The box extends vertically to h-11 inside the
+              centered h-14 row; the label position is unchanged. */}
+          <Link href={`/store/${slug}`} className="flex h-11 items-center gap-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground transition-colors" aria-label="العودة للمتجر">
             <ArrowRight className="size-4" aria-hidden="true" />
             العودة
           </Link>

@@ -118,7 +118,11 @@ export function PlanSelector({
         })}
       </div>
       <div className="text-center">
-        <Button size="lg" variant={selected ? "flame" : "outline"} className="h-14 px-10 text-lg" disabled={!selectedPlan} onClick={onContinue}>
+        {/* r151 (LIVE-AUDIT-SO1 P3-1): the h-14 (56px) override is retired —
+            the CTA rides the unified money-CTA rung size=lg (48px, the
+            r150 spelling used by the cart drawer / sticky bar / success
+            screen). Label scale and generous padding unchanged. */}
+        <Button size="lg" variant={selected ? "flame" : "outline"} className="px-10 text-lg" disabled={!selectedPlan} onClick={onContinue}>
           {selected ? `متابعة مع باقة ${selected.nameAr}` : "اختر باقة أولاً"}
           <MotionArrowLeft className="ms-2 size-5" />
         </Button>

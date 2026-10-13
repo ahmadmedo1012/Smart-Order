@@ -63,7 +63,12 @@
   --ln-grain-op:   0.075;  /* r129: canonical P3-22 landing override (Madarek landing.css:58) */
   --ln-radius-pill: var(--r-full);
   --ln-h1:         clamp(2.75rem, 8.2vw, 6.75rem);
-  --ln-h1-lh:      1.04;
+  /* r151 (LIVE-AUDIT-SO1 P2-2): the hero Arabic leading was 1.04 — below
+     the family Arabic heading floor ≥1.15 (r131-F2, documented for the
+     ≤768px override below and honored by SL/SB/SM). 1.15 lifts the
+     ascenders/diacritics clearance on the 2–3-line 88–108px title. The
+     parity pin (tests/parity.mjs LANDING_TOKENS) rides the same rung. */
+  --ln-h1-lh:      1.15;
   --ln-t-fast:      var(--t-fast);    /* 160ms */
   --ln-t-base:      var(--t-base);    /* 240ms */
   --ln-t-slow:      var(--t-slow);    /* 380ms */
@@ -416,7 +421,11 @@
   /* r149 (C2): twin of the gold 48 rung — border-box parity via the same
      min-block-size floor (border included in the box). */
   min-block-size: 48px;
-  letter-spacing: 0.01em;
+  /* r151 (LIVE-AUDIT-SO1 P2-1): the 0.01em residue is ZEROED — the ghost
+     pill carries Arabic («تسجيل الدخول» / «اطلب من متجر تجريبي» / «ابدأ
+     رحلتك») and the r150 tracking law (4 rules zeroed in this sheet)
+     spares no Arabic node. The GAP-3 border below carries the pill shape. */
+  letter-spacing: 0;
   background: transparent;
   color: var(--ln-cream);
   /* GAP-3: the old 0.14 hairline read as a disabled field — the pill
@@ -1645,11 +1654,12 @@
 /* text always wins the sky — content z1 over decor z0 */
 .landing .ln-keep-hero > .mx-auto { position: relative; z-index: 1; }
 /* r131-F2 (A12 P1-2): the hero title rides the CANONICAL --ln-h1 scale
-   — clamp(44px, 8.2vw, 108px) over --ln-h1-lh 1.04, the exact SL/SB/SM
-   pattern (their .ln-hero-title block). The former fixed Tailwind ladder
-   (36→68px) sat below canon at both ends; mobile Arabic leading gets the
-   ≥1.15 override in §13 (≤768px), landscape phones in the fold guard
-   below. Unlayered rule — it outranks any residual utility. */
+   — clamp(44px, 8.2vw, 108px) over --ln-h1-lh (r151: 1.15, the family
+   Arabic heading floor — was 1.04; the exact SL/SB/SM .ln-hero-title
+   block pattern now shares the floor too). The former fixed Tailwind
+   ladder (36→68px) sat below canon at both ends; mobile Arabic leading
+   gets the ≥1.15 override in §13 (≤768px), landscape phones in the fold
+   guard below. Unlayered rule — it outranks any residual utility. */
 .landing .ln-keep-title {
   font-size: var(--ln-h1);
   line-height: var(--ln-h1-lh);
@@ -2399,7 +2409,10 @@
 }
 .landing .ln-stations-kicker {
   font-size: 0.7rem;
-  letter-spacing: 0.05em;
+  /* r151 (LIVE-AUDIT-SO1 P2-1): 0.05em zeroed — the kicker renders Arabic
+     («المرحلة 1 من 6»); the r150 tracking law wins over the mono-latin
+     display convention (Arabic runs continue via the --ln-mono chain). */
+  letter-spacing: 0;
   color: var(--ln-cream-dim);
 }
 .landing .ln-stations-statusrow {
