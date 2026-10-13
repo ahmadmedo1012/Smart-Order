@@ -57,3 +57,4 @@ tests-results/
 playwright-report/
 download/
 package-lock.json
+test-results/
