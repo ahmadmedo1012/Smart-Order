@@ -64,6 +64,41 @@ const NAV = [
   { href: "/dashboard/settings", label: "الإعدادات", icon: Settings },
 ];
 
+/* P6-2-f3 (GROUP 3): the mobile bottom-nav «المزيد» menu — the four
+   primary rows (already in the bottom bar) + the five surfaces the bar
+   never had room for. 44px targets in the sheet, RTL, Escape closes
+   (Radix dialog semantics come with the Sheet primitive). The explicit
+   element type keeps `exact` optional across the sheet's spread union. */
+const BOTTOM_NAV_PRIMARY: Array<{
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+}> = [
+  {
+    href: "/dashboard",
+    label: "الرئيسية",
+    icon: LayoutDashboard,
+    exact: true,
+  },
+  { href: "/dashboard/orders", label: "الطلبات", icon: ClipboardList },
+  { href: "/dashboard/products", label: "المنتجات", icon: Package },
+  { href: "/dashboard/customers", label: "العملاء", icon: Users },
+];
+
+const MORE_NAV: Array<{
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+}> = [
+  { href: "/dashboard/categories", label: "الأقسام", icon: LayoutGrid },
+  { href: "/dashboard/delivery", label: "التوصيل", icon: Truck },
+  { href: "/dashboard/payments", label: "المدفوعات", icon: CreditCard },
+  { href: "/dashboard/staff", label: "الفريق", icon: UserCog },
+  { href: "/dashboard/settings", label: "الإعدادات", icon: Settings },
+];
+
 const ADMIN_NAV = [
   {
     href: "/dashboard/admin/payments",
@@ -88,6 +123,8 @@ export function DashboardShell({
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = React.useState(false);
+  /* P6-2-f3 (GROUP 3): the «المزيد» bottom-sheet menu state. */
+  const [moreOpen, setMoreOpen] = React.useState(false);
   const [biz, setBiz] = React.useState<Biz | null>(businesses[0] ?? null);
 
   // persist active business in localStorage for API calls
@@ -118,14 +155,52 @@ export function DashboardShell({
  --sidebar-* token pair (gold wash dark / neutral-150 light) + ink text
  + 3px inline-start accent bar with pop entrance + dark-mode gold halo.
  The dead --sidebar-* tokens are wired here through the @theme color
- bridges (bg-sidebar, bg-sidebar-accent, …) — no globals.css edits. */
+ bridges (bg-sidebar, bg-sidebar-accent, …) — no globals.css edits.
+ P6-2-f3 (GROUP 3): ps-8 hosts the LIGHT-mode route rail (node dot +
+ dashed vertical hairline — see the NavLinks spans); dark keeps its
+ night-dispatch paint untouched. */
   const navLinkClass = (active: boolean) =>
     cn(
-      "group relative flex min-h-[30px] items-center gap-2.5 overflow-hidden rounded-sm px-3 py-1 text-[13px] font-medium transition-[color,background-color,box-shadow] duration-(--t-fast) ease-smooth outline-none",
+      "group relative flex min-h-[30px] items-center gap-2.5 overflow-hidden rounded-sm ps-8 pe-3 py-1 text-[13px] font-medium transition-[color,background-color,box-shadow] duration-(--t-fast) ease-smooth outline-none",
       active
         ? "bg-sidebar-accent font-semibold text-sidebar-foreground dark:shadow-[0_0_18px_-4px_rgb(255_122_56/0.16),inset_0_0_0_1px_rgb(255_122_56/0.10)]"
         : "text-muted-foreground hover:bg-muted hover:text-foreground",
     );
+
+  /* P6-2-f3 (GROUP 3): the light-mode ROUTE-LINE / NAV-NODE grammar —
+     a quiet dashed vertical hairline (start rail, per-item segments
+     bridging the gap-1 gutters) + a node dot centered on each item.
+     Light-only (dark:hidden): the dark sidebar keeps its night-dispatch
+     waves + constellation. Paint-only, aria-hidden, never interactive. */
+  const NavRail = ({
+    first,
+    last,
+    active,
+  }: {
+    first: boolean;
+    last: boolean;
+    active: boolean;
+  }) => (
+    <>
+      <span
+        aria-hidden="true"
+        className={cn(
+          "absolute start-[9px] top-1/2 -translate-y-1/2 size-1.5 rounded-full border bg-card dark:hidden",
+          active ? "border-primary/60 bg-primary" : "border-muted-foreground/40"
+        )}
+      />
+      <span
+        aria-hidden="true"
+        className={cn(
+          "absolute start-[11.5px] border-s border-dashed border-border/80 dark:hidden",
+          first && !last && "top-1/2 -bottom-1",
+          last && !first && "-top-1 bottom-1/2",
+          first && last && "hidden",
+          !first && !last && "-top-1 -bottom-1"
+        )}
+      />
+    </>
+  );
 
   const AccentBar = () => (
     <m.span
@@ -145,7 +220,7 @@ export function DashboardShell({
     showAdmin?: boolean;
   }) => (
     <nav aria-label="التنقل في اللوحة" className="flex flex-col gap-1 px-3">
-      {NAV.map(({ href, label, icon: Icon, exact }) => {
+      {NAV.map(({ href, label, icon: Icon, exact }, i) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
         return (
           <Link
@@ -156,6 +231,7 @@ export function DashboardShell({
             className={navLinkClass(active)}
           >
             {active && <AccentBar />}
+            <NavRail first={i === 0} last={i === NAV.length - 1} active={active} />
             <Icon
               className={cn(
                 "size-4 shrink-0",
@@ -183,6 +259,7 @@ export function DashboardShell({
                 className={navLinkClass(active)}
               >
                 {active && <AccentBar />}
+                <NavRail first last active={active} />
                 <Icon
                   className={cn(
                     "size-4 shrink-0",
@@ -429,36 +506,15 @@ export function DashboardShell({
               </main>
             </BusinessContext.Provider>
 
-            {/* Mobile bottom nav */}
+            {/* Mobile bottom nav — P6-2-f3 (GROUP 3): «المزيد» is now a
+                real menu (bottom sheet below) instead of a bare link to
+                /dashboard/settings. */}
             <nav
               aria-label="التنقل السريع"
               className="lg:hidden fixed bottom-0 inset-x-0 z-(--z-dropdown) border-t border-border bg-background/95 backdrop-blur-md safe-bottom"
             >
               <div className="grid grid-cols-5 h-16">
-                {[
-                  {
-                    href: "/dashboard",
-                    label: "الرئيسية",
-                    icon: LayoutDashboard,
-                    exact: true,
-                  },
-                  {
-                    href: "/dashboard/orders",
-                    label: "الطلبات",
-                    icon: ClipboardList,
-                  },
-                  {
-                    href: "/dashboard/products",
-                    label: "المنتجات",
-                    icon: Package,
-                  },
-                  {
-                    href: "/dashboard/customers",
-                    label: "العملاء",
-                    icon: Users,
-                  },
-                  { href: "/dashboard/settings", label: "المزيد", icon: Menu },
-                ].map(({ href, label, icon: Icon, exact }) => {
+                {BOTTOM_NAV_PRIMARY.map(({ href, label, icon: Icon, exact }) => {
                   const active = exact
                     ? pathname === href
                     : pathname.startsWith(href);
@@ -478,8 +534,71 @@ export function DashboardShell({
                     </Link>
                   );
                 })}
+                <button
+                  type="button"
+                  onClick={() => setMoreOpen(true)}
+                  aria-haspopup="dialog"
+                  aria-expanded={moreOpen}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-1 min-h-11 text-[11px] font-medium transition-[color,transform] duration-(--t-fast) ease-smooth active:scale-[0.93]",
+                    MORE_NAV.some(({ href }) => pathname.startsWith(href))
+                      ? "text-accent-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Menu className="size-5" aria-hidden="true" />
+                  المزيد
+                </button>
               </div>
             </nav>
+
+            {/* «المزيد» bottom sheet — the full quick-nav menu (44px
+                rows, RTL grid, Escape/scrim close via the Radix-based
+                Sheet; focus returns to the trigger). */}
+            <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+              <SheetContent side="bottom" className="p-0">
+                <SheetTitle className="px-5 pt-5 pb-2 text-sm font-semibold">
+                  المزيد
+                </SheetTitle>
+                <nav
+                  aria-label="قائمة الأقسام"
+                  className="grid grid-cols-2 gap-1 px-3 pb-4"
+                >
+                  {[...BOTTOM_NAV_PRIMARY, ...MORE_NAV].map(
+                    ({ href, label, icon: Icon, exact }) => {
+                      const active = exact
+                        ? pathname === href
+                        : pathname.startsWith(href);
+                      return (
+                        <Link
+                          key={href}
+                          href={href}
+                          onClick={() => setMoreOpen(false)}
+                          aria-current={active ? "page" : undefined}
+                          className={cn(
+                            "flex min-h-11 items-center gap-2.5 rounded-sm px-3 py-2.5 text-[13px] font-medium transition-colors duration-(--t-fast) ease-smooth",
+                            active
+                              ? "bg-primary/10 font-semibold text-accent-foreground"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                          )}
+                        >
+                          <Icon
+                            className={cn(
+                              "size-4 shrink-0",
+                              active
+                                ? "text-accent-foreground"
+                                : "text-muted-foreground",
+                            )}
+                            aria-hidden="true"
+                          />
+                          {label}
+                        </Link>
+                      );
+                    }
+                  )}
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
