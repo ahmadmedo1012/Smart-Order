@@ -297,7 +297,7 @@ export default function OrderDetailPage() {
             العودة للطلبات
           </Link>
           <div className="mt-2 flex items-center gap-3 flex-wrap">
-            <h1 className={`${pageTitleClass} tabular-nums`}>
+            <h1 className={`${pageTitleClass} tabular-nums font-mono`}>
               {order.orderNumber}
             </h1>
             <OrderStatusBadge status={order.status} />

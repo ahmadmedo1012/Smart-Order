@@ -414,7 +414,7 @@ export default function OrdersPage() {
                     key={o.id}
                     className="group/row transition-colors hover:bg-muted/40"
                   >
-                    <td className="relative px-4 py-3 font-semibold tabular-nums before:pointer-events-none before:absolute before:start-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:origin-center before:scale-y-0 before:rounded-e-sm before:bg-primary before:transition-transform before:duration-(--t-slow) before:ease-spring-soft group-hover/row:before:scale-y-100">
+                    <td className="relative px-4 py-3 font-semibold tabular-nums font-mono before:pointer-events-none before:absolute before:start-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:origin-center before:scale-y-0 before:rounded-e-sm before:bg-primary before:transition-transform before:duration-(--t-slow) before:ease-spring-soft group-hover/row:before:scale-y-100">
                       <Link
                         href={`/dashboard/orders/${o.id}`}
                         className="hover:text-accent-foreground"
@@ -479,7 +479,7 @@ export default function OrdersPage() {
                   className="block rounded-xl border border-border bg-card p-4 active:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-semibold tabular-nums">
+                    <span className="font-semibold tabular-nums font-mono">
                       {o.orderNumber}
                     </span>
                     <OrderStatusBadge status={o.status} />

@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
  *     iOS keyboards on responsive pages).
  *   · focus = accent border + the ONE sanctioned 3px halo at 22% of
  *     the SOLID accent (--state-input-focus-halo → --primary: gold
- *     #E9B44C dark / copper #B57438 light — never #C9962F); the old
+ *     the delivery orange #D14900 in daylight / luminous #FF7A38 at night); the old
  *     ring-2/ring-ring/20 double indicator is gone (W1-F P2-11).
  *   · error (aria-invalid) = destructive border + 3px destructive halo.
  *   · disabled = opacity .6 (canonical --state-input-disabled-opacity).

@@ -246,10 +246,11 @@ export function PaymentDialog({
           rounded-2xl/shadow-2xl spelling is retired. Width rides the kit
           cap (min(560px,100%)). */}
       <DialogContent className="max-h-[90dvh] overflow-y-auto p-0">
-        {/* Header — family flame gradient band. r131-F2 (P1): ink rides
-            the --orange-foreground token (10.63:1 dark / 4.95:1 light) —
-            text-white on gold was 1.89:1. */}
-        <div className="bg-gradient-to-br from-orange to-orange/80 p-6 text-orange-foreground">
+        {/* Header — the delivery-orange band. r131-F2 (P1): ink rides
+            the --orange-foreground token; r152: the ramp runs base →
+            ember (--c-ember, the strong step) so the deep corner keeps
+            white ink at full AA (the old /80 alpha end washed it out). */}
+        <div className="bg-gradient-to-br from-orange to-ember p-6 text-orange-foreground">
           <div className="mb-2 flex items-center gap-2">
             <Smartphone className="size-5" aria-hidden="true" />
             <DialogTitle className="text-lg font-bold text-orange-foreground">دفع الاشتراك</DialogTitle>

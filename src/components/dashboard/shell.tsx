@@ -123,7 +123,7 @@ export function DashboardShell({
     cn(
       "group relative flex min-h-[30px] items-center gap-2.5 overflow-hidden rounded-sm px-3 py-1 text-[13px] font-medium transition-[color,background-color,box-shadow] duration-(--t-fast) ease-smooth outline-none",
       active
-        ? "bg-sidebar-accent font-semibold text-sidebar-foreground dark:shadow-[0_0_18px_-4px_rgb(233_180_76/0.16),inset_0_0_0_1px_rgb(233_180_76/0.10)]"
+        ? "bg-sidebar-accent font-semibold text-sidebar-foreground dark:shadow-[0_0_18px_-4px_rgb(255_122_56/0.16),inset_0_0_0_1px_rgb(255_122_56/0.10)]"
         : "text-muted-foreground hover:bg-muted hover:text-foreground",
     );
 
@@ -211,14 +211,14 @@ export function DashboardShell({
           <aside
             className={cn(
               "hidden lg:flex w-60 xl:w-64 shrink-0 flex-col border-e border-sidebar-border bg-sidebar sticky top-0 h-screen",
-              "dark:bg-[radial-gradient(340px_200px_at_82%_-60px,rgb(233_180_76/0.06),transparent_72%),radial-gradient(280px_220px_at_-20%_108%,rgb(111_168_255/0.05),transparent_70%),linear-gradient(180deg,var(--muted)_0%,var(--background)_34%,var(--background)_100%)]",
+              "dark:bg-[radial-gradient(340px_200px_at_82%_-60px,rgb(255_122_56/0.07),transparent_72%),radial-gradient(280px_220px_at_-20%_108%,rgb(62_92_118/0.10),transparent_70%),linear-gradient(180deg,var(--muted)_0%,var(--background)_34%,var(--background)_100%)]",
             )}
           >
             {/* Constellation dots — paint-only, dark-only, ≤0.22α (never
  competing with labels); physical coords, direction-agnostic. */}
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 hidden dark:block bg-no-repeat [background-image:radial-gradient(1.8px_1.8px_at_21%_12%,rgb(242_239_230/0.22),transparent_100%),radial-gradient(1px_1px_at_68%_7%,rgb(142_151_184/0.16),transparent_100%),radial-gradient(1.5px_1.5px_at_87%_21%,rgb(242_239_230/0.15),transparent_100%),radial-gradient(1px_1px_at_42%_30%,rgb(142_151_184/0.12),transparent_100%),radial-gradient(1.8px_1.8px_at_9%_44%,rgb(233_180_76/0.18),transparent_100%),radial-gradient(1px_1px_at_76%_58%,rgb(142_151_184/0.11),transparent_100%),radial-gradient(1.5px_1.5px_at_28%_74%,rgb(242_239_230/0.14),transparent_100%),radial-gradient(1.2px_1.2px_at_58%_88%,rgb(233_180_76/0.12),transparent_100%)]"
+              className="pointer-events-none absolute inset-0 hidden dark:block bg-no-repeat [background-image:radial-gradient(1.8px_1.8px_at_21%_12%,rgb(241_240_234/0.22),transparent_100%),radial-gradient(1px_1px_at_68%_7%,rgb(185_194_210/0.16),transparent_100%),radial-gradient(1.5px_1.5px_at_87%_21%,rgb(241_240_234/0.15),transparent_100%),radial-gradient(1px_1px_at_42%_30%,rgb(185_194_210/0.12),transparent_100%),radial-gradient(1.8px_1.8px_at_9%_44%,rgb(255_122_56/0.18),transparent_100%),radial-gradient(1px_1px_at_76%_58%,rgb(185_194_210/0.11),transparent_100%),radial-gradient(1.5px_1.5px_at_28%_74%,rgb(241_240_234/0.14),transparent_100%),radial-gradient(1.2px_1.2px_at_58%_88%,rgb(255_122_56/0.12),transparent_100%)]"
             />
             <div className="h-16 flex items-center gap-2.5 px-5 border-b border-sidebar-border">
               <Image

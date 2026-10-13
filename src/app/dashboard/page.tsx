@@ -279,6 +279,10 @@ export default function DashboardOverview() {
         ))}
       </div>
 
+      {/* r152 Route & Node: the quiet dashed road separates the
+          operations chapters (KPI board → the week lane + order desk). */}
+      <div className="route-divider route-divider-quiet" aria-hidden="true" />
+
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Week chart */}
         <Card className="border-border/80">
@@ -390,7 +394,7 @@ export default function DashboardOverview() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-semibold text-sm tabular-nums">
+                          <span className="font-semibold text-sm tabular-nums font-mono">
                             {o.orderNumber}
                           </span>
                           <OrderStatusBadge status={o.status} />

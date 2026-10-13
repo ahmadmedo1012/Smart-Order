@@ -20,7 +20,7 @@ import { CartHydrator } from "@/components/storefront/cart-hydrator";
  *     prefers-reduced-motion. (The dashboard shell's own MotionConfig
  *     is harmless; same value, nested.)
  *   · ThemeColorSync (smart-link r14-M7 port): meta theme-color follows
- *     the manual toggle (night #070B16 / cream #FBFAF9) instead of the
+ *     the manual toggle (paper #F7F7F4 daylight / navy #0D1626 night) instead of the
  *     OS preference (A10 F2).
  *   · Toaster lazy-mounted (A8 perf: the Toaster rode the root layout,
  *     shipping the sonner chunk on every route's critical path). It

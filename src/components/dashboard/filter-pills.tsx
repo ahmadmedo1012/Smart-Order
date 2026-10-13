@@ -3,11 +3,12 @@
 import { cn } from "@/lib/utils";
 
 /**
- * FilterPills — canonical Madarek `.pill` filter family
+ * FilterPills — the canonical filter pill family
  * (components.css:530-555, polish v15): surface + hairline pills,
  * 12px/600, hover = border-strong + surface-2 + −1px lift, `.on` =
- * ink slab (light: #191918 + cream) / gold (dark: metal + void ink)
- * + 4px accent/16% halo. One spelling for every filter/selector chip.
+ * ink slab (light: navy ink + paper) / delivery orange (night:
+ * luminous fill + void ink) + 4px accent/16% halo. One spelling for
+ * every filter/selector chip.
  */
 
 export function pillClasses(on: boolean, className?: string) {

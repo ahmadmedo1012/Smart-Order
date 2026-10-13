@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
  *   · RTL: DialogHeader aligns `text-start` (logical) — the stock
  *     shadcn header anchored Arabic titles to the physical LEFT edge
  *     on ≥sm; the close button rides `end-4` (inset-inline-end).
- *   · Card: surface ground (bg-card — dark #0D1428 / light #FFFFFF,
+ *   · Card: surface ground (bg-card — light #FFFFFF / dark #152238,
  *     never the page ground), r-xl 16px (rounded-xl), width cap
  *     min(560px,100%), --shadow-modal, and the signature 3px accent
  *     top-sheen ::before (inset-inline 30%).

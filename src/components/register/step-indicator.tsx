@@ -77,7 +77,7 @@ export function StepIndicator({
                 className={cn(
                   "hidden text-[11px] font-medium transition-colors sm:block sm:text-xs",
                   /* r132 (A1 finding 5 / A7 r131): pending-step label rides the
-                     FULL muted-foreground tier (#4F4D48 light / #C3C8DC dark,
+                     FULL muted-foreground tier (#4E5A6E light / #B9C2D2 dark,
                      7.0:1) — the old /50 wash blended to ≈2.6:1 on the white
                      register card, below the 4.5:1 floor for 11-12px text. */
                   isActive ? "font-bold text-accent-foreground" : isDone ? "text-foreground/70" : "text-muted-foreground"
