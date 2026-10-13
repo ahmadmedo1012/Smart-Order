@@ -28,12 +28,25 @@ import { cn } from "@/lib/utils"
  *     patterns) · icon-sm 32px.
  *   · focus = the ONE global :focus-visible outline ring
  *     (globals.css, token-driven); the old double ring-offset
- *     indicator is gone (W1-F P2-11).
+ *     indicator is gone (W1-F P2-11). r151 (FOCUS-FAMILY-SO1):
+ *     that global rule lives in @layer base, so the bare
+ *     outline-none utility (later cascade layer) silently killed
+ *     the ring on every Button outside the .landing world (whose
+ *     unlayered cream rule still wins) — measured live in
+ *     r151-a0d: the nested auth button painted outline none while
+ *     the neighbouring m.button ThemeToggle kept the ring. The
+ *     focus-visible utilities below re-declare the SAME token
+ *     contract (--state-focus-ring-*, with the global fallbacks)
+ *     so the primitive carries its own ring regardless of layer
+ *     order; unfocused state is untouched (outline stays none)
+ *     and the documented ring colors ride the tokens (dark accent
+ *     gold / light accent-strong copper, globals.css), never
+ *     currentColor.
  * API unchanged (same variant/size keys) so page consumers don't
  * break; Pure-CSS effects keep it Server-Component-safe.
  */
 const buttonVariants = cva(
-  "group/btn relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-md border border-transparent font-sans text-[13px] font-semibold whitespace-nowrap select-none outline-none transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-(--t-fast) ease-smooth isolate active:scale-[0.97] active:duration-(--t-micro) disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-[0.55] aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&>*]:relative",
+  "group/btn relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-md border border-transparent font-sans text-[13px] font-semibold whitespace-nowrap select-none outline-none focus-visible:outline-solid focus-visible:outline-[length:var(--state-focus-ring-width,2px)] focus-visible:outline-[color:var(--state-focus-ring-color,var(--ring))] focus-visible:outline-offset-[length:var(--state-focus-ring-offset,2px)] transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-(--t-fast) ease-smooth isolate active:scale-[0.97] active:duration-(--t-micro) disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-[0.55] aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&>*]:relative",
   {
     variants: {
       variant: {
