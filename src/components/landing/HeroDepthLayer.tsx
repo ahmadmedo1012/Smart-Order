@@ -6,9 +6,11 @@ import { useEffect, useRef } from "react"
  * HeroDepthLayer — r128 Stage B (F2b), ported from Madarek
  * (frontend/src/components/landing/HeroDepthLayer.tsx).
  *
- * Scroll-craft baseline: parallax starfield for the hero. This layer
- * moves at ~0.2× the scroll rate while the orbit canvas sits at z0 and
- * the text column at z1, so the copy appears closer than the starfield.
+ * r152 (Phase 5 daylight): the night starfield became the DAYLIGHT
+ * DISPATCH GRID — a seeded field of navy ink points at parallax
+ * depth, like waypoints on a city map. Same craft: this layer moves
+ * at ~0.2× the scroll rate while the scene sits at z0 and the text
+ * column at z1, so the copy appears closer than the waypoint field.
  *
  * Perf: one passive scroll listener + one rAF. The canonical component
  * consumed Madarek's useReducedMotion hook; this port reads the media
@@ -83,7 +85,7 @@ export function HeroDepthLayer() {
           cx={s.cx}
           cy={s.cy}
           r={s.r}
-          fill="rgba(245,243,231,0.6)"
+          fill="rgba(27,42,65,0.5)"
           opacity={s.op}
         />
       ))}
