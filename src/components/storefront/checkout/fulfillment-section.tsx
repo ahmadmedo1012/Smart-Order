@@ -26,8 +26,8 @@ export function FulfillmentSection({
             <p className="col-span-2 text-xs text-muted-foreground">خيارات الاستلام تظهر بعد إعادة المحاولة.</p>
           ) : (
             <>
-              <Skeleton className="h-[76px] rounded-xl" />
-              <Skeleton className="h-[76px] rounded-xl" />
+              <Skeleton className="h-[76px] rounded-sm" />
+              <Skeleton className="h-[76px] rounded-sm" />
             </>
           )
         ) : (
@@ -40,7 +40,10 @@ export function FulfillmentSection({
               type="button"
               onClick={() => setFulfillment(t as "DELIVERY" | "PICKUP")}
               aria-pressed={selected}
-              className={`flex items-center gap-2.5 rounded-xl border p-3.5 text-start transition-colors ${
+              /* P6-2-f3 (GROUP 1): stamp grammar — squared corners + 1px
+                 family border; selected = delivery-orange border + soft
+                 wash (aria-pressed/logic untouched). */
+              className={`flex items-center gap-2.5 rounded-sm border p-3.5 text-start transition-colors ${
                 selected ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50"
               }`}
             >

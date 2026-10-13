@@ -56,9 +56,9 @@ export function PaymentSection({
         {!data ? (
           !loadError && (
             <>
-              <Skeleton className="h-14 rounded-xl" />
-              <Skeleton className="h-14 rounded-xl" />
-              <Skeleton className="h-14 rounded-xl" />
+              <Skeleton className="h-14 rounded-sm" />
+              <Skeleton className="h-14 rounded-sm" />
+              <Skeleton className="h-14 rounded-sm" />
             </>
           )
         ) : (
@@ -74,7 +74,10 @@ export function PaymentSection({
                 if (errors.payment) setErrors((x) => ({ ...x, payment: undefined }));
               }}
               aria-pressed={selected}
-              className={`flex h-14 flex-col items-center justify-center gap-1 rounded-xl border text-[13px] font-medium transition-colors duration-(--t-fast) ${
+              /* P6-2-f3 (GROUP 1): stamp grammar — squared provider
+                 tiles (1px family border; selected = orange border +
+                 soft wash); the error-clearing handler is untouched. */
+              className={`flex h-14 flex-col items-center justify-center gap-1 rounded-sm border text-[13px] font-medium transition-colors duration-(--t-fast) ${
                 selected
                   ? "border-primary bg-primary/10"
                   : "border-border text-muted-foreground hover:bg-muted/50"
@@ -93,8 +96,9 @@ export function PaymentSection({
       )}
       {paymentMethod && paymentConfig?.number && (
         <>
-          {/* Transfer target — family number row with copy */}
-          <div className="rounded-xl border border-border/20 bg-muted/30 p-3">
+          {/* Transfer target — family number row with copy (squared to
+              the stamp well, P6-2-f3) */}
+          <div className="rounded-sm border border-border bg-muted/30 p-3">
             <p className="mb-1 text-xs text-muted-foreground">حوّل المبلغ إلى الرقم</p>
             <div className="flex items-center justify-between">
               <span className="font-mono text-lg font-bold tracking-wide" dir="ltr">
@@ -126,8 +130,13 @@ export function PaymentSection({
               المبالغ فوق {WALLET_CAP_LYD} د.ل لا تُدعم عبر رمز التحويل السريع — حوّل المبلغ يدوياً إلى الرقم أعلاه
             </p>
           ) : (
-            <div className="rounded-xl border border-success/25 bg-success/10 p-3">
-              <p className="mb-1.5 text-xs font-medium text-success-ink">رمز التحويل السريع</p>
+            <div className="rounded-sm border border-(--c-sky-ink)/35 bg-(--c-sky-bg) p-3">
+              {/* P6-2-f3 (GROUP 1): the quick-code box re-toned from
+                  success-green to the identity — it is a PAYMENT
+                  INSTRUCTION, not a success state: steel (sky) family
+                  stamp ground + delivery-orange copy CTA. Copy handler
+                  + wallet-cap gate untouched. */}
+              <p className="mb-1.5 text-xs font-medium text-(--c-sky-deep)">رمز التحويل السريع</p>
               <div className="flex items-center justify-between gap-2">
                 <span className="truncate font-mono text-sm font-bold text-accent-foreground" dir="ltr">
                   {paymentMethod.type === "LIBYANA"
@@ -148,7 +157,7 @@ export function PaymentSection({
                       toast.error("تعذّر النسخ");
                     }
                   }}
-                  className="flex h-11 shrink-0 items-center gap-1.5 rounded-md bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90"
+                  className="flex h-11 shrink-0 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                   title="نسخ رمز التحويل السريع"
                   aria-label="نسخ رمز التحويل السريع"
                 >

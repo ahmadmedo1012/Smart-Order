@@ -27,11 +27,12 @@ export function StickySubmitBar({
         <div className="flex-1 min-w-0">
           {/* r140 (P3-11): صدق مالي — هذا تقدير عميل (الخادم يعيد
               التسعير عند الإرسال)؛ السلة نفسها تقول «المجموع التقديري»
-              (cart-drawer) فالشريط يطابقها بدل «الإجمالي» المطلق. */}
-          <div className="text-[11px] text-muted-foreground tabular-nums truncate">
+              (cart-drawer) فالشريط يطابقها بدل «الإجمالي» المطلق.
+              P6-2-f3 (GROUP 1): كل أرقام المال هنا Mono. */}
+          <div className="text-[11px] text-muted-foreground font-mono tabular-nums truncate">
             الإجمالي التقديري{deliveryFee > 0 ? ` — المنتجات ${formatLyd(subtotal)} + توصيل ${formatLyd(deliveryFee)}` : ""}
           </div>
-          <div className="font-heading font-bold text-lg tabular-nums">{formatLyd(total)}</div>
+          <div className="font-mono font-bold text-lg tabular-nums">{formatLyd(total)}</div>
         </div>
         {/* r131-F2 (P0-1): type=submit + form= — the sticky bar stays
             outside <main> yet submits the real checkout form (Enter works

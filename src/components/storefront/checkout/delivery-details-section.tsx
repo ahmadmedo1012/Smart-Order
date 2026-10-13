@@ -87,9 +87,9 @@ export function DeliveryDetailsSection({
           {!data ? (
             !loadError && (
               <>
-                <Skeleton className="h-[76px] rounded-xl" />
-                <Skeleton className="h-[76px] rounded-xl" />
-                <Skeleton className="h-[76px] rounded-xl" />
+                <Skeleton className="h-[76px] rounded-sm" />
+                <Skeleton className="h-[76px] rounded-sm" />
+                <Skeleton className="h-[76px] rounded-sm" />
               </>
             )
           ) : (
@@ -104,16 +104,19 @@ export function DeliveryDetailsSection({
                   if (errors.zone) setErrors((x) => ({ ...x, zone: undefined }));
                 }}
                 aria-pressed={selected}
-                className={`rounded-xl border p-2.5 text-center transition-colors ${
+                /* P6-2-f3 (GROUP 1): stamp grammar — squared zone tiles
+                   (1px family border; selected = orange + soft wash);
+                   the handler body below is untouched. */
+                className={`rounded-sm border p-2.5 text-center transition-colors ${
                   selected ? "border-primary bg-primary/10" : "border-border hover:bg-muted/50"
                 }`}
               >
                 <div className="text-xs font-semibold truncate">{z.name}</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5 tabular-nums">
+                <div className="text-[11px] text-muted-foreground mt-0.5 font-mono tabular-nums">
                   {z.fee === 0 ? "مجاناً" : formatLyd(z.fee)}
                 </div>
                 {z.minOrder > 0 && (
-                  <div className="text-[11px] text-muted-foreground tabular-nums">حد أدنى {formatLyd(z.minOrder)}</div>
+                  <div className="text-[11px] text-muted-foreground font-mono tabular-nums">حد أدنى {formatLyd(z.minOrder)}</div>
                 )}
               </button>
             );
@@ -122,9 +125,9 @@ export function DeliveryDetailsSection({
         </div>
         {errors.zone && <FieldError id="c-zone-error">{errors.zone}</FieldError>}
         {minOrderUnmet && (
-          <p className="text-xs text-destructive-ink rounded-lg bg-destructive/10 border border-destructive/25 px-3 py-2">
+          <p className="text-xs text-destructive-ink rounded-sm bg-destructive/10 border border-destructive/25 px-3 py-2">
             الحد الأدنى للطلب في {zone?.name} هو {formatLyd(zone!.minOrder)} — أضف منتجات بقيمة{" "}
-            <span className="font-bold tabular-nums">{formatLyd(zone!.minOrder - subtotal)}</span> أخرى
+            <span className="font-mono font-bold tabular-nums">{formatLyd(zone!.minOrder - subtotal)}</span> أخرى
           </p>
         )}
       </div>

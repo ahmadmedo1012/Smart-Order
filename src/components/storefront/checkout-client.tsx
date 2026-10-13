@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { SkipLink } from "@/components/shared/skip-link";
 import { toast } from "sonner";
 import { randomUUID } from "@/lib/uuid";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Store, ClipboardList, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { FIELD_FOCUS_ID, type FieldKey } from "@/components/storefront/checkout/types";
 import { SuccessScreen } from "@/components/storefront/checkout/success-screen";
 import { CheckoutHold } from "@/components/storefront/checkout/checkout-hold";
@@ -49,6 +50,19 @@ export function CheckoutClient({
   slug: string;
   business: { name: string; logoUrl: string | null; whatsappNumber: string | null };
 }) {
+  /* P6-2-f3 (GROUP 1): the checkout journey — a quiet route indicator
+     (store → checkout → done) speaking the tracking-road grammar:
+     dashed spine + circular station nodes, the ACTIVE node breathing
+     through the RM-safe pulse-soft ring (the global
+     prefers-reduced-motion gate halts it). Presentation only — the
+     station set is fixed because this page IS the middle station; no
+     state, no effect, aria-current marks the step for AT. */
+  const JOURNEY = [
+    { icon: Store, label: "المتجر", state: "done" as const },
+    { icon: ClipboardList, label: "إتمام الطلب", state: "active" as const },
+    { icon: Check, label: "التسليم", state: "pending" as const },
+  ];
+
   const {
     items,
     clearCart,
@@ -229,6 +243,52 @@ export function CheckoutClient({
           Safari/Firefox move keyboard focus into <main> on skip. */}
       <main id="main" tabIndex={-1} aria-busy={!data && !loadError} className="mx-auto max-w-2xl px-4 py-5 pb-32 focus:outline-none">
         <h1 className="font-heading text-xl font-bold">إتمام الطلب</h1>
+
+        {/* P6-2-f3 (GROUP 1): the journey route — store → checkout →
+            done. Traveled road (into the form) = delivery orange at
+            50%; the road ahead stays hairline. */}
+        <ol aria-label="مسار الطلب" className="mt-3 flex items-start">
+          {JOURNEY.map((n, i) => (
+            <li
+              key={n.label}
+              aria-current={n.state === "active" ? "step" : undefined}
+              className={cn("flex items-start", i === 0 ? "shrink-0" : "flex-1")}
+            >
+              {i > 0 && (
+                <span
+                  aria-hidden="true"
+                  /* dashed segment at node-center height (circle 32px →
+                     center 16px, 2px line → 15px offset) */
+                  className={cn(
+                    "h-0 flex-1 mt-[15px] border-t-2 border-dashed",
+                    n.state === "pending" ? "border-border" : "border-primary/50"
+                  )}
+                />
+              )}
+              <div className="flex flex-col items-center gap-1">
+                <span
+                  className={cn(
+                    "flex size-8 items-center justify-center rounded-full border-2",
+                    n.state === "done" && "border-primary/50 bg-primary/10 text-accent-foreground",
+                    n.state === "active" &&
+                      "border-primary bg-accent-soft text-accent-foreground animate-pulse-soft",
+                    n.state === "pending" && "border-border bg-muted text-muted-foreground/60"
+                  )}
+                >
+                  <n.icon className="size-4" aria-hidden="true" />
+                </span>
+                <span
+                  className={cn(
+                    "text-[10px]",
+                    n.state === "active" ? "font-medium text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  {n.label}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ol>
 
         {/* Zones/payment fetch failed — explicit banner + retry (never a
             silent PICKUP-only degrade; submit stays disabled until data

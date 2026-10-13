@@ -11,13 +11,13 @@ export function CartSummarySection({ items }: { items: CartItems }) {
   return (
     <section className="mt-3 rounded-xl border border-border bg-card p-4">
       <h2 className="font-semibold text-sm mb-3">
-        ملخص السلة <span className="text-muted-foreground font-normal tabular-nums">({items.length} عنصر)</span>
+        ملخص السلة <span className="text-muted-foreground font-normal font-mono tabular-nums">({items.length} عنصر)</span>
       </h2>
       <ul className="space-y-2.5">
         {items.map((i) => (
           <li key={i.key} className="flex items-start justify-between gap-3 text-sm">
             <div className="min-w-0">
-              <span className="tabular-nums text-muted-foreground">{i.quantity}×</span>{" "}
+              <span className="font-mono tabular-nums text-muted-foreground">{i.quantity}×</span>{" "}
               <span className="font-medium">{i.productName}</span>
               {i.variantName && <span className="text-muted-foreground text-xs"> — {i.variantName}</span>}
               {i.options.length > 0 && (
@@ -30,7 +30,9 @@ export function CartSummarySection({ items }: { items: CartItems }) {
                 </div>
               )}
             </div>
-            <span className="tabular-nums font-medium shrink-0">{formatLyd(i.unitPrice * i.quantity)}</span>
+            {/* P6-2-f3 (GROUP 1): money figures ride IBM Plex Mono
+                (mixed-script stack — Latin/digits mono, Arabic sans) */}
+            <span className="font-mono tabular-nums font-medium shrink-0">{formatLyd(i.unitPrice * i.quantity)}</span>
           </li>
         ))}
       </ul>

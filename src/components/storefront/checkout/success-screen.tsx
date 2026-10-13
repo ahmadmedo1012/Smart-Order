@@ -25,12 +25,15 @@ export function SuccessScreen({ result, slug }: { result: CheckoutResult; slug: 
         <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
           رقم طلبك هو
         </p>
-        <div className="mt-2 inline-flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/25 px-5 py-2.5">
+        {/* P6-2-f3 (GROUP 1): the order-number token squares to the
+            stamp idiom (family border + soft wash) and rides the mono
+            code stack — codes are Plex Mono, per the identity. */}
+        <div className="mt-2 inline-flex items-center gap-2 rounded-sm bg-primary/10 border border-primary/25 px-5 py-2.5">
           <ClipboardList className="size-5 text-accent-foreground" aria-hidden="true" />
-          <span className="font-heading font-bold text-lg text-accent-foreground tabular-nums">{result.orderNumber}</span>
+          <span className="font-mono font-bold text-lg text-accent-foreground tabular-nums">{result.orderNumber}</span>
         </div>
         <p className="mt-3 text-sm text-muted-foreground">
-          الإجمالي: <span className="font-bold text-foreground tabular-nums">{formatLyd(result.total)}</span>
+          الإجمالي: <span className="font-mono font-bold text-foreground tabular-nums">{formatLyd(result.total)}</span>
         </p>
 
         <div className="mt-6 space-y-2.5">
@@ -63,7 +66,7 @@ export function SuccessScreen({ result, slug }: { result: CheckoutResult; slug: 
         <p className="mt-6 text-[11px] text-muted-foreground leading-relaxed">
           احفظ رابط التتبع — يمكنك مشاركته مع أي شخص لمتابعة الطلب.
           <br />
-          <span dir="ltr" className="tabular-nums">{trackUrl}</span>
+          <span dir="ltr" className="font-mono tabular-nums">{trackUrl}</span>
         </p>
       </div>
     </div>
