@@ -32,7 +32,7 @@ of the Smart family (`order.smart-link.ly`). Full product context: `PRODUCT.md`.
 | `bun install --frozen-lockfile` | Install exactly what CI/Vercel installs |
 | `npm run lint` | ESLint — must be 0 errors / 0 warnings |
 | `npx tsc --noEmit` | Typecheck — must be 0 errors |
-| `npm run test:parity` | Madarek parity snapshot (`tests/parity.mjs`, dependency-free node) |
+| `npm run test:parity` | Design parity snapshot — the Route & Node daylight contract (`tests/parity.mjs`, dependency-free node) |
 | `npm run test:unit` | node:test unit suite — Libyan money/phone seams + Tripoli day-boundary helpers + client-only display guard (`tests/unit/`, dependency-free; Node ≥ 22.18 type-strips the TS natively) |
 | `npm run test:e2e` | API E2E suite — needs a LIVE server (`node tests/e2e/api-e2e.js [baseUrl]`); CI boots one on a scratch SQLite |
 | `npm run build` | Production build (no DB needed — DB routes are force-dynamic) |
@@ -40,13 +40,20 @@ of the Smart family (`order.smart-link.ly`). Full product context: `PRODUCT.md`.
 
 ## Design canon
 
-- **Fleet canon:** `fleet/madarek` `DESIGN.md` + `frontend/src/styles/tokens.css` — the
-  single source of truth for colors/radius/motion/z/type across the family.
 - **This repo's laws:** `DESIGN.md` (local, verified-in-code digest). If it and
   `src/app/globals.css` disagree, globals.css wins — fix the doc.
-- Night = default (`#070B16` ground / `#E9B44C` gold), light = cream/copper
-  (`#FBFAF9` / `#B57438`). Tokens only — no raw hexes outside the token files.
-  Radius ladder 6/8/10/12/16/20/28. IBM Plex Sans Arabic self-hosted (no external requests).
+- **Identity — «Operational Daylight: Route & Node»** (Phase 5, r152): LIGHT is
+  the default (`:root` — paper `#F7F7F4`, navy ink `#1B2A41`, delivery orange
+  `#D14900` + pressed `#8F3A00`, steel `#3E5C76`, green `#1E7A46`); dark is the
+  explicit `.dark` «night dispatch» override (`#0D1626` / luminous `#FF7A38`).
+  The retired Madarek night/gold (`#070B16`/`#E9B44C`) must NOT be resurrected.
+- Type: **Tajawal** (arabic body, 400-800) + **Barlow Semi Condensed** (latin
+  display; arabic headings chain to Tajawal) + **IBM Plex Mono** (operational
+  codes/numerals) — self-hosted, no external requests.
+- Geometry: status/selection chips are squared **stamps** (`rounded-sm` + 1px
+  family-ink border); section dividers ride the **dashed route line**
+  (`.route-divider*`, `border-s-2 border-dashed`). Radius ladder
+  6/8/10/12/16/20/28. Tokens only — no raw hexes outside the token files.
 
 ## Parity protocol
 

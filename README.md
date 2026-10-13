@@ -9,8 +9,8 @@
 > **الإنتاج:** <https://order.smart-link.ly> · Next.js 16 · PostgreSQL (Neon) · Vercel
 
 [![CI](https://github.com/ahmadmedo1012/Smart-Order/actions/workflows/ci.yml/badge.svg)](https://github.com/ahmadmedo1012/Smart-Order/actions/workflows/ci.yml)
-[![Live](https://img.shields.io/badge/live-order.smart--link.ly-E9B44C)](https://order.smart-link.ly)
-[![License](https://img.shields.io/badge/license-proprietary-%23B57438)](./LICENSE)
+[![Live](https://img.shields.io/badge/live-order.smart--link.ly-D14900)](https://order.smart-link.ly)
+[![License](https://img.shields.io/badge/license-proprietary-%238A3400)](./LICENSE)
 
 ---
 
@@ -18,8 +18,10 @@
 
 | الوضع النهاري ☀️ | الوضع الليلي 🌙 |
 |:---:|:---:|
-| [![الصفحة الرئيسية بالوضع النهاري — العنوان «متجر رقمي لمتجرك — الطلبات تصلك في لوحة واحدة» ومجسّم هاتف لواجهة الطلبات](docs/screenshots/hero-light.jpg)](docs/screenshots/hero-light.jpg) | [![الصفحة الرئيسية بالوضع الليلي — نفس الشريط بهوية مدارك night/gold](docs/screenshots/hero-dark.jpg)](docs/screenshots/hero-dark.jpg) |
+| [![الصفحة الرئيسية بالوضع النهاري — العنوان «متجر رقمي لمتجرك — الطلبات تصلك في لوحة واحدة» ومجسّم هاتف لواجهة الطلبات (لقطة ما قبل الانقلاب — التجديد معلّق)](docs/screenshots/hero-light.jpg)](docs/screenshots/hero-light.jpg) | [![الصفحة الرئيسية بالوضع الليلي — نفس الشريط (لقطة ما قبل الانقلاب؛ الوضع الليلي الحالي هو «إرساليات الليل»: كحلي عميق وبرتقالي مضيء — تجديد الالتقاط معلّق)](docs/screenshots/hero-dark.jpg)](docs/screenshots/hero-dark.jpg) |
 
+> ⚠️ اللقطات أدناه أُلحقت قبل انقلاب هوية المرحلة الخامسة — تجديد الالتقاط (Playwright) معلّق لمهمة لاحقة؛ العلامة الحالية هي «النهار التشغيلي — الطريق والعقدة».
+>
 > مزيد من اللقطات (المتجر، إتمام الطلب، لوحة التحكم) في قسم «لقطات الشاشة» أدناه — والتعليقات الكاملة والمقاسات في [`docs/screenshots/README.md`](docs/screenshots/README.md).
 
 ---
@@ -33,7 +35,7 @@
 - **محرّك طلبات موثّق** — آلة حالات مُتحقَّقة (NEW → CONFIRMED → PREPARING → READY → OUT_FOR_DELIVERY → DELIVERED / CANCELLED / REJECTED)، أرقام طلبات عامة (`SO-20260917-0042`)، سجل تدقيق كامل، وصفحة تتبّع عامة للزبون برمز غير قابل للتخمين.
 - **مدفوعات ليبية** — نقدًا / عند التوصيل / تحويل مدار / تحويل ليبيانا، مع تأكيد يدوي من المتجر (لا نجاح زائف من أي بوابة).
 - **واتساب أولًا** — رسائل طلب مهيكلة عبر روابط `wa.me` للزبون ولصاحب العمل بعد كل طلب.
-- **لوحة تحكم للمالك** — إحصائيات اليوم وتنبيهات قابلة للتنفيذ، الطلبات بفلاتر وبحث، وإدارة المنتجات والأقسام والعملاء والتوصيل والمدفوعات والموظفين — كل شيء بالعربية RTL على هوية مدارك.
+- **لوحة تحكم للمالك** — إحصائيات اليوم وتنبيهات قابلة للتنفيذ، الطلبات بفلاتر وبحث، وإدارة المنتجات والأقسام والعملاء والتوصيل والمدفوعات والموظفين — كل شيء بالعربية RTL على هوية «الطريق والعقدة» (نهار تشغيلي: ورق وحبر كحلي وبرتقالي توصيل، مع وضع «إرساليات الليل» الاختياري).
 
 ---
 
@@ -52,11 +54,11 @@
 ## 🧰 التقنيات
 
 - **Next.js 16** (App Router) + React 19 + TypeScript
-- **Tailwind CSS 4** + shadcn/ui (Radix) — نظام تصميم مدارك: ليلي night/gold ونهاري cream/copper، بالوضعين.
+- **Tailwind CSS 4** + shadcn/ui (Radix) — هوية «الطريق والعقدة»: نهاري افتراضي (ورق `#F7F7F4`، حبر كحلي `#1B2A41`، برتقالي توصيل `#D14900`) ووضع ليلي «إرساليات الليل» (`#0D1626`/`#FF7A38`).
 - **Prisma ORM** — SQLite للتطوير المحلي، PostgreSQL (Neon) في الإنتاج.
 - **مصادقة جلسات مخصصة** — PBKDF2-SHA512 بـ 600 ألف تكرار، رموز جلسات مُجزَّأة (hashed)، وكوكيز httpOnly.
 - **الأموال** — درهم صحيح (millimes) في كل المسارات: 1 د.ل = 1000 درهم، بلا أي حساب فاصلة عائمة.
-- **خطوط مستضافة ذاتيًا** — subsets من IBM Plex Sans Arabic (400–700، عربي + لاتيني) بموجب OFL — تكافؤ مدارك الحرفي، بلا أي طلبات خارجية.
+- **خطوط مستضافة ذاتيًا** — Tajawal (400–800، عربي + لاتيني) للنص، Barlow Semi Condensed (600/700) للعرض اللاتيني، وIBM Plex Mono للرموز التشغيلية — بموجب SIL OFL، بلا أي طلبات خارجية.
 
 ---
 
@@ -106,7 +108,7 @@ bun run build                 # بناء الإنتاج
 | `bun run start` | تشغيل نسخة الإنتاج محليًا |
 | `bun run start:selfhost` | تشغيل حزمة standalone (`NODE_ENV=production`) |
 | `bun run lint` | ESLint |
-| `bun run test:parity` | اختبارات تكافؤ مدارك (الألوان، نصف القطر، الحركة، z-index، الارتفاعات + بوابات الاستهلاك) |
+| `bun run test:parity` | اختبارات تكافؤ التصميم (عقد «الطريق والعقدة» النهاري: الألوان، نصف القطر، الحركة، z-index، الارتفاعات + بوابات الاستهلاك) |
 | `bun run test:unit` | اختبارات وحدة node:test بلا تبعيات لدرزات المال والهاتف الليبية (الأرقام الشرقية ٠٩١٢٣٤٥٦٧٨، الفواصل ٫/،، بادئات +218/00218، العقد الأوسع: محمول 09 بأطوال 9-10 وأرضي 0[1-9]، سقف المحفظة 99 د.ل، حدود اليوم بتوقيت طرابلس) + حارس عرض التواريخ للعميل فقط |
 | `bun run test:e2e` | مجموعة E2E للـ API: المصادقة، عزل المستأجرين، دورة حياة الطلب، إعادة التسعير، حدود المعدل — تعمل ضد أي Base URL |
 | `bun run db:push` | دفع مخطط Prisma إلى قاعدة البيانات (`--accept-data-loss`) |
@@ -120,7 +122,7 @@ bun run build                 # بناء الإنتاج
 
 ```bash
 bun run dev                                  # ابدأ خادم التطوير
-bun run test:parity                          # تكافؤ مدارك
+bun run test:parity                          # تكافؤ التصميم
 node tests/e2e/api-e2e.js https://order.smart-link.ly   # E2E ضد أي نشر
 ```
 
@@ -178,13 +180,13 @@ tests/         unit/ (node:test) + parity.mjs + e2e/api-e2e.js
 
 ---
 
-## 🛰️ جزء من منظومة مدارك — Part of the Madarek Ecosystem
+## 🛰️ جزء من منظومة سمارت — Part of the Smart Ecosystem
 
-> نظام تصميم واحد لكل المشاريع · هوية مدارك: ليلي night/gold `#070B16`/`#E9B44C` — نهاري cream/copper `#FBFAF9`/`#B57438` — خط IBM Plex Sans Arabic
+> منذ المرحلة الخامسة انفصلت هويات المنظومة: كل منتج يحمل عقده البصري الخاص — سمارت أوردر يحمل «النهار التشغيلي: الطريق والعقدة» (ورق `#F7F7F4` / حبر كحلي `#1B2A41` / برتقالي توصيل `#D14900`، خطوط Tajawal + Barlow Semi Condensed + IBM Plex Mono). مدارك تبقى المرجع التاريخي لنظام التصميم العائلي — لا هوية حية في هذا المستودع.
 
 | المشروع | الدور | GitHub | الموقع المباشر |
 |---|---|---|---|
-| 🎓 **مدارك / Madarek** | منصة التعليم الذكي لجامعة الزاوية — المرجع الأم لنظام التصميم | [github.com/ahmadmedo1012/madarek](https://github.com/ahmadmedo1012/madarek) | [madarek.onrender.com](https://madarek.onrender.com) |
+| 🎓 **مدارك / Madarek** | منصة التعليم الذكي لجامعة الزاوية — المرجع التاريخي لنظام التصميم العائلي | [github.com/ahmadmedo1012/madarek](https://github.com/ahmadmedo1012/madarek) | [madarek.onrender.com](https://madarek.onrender.com) |
 | 🔗 **سمارت لينك / Smart-Link** | المظلة الرقمية للأعمال في ليبيا | [github.com/ahmadmedo1012/Smart-Link](https://github.com/ahmadmedo1012/Smart-Link) | [smart-link.ly](https://smart-link.ly) |
 | 🍽️ **سمارت منيو / Smart-Menu** | منيو رقمي وطلبات واتساب للمطاعم | [github.com/ahmadmedo1012/Smart-Menu](https://github.com/ahmadmedo1012/Smart-Menu) | [menu.smart-link.ly](https://menu.smart-link.ly) |
 | 🤖 **سمارت بوت / SmartBot** | بوت ماسنجر وأتمتة لصفحات فيسبوك | [github.com/ahmadmedo1012/SmartBot](https://github.com/ahmadmedo1012/SmartBot) | [bot.smart-link.ly](https://bot.smart-link.ly) |
@@ -195,4 +197,4 @@ tests/         unit/ (node:test) + parity.mjs + e2e/api-e2e.js
 مشروع خاص — جميع الحقوق محفوظة © 2026 أحمد مدو (`ahmadmedo1012`). النص القانوني الكامل في ملف [`LICENSE`](LICENSE).
 
 ### الخطوط
-العلامة الأساسية **IBM Plex Sans Arabic** (400–700، subsets عربي + لاتيني) مع IBM Plex Mono — self-hosted بلا أي طلبات خارجية، وكلاهما بموجب **رخصة SIL Open Font License 1.1**.
+الخطوط المستضافة ذاتيًا: **Tajawal** (400–800، عربي + لاتيني) + **Barlow Semi Condensed** (600/700، لاتيني) + **IBM Plex Mono** — بلا أي طلبات خارجية، والجميع بموجب **رخصة SIL Open Font License 1.1**.

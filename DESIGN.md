@@ -4,35 +4,39 @@
 > code — follow them; change them only deliberately and update this file in the
 > same commit.
 >
-> **Upstream source:** the Madarek design system (`madarek/frontend/src/styles/
-> tokens.css` — the sibling-family single source of truth; it stands alone,
-> no intermediate digest). **Token SSOT in this repo:**
-> `src/app/globals.css` (`:root` = night layer, `.light` = cream layer,
-> `@theme inline` = Tailwind bridge). Fonts: `public/fonts/fonts.css`. If this
-> file and globals.css disagree, globals.css wins — fix the doc.
+> **Token SSOT in this repo:** `src/app/globals.css` (`:root` = the LIGHT
+> default, `.dark` = the night-dispatch opt-in, `@theme inline` = Tailwind
+> bridge). Fonts: `public/fonts/fonts.css`. If this file and globals.css
+> disagree, globals.css wins — fix the doc.
 
-## Identity
+## Identity — «Operational Daylight: Route & Node» (Phase 5, r152)
 
-Madarek night world (default theme): ground `#070B16` night-indigo, surfaces
-`#0D1428 / #121A36`, ink `#F2EFE6` warm sand, accent `#E9B44C` gold (hover
-`#F5D48A` · strong `#C9962F` · soft `#2C2312` · on-accent ink `#05070F`),
-hairlines `#1B2444 / #263052`, secondary text `#C3C8DC`. Light mode is a
-first-class parity mode: cream ground `#FBFAF9`, white cards, ink `#191918`,
-copper accent `#B57438` (hover `#9A5F25` · strong/deep `#5C3416` · soft
-`#F4E4D2` · fg `#1A0F06`), hairlines `#E9E7E2 / #D9D6D0`. All as
-dual-lightness tokens (both layers AA-verified). The old flame system
-(`#010000` ground / `#bc4700` flame / Cairo + Readex Pro / radius 8-12-18-28)
-is RETIRED — do not reintroduce it; only "was ..." migration comments may
-mention those hexes.
+Smart Order is the ecosystem's **daytime operations room** — dispatch sheets,
+courier vests, and shipping stamps. Phase 5 deliberately breaks the family
+Madarek night monoculture: this product's contract is its own (Smart-Link
+keeps the family night; Smart-Menu goes warm culinary; SmartBot goes petrol).
 
-**Brand signature:** the gold-metal mark gradient `linear-gradient(145deg,
-#C9962F, #E9B44C)` with void-ink glyph `#05070F` — carried by the raster
-brand assets (the dead `shared/brand.tsx` component, zero consumers, was
-removed in r132). `text-gradient-orange` rides gold → hover-gold at 135° in dark,
-copper `#B57438 → #9A5F25` in light. Raster brand assets (favicon,
-icon-192/512, apple-touch-icon, brand-icon, favicon.ico, og-default.png) are
-night+gold. (The flame-era `public/showcase-store.webp` showcase asset —
-recolored once in r125, zero consumers — was removed in r133.)
+- **LIGHT-first.** `:root` is the light theme (`color-scheme: light`);
+  `.dark` («إرساليات الليل» — night dispatch) is the explicit opt-in
+  (next-themes `defaultTheme="light"` + the pre-paint boot script).
+- Ground paper `#F7F7F4` · raised white `#FFFFFF` · soft `#EFEFEA` ·
+  hairline `#E2E2DC` · ink NAVY `#1B2A41` · secondary `#4E5A6E` (6.4:1) ·
+  muted `#6E7684`.
+- Primary **DELIVERY ORANGE** `#D14900` (white on it 4.5:1 ✓ · hover
+  `#B23E00` · pressed `#8F3A00` · as TEXT `--accent-ink` `#8A3400`, 7.5:1
+  on paper). Info STEEL `#3E5C76` · success `#1E7A46` · warning amber ·
+  destructive rose. Orange = the courier vest; navy = the dispatch ink.
+- Night dispatch: ground `#0D1626`, surface `#152238`, surface-2 `#1B2A41`,
+  paper ink `#F1F0EA`, LUMINOUS orange `#FF7A38` with dark on-orange ink
+  `#241307` (6.9:1) · accent-as-text `#FFA170` (9:1) · hover `#FF8A50` ·
+  pressed `#E85D10` · hairline `#24344F`.
+- **WhatsApp green is reserved for WhatsApp UI only** (`--whatsapp`
+  constant; text-on-fill rides `--whatsapp-foreground` per theme).
+
+**Brand signature:** the orange press register (`active:bg-(--accent-pressed)`)
+and the square shipping stamp. Raster brand assets (favicon, icons,
+`og-default.png`) are PRE-FLIP captures — regeneration is pending (tracked
+Phase 6 debt; manifest + viewport metas already ride the daylight pair).
 
 ## Color
 
@@ -41,144 +45,140 @@ recolored once in r125, zero consumers — was removed in r133.)
   recharts selectors, device-mockup materials; audit before adding any).
 - **9 pastel families** × {bg, ink, deep} in BOTH modes: peach · mint ·
   lavender · sky · yellow · rose · sand · grey · copper (`--c-*-bg/-ink/-deep`
-  in `:root` and `.light`). Dark = space-tinted deep bgs + luminous inks;
-  light = pastel bgs + saturated inks + deep text shades.
-- **Status language = the canonical three-way split** (restored r125): base =
-  the family ink (FILL/STROKE role — dots, usage bars, soft-tint borders;
-  light: mint `#4FA66D` / yellow `#D6A330` / sky `#5C8FCE` / rose `#DD6E78`;
-  dark: the luminous inks), `*-ink` = the family deep for TEXT (light:
-  `#1F4F30 / #6B4C0B / #1F3D63 / #6B2128`, AA 6.2-11.2:1 on every consumer
-  surface; dark: same as base), `*-soft` = the family -bg pastel tint.
-  Fill foregrounds = `#191918` ink on the mids (Madarek `--danger-fg`
-  pattern; NEVER white on the mid or luminous fills). Status semantics:
-  NEW = gold, CONFIRMED/OUT_FOR_DELIVERY = info, PREPARING/READY-adjacent =
-  warning/saffron, DELIVERED/PAID = success, REJECTED/REFUNDED =
-  destructive.
-- **WhatsApp green** (`#25D366` family) appears exclusively on
-  WhatsApp-brand actions; it is a brand, not a success color.
+  in `:root` and `.dark`), re-anchored to the daylight world: sky = STEEL,
+  mint = delivery green, yellow = amber, copper = THE delivery-orange family,
+  grey = navy-grey neutrals. Light = pastel bgs + saturated inks + deep text
+  shades; night = navy-tinted deep grounds + luminous inks.
+- **Status language = the canonical three-way split:** base = the family ink
+  (FILL/STROKE role — dots, usage bars, soft-tint borders), `*-ink` = the
+  family deep for TEXT (light) / the luminous ink (night), `*-soft` = the
+  family -bg pastel tint. Fill foregrounds = white on the light mids, dark
+  void ink on the night luminous fills — never the wrong way. Status mapping
+  (status-badges.tsx SSOT): NEW/READY = copper, CONFIRMED/OUT_FOR_DELIVERY =
+  sky (steel), PREPARING = yellow (amber), DELIVERED/PAID = mint, CANCELLED/
+  UNPAID = grey, REJECTED/REFUNDED = rose.
 
 ## Typography
 
-- **IBM Plex Sans Arabic is THE family** (body + display + headings,
-  `--font-sans` = `--font-heading`), self-hosted 400/500/600/700 × {arabic,
-  latin} subsets, `font-display: swap`, the two arabic subsets preloaded in
-  `app/layout.tsx`. Accent cut: Plex Mono (latin) for codes/IDs. (r132: the
-  dead Plex Serif italic + Noto Naskh Arabic faces — zero consumers — were
-  removed with the `.font-naskh` rule.)
-- Legacy `--font-cairo` is a documented shim NAME whose value is defined in
-  `public/fonts/fonts.css` (`:root { --font-cairo: "IBM Plex Sans Arabic" }`,
-  ~line 38) — kept as the load-bearing contract (an undefined var would
-  invalidate the whole font-family declaration); the literal
-  `"IBM Plex Sans Arabic"` fallback in every stack keeps things resolvable
-  regardless. Cairo/Readex Pro files are deleted from the repo.
-- Weights ≤ 700 (Plex Sans Arabic ships 400-700 only; 700 carries display —
-  no true 800 exists).
+- **BODY = Tajawal** (self-hosted 400/500/700/800 × {arabic, latin} subsets,
+  `font-display: swap`, the two arabic subsets preloaded in `app/layout.tsx`).
+- **DISPLAY/HEADINGS = Barlow Semi Condensed** (self-hosted 600/700, latin
+  only). `--font-heading` = `"Barlow Semi Condensed", var(--font-cairo),
+  "Tajawal", …` — Barlow carries Latin display; Arabic headings chain to
+  Tajawal (never Times). `--font-display` rides the same chain.
+- **OPERATIONAL CODES = IBM Plex Mono** (`--font-mono`, latin): order IDs,
+  page counts, pagination numerals — anything a dispatcher reads as a code.
+- The legacy `--font-cairo` shim resolves to `"Tajawal"`
+  (`public/fonts/fonts.css` ~line 38) — kept as the load-bearing contract
+  (an undefined var would invalidate the whole font-family declaration).
+- Weights ≤ 800 (Tajawal ships 400-800; 800 carries display).
 - **No letter-spacing on Arabic, ever** — the `[dir=rtl] :lang(ar)` +
-  heading guards in globals.css enforce it (Madarek ruling #2: tracking
-  breaks cursive joins). Tracking is legal only on Latin-safe runs
-  (Latin wordmarks). No synthetic italics on Arabic.
+  heading guards in globals.css enforce it (tracking breaks cursive joins).
+  Tracking is legal only on Latin-safe runs. No synthetic italics on Arabic.
 - Numbers everywhere: `tabular-nums` + `lining-nums` globally (this is a
   money product — 1 LYD = 1000 millimes, always Int millimes, never floats).
 
-## Shape, space, elevation
+## Shape, space, elevation — «stamps & roads»
 
-- Radius ladder (Madarek "Notion-soft"): **6 / 8 / 10 / 12 / 16 / 20 / 28**
-  (+ `9999` pills) via `--radius-xs … --radius-3xl` (`@theme`): buttons and
-  inputs `rounded-lg` (12), cards `rounded-xl` (16 = Madarek `.card` r-xl),
-  dialogs/sheets `rounded-2xl` (20), hero panels `rounded-3xl` (28). Never
-  ad-hoc px radii.
+- Radius ladder: **6 / 8 / 10 / 12 / 16 / 20 / 28** (+ `9999` pills) via
+  `--radius-xs … --radius-3xl`: buttons/inputs `rounded-md` (10), cards
+  `rounded-xl` (16), dialogs/sheets `rounded-2xl` (20). Never ad-hoc radii.
+- **THE STAMP:** status and selection chips are SQUARE-CORNERED
+  (`rounded-sm`) with a 1px family-ink border over the solid family ground
+  + family deep ink — the shipping-stamp grammar (badge.tsx,
+  status-badges.tsx, active filter pills/tabs, pagination active page,
+  error states). A round pill reads as idle; a squared stamp reads as
+  franked/selected. Do not round the stamps back into pills.
+- **THE ROAD:** dividers between sections ride the dashed route line —
+  `.route-divider` (2px dashed orange + circular node) /
+  `.route-divider-quiet` (hairline road at rest) / `.route-spine-segment`
+  (vertical 2px dashed inline-start spine); the tracking timeline draws the
+  road with `border-s-2 border-dashed` segments between station nodes.
 - Spacing: Tailwind scale only (4px base).
-- Elevation: `--elev-1..5` dual grammar — dark = fill-led + 1px inset white
-  top-light; light = soft two-layer black (`--shadow-card/-h/-pop/-modal`
-  compose on top). Glass: `rgba(11,16,32,0.78)` dark /
-  `rgba(251,250,249,0.78)` light + 16px blur + theme hairline (`--glass-*`).
-- Grounds are FLAT: no body radial in either theme (`--background-radial:
-  none`); painted gold/copper hero washes live ONLY in `--menu-glow` hero
-  scopes.
-- Under `prefers-contrast: more`: elevations collapse to solid rings (white
-  .36-.68 dark / black .32-.64 light), glass goes solid, borders strengthen —
-  ported from Madarek tokens.css (`:root:not(.light)` + `.light` blocks).
-
-## Motion
-
-Madarek motion ladder: `--t-micro 80 / --t-fast 160 / --t-base 240 / --t-slow
-380 / --t-slower 520 / --t-cinema 720ms` + canonical easings and springs
-(`--ease-spring`, `--ease-bounce`, `--ease-smooth` = Madarek `--ease-out`).
-Press register: buttons `active:scale-[0.97]`, cards lift `-3px` on hover
-(`card-premium`). `[dir=rtl]` flips `--motion-direction: -1` for logical
-translations. **Reduced motion** = the Madarek 0ms ZEROING: every `--t-*`
-token drops to `0ms` (unlayered block — a layered redefinition would lose the
-cascade to the unlayered `:root` ladder) + the universal `0.01ms` guard with
-`iteration-count: 1`; state changes and final frames are preserved, nothing
-is left mid-air.
+- Elevation: `--elev-1..5` — daylight = soft two-layer navy-inked black;
+  night = fill-led + 1px inset white top-light (`--shadow-card/-h/-pop/
+  -modal` compose on top). Glass: paper rgba + 16px blur + navy hairline.
+- Grounds are FLAT: no body radial in either theme; orange hero washes live
+  ONLY in `--menu-glow` hero scopes.
+- Under `prefers-contrast: more`: elevations collapse to solid rings, glass
+  goes solid, borders strengthen.
 
 ## Components
 
 - Primitives (`src/components/ui/*`) are the default choice — never
-  re-implement a primitive. Buttons: h-12 default, `font-bold`,
-  `rounded-lg`, `active:scale-[0.97]`, gold/copper focus rings
-  (`--state-input-focus-halo` color-mix recipe, no raw oklch).
-- **Status chips** (`shared/status-badges.tsx`, `ui/badge.tsx`):
-  SOLID pastel family grounds — `bg-(--c-<family>-bg) + text-(--c-<family>-deep)`,
-  borderless (r148, fleet r131-F4 ruling; the old `/15` translucent washes
-  are retired), plus a base-colored dot on status chips. `ui/badge.tsx`
-  variants (destructive/gold/success/warning/info/saffron) speak the same
-  language; `saffron` maps onto the yellow family.
-- **Empty states** (`shared/states.tsx`): accent-tinted icon ring
-  (`--orange` 8% wash + 20% border), never hand-rolled.
+  re-implement a primitive. Buttons: `h-11` 44px default (`h-12` 48 lg),
+  `font-bold`, `active:scale-[0.97]`, orange press register
+  `active:bg-(--accent-pressed)`, token focus rings (`--state-focus-ring-*`).
+- **Status stamps** (`shared/status-badges.tsx`, `ui/badge.tsx`): solid
+  family ground + family deep ink + 1px family-ink border + squared
+  `rounded-sm` corner, plus a base-colored dot on status chips.
+- **Dashboard chrome (Phase 6 grammar):** PageHeader carries an optional
+  quiet route divider + a mono `meta` line for counts; UnderlineTabs'
+  active tab and FilterPills' active pill speak the stamp language;
+  TablePagination numerals ride Plex Mono with squared controls;
+  ConfirmDialog gets a header hairline + squared destructive confirm;
+  skeletons carry node punctuation (route-station dots) and dashed
+  section variants; FieldError is a quiet rose stamp.
+- **Empty states** (`shared/states.tsx`): stations on the route
+  (RouteStationRoad — dashed road + terminal nodes), never hand-rolled.
 - Icons: lucide named imports only. Forward motion in RTL points LEFT
-  (`rtl:rotate-180` on arrows — e.g. the hero CTA); back affordances use
-  ArrowRight/ChevronRight (RTL convention).
-- Inputs: h-12 `rounded-lg`, placeholder rides full-strength
-  `text-placeholder-text` (AA 5.0-6.8:1 — do NOT re-add opacity modifiers).
+  (`rtl:rotate-180`); back affordances use ArrowRight/ChevronRight.
+- Inputs: h-11/h-12 `rounded-md`, placeholder rides full-strength
+  `text-placeholder-text` (AA — do NOT re-add opacity modifiers).
+
+## Motion
+
+Ladder (theme-independent): `--t-micro 80 / --t-fast 160 / --t-base 240 /
+--t-slow 380 / --t-slower 520 / --t-cinema 720ms` + canonical easings and
+springs. Press register: buttons `active:scale-[0.97]` + the orange pressed
+ramp; cards lift `-3px` on hover (`card-premium`). `[dir=rtl]` flips
+`--motion-direction: -1`. **Reduced motion** = the 0ms ZEROING: every
+`--t-*` token drops to `0ms` (unlayered block) + the universal `0.01ms`
+guard with `iteration-count: 1`; state changes and final frames are
+preserved, nothing is left mid-air.
 
 ## RTL & layout
 
 Arabic RTL-first (`lang="ar" dir="rtl"`); numeric/Latin runs (phones, order
 codes, URLs) get `dir="ltr"` or `bdi` isolation. 1220px landing column;
 mobile-first storefront with bottom nav + sticky order bar + safe-area
-insets (`safe-bottom`). Touch targets ≥ 44px — the family 44/48/52
-control canon (r150 §8): ordinary buttons ride `h-11` 44 / `h-12` 48 /
-52; the r131 `h-10` 40px CTA rung is retired (default Button = `h-11`,
-pinned by parity in sync with Smart-Link); sanctioned compact rungs
-(sm 32 / icon 40 square) never carry primary CTAs. Film-grain atmosphere overlay
-at 2.2%/1.2% opacity (pointer-events none). Sticky footer discipline:
-`min-h-dvh flex-col` + `mt-auto`.
+insets. Touch targets ≥ 44px — the 44/48/52 control canon (default Button
+`h-11`, pinned by parity). Film-grain atmosphere overlay at 2.2%/1.2%
+opacity (pointer-events none). Sticky footer: `min-h-dvh flex-col` +
+`mt-auto`.
 
 ## Mode rule (I-12)
 
-Persuade surfaces (landing, auth) may carry the full gold identity
+Persuade surfaces (landing, auth) may carry the full orange identity
 (gradients, glow, showcase). Operate surfaces (dashboard) get a thin header
-accent AT MOST — never port marketing ambience into CRUD density.
-
-**Landing theme-invariance (r148, 19-AUDIT-SO SO-D8):** the landing
-homepage is a FIXED night world — `.landing` carries no `.light`
-overrides by design, and the theme toggle appears on store/dashboard
-surfaces only («الصفحة الهبوطية عالم ثابت — الوضع الليلي/النهاري يبدأ من
-المتجر»). The parity gates enforce this isolation (landing scope
-isolation) — do NOT add `.light` overrides to landing.css. Product
-surfaces (store/checkout/dashboard) are full dual-lightness.
+accent AT MOST — never port marketing ambience into CRUD density. The
+landing is a FIXED daylight world — no theme toggle on it (the toggle
+appears on store/dashboard/auth surfaces only). Product surfaces
+(store/checkout/dashboard/tracking) are full dual-lightness.
 
 ## SEO/metadata conventions
 
 Title template `%s | سمارت أوردر`. Open Graph cards point at
-`/og-default.png` (1200×630, Madarek night/gold identity). `manifest.json`:
-`theme_color #E9B44C`, `background_color #070B16`; viewport `themeColor`
-dual `#FBFAF9`/`#070B16`. NOTE: `NEXT_PUBLIC_SITE_URL` must be a REAL url or
-unset — an empty string crashes `new URL()` in `layout.tsx` metadata (dev
-500s the whole site; fixed in `.env.example` r125).
+`/og-default.png` (1200×630 — pre-flip raster, regen pending).
+`manifest.json`: `theme_color #D14900`, `background_color #F7F7F4`; viewport
+`themeColor` dual `#F7F7F4`/`#0D1626`. NOTE: `NEXT_PUBLIC_SITE_URL` must be
+a REAL url or unset — an empty string crashes `new URL()` in `layout.tsx`
+metadata (dev 500s the whole site).
 
-## Do's and Don'ts
+## Anti-patterns (do not resurrect)
 
-- Do keep WhatsApp green off non-WhatsApp surfaces.
-- Do render status as a SOLID pastel family ground + `-deep` text
-  (r148 fleet ruling) — text NEVER rides the base mid-tones (they fail
-  AA in light) and status is never a translucent alpha wash.
-- Do use the gold metal gradient only on the brand mark and primary CTAs.
-- Don't introduce a second accent family (no blues, purples, emeralds —
-  families outside the 9 pastel set are for charts/illustration only).
-- Don't use emoji as icons — lucide stroke set only.
-- Don't use generic Tailwind gray; the neutrals are night-indigo (dark) /
-  warm cream (light).
-- Don't animate layout properties; transform/opacity only.
-- Don't track (letter-space) Arabic — ever.
+- **The Madarek night/gold identity** — indigo `#070B16` ground, gold
+  `#E9B44C`, sand `#F2EFE6`, night-first default. RETIRED for this product;
+  only "was …" migration comments may mention those hexes. The night
+  DISPATCH (`.dark` #0D1626/#FF7A38) is this product's own dark mode, not
+  a Madarek port.
+- Rounding the stamps back into pills (selection/status grammar is square).
+- Solid hairlines where the road grammar asks for dashes (section
+  dividers, tracking spine) — and dashes where UI density asks for solid.
+- A second accent family (no blues/purples/emeralds outside the 9 pastel
+  set — charts/illustration only). Generic Tailwind gray (neutrals are
+  navy-inked).
+- WhatsApp green off non-WhatsApp surfaces; white on the light mid fills or
+  dark ink on night pastels; emoji as icons (lucide only).
+- Animating layout properties (transform/opacity only); letter-spacing on
+  Arabic; ad-hoc px radii.
