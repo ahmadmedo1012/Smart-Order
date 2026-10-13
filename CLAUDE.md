@@ -35,8 +35,30 @@ of the Smart family (`order.smart-link.ly`). Full product context: `PRODUCT.md`.
 | `npm run test:parity` | Design parity snapshot — the Route & Node daylight contract (`tests/parity.mjs`, dependency-free node) |
 | `npm run test:unit` | node:test unit suite — Libyan money/phone seams + Tripoli day-boundary helpers + client-only display guard (`tests/unit/`, dependency-free; Node ≥ 22.18 type-strips the TS natively) |
 | `npm run test:e2e` | API E2E suite — needs a LIVE server (`node tests/e2e/api-e2e.js [baseUrl]`); CI boots one on a scratch SQLite |
+| `npm run test:e2e:browser` | **Playwright browser battery** (`tests/browser/`) — boots its own server: `prisma db push` on the DEDICATED scratch SQLite `file:./db/e2e.db` → `scripts/e2e-seed.mjs` → `next start` on port 3115. Requires a prior `npm run build`. Chromium only, 2 workers, locale ar-LY |
 | `npm run build` | Production build (no DB needed — DB routes are force-dynamic) |
 | `npm run dev` / `db:push` / `db:generate` | Dev server / schema push / client generate |
+
+### Browser e2e (Phase 6, P6-2-f4)
+
+- `bun run build` ONCE, then `npm run test:e2e:browser` — the webServer in
+  `playwright.config.ts` does the rest (schema push → seed → `next start`).
+- **Never port 3000/3111-3114** — the battery owns 3115 (`E2E_PORT` override).
+- The scratch DB is `file:./db/e2e.db` (Prisma resolves it to `prisma/db/e2e.db`)
+  — it never touches dev data; `scripts/e2e-seed.mjs` REFUSES to run on any
+  other DATABASE_URL.
+- Seeded universe: the demo store (`/store/demo-store` — 6 products, 2 zones,
+  3 payment methods, identical data to `/api/seed`) + the merchant
+  `owner@demo.smart-order.ly` / `E2e-Oasis-2026` (OWNER, env-overridable
+  `E2E_MERCHANT_EMAIL`/`E2E_MERCHANT_PASSWORD`).
+- Specs assert the real UI copy/selectors: full customer journey (store →
+  dialog → cart → checkout → POST 201 → `/track?placed=1`), tracking road
+  (6 stations + terminus, PICKUP hides OUT_FOR_DELIVERY, aria-live stamp, mono
+  order number), merchant dashboard (login → orders list → NEW→CONFIRMED
+  transition via the real PATCH), focus-visible ring + 390px overflow.
+- The merchant login rate limit is 10/10min per IP — the battery logs in once
+  per run; rapid re-runs within 10 minutes can trip it (delete
+  `prisma/db/e2e.db` and re-run for a fresh universe).
 
 ## Design canon
 

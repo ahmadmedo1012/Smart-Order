@@ -5,7 +5,7 @@
  * تسجّل مواصفات المتصفح دخوله عبر نموذج الدخول الحقيقي.
  *
  * حارس: يرفض العمل إلا على قاعدة e2e المخصصة — لا يزرع قاعدة التطوير
- * أبدًا (smart-order.db).
+ * أبدًا (قاعدة التطوير الافتراضية — راجع .env.example).
  *
  * Usage (تُشغَّل تلقائيًا من playwright.config.ts webServer):
  *   DATABASE_URL="file:./db/e2e.db" node scripts/e2e-seed.mjs

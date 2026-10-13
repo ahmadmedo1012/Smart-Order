@@ -167,3 +167,63 @@ jobs:
           name: e2e-server-log
           path: server.log
           retention-days: 7
+
+  # P6-2-f4 (Phase 6): المستودع لم يكن لديه قط e2e للمتصفح — وظيفة
+  # حقيقية الآن: Playwright/Chromium على خادم إنتاج مبني، فوق قاعدة
+  # SQLite تجريبية مخصصة (db/e2e.db — بذرة scripts/e2e-seed.mjs:
+  # المتجر التجريبي + تاجر OWNER). نفس بيئة وظيفة test أعلاه
+  # (bun frozen · generate · build) + تثبيت chromium؛ webServer داخل
+  # playwright.config.ts يقلع بالسلسلة كاملة على المنفذ 3115.
+  browser:
+    name: Browser e2e (Playwright + SQLite تجريبية مخصصة)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: quality
+    env:
+      # قاعدة البطارية المخصصة — لا تلمس قاعدة وظيفة test
+      # (db/smart-order.db) أبدًا؛ سكربت البذرة يرفض غيرها.
+      DATABASE_URL: "file:./db/e2e.db"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Bun 1.3.14
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: Install dependencies (frozen)
+        run: bun install --frozen-lockfile
+
+      # توليد عميل Prisma قبل البناء (webServer الخاص بالبطارية يعيد
+      # دفع المخطط على قاعدته المخصصة في وقت التشغيل)
+      - name: Prisma generate
+        run: npx prisma generate
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright chromium
+        run: npx playwright install --with-deps chromium
+
+      # E2E_PORT افتراضي 3115 داخل التكوين؛ webServer يدير
+      # db push + البذرة + next start بنفسه
+      - name: Browser battery
+        run: npm run test:e2e:browser
+
+      - name: Upload Playwright artifacts (عند الفشل فقط)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore

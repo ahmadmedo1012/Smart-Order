@@ -1329,6 +1329,32 @@ for (const [name, okFlag] of P6_STOREFRONT) {
   else failures.push(`phase6 storefront gate FAILED: ${name}`);
 }
 
+// ── P6-2-f4 (Phase 6): BROWSER E2E BATTERY — the suite + its scratch
+// universe under test: the config contract (dedicated e2e SQLite db +
+// port 3115 + tests/browser + ar-LY + chromium + the db-push/seed/start
+// webServer chain) and the seed script's safety rails (demo-store +
+// OWNER merchant + the refusal guard that keeps it off the dev db).
+// Same consumption-pin shape as the layers above. ────────────────────
+const P6_E2E = [
+  ['e2e: the Playwright config pins the battery contract (tests/browser · chromium · ar-LY · 2 workers · port 3115 · dedicated e2e.db + seed + next start webServer)',
+    R('playwright.config.ts').includes('testDir: "tests/browser"') &&
+    R('playwright.config.ts').includes('locale: "ar-LY"') &&
+    R('playwright.config.ts').includes('E2E_PORT || "3115"') &&
+    R('playwright.config.ts').includes('file:./db/e2e.db') &&
+    R('playwright.config.ts').includes('node scripts/e2e-seed.mjs') &&
+    R('playwright.config.ts').includes('devices["Desktop Chrome"]')],
+  ['e2e: the seed script guards its universe (refuses any non-e2e DATABASE_URL, never references the dev db) and seeds the demo store + an OWNER merchant (same hash algorithm as src/lib/password.ts)',
+    R('scripts/e2e-seed.mjs').includes('e2e.db') &&
+    !R('scripts/e2e-seed.mjs').includes('smart-order.db') &&
+    R('scripts/e2e-seed.mjs').includes('demo-store') &&
+    R('scripts/e2e-seed.mjs').includes('role: "OWNER"') &&
+    R('scripts/e2e-seed.mjs').includes('pbkdf2$${ITERATIONS}')],
+];
+for (const [name, okFlag] of P6_E2E) {
+  if (okFlag) passed += 1;
+  else failures.push(`phase6 browser-e2e gate FAILED: ${name}`);
+}
+
 // ── report ───────────────────────────────────────────────────────────────────
 
 if (failures.length > 0) {
