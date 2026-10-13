@@ -171,7 +171,8 @@ export function CartDrawer({
             </p>
             <Button
               asChild
-              className="w-full text-base font-bold"
+              size="lg"
+              className="w-full"
               onClick={onCheckout}
             >
               <Link href={`/store/${slug}/checkout`}>

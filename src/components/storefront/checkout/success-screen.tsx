@@ -45,7 +45,7 @@ export function SuccessScreen({ result, slug }: { result: CheckoutResult; slug: 
               href={`https://wa.me/${result.whatsapp.number}?text=${encodeURIComponent(result.whatsapp.message)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="whatsapp-btn w-full h-12 rounded-lg font-bold text-base inline-flex items-center justify-center gap-2 transition-colors" /* r150: whatsapp hand-rolled twin keeps its 48px row with the lg CTA above */
+              className="whatsapp-btn w-full h-12 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-colors" /* r150: whatsapp hand-rolled twin keeps its 48px row with the lg CTA above */
             >
               <MessageCircle className="size-5" aria-hidden="true" />
               إرسال تفاصيل الطلب عبر واتساب

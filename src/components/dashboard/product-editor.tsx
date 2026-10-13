@@ -418,7 +418,7 @@ export function ProductEditor({
 
             {/* Image */}
             <section className="space-y-2">
-              <Label id="p-image-label">صورة المنتج</Label>
+              <Label>صورة المنتج</Label>
               <div className="flex items-start gap-4">
                 <div className="relative size-28 rounded-xl border border-dashed border-border bg-muted/50 overflow-hidden shrink-0">
                   {imageUrl ? (
