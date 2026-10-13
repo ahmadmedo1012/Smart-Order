@@ -1,10 +1,22 @@
 #!/usr/bin/env node
 /**
- * test(r126): Madarek parity snapshot — pin the canonical design tokens.
- * (Task 11-a, Wave B; source of truth: madarek/frontend/src/styles/tokens.css
- * — §1 dark · §2 light · §3 radius · §4 motion · §5 elevation. The old
- * download/madarek-reference-digest.md citations were removed with the
- * junk download/ dir in r126; the tokens.css SSOT stands alone.)
+ * test(r152): PHASE 5 PARITY SNAPSHOT — "Operational Daylight: Route & Node".
+ *
+ * ═════════════════════════════════════════════════════════════════════
+ * THE PHASE 5 PER-PRODUCT DECISION (mission r152, documented):
+ * Smart Order RETIRES the family Madarek token VALUES. The four-product
+ * monoculture is broken deliberately: Smart-Link keeps the family night,
+ * Smart-Menu goes warm culinary light, SmartBot goes petrol dark, and
+ * THIS product re-anchors to a LIGHT-FIRST daylight operations world —
+ * paper #F7F7F4, navy ink #1B2A41, DELIVERY ORANGE #D14900, steel info
+ * #3E5C76, Tajawal + Barlow Semi Condensed + IBM Plex Mono, and the
+ * dashed route-line/node motif. The dark theme survives as the explicit
+ * "night dispatch" override (.dark). Token NAMES are unchanged (150+
+ * consumers); every VALUE below is re-anchored to this contract. The
+ * structural/family chain shape (status → pastel families, charts,
+ * accent → copper family) is PINNED RAW as before — the SSOT idiom
+ * survives the palette flip.
+ * ═════════════════════════════════════════════════════════════════════
  *
  * Run: `npm run test:parity` (plain node — Smart-Order ships no unit-test
  * runner; its e2e script targets a live dev server, so this is a
@@ -12,13 +24,13 @@
  *
  * HOW IT READS THE CSS
  * ─────────────────────
- * - Only the theme blocks matter: :root (night, the default) and .light
- *   (paper) — extracted brace-matched from the TOP LEVEL so @media
- *   (prefers-contrast / reduced-motion) overrides can never mask the resting
- *   values. The radius ladder lives in the Tailwind `@theme inline` block —
- *   extracted the same way.
- * - The light scope is the real cascade: {.light} overlays {:root}; tokens
- *   .light does not redefine (radius, motion, families, elev…) inherit :root.
+ * - Only the theme blocks matter: :root (DAYLIGHT, the r152 default) and
+ *   .dark (night dispatch override) — extracted brace-matched from the TOP
+ *   LEVEL so @media (prefers-contrast / reduced-motion) overrides can never
+ *   mask the resting values. The radius ladder lives in the Tailwind
+ *   `@theme inline` block — extracted the same way.
+ * - The dark scope is the real cascade: {.dark} overlays {:root}; tokens
+ *   .dark does not redefine (radius, motion, families, elev…) inherit :root.
  * - var() chains are resolved inside the final scope; comparisons are
  *   normalization-tolerant (whitespace, `a,b` vs `a, b`, hex case) so the
  *   pins are about VALUES, not formatting.
@@ -144,10 +156,13 @@ function parseDecls(blockText) {
   return out;
 }
 
-const dark = parseDecls(block(':root'));
+// r152: DAYLIGHT is the :root default; .dark (night dispatch) is the
+// explicit override. The scope variables keep their historical names
+// (dark/light) so the assertion tables below read naturally.
+const light = parseDecls(block(':root'));
 const theme = themeDecls();
-// real cascade: .light overlays :root; everything else inherits
-const light = { ...dark, ...parseDecls(block('.light')) };
+// real cascade: .dark overlays :root; everything else inherits
+const dark = { ...light, ...parseDecls(block('.dark')) };
 
 function resolve(scope, value, depth = 0) {
   if (depth > 10) return value;
@@ -192,71 +207,78 @@ function pinAll(scope, mode, table) {
 
 // ── canonical snapshot (madarek tokens.css, live-verified) ──────────────────
 
-const GROUNDS_DARK = {
-  '--background': '#070B16', // Madarek --bg (neutral-50 night)
-  '--card': '#0D1428', // Madarek --surface (neutral-0)
-  '--secondary': '#121A36', // Madarek --bg-soft / --surface-2 (neutral-100)
-  '--foreground': '#F2EFE6', // Madarek --text (neutral-900 sand)
-  '--muted-foreground': '#C3C8DC', // Madarek --text-secondary
-  '--placeholder-text': '#8E97B8', // Madarek --text-muted (neutral-500)
-  '--border': '#1B2444', // Madarek hairline (neutral-200)
-};
+/* r152 tables — the DAYLIGHT contract (light = :root default) and the
+   NIGHT DISPATCH override (dark = .dark). Every value re-anchored per
+   the Phase 5 per-product decision documented in the header. */
 const GROUNDS_LIGHT = {
-  '--background': '#FBFAF9',
-  '--card': '#FFFFFF',
-  '--secondary': '#F7F6F3',
-  '--foreground': '#191918',
-  '--muted-foreground': '#4F4D48',
-  '--placeholder-text': '#6E6C65', // Madarek --text-muted light (WCAG literal)
-  '--border': '#E9E7E2',
+  '--background': '#F7F7F4', // daylight paper ground
+  '--card': '#FFFFFF', // raised white
+  '--secondary': '#EFEFEA', // soft
+  '--foreground': '#1B2A41', // ink navy — 12.6:1 on paper
+  '--muted-foreground': '#4E5A6E', // secondary steel-navy
+  '--placeholder-text': '#6E7684', // muted
+  '--border': '#E2E2DC', // daylight hairline
 };
-const ACCENT_DARK = {
-  '--primary': '#E9B44C', // Madarek --accent (their --accent is the 15% wash twin)
-  '--primary-foreground': '#05070F', // Madarek --accent-fg
-  '--accent-foreground': '#E9B44C', // Madarek --accent-ink (chains --c-copper-ink)
-  '--accent-soft': '#2C2312', // Madarek --accent-soft (chains --c-copper-bg)
-  '--c-copper-bg': '#2C2312', // Madarek --accent-soft (family copper ground)
+const GROUNDS_DARK = {
+  '--background': '#0D1626', // night dispatch ground
+  '--card': '#152238',
+  '--secondary': '#1B2A41',
+  '--foreground': '#F1F0EA', // paper ink at night
+  '--muted-foreground': '#B9C2D2',
+  '--placeholder-text': '#8C97AC',
+  '--border': '#24344F', // night hairline
 };
 const ACCENT_LIGHT = {
-  '--primary': '#B57438',
-  '--primary-foreground': '#1A0F06',
-  '--accent-foreground': '#5C3416', // chains --c-copper-deep
-  '--accent-soft': '#F4E4D2', // chains --c-copper-bg
-  '--c-copper-bg': '#F4E4D2',
+  '--primary': '#D14900', // DELIVERY ORANGE (white on it 4.5:1)
+  '--primary-foreground': '#FFFFFF',
+  '--accent-foreground': '#8A3400', // orange-deep text accent (7.5:1 on paper)
+  '--accent-soft': '#FCE3D6', // chains --c-copper-bg
+  '--c-copper-bg': '#FCE3D6',
+  '--accent-hover': '#B23E00',
+  '--accent-pressed': '#8F3A00', // r152 press register
 };
-const STATUS_DARK = {
-  '--success': '#7FD39A', '--success-soft': '#0F241C', '--success-ink': '#7FD39A',
-  '--warning': '#ECC97D', '--warning-soft': '#2C2410', '--warning-ink': '#ECC97D',
-  '--destructive': '#F0938F', '--destructive-soft': '#2C1620', '--destructive-ink': '#F0938F',
-  '--info': '#8FBBF2', '--info-soft': '#14213A', '--info-ink': '#8FBBF2',
+const ACCENT_DARK = {
+  '--primary': '#FF7A38', // luminous delivery orange
+  '--primary-foreground': '#241307', // dark on-orange ink (6.9:1)
+  '--accent-foreground': '#FF9A62', // luminous orange as text at night (8.7:1, chains --c-copper-ink)
+  '--accent-soft': '#38200F', // chains --c-copper-bg (night)
+  '--c-copper-bg': '#38200F',
+  '--accent-hover': '#FF8A50',
+  '--accent-pressed': '#E85D10',
 };
 const STATUS_LIGHT = {
-  '--success': '#4FA66D', '--success-soft': '#DCF1E2', '--success-ink': '#1F4F30',
-  '--warning': '#D6A330', '--warning-soft': '#FCF1CD', '--warning-ink': '#6B4C0B',
-  '--destructive': '#DD6E78', '--destructive-soft': '#FCE0E2', '--destructive-ink': '#6B2128',
-  '--info': '#5C8FCE', '--info-soft': '#DDEBF7', '--info-ink': '#1F3D63',
+  '--success': '#1E7A46', '--success-soft': '#DCF0E4', '--success-ink': '#14522D',
+  '--warning': '#B45309', '--warning-soft': '#FCF1CD', '--warning-ink': '#6B4C0B',
+  '--destructive': '#C4384A', '--destructive-soft': '#FBE3E6', '--destructive-ink': '#8C2733',
+  '--info': '#3E5C76', '--info-soft': '#DFE9F0', '--info-ink': '#2A3E52',
 };
-const FAMILIES_DARK = {
-  peach: ['#2C1A16', '#F2A07F', '#FCD9C4'],
-  mint: ['#0F241C', '#7FD39A', '#C9EAD3'],
-  lavender: ['#221B3A', '#B7A0F4', '#DCD2F9'],
-  sky: ['#14213A', '#8FBBF2', '#C9DCEE'],
-  yellow: ['#2C2410', '#ECC97D', '#F8E5B5'],
-  rose: ['#2C1620', '#F0938F', '#FACDD2'],
-  sand: ['#241F14', '#D9C18C', '#EFE2C5'],
-  grey: ['#161D33', '#A9B0C8', '#D5DAE8'],
-  copper: ['#2C2312', '#E9B44C', '#F5D48A'],
+const STATUS_DARK = {
+  '--success': '#6FD99B', '--success-soft': '#0F2A1E', '--success-ink': '#6FD99B',
+  '--warning': '#F2C48D', '--warning-soft': '#2E2610', '--warning-ink': '#F2C48D',
+  '--destructive': '#F4938F', '--destructive-soft': '#301723', '--destructive-ink': '#F4938F',
+  '--info': '#8FBBF2', '--info-soft': '#14263E', '--info-ink': '#8FBBF2',
 };
 const FAMILIES_LIGHT = {
-  peach: ['#FFE9DC', '#E07856', '#6B2D1A'],
-  mint: ['#DCF1E2', '#4FA66D', '#1F4F30'],
-  lavender: ['#ECE6FA', '#8A6FE0', '#3F2D7A'],
-  sky: ['#DDEBF7', '#5C8FCE', '#1F3D63'],
-  yellow: ['#FCF1CD', '#D6A330', '#6B4C0B'],
-  rose: ['#FCE0E2', '#DD6E78', '#6B2128'],
-  sand: ['#F1ECDF', '#B59868', '#5A4623'],
-  grey: ['#EFECE7', '#6B665E', '#2D2A24'],
-  copper: ['#F4E4D2', '#B57438', '#5C3416'],
+  peach: ['#FDE8DE', '#E06A45', '#7A3018'],
+  mint: ['#DCF0E4', '#1E7A46', '#14522D'],
+  lavender: ['#ECEAF8', '#7C63DB', '#3F2D7A'],
+  sky: ['#DFE9F0', '#3E5C76', '#2A3E52'],
+  yellow: ['#FCF1CD', '#B45309', '#6B4C0B'],
+  rose: ['#FBE3E6', '#C4384A', '#8C2733'],
+  sand: ['#F1EEE1', '#A08A5B', '#55471F'],
+  grey: ['#ECEDE7', '#6E7684', '#2F3745'],
+  copper: ['#FCE3D6', '#D14900', '#8A3400'],
+};
+const FAMILIES_DARK = {
+  peach: ['#32201A', '#F2A07F', '#FCD9C4'],
+  mint: ['#0F2A1E', '#6FD99B', '#C9EAD3'],
+  lavender: ['#232040', '#B7A0F4', '#DCD2F9'],
+  sky: ['#14263E', '#8FBBF2', '#C9DCEE'],
+  yellow: ['#2E2610', '#F2C48D', '#F8E5B5'],
+  rose: ['#301723', '#F4938F', '#FACDD2'],
+  sand: ['#26221A', '#D9C18C', '#EFE2C5'],
+  grey: ['#1A2438', '#A9B0C8', '#D5DAE8'],
+  copper: ['#38200F', '#FF9A62', '#FFC9A8'],
 };
 // Tailwind @theme spellings (Madarek --r-* ladder, same values; no --r-full
 // token — rounded-full uses the Tailwind default)
@@ -269,30 +291,32 @@ const MOTION = {
   '--t-slow': '380ms', '--t-slower': '520ms', '--t-cinema': '720ms',
 };
 const ELEV_DARK = {
-  '--elev-1': '0 1px 2px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.04)',
-  '--elev-2': '0 4px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)',
-  '--elev-3': '0 8px 16px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.06)',
-  '--elev-4': '0 16px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07)',
-  '--elev-5': '0 32px 64px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.08)',
+  '--elev-1': '0 1px 2px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.04)',
+  '--elev-2': '0 4px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+  '--elev-3': '0 8px 16px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.06)',
+  '--elev-4': '0 16px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.07)',
+  '--elev-5': '0 32px 64px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
 };
 const ELEV_LIGHT = {
-  '--elev-1': '0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.06)',
-  '--elev-2': '0 4px 8px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04)',
-  '--elev-3': '0 8px 16px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.05)',
-  '--elev-4': '0 16px 32px rgba(0,0,0,0.10), 0 8px 16px rgba(0,0,0,0.06)',
-  '--elev-5': '0 32px 64px rgba(0,0,0,0.12), 0 16px 32px rgba(0,0,0,0.08)',
+  /* r152: daylight recipes — navy-inked soft two-layer (the ink color
+     rides the elevation so paper never gets muddy grey shadows). */
+  '--elev-1': '0 1px 2px rgba(27, 42, 65, 0.06), 0 1px 1px rgba(27, 42, 65, 0.04)',
+  '--elev-2': '0 4px 8px rgba(27, 42, 65, 0.08), 0 2px 4px rgba(27, 42, 65, 0.05)',
+  '--elev-3': '0 8px 16px rgba(27, 42, 65, 0.10), 0 4px 8px rgba(27, 42, 65, 0.06)',
+  '--elev-4': '0 16px 32px rgba(27, 42, 65, 0.12), 0 8px 16px rgba(27, 42, 65, 0.07)',
+  '--elev-5': '0 32px 64px rgba(27, 42, 65, 0.14), 0 16px 32px rgba(27, 42, 65, 0.08)',
 };
 
 // ── assertions ───────────────────────────────────────────────────────────────
 
-pinAll(dark, 'dark', GROUNDS_DARK);
 pinAll(light, 'light', GROUNDS_LIGHT);
-pinAll(dark, 'dark', ACCENT_DARK);
+pinAll(dark, 'dark', GROUNDS_DARK);
 pinAll(light, 'light', ACCENT_LIGHT);
-pinAll(dark, 'dark', STATUS_DARK);
+pinAll(dark, 'dark', ACCENT_DARK);
 pinAll(light, 'light', STATUS_LIGHT);
-pin(dark, 'glass-dark', '--glass-bg', 'rgba(11, 16, 32, 0.78)');
-pin(light, 'glass-light', '--glass-bg', 'rgba(251, 250, 249, 0.78)');
+pinAll(dark, 'dark', STATUS_DARK);
+pin(light, 'glass-light', '--glass-bg', 'rgba(247, 247, 244, 0.82)');
+pin(dark, 'glass-dark', '--glass-bg', 'rgba(13, 22, 38, 0.80)');
 
 for (const [family, [bg, ink, deep]] of Object.entries(FAMILIES_DARK)) {
   pin(dark, 'family-dark', `--c-${family}-bg`, bg);
@@ -311,32 +335,31 @@ pinAll(theme, 'radius(@theme)', RADIUS);
 for (const scope of [dark, light]) {
   pinAll(scope, 'motion', MOTION);
 }
-pinAll(dark, 'elev-dark', ELEV_DARK);
 pinAll(light, 'elev-light', ELEV_LIGHT);
+pinAll(dark, 'elev-dark', ELEV_DARK);
 
 // ── r126 pins: focus contract + z-order ladder (audit P4-A5 ring gap) ───────
 // The light --ring was raw copper #B57438 = 3.65:1 (FAIL); the Madarek
 // contract (rubric §B23) requires ≥4.5:1 in BOTH themes. The 2px/2px ring
 // rides --state-focus-ring-* tokens, mirrored by the shadcn --ring bridge.
-const FOCUS_DARK = {
-  // r130 (W2-1, fix 5): #E9B44C — the TRUE canonical dark cascade
-  // (tokens.css:228 resolves --state-focus-ring-color through
-  // var(--accent) = the luminous gold, 10.39:1). The r129 #C9962F
-  // strong-gold pin was the fleet fork (W1-H FLEET-1 / W1-F P1-9) —
-  // demoted the ring one shade darker than madarek's night UI.
-  '--ring': '#E9B44C',
-  '--state-focus-ring-color': '#E9B44C', // Madarek dark --accent (10.39:1)
-  '--state-focus-ring-width': '2px',
-  '--state-focus-ring-offset': '2px',
-};
+/* r152: the ring contract re-anchored — daylight rides the orange-deep
+   text accent #8A3400 (7.5:1 on paper); night dispatch rides the
+   luminous orange text tier #FFA170 (9.0:1 on the night ground). Both
+   clear the 4.5:1 floor with margin. */
 const FOCUS_LIGHT = {
-  '--ring': '#5C3416',
-  '--state-focus-ring-color': '#5C3416', // Madarek light --accent-strong (10.29:1)
+  '--ring': '#8A3400',
+  '--state-focus-ring-color': '#8A3400',
   '--state-focus-ring-width': '2px',
   '--state-focus-ring-offset': '2px',
 };
-pinAll(dark, 'focus-dark', FOCUS_DARK);
+const FOCUS_DARK = {
+  '--ring': '#FFA170',
+  '--state-focus-ring-color': '#FFA170',
+  '--state-focus-ring-width': '2px',
+  '--state-focus-ring-offset': '2px',
+};
 pinAll(light, 'focus-light', FOCUS_LIGHT);
+pinAll(dark, 'focus-dark', FOCUS_DARK);
 
 // Z-order ladder (Madarek tokens.css §3a, theme-independent :root tokens)
 const Z_LADDER = {
@@ -446,8 +469,8 @@ const R131_F1 = [
     rawProviders.includes('reducedMotion="user"')],
   ['toaster lazy-mounted out of the critical path (dynamic ssr:false)',
     rawProviders.includes('ssr: false') && !rawProviders.includes('Toaster position=')],
-  ['theme-color metas follow the manual toggle (smart-link ThemeColorSync port)',
-    rawThemeColorSync.includes('{ dark: "#070B16", light: "#FBFAF9" } as const') &&
+  ['theme-color metas follow the manual toggle (r152 daylight pair: paper #F7F7F4 / night #0D1626)',
+    rawThemeColorSync.includes('{ dark: "#0D1626", light: "#F7F7F4" } as const') &&
     rawThemeColorSync.includes('meta[name="theme-color"]')],
   // Fonts: immutable 1y cache header (A8 perf).
   ['fonts served immutable (1y) — smart-link/smart-menu pattern',
@@ -529,20 +552,25 @@ const landingCssRaw = readFileSync(new URL('../src/app/landing.css', import.meta
 const landingBlocks = topLevelBlocks(landingCssRaw.replace(/\/\*[\s\S]*?\*\//g, ' '));
 const landingBody = landingBlocks.find((x) => x.prelude === '.landing')?.body;
 if (!landingBody) throw new Error('.landing top-level block not found in landing.css');
-const landingScope = { ...dark, ...parseDecls(landingBody) };
+const landingScope = { ...light, ...parseDecls(landingBody) };
 const landingRaw = landingCssRaw.replace(/\s+/g, ' ');
+/* r152: the landing layer re-anchored to the SAME daylight contract —
+   Orbit-Ink retired. Role map: --ln-ink = paper GROUND (+ on-accent
+   text), --ln-cream = navy INK, --ln-lime = delivery orange,
+   --ln-violet = steel. The landing stays a FIXED world (theme-locked
+   LIGHT now — .landing carries no .dark overrides by design). */
 const LANDING_TOKENS = {
-  '--ln-ink': '#252A3E',
-  '--ln-ink-2': '#1C2032',
-  '--ln-cream': '#F5F3E7',
-  '--ln-cream-dim': '#C9C6B4',
-  '--ln-lime': '#DFEDB2',
-  '--ln-lime-deep': '#B9D778',
-  '--ln-violet': '#7A6BF2',
-  '--ln-violet-deep': '#4E2FB8',
-  '--ln-line': 'rgba(245, 243, 231, 0.14)',
-  '--ln-line-soft': 'rgba(245, 243, 231, 0.07)',
-  '--ln-grain-op': '0.075',
+  '--ln-ink': '#F7F7F4',
+  '--ln-ink-2': '#EFEFEA',
+  '--ln-cream': '#1B2A41',
+  '--ln-cream-dim': '#4E5A6E',
+  '--ln-lime': '#D14900',
+  '--ln-lime-deep': '#B23E00',
+  '--ln-violet': '#3E5C76',
+  '--ln-violet-deep': '#2A3E52',
+  '--ln-line': 'rgba(27, 42, 65, 0.14)',
+  '--ln-line-soft': 'rgba(27, 42, 65, 0.07)',
+  '--ln-grain-op': '0.05',
   '--ln-radius-pill': '9999px', // resolves the scoped --r-full bridge
   '--ln-h1': 'clamp(2.75rem, 8.2vw, 6.75rem)',
   // r151 (LIVE-AUDIT-SO1 P2-2): the nail rides the licensed floor change —
@@ -725,8 +753,8 @@ const R129_LAYER = [
     /animation: ln-scene-in var\(--ln-t-slow\) var\(--ln-ease-out\) var\(--ln-t-fast\) forwards;/.test(landingRaw)],
   ['returning-visitor calm: [data-intro-seen] shortens the canvas entrance to --ln-t-fast/zero delay',
     /\.landing\[data-intro-seen='true'\] \.ln-hero-canvas \{ animation-duration: var\(--ln-t-fast\); animation-delay: 0s; \}/.test(landingRaw)],
-  ['::selection rides the violet depth pair (no product gold bleed into the landing)',
-    /\.landing ::selection \{ background: var\(--ln-violet-deep\); color: var\(--ln-cream\); \}/.test(landingRaw)],
+  ['::selection rides the steel depth pair (r152 daylight: steel bg + paper text)',
+    /\.landing ::selection \{ background: var\(--ln-violet-deep\); color: var\(--ln-ink\); \}/.test(landingRaw)],
   ['press states P4-01: gold/ghost/text compress to --press-scale over the micro tier',
     /\.landing \.ln-btn-gold:active, \.landing \.ln-btn-ghost:active, \.landing \.ln-btn-text:active \{ transform: scale\(var\(--press-scale, 0\.97\)\); transition-duration: var\(--t-micro\); \}/.test(landingRaw)],
   ['press states P4-01 magnetic variant: gold preserves its translate while pressing',
@@ -739,8 +767,8 @@ const R129_LAYER = [
     landingRaw.includes('padding-block-end: env(safe-area-inset-bottom, var(--sp-4));')],
   ['resting card shadows P3-28/30/35: station/stat/role carry 0 1px 2px rgba(0,0,0,0.06) (3 sites)',
     landingRaw.split('box-shadow: 0 1px 2px rgba(0,0,0,0.06);').length - 1 === 3],
-  ['progress visual resting hairline P3-29: inset 0 1px 0 rgba(245,243,231,0.04)',
-    landingRaw.includes('box-shadow: inset 0 1px 0 rgba(245,243,231,0.04);')],
+  ['progress visual resting hairline P3-29 (r152): inset 0 1px 0 rgba(27,42,65,0.04)',
+    landingRaw.includes('box-shadow: inset 0 1px 0 rgba(27,42,65,0.04);')],
   ['cta-lede measure P4-10 resolved tail: 72ch (was 54ch)',
     /\.landing \.ln-cta-lede \{[^}]*max-inline-size: 72ch;/.test(landingRaw)],
   ['burger fold at the canonical 1080px (was 1024) + the min-1081 drawer guard',
@@ -748,20 +776,20 @@ const R129_LAYER = [
     /@media \(min-width: 1081px\) \{ \.landing \.landing-mobile-menu \{ display: none !important; \}/.test(landingRaw)],
   ['universal cream focus ring: .landing :focus-visible 2px/3px (no product gold leak)',
     /\.landing :focus-visible \{ outline: 2px solid var\(--ln-cream\); outline-offset: 3px; \}/.test(landingRaw)],
-  ['focus restores P4-09: gold pill takes the INK ring (cream would vanish on lime)',
-    /\.landing \.ln-btn-gold:focus-visible \{ outline-color: var\(--ln-ink\); \}/.test(landingRaw)],
-  ['hero sky: the ONE sanctioned violet depth radial rgb(122 107 242 / 0.10)',
-    landingRaw.includes('radial-gradient(46% 54% at 30% 44%, rgb(122 107 242 / 0.10) 0%, transparent 70%)')],
-  ['hero sky ::after cream breath: ellipse at 70% 60%, α 0.02',
-    landingRaw.includes('radial-gradient(ellipse at 70% 60%, rgba(245,243,231,0.02) 0%, transparent 60%)')],
+  ['focus restores P4-09 (r152): the accent pill takes the NAVY ring (paper would vanish on the paper ground)',
+    /\.landing \.ln-btn-gold:focus-visible \{ outline-color: var\(--ln-cream\); \}/.test(landingRaw)],
+  ['hero sky: the ONE sanctioned steel depth radial rgb(62 92 118 / 0.10) (r152 daylight)',
+    landingRaw.includes('radial-gradient(46% 54% at 30% 44%, rgb(62 92 118 / 0.10) 0%, transparent 70%)')],
+  ['hero sky ::after navy breath: ellipse at 70% 60%, α 0.02 (r152)',
+    landingRaw.includes('radial-gradient(ellipse at 70% 60%, rgba(27,42,65,0.02) 0%, transparent 60%)')],
   ['starfield resting opacity P4-16: .ln-keep-sky .ln-hero-depth at 0.5 (was 1 — ~2× too bright)',
     /\.landing \.ln-keep-sky \.ln-hero-depth \{[^}]*opacity: 0\.5;/.test(landingRaw)],
   ['label halo P4-18: .ln-label::before radial lime α0.12 + 6px blur',
     /\.landing \.ln-label::before \{[^}]*opacity: 0\.12; filter: blur\(6px\);/.test(landingRaw)],
   ['skip link: canonical lime pill, centered, z-2100 above the z-2000 grain veil',
     /\.landing a\.ln-skip-link \{[^}]*z-index: 2100;[^}]*background: var\(--ln-lime\);/.test(landingRaw)],
-  ['constellation resting life: .is-resting scale(1.45) + the 4px halo ring',
-    /\.landing \.ln-constellation-dot\.is-resting \{ transform: scale\(1\.45\); box-shadow: 0 0 0 4px rgb\(245 243 231 \/ 0\.1\); \}/.test(landingRaw)],
+  ['constellation resting life: .is-resting scale(1.45) + the 4px navy halo ring (r152)',
+    /\.landing \.ln-constellation-dot\.is-resting \{ transform: scale\(1\.45\); box-shadow: 0 0 0 4px rgb\(27 42 65 \/ 0\.1\); \}/.test(landingRaw)],
   ['@390 trust tightening (canonical landing.css:1723-1725)',
     /@media \(max-width: 390px\) \{ \.landing \.ln-trust-inner \{ gap: var\(--sp-3\); font-size: 12\.5px; \}/.test(landingRaw)],
   ['RM progress guard P3-32: the ribbon stays visible under reduced motion',
@@ -836,20 +864,20 @@ for (const [name, okFlag] of HEALTH_API) {
   else failures.push(`health API gate FAILED: ${name}`);
 }
 
-// ── r129 (F4): token-matrix additions (globals.css) ───────────────────────────
-// --c-ember light was mislabeled with the base accent; the canonical STRONG
-// slot (light --accent-strong) is the deep copper #5C3416.
-pin(light, 'matrix-light', '--c-ember', '#5C3416');
-// canonical --accent-hover (tokens.css:520/750) — the hover step of the
-// accent family, previously absent in SO.
-pin(dark, 'matrix-dark', '--accent-hover', '#F5D48A');
-pin(light, 'matrix-light', '--accent-hover', '#9A5F25');
-// canonical --gold-soft/--brand-purple (tokens.css:576-577/781-782) —
-// chain the pastel families per-theme.
-pin(dark, 'matrix-dark', '--gold-soft', '#2C2410');
+// ── r152 matrix pins — the daylight re-anchor of the same slots ──────
+// --c-ember = the delivery-orange STRONG step (light #B23E00 = hover;
+// night #F26A1B is declared raw in .dark so no pin here).
+pin(light, 'matrix-light', '--c-ember', '#B23E00');
+// the accent hover/press steps (light #B23E00/#8F3A00; night #FF8A50/#E85D10).
+pin(dark, 'matrix-dark', '--accent-hover', '#FF8A50');
+pin(dark, 'matrix-dark', '--accent-pressed', '#E85D10');
+pin(light, 'matrix-light', '--accent-hover', '#B23E00');
+pin(light, 'matrix-light', '--accent-pressed', '#8F3A00');
+// --gold-soft/--brand-purple — chained per-theme through the families.
 pin(light, 'matrix-light', '--gold-soft', '#FCF1CD');
+pin(dark, 'matrix-dark', '--gold-soft', '#2E2610');
+pin(light, 'matrix-light', '--brand-purple', '#7C63DB');
 pin(dark, 'matrix-dark', '--brand-purple', '#B7A0F4');
-pin(light, 'matrix-light', '--brand-purple', '#8A6FE0');
 // canonical easings/hover step (tokens.css:153/171).
 pin(dark, 'matrix-dark', '--ease-spring-snappy', 'cubic-bezier(0.5, 1.6, 0.4, 1)');
 pin(dark, 'matrix-dark', '--hover-lift', '-1px');
@@ -1059,11 +1087,79 @@ for (const [name, okFlag] of R134_LAYER) {
   else failures.push(`r134 layer gate FAILED: ${name}`);
 }
 
+// ── r152 (PHASE 5): the DAYLIGHT FLIP gates — the theme-default
+// contract, the font re-anchor, and the night-dispatch override. These
+// pin the flip itself so a future edit cannot silently regress to the
+// dark-default family monoculture. ──────────────────────────────────────
+const rawLayout = readFileSync(new URL('../src/app/layout.tsx', import.meta.url), 'utf8');
+const rawThemeProvider = readFileSync(new URL('../src/components/shared/theme-provider.tsx', import.meta.url), 'utf8');
+const rawManifest = readFileSync(new URL('../public/manifest.json', import.meta.url), 'utf8');
+const rawFontsCss = readFileSync(new URL('../public/fonts/fonts.css', import.meta.url), 'utf8');
+const rawButton2 = readFileSync(new URL('../src/components/ui/button.tsx', import.meta.url), 'utf8');
+const R152_LAYER = [
+  ['daylight is the DEFAULT: :root declares color-scheme light (night is the .dark override)',
+    rawCss.includes(':root { color-scheme: light;') && rawCss.includes('.dark { color-scheme: dark;')],
+  ['night dispatch survives as the explicit .dark override (ground #0D1626 / luminous orange #FF7A38)',
+    norm(resolve(dark, dark['--background'] ?? '')) === '#0D1626' &&
+    norm(resolve(dark, dark['--primary'] ?? '')) === '#FF7A38'],
+  ['the boot script paints LIGHT by default (dark only when stored)',
+    rawLayout.includes("if(t==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.add('light')}")],
+  ['next-themes defaultTheme="light" (one resolution path with the boot script)',
+    rawThemeProvider.includes('defaultTheme="light"')],
+  ['first-paint preloads are the Tajawal arabic subsets (400 + 700)',
+    rawLayout.includes('/fonts/tajawal-400-normal-arabic.woff2') &&
+    rawLayout.includes('/fonts/tajawal-700-normal-arabic.woff2') &&
+    !rawLayout.includes('plex-sans-arabic-400-normal-arabic.woff2" as="font"')],
+  ['fonts.css: the P1 shim --font-cairo now resolves to "Tajawal" (the real loaded face)',
+    rawFontsCss.includes(':root { --font-cairo: "Tajawal"; }')],
+  ['fonts.css: Tajawal @font-face ×8 (400/500/700/800 × arabic+latin) — self-hosted, no external requests',
+    (rawFontsCss.match(/font-family: 'Tajawal';/g) || []).length === 8 &&
+    rawFontsCss.includes('/fonts/tajawal-800-normal-arabic.woff2')],
+  ['fonts.css: Barlow Semi Condensed @font-face ×2 (600/700 latin) — the Latin display face',
+    (rawFontsCss.match(/font-family: 'Barlow Semi Condensed';/g) || []).length === 2 &&
+    rawFontsCss.includes('/fonts/barlow-semi-condensed-700-normal-latin.woff2')],
+  ['globals @theme: --font-heading chains Barlow Semi Condensed FIRST (Latin display), Tajawal next (Arabic headings — never Times)',
+    theme['--font-heading'] === '"Barlow Semi Condensed", var(--font-cairo), "Tajawal", "IBM Plex Sans Arabic", system-ui, sans-serif'],
+  ['globals @theme: the --font-display bridge exists and rides the same Barlow→Tajawal chain',
+    theme['--font-display'] === theme['--font-heading']],
+  ['globals @theme: --font-sans is Tajawal-first (Arabic body)',
+    theme['--font-sans'].startsWith('var(--font-cairo), "Tajawal"')],
+  ['the woff2 files actually exist on disk (Tajawal ×8 + Barlow ×2)',
+    ['tajawal-400-normal-arabic.woff2', 'tajawal-500-normal-arabic.woff2', 'tajawal-700-normal-arabic.woff2',
+     'tajawal-800-normal-arabic.woff2', 'tajawal-400-normal-latin.woff2', 'tajawal-500-normal-latin.woff2',
+     'tajawal-700-normal-latin.woff2', 'tajawal-800-normal-latin.woff2',
+     'barlow-semi-condensed-600-normal-latin.woff2', 'barlow-semi-condensed-700-normal-latin.woff2']
+      .every((f) => existsSync(new URL(`../public/fonts/${f}`, import.meta.url)))],
+  ['viewport themeColor pair rides the daylight contract (light #F7F7F4 / dark #0D1626)',
+    rawLayout.includes('color: "#F7F7F4"') && rawLayout.includes('color: "#0D1626"')],
+  ['manifest: theme_color #D14900 (delivery orange) + background_color #F7F7F4 (paper)',
+    rawManifest.includes('"theme_color": "#D14900"') && rawManifest.includes('"background_color": "#F7F7F4"')],
+  ['primary button carries the delivery-orange press register (active:bg-(--accent-pressed))',
+    rawButton2.includes('active:bg-(--accent-pressed)')],
+  ['ROUTE & NODE motif primitives are defined (route-divider + route-spine-segment)',
+    rawCss.includes('.route-divider {') && rawCss.includes('.route-spine-segment {')],
+  ['tracking rides the dashed road: tracking-client threads border-s-2 border-dashed route segments',
+    readFileSync(new URL('../src/components/storefront/tracking-client.tsx', import.meta.url), 'utf8')
+      .includes('border-s-2 border-dashed')],
+  ['status stamps: badge.tsx rides the squared stamp (rounded-sm) with family-ink borders',
+    readFileSync(new URL('../src/components/ui/badge.tsx', import.meta.url), 'utf8')
+      .includes('rounded-sm border px-2') &&
+    readFileSync(new URL('../src/components/shared/status-badges.tsx', import.meta.url), 'utf8')
+      .includes('border-(--c-copper-ink)/35')],
+  ['empty states are stations on the route (RouteStationRoad in states.tsx)',
+    readFileSync(new URL('../src/components/shared/states.tsx', import.meta.url), 'utf8')
+      .includes('RouteStationRoad')],
+];
+for (const [name, okFlag] of R152_LAYER) {
+  if (okFlag) passed += 1;
+  else failures.push(`r152 daylight-flip gate FAILED: ${name}`);
+}
+
 // ── report ───────────────────────────────────────────────────────────────────
 
 if (failures.length > 0) {
-  console.error(`✗ Madarek parity snapshot FAILED (${failures.length} assertion(s)):`);
+  console.error(`✗ Phase 5 daylight parity snapshot FAILED (${failures.length} assertion(s)):`);
   for (const f of failures) console.error(`  • ${f}`);
   process.exit(1);
 }
-console.log(`✓ Madarek parity snapshot: ${passed} assertions passed (globals.css + landing.css == canonical token values)`);
+console.log(`✓ Phase 5 daylight parity snapshot: ${passed} assertions passed (globals.css + landing.css == the Operational Daylight Route & Node contract)`);

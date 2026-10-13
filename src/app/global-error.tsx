@@ -28,9 +28,9 @@ export default function GlobalError({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          /* Madarek night — ground #070B16, sand ink #F2EFE6 */
-          background: "#070B16",
-          color: "#F2EFE6",
+          /* r152 Phase 5 daylight — paper ground #F7F7F4, navy ink #1B2A41 */
+          background: "#F7F7F4",
+          color: "#1B2A41",
           fontFamily: "system-ui, 'Segoe UI', Tahoma, sans-serif",
           textAlign: "center",
           padding: "2rem",
@@ -43,8 +43,8 @@ export default function GlobalError({
               height: 56,
               borderRadius: 16,
               margin: "0 auto 24px",
-              /* gold wash — the dark accent at 15% */
-              background: "rgba(233, 180, 76, 0.15)",
+              /* delivery-orange wash — the daylight accent at 12% */
+              background: "rgba(209, 73, 0, 0.12)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -72,17 +72,17 @@ export default function GlobalError({
             <button
               onClick={reset}
               style={{
-                height: 40,
+                height: 44,
                 padding: "0 20px",
                 display: "inline-flex",
                 alignItems: "center",
                 borderRadius: 10,
                 border: "none",
-                /* Madarek .btn.accent dark — gold fill + dark ink
-                   (#05070F on #E9B44C ≈ 10.6:1); 40/13/600/r10 inline
+                /* r152 daylight CTA — delivery orange fill + white ink
+                   (#FFFFFF on #D14900 ≈ 4.5:1); 44/13/600/r10 inline
                    (no CSS bundle on this boundary — values only). */
-                background: "#E9B44C",
-                color: "#05070F",
+                background: "#D14900",
+                color: "#FFFFFF",
                 fontWeight: 600,
                 fontSize: 13,
                 cursor: "pointer",
@@ -99,14 +99,14 @@ export default function GlobalError({
             <a
               href="/"
               style={{
-                height: 40,
+                height: 44,
                 padding: "0 20px",
                 display: "inline-flex",
                 alignItems: "center",
                 borderRadius: 10,
-                border: "1px solid rgba(255,255,255,0.14)",
-                background: "rgba(255,255,255,0.04)",
-                color: "#F2EFE6",
+                border: "1px solid rgba(27,42,65,0.22)",
+                background: "#FFFFFF",
+                color: "#1B2A41",
                 fontWeight: 600,
                 fontSize: 13,
                 textDecoration: "none",

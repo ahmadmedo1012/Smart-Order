@@ -15,28 +15,37 @@
 
 /*
  * ════════════════════════════════════════════════════════════════
- * MADAREK DESIGN SYSTEM — PARITY LOCK (Smart Order / Smart Menu)
+ * PHASE 5 (r152) — "OPERATIONAL DAYLIGHT: ROUTE & NODE" (Smart Order)
  * ════════════════════════════════════════════════════════════════
- * Smart Order is the third product of the Smart family
- * (Smart Link → https://smart-link.ly, SmartBot →
- * https://bot.smart-link.ly). The token values below are the
- * MADAREK canonical set (madarek/frontend/src/styles/tokens.css),
- * the single source of truth for the whole family:
- *   · DARK (default) — the مدارك night: indigo ground #070B16,
- *     sand ink #F2EFE6, luminous gold accent #E9B44C
- *     (10.39:1 as text on the night ground).
- *   · LIGHT — the Notion-warm cream: ground #FBFAF9, ink #191918,
- *     copper accent #B57438 (copper-deep #5C3416 as text, 10.29:1).
- *   · Type: IBM Plex Sans Arabic 400-700 self-hosted (one family,
- *     weight 700 carries display — no true 800 exists), IBM Plex
- *     Mono for codes/IDs.
- *   · Radius: the Notion-soft ladder 6/8/10/12/16/20/28.
- *   · Elevation: --elev-1..5 (dark fill-led + inset top highlight,
- *     light soft two-layer). Motion: --t-micro…--t-cinema ladder.
+ * The family Madarek monoculture is retired for this product. Smart
+ * Order is the ecosystem's daytime OPERATIONS ROOM — the product that
+ * breaks from the shared night identity (Smart-Link keeps the family
+ * umbrella night; Smart-Menu goes warm culinary light; SmartBot goes
+ * petrol-circuit dark; Smart Order goes CRISP DAYLIGHT):
+ *   · LIGHT (default, :root) — daylight paper ground #F7F7F4, raised
+ *     white #FFFFFF, soft #EFEFEA, hairline #E2E2DC, ink NAVY #1B2A41,
+ *     secondary #4E5A6E, muted #6E7684, primary DELIVERY ORANGE #D14900
+ *     (white on it 4.5:1 ✓ · hover #B23E00 · pressed #8F3A00 · deep
+ *     text accent #8A3400, 7.5:1 on paper), info STEEL #3E5C76, success
+ *     #1E7A46, warning amber, destructive rose. Orange = the courier
+ *     vest; navy = the dispatch ink.
+ *   · DARK (explicit override, .dark class) — "night dispatch": the
+ *     SAME route-and-node identity at night — navy ground #0D1626,
+ *     surface #152238, paper ink #F1F0EA, luminous orange #FF7A38 with
+ *     dark on-orange ink (6.9:1), accent-as-text #FFA170 (9:1).
+ *     Deliberate, not deleted: the toggle keeps working for night ops.
+ *   · Type: Tajawal 400/500/700/800 (Arabic body + headings) + Barlow
+ *     Semi Condensed 600/700 (Latin display — no Arabic glyphs, so
+ *     Arabic headings chain to Tajawal, never Times) + IBM Plex Mono
+ *     (order IDs / codes, tabular). Self-hosted in public/fonts.
+ *   · Motif: the dashed ROUTE line with circular NODES (tracking
+ *     timeline backbone, section dividers, empty-state scenes); status
+ *     stamps = bordered family chips; KPI numerals = big tabular-nums.
  * WhatsApp green remains reserved for WhatsApp only.
- * Mirrors the prod-verified bridges in SmartBot (fb_dashboard) and
- * Smart-Link — token NAMES kept (150+ consumers), VALUES flipped
- * to Madarek.
+ * Token NAMES kept (150+ consumers), VALUES re-anchored to this
+ * per-product contract — the Phase 5 mission decision, documented in
+ * tests/parity.mjs (definitions + consumption gates re-anchored in the
+ * same commit).
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -57,10 +66,14 @@
      Plex Sans Arabic — one family, weight 700 carries display).
      --font-mono is Madarek's mixed-script stack: Latin/digits in
      IBM Plex Mono, Arabic runs continue in Plex Sans Arabic. ── */
-  --font-sans: var(--font-cairo), "IBM Plex Sans Arabic", "Tajawal", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "IBM Plex Mono", "IBM Plex Sans Arabic", ui-monospace, "SFMono-Regular", monospace;
-  --font-arabic: var(--font-cairo), "IBM Plex Sans Arabic", "Tajawal", system-ui, sans-serif;
-  --font-heading: var(--font-cairo), "IBM Plex Sans Arabic", "Tajawal", system-ui, sans-serif;
+  --font-sans: var(--font-cairo), "Tajawal", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", "Tajawal", "IBM Plex Sans Arabic", ui-monospace, "SFMono-Regular", monospace;
+  --font-arabic: var(--font-cairo), "Tajawal", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-heading: "Barlow Semi Condensed", var(--font-cairo), "Tajawal", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  /* r152: the --font-display bridge — the Barlow→Tajawal chain (Latin
+     display + Arabic headings on Tajawal), spelled once for utilities
+     and one-off display sites. */
+  --font-display: "Barlow Semi Condensed", var(--font-cairo), "Tajawal", "IBM Plex Sans Arabic", system-ui, sans-serif;
 
   /* ── Core surface / text ── */
   --color-background: var(--background);
@@ -198,12 +211,13 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   DARK — default (Madarek night: indigo ground, sand ink, gold)
+   LIGHT — DEFAULT (r152): Operational Daylight — Route & Node
+   (daylight paper ground, navy ink, delivery orange)
    ════════════════════════════════════════════════════════════════ */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* ── Madarek motion ladder (tokens.css §4.1/§4.3, exact) ── */
+  /* ── Motion ladder (unchanged by Phase 5 — the family durations) ── */
   --t-micro: 80ms;
   --t-fast: 160ms;
   --t-base: 240ms;
@@ -217,19 +231,12 @@
   --ease-spring-soft: cubic-bezier(0.34, 1.18, 0.64, 1);
   --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-  /* r129 (token-matrix): canonical tokens.css:153/171 — the snappy
-     spring (fleet-wide absent per the r129-A10 audit) and the hover
-     lift step (canonical pair: --hover-lift / --hover-lift-lg). */
   --ease-spring-snappy: cubic-bezier(0.5, 1.6, 0.4, 1);
   --hover-lift: -1px;
   --hover-lift-lg: -3px;
   --motion-direction: 1; /* flips to -1 under [dir=rtl] at file end */
   --press-scale: 0.97;
-  /* ── r130 (W2-1, fix 7): canonical semantic motion layer (tokens.css
-     §4.1 :177-209) — the --motion-duration-* names so canonical-named
-     code resolves; the raw --t-* ladder above stays the implementation.
-     page 320 · reveal 360 · stat 700 · skeleton 1200 (linear loops);
-     ambient bands 1.6/2.4/3.6/6/9/22s; stagger 60ms cap 6. ── */
+  /* ── Semantic motion layer (durations/eases, unchanged) ── */
   --motion-duration-micro: var(--t-micro);   /*   80ms */
   --motion-duration-short: var(--t-fast);    /*  160ms */
   --motion-duration-medium: var(--t-base);   /*  240ms */
@@ -246,26 +253,19 @@
   --motion-duration-ambient-scene: 22s;
   --motion-stagger-step: 60ms;
   --motion-stagger-cap: 6;
-  /* Infinite loops (spinners/shimmer) MUST be linear (tokens.css §4.2) */
   --ease-linear: linear;
-  /* r130 (fix 7): the invented curve NAMES remap onto the canonical
-     settle/standard so the one out-of-file var() consumer
-     (landing hero-settle) resolves canonically. */
   --ease-out-quart: var(--ease-out);
   --ease-out-expo: var(--ease-out);
   --ease-in-out-quart: var(--ease);
-  /* ── Font weight ladder (r130 W2-1, fix 1/6) — canonical --fw-*
-     names for hand-written CSS (see the @theme note above for why
-     they can never be spelled --font-*). Plex ships 400/500/600/700
-     only; no true 800 exists (tokens.css:1052). ── */
+  /* ── Font weight ladder (Tajawal 400/500/700/800 — CSS matching
+     resolves 600 requests to the real 700 cut, never synthetic) ── */
   --fw-light: 300;
   --fw-regular: 400;
   --fw-medium: 500;
   --fw-semibold: 600;
   --fw-bold: 700;
-  /* ── Type scale (r130 W2-1, fix 6; tokens.css §2 :53-98) — the
-     canonical rungs 11/12/13/15/17/22/30 + the display clamps + the
-     metric tabular sizes. Body pins 15px/1.65 in @layer base. ── */
+  --fw-black: 800;
+  /* ── Type scale (unchanged rungs) ── */
   --fs-xxs: 11px;
   --fs-xs: 12px;
   --fs-sm: 13px;
@@ -282,7 +282,7 @@
   --fs-metric-xl: 44px;
   --lh-snug: 1.20;
   --lh-base: 1.65;
-  /* legacy aliases (tokens.css :83-88) */
+  /* legacy aliases */
   --fs-base: var(--fs-body);
   --fs-md: var(--fs-body);
   --fs-lg: var(--fs-h3);
@@ -290,29 +290,19 @@
   --fs-2xl: var(--fs-h1);
   --fs-3xl: var(--fs-display-md);
   --fs-4xl: var(--fs-display-lg);
-  /* ── Radius ladder, canonical --r-* names (tokens.css §1.2) — r129
-     (token-matrix: SO carried only the Tailwind --radius-* spellings;
-     these bridges give non-Tailwind consumers the canonical names;
-     same values, theme-independent like every literal ladder). ── */
+  /* ── Radius ladder (unchanged) ── */
   --r-xs: 6px;   --r-sm: 8px;   --r-md: 10px;  --r-lg: 12px;
   --r-xl: 16px;  --r-2xl: 20px; --r-3xl: 28px; --r-full: 9999px;
-  /* ── Focus contract (Madarek tokens.css §1.10 interaction tokens):
-     the ring MUST clear 4.5:1 against the ground. r130 (W2-1, fix 5):
-     dark rides var(--accent) = the luminous gold #E9B44C (10.39:1 on
-     the night ground) — the TRUE canonical dark cascade (tokens.css:228
-     `--state-focus-ring-color: var(--accent)`); the former #C9962F was
-     the strong-gold demotion (W1-F P1-9 / FLEET-1). Light steps to
-     --accent-strong #5C3416 (see .light below). Width/offset are the
-     canonical 2px/2px and are consumed by the global :focus-visible
-     rule in @layer base below. ── */
-  --state-focus-ring-color: #E9B44C; /* Madarek dark --accent (10.39:1) */
+  /* ── Focus contract (r152 daylight): the ring MUST clear 4.5:1
+     against the ground — daylight rides the orange-deep text accent
+     #8A3400 (7.5:1 on paper); the dark cascade (below) rides the
+     luminous #FFA170 (9:1 on the night ground). Width/offset stay the
+     canonical 2px/2px. ── */
+  --state-focus-ring-color: #8A3400;
   --state-focus-ring-width: 2px;
   --state-focus-ring-offset: 2px;
 
-  /* ── Z-order ladder (Madarek tokens.css §3a, theme-independent):
-     base 0 < dropdown 100 < popover 200 < tooltip 250 < sheet 300 <
-     modal 400 < toast 500 < lightbox 600. Sticky app chrome sits at
-     --z-dropdown. Consumed via z-(--z-*) utilities. ── */
+  /* ── Z-order ladder (unchanged, theme-independent) ── */
   --z-base: 0;
   --z-dropdown: 100;
   --z-popover: 200;
@@ -322,110 +312,97 @@
   --z-toast: 500;
   --z-lightbox: 600;
 
-  /* ── Surfaces — Madarek night-indigo ramp (tokens.css §1.3):
-     ground #070B16 (neutral-50), surface #0D1428 (neutral-0),
-     surface-2 #121A36 (neutral-100), ink #F2EFE6 (neutral-900) ── */
-  --background: #070B16;
-  /* De-glow (Madarek ground is FLAT — no body radial; the painted
-     skies live in --menu-glow hero washes). Token kept for the
-     inline-style contract, value neutralized. */
+  /* ── Surfaces — the DAYLIGHT ramp (r152): paper ground #F7F7F4,
+     raised white cards #FFFFFF, soft #EFEFEA, ink navy #1B2A41 ── */
+  --background: #F7F7F4;
+  /* Daylight ground is FLAT — crisp paper, no body radial (the painted
+     orange hero washes live in --menu-glow scopes only). Token kept
+     for the inline-style contract, value neutralized. */
   --background-radial: none;
-  --foreground: #F2EFE6;
-  --card: #0D1428;
-  --card-foreground: #F2EFE6;
-  --popover: #0D1428;
-  --popover-foreground: #F2EFE6;
-  --muted: #121A36;
-  --muted-foreground: #C3C8DC; /* Madarek --text-secondary dark: 11.8:1 */
-  --placeholder-text: #8E97B8; /* Madarek neutral-500 dark: 6.8:1 */
+  --foreground: #1B2A41;
+  --card: #FFFFFF;
+  --card-foreground: #1B2A41;
+  --popover: #FFFFFF;
+  --popover-foreground: #1B2A41;
+  --muted: #EFEFEA;
+  --muted-foreground: #4E5A6E; /* secondary steel-navy: 6.4:1 on paper */
+  --placeholder-text: #6E7684; /* muted: 4.6:1 on white cards */
 
-  /* ── Brand solid — Madarek dark accent = luminous gold #E9B44C;
-       text on gold = --accent-fg #05070F (10.6:1, measured) ── */
-  --primary: #E9B44C;
-  --primary-foreground: #05070F;
-  --secondary: #121A36;
-  --secondary-foreground: #C3C8DC;
-  --accent: rgb(233 180 76 / 0.15); /* 15% gold wash (hover tints) */
-  --accent-foreground: var(--c-copper-ink); /* gold as text — 10.39:1 on cards (P4-W3c: chains the copper family) */
-  /* P4-W3c (B2): Smart-Menu-parity accent-soft — the copper family's
-     pastel ground as the SOFT ACCENT chip surface (Madarek §1.5
-     --accent-soft). Consumers: plan-usage chips, dashboard wells/alerts. */
-  --accent-soft: var(--c-copper-bg);
-  /* r129 (token-matrix): canonical --accent-hover dark (tokens.css:750)
-     — the hover step of the accent family, previously absent. */
-  --accent-hover: #F5D48A;
-  --border: #1B2444; /* Madarek hairline: neutral-200 dark */
-  --input: #7A83A0; /* Madarek neutral-400: 4.86:1 vs card (1.4.11) */
-  /* r130 (W2-1, fix 5): --ring = the dark accent gold #E9B44C — the
-     canonical dark cascade (tokens.css resolves the ring through
-     var(--accent)); matches --state-focus-ring-color above. The r129
-     #C9962F strong-gold pin was the fleet fork (W1-H FLEET-1). */
-  --ring: #E9B44C;
+  /* ── Brand solid — DELIVERY ORANGE #D14900; text on orange = white
+       (4.5:1 ✓). Hover #B23E00, pressed #8F3A00, deep text #8A3400. ── */
+  --primary: #D14900;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EFEFEA;
+  --secondary-foreground: #1B2A41;
+  --accent: rgb(209 73 0 / 0.12); /* 12% orange wash (hover tints) */
+  --accent-foreground: var(--c-copper-deep); /* orange-deep as text — 7.5:1 on paper (chains the copper family) */
+  --accent-soft: var(--c-copper-bg); /* soft orange chip ground (chains the copper family) */
+  --accent-hover: #B23E00;
+  /* r152: the pressed step of the delivery-orange ramp (the brief's
+     #8F3A00) — consumed by the primary button active state. */
+  --accent-pressed: #8F3A00;
+  --border: #E2E2DC; /* daylight hairline */
+  --input: #6E7684; /* 4.6:1 vs card (WCAG 1.4.11) */
+  --ring: #8A3400;
 
-  /* ── Accent metal ramp (dark) — Madarek gold CTA family:
-     flame/saffron = --accent #E9B44C, ember = --accent-strong
-     #C9962F, espresso = --accent-fg #05070F. Legacy names kept. ── */
-  --orange: #E9B44C;
-  --orange-foreground: #05070F;
-  --c-flame: #E9B44C;
-  --c-ember: #C9962F;
-  --c-saffron: #E9B44C;
-  --c-saffron-ink: #F5D48A;
-  --c-espresso: #05070F;
-  --c-ash: #C3C8DC;
-  --c-night: #070B16;
+  /* ── Accent metal ramp (daylight) — the delivery-orange CTA family:
+       flame = base #D14900, ember = hover/strong #B23E00,
+       saffron = the ramp mid #E06B1B, espresso = on-accent dark ink
+       #241307. Legacy names kept (150+ consumers). ── */
+  --orange: #D14900;
+  --orange-foreground: #FFFFFF;
+  --c-flame: #D14900;
+  --c-ember: #B23E00;
+  --c-saffron: #E06B1B;
+  --c-saffron-ink: #8A3400;
+  --c-espresso: #241307;
+  --c-ash: #4E5A6E;
+  --c-night: #1B2A41;
 
-  /* ── Status (dark) — Madarek dark split (§1.6): base = the luminous
-       family ink (fill/stroke/TEXT — dark ink == base, the canonical
-       identity), -ink = the text slot (same luminous ink here),
-       -foreground = void/dark ink on the luminous fills (canonical
-       --danger-fg dark pattern; never white on the luminous mids).
-       P4-W3c (B2): the whole status layer now CHAINS through the 9
-       pastel families (Smart-Menu's SSOT idiom — its globals.css does
-       exactly this) instead of duplicating their literals: mint/yellow/
-       sky/rose -ink base+text, their -bg as the soft grounds. The
-       family set below is the single source; editing a family hue now
-       reaches every chip/chart/alert at once. ── */
+  /* ── Status (daylight) — the three-way split kept: base = the family
+       -ink (fill/stroke role: dots, usage bars, borders — steel
+       #3E5C76 / green #1E7A46 / amber / rose), -ink = the family
+       -deep for TEXT (AA on cards and soft tints), -foreground = ink
+       on the solid fills. Chained through the 9 families below (the
+       SSOT idiom survives Phase 5 — the family set is the single
+       source). ── */
   --success: var(--c-mint-ink);
-  --success-ink: var(--c-mint-ink);
-  --success-foreground: #191918;
+  --success-ink: var(--c-mint-deep);
+  --success-foreground: #FFFFFF;
   --warning: var(--c-yellow-ink);
-  --warning-ink: var(--c-yellow-ink);
-  --warning-foreground: #191918;
+  --warning-ink: var(--c-yellow-deep);
+  --warning-foreground: #FFFFFF;
   --info: var(--c-sky-ink);
-  --info-ink: var(--c-sky-ink);
-  --info-foreground: #191918;
+  --info-ink: var(--c-sky-deep);
+  --info-foreground: #FFFFFF;
   --destructive: var(--c-rose-ink);
-  --destructive-ink: var(--c-rose-ink);
-  --destructive-foreground: #05070F;
+  --destructive-ink: var(--c-rose-deep);
+  --destructive-foreground: #FFFFFF;
 
-  /* ── Status soft grounds (dark) — the mint/yellow/sky/rose family
-       -bg slots, chained (P4-W3c: were duplicated literals) ── */
+  /* ── Status soft grounds (daylight) — the family -bg pastel fills,
+       chained ── */
   --success-soft: var(--c-mint-bg);
   --warning-soft: var(--c-yellow-bg);
   --info-soft: var(--c-sky-bg);
   --destructive-soft: var(--c-rose-bg);
 
-  /* ── 9 pastel families (dark) — Madarek tokens.css :698-706 exact:
-       space-tinted deep bg / luminous ink / pale tint per family.
-       Status -soft grounds above are these families' -bg slots
-       (mint/yellow/sky/rose); charts pick their -ink values. Triads
-       follow the Madarek naming --c-<family>-bg/-ink/-deep. ── */
-  --c-peach-bg: #2C1A16;     --c-peach-ink: #F2A07F;     --c-peach-deep: #FCD9C4;
-  --c-mint-bg: #0F241C;      --c-mint-ink: #7FD39A;      --c-mint-deep: #C9EAD3;
-  --c-lavender-bg: #221B3A;  --c-lavender-ink: #B7A0F4;  --c-lavender-deep: #DCD2F9;
-  --c-sky-bg: #14213A;       --c-sky-ink: #8FBBF2;       --c-sky-deep: #C9DCEE;
-  --c-yellow-bg: #2C2410;    --c-yellow-ink: #ECC97D;    --c-yellow-deep: #F8E5B5;
-  --c-rose-bg: #2C1620;      --c-rose-ink: #F0938F;      --c-rose-deep: #FACDD2;
-  --c-sand-bg: #241F14;      --c-sand-ink: #D9C18C;      --c-sand-deep: #EFE2C5;
-  --c-grey-bg: #161D33;      --c-grey-ink: #A9B0C8;      --c-grey-deep: #D5DAE8;
-  --c-copper-bg: #2C2312;    --c-copper-ink: #E9B44C;    --c-copper-deep: #F5D48A;
-  /* r129 (token-matrix): canonical brand companions (tokens.css:781-782)
-     — declared PER-THEME because they chain the pastel families (the
-     var() substitutes at declaration scope, so a :root-only copy would
-     freeze the dark value into .light). */
-  --brand-purple: var(--c-lavender-ink); /* = #B7A0F4 dark */
-  --gold-soft: var(--c-yellow-bg);       /* = #2C2410 dark */
+  /* ── 9 pastel families (daylight) — re-anchored r152 to the Route &
+       Node daylight world: sky = STEEL (info), mint = delivery green,
+       yellow = amber, copper = the DELIVERY ORANGE family, grey =
+       navy-grey neutrals. ── */
+  --c-peach-bg: #FDE8DE;     --c-peach-ink: #E06A45;     --c-peach-deep: #7A3018;
+  --c-mint-bg: #DCF0E4;      --c-mint-ink: #1E7A46;      --c-mint-deep: #14522D;
+  --c-lavender-bg: #ECEAF8;  --c-lavender-ink: #7C63DB;  --c-lavender-deep: #3F2D7A;
+  --c-sky-bg: #DFE9F0;       --c-sky-ink: #3E5C76;       --c-sky-deep: #2A3E52;
+  --c-yellow-bg: #FCF1CD;    --c-yellow-ink: #B45309;    --c-yellow-deep: #6B4C0B;
+  --c-rose-bg: #FBE3E6;      --c-rose-ink: #C4384A;      --c-rose-deep: #8C2733;
+  --c-sand-bg: #F1EEE1;      --c-sand-ink: #A08A5B;      --c-sand-deep: #55471F;
+  --c-grey-bg: #ECEDE7;      --c-grey-ink: #6E7684;      --c-grey-deep: #2F3745;
+  --c-copper-bg: #FCE3D6;    --c-copper-ink: #D14900;    --c-copper-deep: #8A3400;
+  /* brand companions — chained per-theme (the var() substitutes at
+     declaration scope). */
+  --brand-purple: var(--c-lavender-ink); /* = #7C63DB daylight */
+  --gold-soft: var(--c-yellow-bg);       /* = #FCF1CD daylight */
 
   /* ── External brand (unchanged by definition; -foreground = the
        dark on-green ink, identical in both themes) ── */
@@ -433,27 +410,207 @@
   --whatsapp-deep: #20bd5a;
   --whatsapp-foreground: #07361d;
 
-  /* ── Charts — Madarek dark series (copper/gold-led, §1.14); P4-W3c:
-       chained through the family -ink slots (single source) ── */
+  /* ── Charts — daylight series (orange-led); chained through the
+       family -ink slots (single source) ── */
   --chart-1: var(--c-copper-ink);
   --chart-2: var(--c-mint-ink);
   --chart-3: var(--c-sky-ink);
   --chart-4: var(--c-rose-ink);
   --chart-5: var(--c-lavender-ink);
 
-  /* ── Sidebar — Madarek night (§1.11): gold wash active state ── */
-  --sidebar: #070B16;
-  --sidebar-foreground: #F2EFE6;
-  --sidebar-primary: #E9B44C;
-  --sidebar-primary-foreground: #05070F;
-  --sidebar-accent: rgb(233 180 76 / 0.10); /* Madarek §5.5 gold wash */
-  --sidebar-accent-foreground: #E9B44C;
-  --sidebar-border: #1B2444;
-  --sidebar-ring: #E9B44C;
+  /* ── Sidebar — daylight paper: orange wash active state ── */
+  --sidebar: #F2F2EE;
+  --sidebar-foreground: #1B2A41;
+  --sidebar-primary: #D14900;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: rgb(209 73 0 / 0.10); /* orange wash active */
+  --sidebar-accent-foreground: #8A3400;
+  --sidebar-border: #E2E2DC;
+  --sidebar-ring: #8A3400;
 
-  /* ── Elevation ladder — Madarek §1.9 dark recipes: fill-led with
-       the 1px inset top-edge highlight. 4-tier shadow system maps
-       onto the 5-step ladder (sm=elev-1 … xl=elev-4). ── */
+  /* ── Elevation ladder — daylight recipes (soft two-layer navy-inked
+       black); 4-tier system maps sm=elev-1 … xl=elev-4. ── */
+  --elev-1: 0 1px 2px rgba(27, 42, 65, 0.06), 0 1px 1px rgba(27, 42, 65, 0.04);
+  --elev-2: 0 4px 8px rgba(27, 42, 65, 0.08), 0 2px 4px rgba(27, 42, 65, 0.05);
+  --elev-3: 0 8px 16px rgba(27, 42, 65, 0.10), 0 4px 8px rgba(27, 42, 65, 0.06);
+  --elev-4: 0 16px 32px rgba(27, 42, 65, 0.12), 0 8px 16px rgba(27, 42, 65, 0.07);
+  --elev-5: 0 32px 64px rgba(27, 42, 65, 0.14), 0 16px 32px rgba(27, 42, 65, 0.08);
+  --shadow-sm: var(--elev-1);
+  --shadow-md: var(--elev-2);
+  --shadow-lg: var(--elev-3);
+  --shadow-xl: var(--elev-4);
+  --shadow-card: var(--elev-1);
+  --shadow-card-h: 0 1px 2px rgba(27, 42, 65, 0.07), 0 8px 22px rgba(27, 42, 65, 0.10), 0 0 0 1px rgba(27, 42, 65, 0.05);
+  --shadow-pop: 0 2px 4px rgba(27, 42, 65, 0.08), 0 10px 28px rgba(27, 42, 65, 0.13), 0 0 0 1px rgba(27, 42, 65, 0.06);
+  --shadow-modal: 0 12px 32px rgba(27, 42, 65, 0.16), 0 32px 80px rgba(27, 42, 65, 0.18), 0 0 0 1px rgba(27, 42, 65, 0.07);
+  --shadow-glass: 0 1px 2px rgba(27, 42, 65, 0.07), 0 8px 22px rgba(27, 42, 65, 0.10), 0 0 0 1px rgba(27, 42, 65, 0.05);
+  --shadow-glass-lg: 0 12px 32px rgba(27, 42, 65, 0.16), 0 32px 80px rgba(27, 42, 65, 0.18), 0 0 0 1px rgba(27, 42, 65, 0.07);
+
+  /* ── Surface variants — daylight ── */
+  --surface-raised: #FFFFFF;
+  --surface-overlay: #FFFFFF;
+  --surface-sunken: #EFEFEA;
+
+  /* ── Glass — daylight: paper rgba + 16px blur + navy hairline;
+       strong = the topbar surface. ── */
+  --glass-bg: rgba(247, 247, 244, 0.82);
+  --glass-bg-strong: rgba(247, 247, 244, 0.92);
+  --glass-border: rgba(27, 42, 65, 0.10);
+  --glass-border-strong: rgba(27, 42, 65, 0.22);
+
+  /* ── Overlay backdrop — navy-inked daylight scrim ── */
+  --overlay: rgba(27, 42, 65, 0.42);
+
+  /* ── Grid pattern — navy hairline alphas (daylight) ── */
+  --grid-line: rgba(27, 42, 65, 0.08);
+  --grid-fill: rgba(27, 42, 65, 0.04);
+  --grid-square: rgba(27, 42, 65, 0.08);
+
+  /* ── Accent gradients — delivery orange at the wash alphas ── */
+  --gradient-orange: linear-gradient(135deg, rgb(209 73 0 / 0.10), rgb(209 73 0 / 0.05));
+  --gradient-shine: linear-gradient(90deg, transparent 0%, oklch(0 0 0 / 0.04) 50%, transparent 100%);
+
+  /* ── Page glow — orange hero washes (daylight operations room) ── */
+  --menu-glow: radial-gradient(ellipse_at_50%_0%, rgb(209 73 0 / 0.07), transparent 70%);
+  --menu-glow-strong: radial-gradient(ellipse 80% 50% at 50% -10%, rgb(209 73 0 / 0.13), transparent 70%);
+
+  /* ── Image placeholder shimmer (daylight) ── */
+  --image-shimmer: rgba(27, 42, 65, 0.08);
+
+  /* ── Interaction state — the ONE sanctioned input focus halo: 3px at
+       22% of the SOLID accent; var() substitution is per-element, so
+       this single definition serves both themes. ── */
+  --state-input-focus-halo: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
+  --state-input-focus-border: var(--primary);
+  --state-input-error-halo: 0 0 0 3px color-mix(in srgb, var(--destructive) 22%, transparent);
+  --state-button-disabled-opacity: 0.55;
+  --state-input-disabled-opacity: 0.6;
+
+  /* ── Scrollbar (daylight) — navy thumbs on paper ── */
+  --scrollbar-thumb: rgba(27, 42, 65, 0.18);
+  --scrollbar-thumb-hover: rgba(27, 42, 65, 0.32);
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   DARK — NIGHT DISPATCH (explicit .dark override; daylight is default)
+   ════════════════════════════════════════════════════════════════ */
+.dark {
+  color-scheme: dark;
+
+  /* ═══ r152 — NIGHT DISPATCH (the explicit dark override; the default
+     theme is the daylight :root above). The SAME route-and-node
+     identity at night: deep navy ground, raised navy surfaces, paper
+     ink, LUMINOOUS delivery orange. The toggle keeps working. ═══ */
+
+  /* ── Core palette — night dispatch:
+     ground #0D1626, surface #152238, surface-2 #1B2A41, ink #F1F0EA ── */
+  --background: #0D1626;
+  /* Flat night ground — no body radial (de-glow doctrine survives). */
+  --background-radial: none;
+  --foreground: #F1F0EA;
+  --card: #152238;
+  --card-foreground: #F1F0EA;
+  --popover: #152238;
+  --popover-foreground: #F1F0EA;
+  --muted: #1B2A41;
+  --muted-foreground: #B9C2D2; /* night secondary: 8.9:1 on card */
+  --placeholder-text: #8C97AC; /* night muted: 5.4:1 on card */
+
+  /* ── Brand solid — LUMINOOUS delivery orange #FF7A38; text on it =
+       the dark on-orange ink #241307 (6.9:1 — the luminous-fill +
+       void-ink family pattern, never white on the luminous mid). ── */
+  --primary: #FF7A38;
+  --primary-foreground: #241307;
+  --secondary: #1B2A41;
+  --secondary-foreground: #C6CEDC;
+  --accent: rgb(255 122 56 / 0.16); /* 16% luminous orange wash */
+  --accent-foreground: var(--c-copper-ink); /* luminous orange as text — 8.7:1 on the night ground (chains the copper family) */
+  --accent-soft: var(--c-copper-bg); /* night copper family ground */
+  --accent-hover: #FF8A50;
+  --accent-pressed: #E85D10;
+  --border: #24344F; /* night hairline */
+  --input: #5F7189; /* 3.2:1 vs card (WCAG 1.4.11) */
+  /* Focus ring — night cascade: the luminous orange text tier #FFA170
+     (9:1 on ground, 8:1 on cards) mirrors --accent-foreground. */
+  --ring: #FFA170;
+  --state-focus-ring-color: #FFA170;
+
+  /* ── Accent metal ramp (night) — luminous orange family:
+       flame = #FF7A38, ember = strong #F26A1B, saffron = #FF9A62,
+       espresso = the void ink #241307. ── */
+  --orange: #FF7A38;
+  --orange-foreground: #241307;
+  --c-flame: #FF7A38;
+  --c-ember: #F26A1B;
+  --c-saffron: #FF9A62;
+  --c-saffron-ink: #FFA170;
+  --c-espresso: #241307;
+  --c-ash: #B9C2D2;
+  --c-night: #0D1626;
+
+  /* ── Status (night) — luminous family inks as base (fill/stroke/TEXT
+       in the dark identity), -ink = the same luminous tier, -foreground
+       = dark ink on the luminous fills. Chained through the night
+       family set below. ── */
+  --success: var(--c-mint-ink);
+  --success-ink: var(--c-mint-ink);
+  --success-foreground: #06281A;
+  --warning: var(--c-yellow-ink);
+  --warning-ink: var(--c-yellow-ink);
+  --warning-foreground: #241300;
+  --info: var(--c-sky-ink);
+  --info-ink: var(--c-sky-ink);
+  --info-foreground: #0A1A2E;
+  --destructive: var(--c-rose-ink);
+  --destructive-ink: var(--c-rose-ink);
+  --destructive-foreground: #2A0B10;
+
+  /* ── Status soft grounds (night) — the family -bg deep tints ── */
+  --success-soft: var(--c-mint-bg);
+  --warning-soft: var(--c-yellow-bg);
+  --info-soft: var(--c-sky-bg);
+  --destructive-soft: var(--c-rose-bg);
+
+  /* ── 9 pastel families (night) — navy-tinted deep grounds +
+       luminous inks (the night identity of the daylight families). ── */
+  --c-peach-bg: #32201A;     --c-peach-ink: #F2A07F;     --c-peach-deep: #FCD9C4;
+  --c-mint-bg: #0F2A1E;      --c-mint-ink: #6FD99B;      --c-mint-deep: #C9EAD3;
+  --c-lavender-bg: #232040;  --c-lavender-ink: #B7A0F4;  --c-lavender-deep: #DCD2F9;
+  --c-sky-bg: #14263E;       --c-sky-ink: #8FBBF2;       --c-sky-deep: #C9DCEE;
+  --c-yellow-bg: #2E2610;    --c-yellow-ink: #F2C48D;    --c-yellow-deep: #F8E5B5;
+  --c-rose-bg: #301723;      --c-rose-ink: #F4938F;      --c-rose-deep: #FACDD2;
+  --c-sand-bg: #26221A;      --c-sand-ink: #D9C18C;      --c-sand-deep: #EFE2C5;
+  --c-grey-bg: #1A2438;      --c-grey-ink: #A9B0C8;      --c-grey-deep: #D5DAE8;
+  --c-copper-bg: #38200F;    --c-copper-ink: #FF9A62;    --c-copper-deep: #FFC9A8;
+  /* brand companions, per-theme chain */
+  --brand-purple: var(--c-lavender-ink); /* = #B7A0F4 night */
+  --gold-soft: var(--c-yellow-bg);       /* = #2E2610 night */
+
+  /* ── External brand (unchanged by definition) ── */
+  --whatsapp: #25d366;
+  --whatsapp-deep: #20bd5a;
+  --whatsapp-foreground: #07361d;
+
+  /* ── Charts — night series (luminous orange-led); chained ── */
+  --chart-1: var(--c-copper-ink);
+  --chart-2: var(--c-mint-ink);
+  --chart-3: var(--c-sky-ink);
+  --chart-4: var(--c-rose-ink);
+  --chart-5: var(--c-lavender-ink);
+
+  /* ── Sidebar — night dispatch: navy ground, luminous orange active ── */
+  --sidebar: #0D1626;
+  --sidebar-foreground: #F1F0EA;
+  --sidebar-primary: #FF7A38;
+  --sidebar-primary-foreground: #241307;
+  --sidebar-accent: rgb(255 122 56 / 0.10); /* luminous orange wash */
+  --sidebar-accent-foreground: #FF9A62;
+  --sidebar-border: #24344F;
+  --sidebar-ring: #FFA170;
+
+  /* ── Elevation ladder — night recipes (fill-led + the 1px inset top
+       highlight); 4-tier system maps sm=elev-1 … xl=elev-4. ── */
   --elev-1: 0 1px 2px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   --elev-2: 0 4px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --elev-3: 0 8px 16px rgba(0, 0, 0, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -464,281 +621,64 @@
   --shadow-lg: var(--elev-3);
   --shadow-xl: var(--elev-4);
   --shadow-card: var(--elev-1);
-  --shadow-card-h: 0 1px 2px rgba(2, 4, 12, 0.50), 0 8px 22px rgba(2, 4, 12, 0.55), 0 0 0 1px rgba(142, 151, 184, 0.08);
-  --shadow-pop: 0 2px 4px rgba(2, 4, 12, 0.55), 0 10px 28px rgba(2, 4, 12, 0.62), 0 0 0 1px rgba(142, 151, 184, 0.10);
-  --shadow-modal: 0 12px 32px rgba(2, 4, 12, 0.66), 0 32px 80px rgba(2, 4, 12, 0.70), 0 0 0 1px rgba(142, 151, 184, 0.12);
-  /* r140: ‏--shadow-glow حُذف كاملًا — التوهج خارج الكنون الأسطولي
-     (مبدأ de-glow) ولا مستهلك باقي له بعد تنظيف رفعة البطاقة. */
-  --shadow-glass: 0 1px 2px rgba(2, 4, 12, 0.50), 0 8px 22px rgba(2, 4, 12, 0.55), 0 0 0 1px rgba(142, 151, 184, 0.08);
-  --shadow-glass-lg: 0 12px 32px rgba(2, 4, 12, 0.66), 0 32px 80px rgba(2, 4, 12, 0.70), 0 0 0 1px rgba(142, 151, 184, 0.12);
+  --shadow-card-h: 0 1px 2px rgba(2, 6, 14, 0.50), 0 8px 22px rgba(2, 6, 14, 0.55), 0 0 0 1px rgba(185, 194, 210, 0.08);
+  --shadow-pop: 0 2px 4px rgba(2, 6, 14, 0.55), 0 10px 28px rgba(2, 6, 14, 0.62), 0 0 0 1px rgba(185, 194, 210, 0.10);
+  --shadow-modal: 0 12px 32px rgba(2, 6, 14, 0.66), 0 32px 80px rgba(2, 6, 14, 0.70), 0 0 0 1px rgba(185, 194, 210, 0.12);
+  --shadow-glass: 0 1px 2px rgba(2, 6, 14, 0.50), 0 8px 22px rgba(2, 6, 14, 0.55), 0 0 0 1px rgba(185, 194, 210, 0.08);
+  --shadow-glass-lg: 0 12px 32px rgba(2, 6, 14, 0.66), 0 32px 80px rgba(2, 6, 14, 0.70), 0 0 0 1px rgba(185, 194, 210, 0.12);
 
-  /* ── Surface variants — Madarek night surfaces (§1.3/§1.7) ── */
-  --surface-raised: #121A36;
-  --surface-overlay: #0D1428;
-  --surface-sunken: #070B16;
+  /* ── Surface trio — night dispatch ── */
+  --surface-raised: #1B2A41;
+  --surface-overlay: #152238;
+  --surface-sunken: #0D1626;
 
-  /* ── Glass — Madarek §1.8 dark: rgba(11,16,32,0.78) + 16px blur +
-       neutral hairline; strong = the topbar surface. ── */
-  --glass-bg: rgba(11, 16, 32, 0.78);
-  /* r140: ‏0.94 ← 0.92 توحيدًا مع الكنون (قرار r140 الموحد:
-     0.92 + 16px) — التباين مع madarek player.css rgb(11 16 32 / 0.92) */
-  --glass-bg-strong: rgba(11, 16, 32, 0.92);
-  --glass-border: rgba(142, 151, 184, 0.12);
-  --glass-border-strong: rgba(142, 151, 184, 0.28);
+  /* ── Glass — night: navy rgba + 16px blur + pale hairline. ── */
+  --glass-bg: rgba(13, 22, 38, 0.80);
+  --glass-bg-strong: rgba(13, 22, 38, 0.92);
+  --glass-border: rgba(185, 194, 210, 0.12);
+  --glass-border-strong: rgba(185, 194, 210, 0.28);
 
-  /* ── Overlay backdrop — Madarek modal scrim (dark 0.62, §5.10) ── */
-  --overlay: rgba(15, 15, 15, 0.62);
+  /* ── Overlay backdrop — night modal scrim ── */
+  --overlay: rgba(4, 9, 16, 0.62);
 
-  /* ── Grid pattern — mist hairline alphas (Madarek night) ── */
-  --grid-line: rgba(142, 151, 184, 0.10);
-  --grid-fill: rgba(142, 151, 184, 0.05);
-  --grid-square: rgba(142, 151, 184, 0.10);
+  /* ── Grid pattern — pale hairline alphas (night) ── */
+  --grid-line: rgba(185, 194, 210, 0.10);
+  --grid-fill: rgba(185, 194, 210, 0.05);
+  --grid-square: rgba(185, 194, 210, 0.10);
 
-  /* ── Accent gradients — gold at the original wash alphas ── */
-  --gradient-orange: linear-gradient(135deg, rgb(233 180 76 / 0.12), rgb(233 180 76 / 0.06));
+  /* ── Accent gradients — luminous orange at the wash alphas ── */
+  --gradient-orange: linear-gradient(135deg, rgb(255 122 56 / 0.12), rgb(255 122 56 / 0.06));
   --gradient-shine: linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.06) 50%, transparent 100%);
 
-  /* ── Page glow — gold hero washes (Madarek ambient hero glow) ── */
-  --menu-glow: radial-gradient(ellipse_at_50%_0%, rgb(233 180 76 / 0.08), transparent 70%);
-  --menu-glow-strong: radial-gradient(ellipse 80% 50% at 50% -10%, rgb(233 180 76 / 0.15), transparent 70%);
+  /* ── Page glow — luminous orange hero washes (night ops) ── */
+  --menu-glow: radial-gradient(ellipse_at_50%_0%, rgb(255 122 56 / 0.08), transparent 70%);
+  --menu-glow-strong: radial-gradient(ellipse 80% 50% at 50% -10%, rgb(255 122 56 / 0.15), transparent 70%);
 
-  /* ── Image placeholder shimmer (theme-aware) ── */
+  /* ── Image placeholder shimmer — night ── */
   --image-shimmer: rgba(0, 0, 0, 0.30);
 
-  /* ── Interaction state (r130 W2-1, fix 4; tokens.css :226-265): the
-     ONE sanctioned input focus halo — 3px at 22% of the SOLID accent.
-     --primary IS the solid accent in this bridge (gold #E9B44C dark /
-     copper #B57438 light — never #C9962F); var() substitution is
-     per-element, so this single definition serves both themes. ── */
-  --state-input-focus-halo: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
-  --state-input-focus-border: var(--primary);
-  --state-input-error-halo: 0 0 0 3px color-mix(in srgb, var(--destructive) 22%, transparent);
-  --state-button-disabled-opacity: 0.55;
-  --state-input-disabled-opacity: 0.6;
-
-  /* ── Scrollbar (r130 W2-1, fix 8; tokens.css :809-810 dark) —
-     consumed by the global thin-scrollbar block near the end of this
-     sheet (canonical polish.css :5197-5210). ── */
-  --scrollbar-thumb: rgba(142, 151, 184, 0.20);
-  --scrollbar-thumb-hover: rgba(142, 151, 184, 0.34);
-}
-
-/* ════════════════════════════════════════════════════════════════
-   LIGHT — Madarek cream (Notion-warm paper, copper accent)
-   ════════════════════════════════════════════════════════════════ */
-.light {
-  color-scheme: light;
-
-  /* ── Core palette — Madarek cream (§1.3/§1.7 light):
-     ground #FBFAF9, surface #FFFFFF, surface-2 #F7F6F3, ink #191918 ── */
-  --background: #FBFAF9;
-  /* Flat cream ground — the Madarek light ground is FLAT (no body
-     radial; painted washes live in --menu-glow hero scopes). Token
-     kept for the layout inline-style contract, value neutralized
-     exactly like the dark side. */
-  --background-radial: none;
-  --foreground: #191918;
-  --card: #FFFFFF;
-  --card-foreground: #191918;
-  --popover: #FFFFFF;
-  --popover-foreground: #191918;
-  --muted: #F1EFEC;
-  --muted-foreground: #4F4D48; /* Madarek --text-secondary light: 8.1:1 */
-  --placeholder-text: #6E6C65; /* Madarek --text-muted light: 5.04:1 */
-
-  /* ── Brand solid — Madarek light accent = copper #B57438; text on
-       copper = --accent-fg #1A0F06 (4.95:1, Madarek's own .btn.accent
-       light pairing). ── */
-  --primary: #B57438;
-  --primary-foreground: #1A0F06;
-  --secondary: #F7F6F3;
-  --secondary-foreground: #191918;
-  --accent: rgb(181 116 56 / 0.12); /* 12% copper wash */
-  --accent-foreground: var(--c-copper-deep); /* copper-deep as text — 10.29:1 (P4-W3c: chains the copper family) */
-  --accent-soft: var(--c-copper-bg); /* P4-W3c (B2): soft accent chip ground (Madarek §1.5) */
-  /* r129 (token-matrix): canonical --accent-hover light (tokens.css:520)
-     — #9A5F25, the copper family's hover step (the closest value in
-     the sheet was --c-saffron-ink #6B4C0B — a different slot). */
-  --accent-hover: #9A5F25;
-  --border: #E9E7E2; /* Madarek hairline: neutral-200 light */
-  --input: #6E6C65; /* 5.26:1 vs card (WCAG 1.4.11) */
-  /* Focus ring — Madarek light contract: raw accent #B57438 is only
-     3.65:1 on cream, so the light ring rides the deep copper #5C3416
-     (10.29:1 on the ground; 8.6:1 even on the copper-soft tints where
-     #9A5F25 would drop to ~4.2:1). Mirrors --accent-ink. */
-  --ring: #5C3416;
-  --state-focus-ring-color: #5C3416; /* Madarek light --accent-strong */
-
-  /* ── Accent metal ramp (light) — copper #B57438 → gold #D6A330,
-       espresso #1A0F06 (Madarek light --accent-fg). ── */
-  --orange: #B57438;
-  --orange-foreground: #1A0F06;
-  --c-flame: #B57438;
-  /* r129 (token-matrix): --c-ember light = #5C3416 — the STRONG slot
-     was mislabeled with the base accent #B57438 (canonical light
-     --accent-strong = --c-copper-deep #5C3416, tokens.css:522). */
-  --c-ember: #5C3416;
-  --c-saffron: #D6A330;
-  --c-saffron-ink: #6B4C0B; /* Madarek gold-ink light: 7.56:1 */
-  --c-espresso: #1A0F06;
-  --c-ash: #4F4D48;
-  --c-night: #191918;
-
-  /* ── Status (light) — canonical Madarek three-way split (§2.6),
-       restored r125 (was: deep-collapse "WCAG collapse"). base = the
-       family -ink (fill/stroke role: dots, usage bars, soft-tint
-       borders — vivid mint #4FA66D / yellow #D6A330 / sky #5C8FCE /
-       rose #DD6E78); -ink = the family -deep for TEXT (7.9-11.2:1 on
-       cards and soft tints — the slot text consumers must ride);
-       -foreground = #191918 ink on the mid fills (Madarek --danger-fg
-       light pattern, 5.3-7.7:1 — white on the mids fails AA).
-       P4-W3c (B2): chained through the family set below (Smart-Menu's
-       SSOT idiom) — the literals above describe the resolved values. ── */
-  --success: var(--c-mint-ink);
-  --success-ink: var(--c-mint-deep);
-  --success-foreground: #191918;
-  --warning: var(--c-yellow-ink);
-  --warning-ink: var(--c-yellow-deep);
-  --warning-foreground: #191918;
-  --info: var(--c-sky-ink);
-  --info-ink: var(--c-sky-deep);
-  --info-foreground: #191918;
-  --destructive: var(--c-rose-ink);
-  --destructive-ink: var(--c-rose-deep);
-  --destructive-foreground: #191918;
-
-  /* ── Status soft grounds (light) — the family -bg pastel fills,
-       chained (P4-W3c: were duplicated literals) ── */
-  --success-soft: var(--c-mint-bg);
-  --warning-soft: var(--c-yellow-bg);
-  --info-soft: var(--c-sky-bg);
-  --destructive-soft: var(--c-rose-bg);
-
-  /* ── 9 pastel families (light) — Madarek tokens.css :453-461 exact:
-       pastel bg / readable ink / deep text per family. Status -soft
-       grounds above are these families' -bg slots; status base =
-       mint/yellow/sky/rose -ink and status -ink = their -deep
-       (mint #1F4F30, yellow #6B4C0B, sky #1F3D63, rose #6B2128). ── */
-  --c-peach-bg: #FFE9DC;     --c-peach-ink: #E07856;     --c-peach-deep: #6B2D1A;
-  --c-mint-bg: #DCF1E2;      --c-mint-ink: #4FA66D;      --c-mint-deep: #1F4F30;
-  --c-lavender-bg: #ECE6FA;  --c-lavender-ink: #8A6FE0;  --c-lavender-deep: #3F2D7A;
-  --c-sky-bg: #DDEBF7;       --c-sky-ink: #5C8FCE;       --c-sky-deep: #1F3D63;
-  --c-yellow-bg: #FCF1CD;    --c-yellow-ink: #D6A330;    --c-yellow-deep: #6B4C0B;
-  --c-rose-bg: #FCE0E2;      --c-rose-ink: #DD6E78;      --c-rose-deep: #6B2128;
-  --c-sand-bg: #F1ECDF;      --c-sand-ink: #B59868;      --c-sand-deep: #5A4623;
-  --c-grey-bg: #EFECE7;      --c-grey-ink: #6B665E;      --c-grey-deep: #2D2A24;
-  --c-copper-bg: #F4E4D2;    --c-copper-ink: #B57438;    --c-copper-deep: #5C3416;
-  /* r129 (token-matrix): canonical brand companions, light (tokens.css:576-577)
-     — same chain, per-theme (see the dark block's note). */
-  --brand-purple: var(--c-lavender-ink); /* = #8A6FE0 light */
-  --gold-soft: var(--c-yellow-bg);       /* = #FCF1CD light */
-
-  /* ── External brand (unchanged by definition; -foreground = the
-       dark on-green ink, identical in both themes) ── */
-  --whatsapp: #25d366;
-  --whatsapp-deep: #20bd5a;
-  --whatsapp-foreground: #07361d;
-
-  /* ── Charts — Madarek light series (copper-led, §1.14); P4-W3c:
-       chained through the family -ink slots ── */
-  --chart-1: var(--c-copper-ink);
-  --chart-2: var(--c-mint-ink);
-  --chart-3: var(--c-sky-ink);
-  --chart-4: var(--c-rose-ink);
-  --chart-5: var(--c-lavender-ink);
-
-  /* ── Sidebar — Madarek cream (§1.11): neutral-150 flat active ── */
-  --sidebar: #FBFAF9;
-  --sidebar-foreground: #191918;
-  --sidebar-primary: #B57438;
-  --sidebar-primary-foreground: #1A0F06;
-  --sidebar-accent: #F1EFEC; /* Madarek light active bg (neutral-150) */
-  --sidebar-accent-foreground: #5C3416;
-  --sidebar-border: #E9E7E2;
-  --sidebar-ring: #5C3416;
-
-  /* ── Elevation ladder — Madarek §1.9 light recipes (soft
-       two-layer); 4-tier system maps sm=elev-1 … xl=elev-4. ── */
-  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.06);
-  --elev-2: 0 4px 8px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
-  --elev-3: 0 8px 16px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.05);
-  --elev-4: 0 16px 32px rgba(0, 0, 0, 0.10), 0 8px 16px rgba(0, 0, 0, 0.06);
-  --elev-5: 0 32px 64px rgba(0, 0, 0, 0.12), 0 16px 32px rgba(0, 0, 0, 0.08);
-  --shadow-sm: var(--elev-1);
-  --shadow-md: var(--elev-2);
-  --shadow-lg: var(--elev-3);
-  --shadow-xl: var(--elev-4);
-  --shadow-card: var(--elev-1);
-  --shadow-card-h: 0 1px 2px rgba(15, 15, 15, 0.04), 0 6px 18px rgba(15, 15, 15, 0.06);
-  --shadow-pop: 0 1px 2px rgba(15, 15, 15, 0.04), 0 8px 24px rgba(15, 15, 15, 0.08);
-  --shadow-modal: 0 12px 36px rgba(15, 15, 15, 0.10), 0 32px 80px rgba(15, 15, 15, 0.14);
-  /* r140: هالة النحاس المحذوفة مع توأمها الداكن — نفس قرار de-glow */
-  --shadow-glass: 0 1px 2px rgba(15, 15, 15, 0.04), 0 6px 18px rgba(15, 15, 15, 0.06);
-  --shadow-glass-lg: 0 12px 36px rgba(15, 15, 15, 0.10), 0 32px 80px rgba(15, 15, 15, 0.14);
-
-  /* ── Surface trio — Madarek light surfaces ── */
-  --surface-raised: #FFFFFF;
-  --surface-overlay: #FFFFFF;
-  --surface-sunken: #F7F6F3;
-
-  /* ── Glass — Madarek §1.8 light: rgba(251,250,249,0.78) + 16px
-       blur + warm hairline rgba(25,25,24,0.06). ── */
-  --glass-bg: rgba(251, 250, 249, 0.78);
-  --glass-bg-strong: rgba(251, 250, 249, 0.92);
-  --glass-border: rgba(25, 25, 24, 0.06);
-  --glass-border-strong: rgba(25, 25, 24, 0.18);
-
-  /* ── Overlay backdrop — Madarek modal scrim (light 0.40) ── */
-  --overlay: rgba(15, 15, 15, 0.40);
-
-  /* ── Grid pattern — warm ink hairline alphas ── */
-  --grid-line: rgba(25, 25, 24, 0.08);
-  --grid-fill: rgba(25, 25, 24, 0.04);
-  --grid-square: rgba(25, 25, 24, 0.08);
-
-  /* ── Accent gradients — copper at the family wash alphas ── */
-  --gradient-orange: linear-gradient(135deg, rgb(181 116 56 / 0.12), rgb(181 116 56 / 0.06));
-  --gradient-shine: linear-gradient(90deg, transparent 0%, oklch(0 0 0 / 0.04) 50%, transparent 100%);
-
-  /* ── Page glow — copper hero washes ── */
-  --menu-glow: radial-gradient(ellipse_at_50%_0%, rgb(181 116 56 / 0.08), transparent 70%);
-  --menu-glow-strong: radial-gradient(ellipse 80% 50% at 50% -10%, rgb(181 116 56 / 0.15), transparent 70%);
-
-  /* ── Image placeholder shimmer — light ── */
-  --image-shimmer: rgba(25, 25, 24, 0.10);
-
-  /* ── Interaction state (r130 W2-1, fix 4) — light copy of the :root
-     halo pair (per-theme declaration per this sheet's chained-token
-     convention; --primary resolves to the copper #B57438 here). ── */
+  /* ── Interaction state — night copy of the halo pair (per-theme
+     declaration per this sheet's chained-token convention). ── */
   --state-input-focus-halo: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
   --state-input-focus-border: var(--primary);
   --state-input-error-halo: 0 0 0 3px color-mix(in srgb, var(--destructive) 22%, transparent);
 
-  /* ── Scrollbar (r130 W2-1, fix 8; tokens.css :621-622 light) ── */
-  --scrollbar-thumb: rgba(25, 25, 24, 0.16);
-  --scrollbar-thumb-hover: rgba(25, 25, 24, 0.28);
+  /* ── Scrollbar — night ── */
+  --scrollbar-thumb: rgba(185, 194, 210, 0.20);
+  --scrollbar-thumb-hover: rgba(185, 194, 210, 0.34);
 }
+
 
 /* ═════════════════════════════════════════════════════════════
    prefers-contrast: more — ported from Madarek tokens.css :964-1005
    (012 theme-tokens contract §8). Elevation collapses to solid
    focus-style rings, glass de-blurs to a flat surface, borders
-   strengthen. Dark rides :root:not(.light) (this app toggles a
-   .light class on <html>; dark is the default), light rides .light
+   strengthen. Light rides :root:not(.dark) (r152: the app toggles a
+   .dark class on <html>; DAYLIGHT is the default), dark rides .dark
    — declared after so it wins at equal specificity.
    ═════════════════════════════════════════════════════════════ */
 @media (prefers-contrast: more) {
-  :root:not(.light) {
-    --elev-1: 0 0 0 1px rgba(255, 255, 255, 0.36);
-    --elev-2: 0 0 0 1.5px rgba(255, 255, 255, 0.44);
-    --elev-3: 0 0 0 2px rgba(255, 255, 255, 0.52);
-    --elev-4: 0 0 0 2.5px rgba(255, 255, 255, 0.60);
-    --elev-5: 0 0 0 3px rgba(255, 255, 255, 0.68);
-    --glass-bg: var(--card);
-    --glass-border: rgba(255, 255, 255, 0.36);
-    --border: rgba(255, 255, 255, 0.48);
-  }
-  .light {
+  :root:not(.dark) {
     --elev-1: 0 0 0 1px rgba(0, 0, 0, 0.32);
     --elev-2: 0 0 0 1.5px rgba(0, 0, 0, 0.40);
     --elev-3: 0 0 0 2px rgba(0, 0, 0, 0.48);
@@ -747,6 +687,16 @@
     --glass-bg: var(--card);
     --glass-border: rgba(0, 0, 0, 0.32);
     --border: rgba(0, 0, 0, 0.42);
+  }
+  .dark {
+    --elev-1: 0 0 0 1px rgba(255, 255, 255, 0.36);
+    --elev-2: 0 0 0 1.5px rgba(255, 255, 255, 0.44);
+    --elev-3: 0 0 0 2px rgba(255, 255, 255, 0.52);
+    --elev-4: 0 0 0 2.5px rgba(255, 255, 255, 0.60);
+    --elev-5: 0 0 0 3px rgba(255, 255, 255, 0.68);
+    --glass-bg: var(--card);
+    --glass-border: rgba(255, 255, 255, 0.36);
+    --border: rgba(255, 255, 255, 0.48);
   }
 }
 
@@ -1315,8 +1265,8 @@
   border-radius: var(--radius-sm);
   animation: shimmer var(--motion-duration-skeleton, 1200ms) var(--ease-linear, linear) infinite;
 }
-.light .shimmer {
-  background: linear-gradient(90deg, transparent 0%, oklch(0 0 0 / 0.04) 50%, transparent 100%);
+.dark .shimmer {
+  background: linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.06) 50%, transparent 100%);
   background-size: 200% 100%;
 }
 
@@ -1350,12 +1300,12 @@
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.022;
+  opacity: 0.012;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 256px 256px;
   animation: none;
 }
-.light .grain-overlay::before { opacity: 0.012; }
+.dark .grain-overlay::before { opacity: 0.022; }
 
 /* r130 (W2-1, fix 9): .empty-state-icon DELETED — zero consumers
    (rg-verified; W1-F P1-4) and the wrong recipe (56px/r-md/orange
@@ -1401,6 +1351,54 @@
     linear-gradient(to bottom, var(--c-copper-bg), var(--muted));
 }
 
+/* ── ROUTE & NODE motif (r152, Phase 5 signature) ──────────────────
+   The dashed route line with circular nodes: the tracking timeline's
+   backbone, section dividers, and card connectors all speak this ONE
+   geometry — a 2px dashed hairline (delivery orange when traveled,
+   hairline when pending) punctuated by circular nodes. Logical
+   properties only (RTL-safe); color-mix keeps every state on tokens. */
+.route-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.route-divider::before {
+  content: "";
+  flex: 1 1 auto;
+  height: 0;
+  border-block-start: 2px dashed color-mix(in srgb, var(--primary) 45%, transparent);
+}
+.route-divider::after {
+  content: "";
+  flex: 0 0 auto;
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: var(--r-full);
+  border: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  background: var(--card);
+}
+.route-divider-node {
+  flex: 0 0 auto;
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: var(--r-full);
+  border: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  background: var(--card);
+}
+/* The quiet variant for dividers between neutral sections (hairline
+   route, no orange) — the road at rest. */
+.route-divider-quiet::before {
+  border-block-start-color: color-mix(in srgb, var(--border) 90%, transparent);
+}
+.route-divider-quiet::after {
+  border-color: color-mix(in srgb, var(--muted-foreground) 35%, transparent);
+}
+/* The vertical spine segment (tracking timelines connect these):
+   2px dashed, inline-start edge. Consumers position it. */
+.route-spine-segment {
+  border-inline-start: 2px dashed color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
 /* Safe-area padding for mobile checkout bars */
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -1410,11 +1408,10 @@
 }
 
 /* ── Print: receipts clean AND readable (r131 F1, A5 P1-3) ──────────
-   The DARK theme is the app default, and browsers strip backgrounds
-   when printing — the sand-on-night ink tokens printed near-white on
-   white paper (the merchant kitchen-receipt flow). The print block
-   now forces the LIGHT palette onto paper regardless of the active
-   theme class: the load-bearing tokens are re-declared for
+   Browsers strip backgrounds when printing — the paper-on-night ink
+   tokens would print near-white on white paper (the merchant
+   kitchen-receipt flow). The print block forces the DAYLIGHT palette
+   onto paper regardless of the active theme class: the load-bearing tokens are re-declared for
    :root/.dark/.light (this block sits AFTER both theme blocks, so it
    wins the cascade), and the pastel families ride along so status
    chips keep dark-on-pastel ink instead of luminous ink on stripped
@@ -1429,39 +1426,39 @@
   .dark,
   .light {
     color-scheme: light;
-    --background: #FBFAF9;
-    --foreground: #191918;
+    --background: #F7F7F4;
+    --foreground: #1B2A41;
     --card: #FFFFFF;
-    --card-foreground: #191918;
+    --card-foreground: #1B2A41;
     --popover: #FFFFFF;
-    --popover-foreground: #191918;
-    --muted: #F1EFEC;
-    --muted-foreground: #4F4D48;
-    --secondary: #F7F6F3;
-    --secondary-foreground: #191918;
-    --primary: #B57438;
-    --primary-foreground: #1A0F06;
-    --accent-foreground: #5C3416;
-    --accent-soft: #F4E4D2;
-    --border: #E9E7E2;
-    --input: #6E6C65;
-    --ring: #5C3416;
-    --state-focus-ring-color: #5C3416;
-    /* 9 pastel families (light values) — status chains resolve these
+    --popover-foreground: #1B2A41;
+    --muted: #EFEFEA;
+    --muted-foreground: #4E5A6E;
+    --secondary: #EFEFEA;
+    --secondary-foreground: #1B2A41;
+    --primary: #D14900;
+    --primary-foreground: #FFFFFF;
+    --accent-foreground: #8A3400;
+    --accent-soft: #FCE3D6;
+    --border: #E2E2DC;
+    --input: #6E7684;
+    --ring: #8A3400;
+    --state-focus-ring-color: #8A3400;
+    /* 9 pastel families (daylight values) — status chains resolve these
        at :root, so --success/--warning/--info/--destructive flip with
        them automatically. */
-    --c-peach-bg: #FFE9DC;     --c-peach-ink: #E07856;     --c-peach-deep: #6B2D1A;
-    --c-mint-bg: #DCF1E2;      --c-mint-ink: #4FA66D;      --c-mint-deep: #1F4F30;
-    --c-lavender-bg: #ECE6FA;  --c-lavender-ink: #8A6FE0;  --c-lavender-deep: #3F2D7A;
-    --c-sky-bg: #DDEBF7;       --c-sky-ink: #5C8FCE;       --c-sky-deep: #1F3D63;
-    --c-yellow-bg: #FCF1CD;    --c-yellow-ink: #D6A330;    --c-yellow-deep: #6B4C0B;
-    --c-rose-bg: #FCE0E2;      --c-rose-ink: #DD6E78;      --c-rose-deep: #6B2128;
-    --c-sand-bg: #F1ECDF;      --c-sand-ink: #B59868;      --c-sand-deep: #5A4623;
-    --c-grey-bg: #EFECE7;      --c-grey-ink: #6B665E;      --c-grey-deep: #2D2A24;
-    --c-copper-bg: #F4E4D2;    --c-copper-ink: #B57438;    --c-copper-deep: #5C3416;
+    --c-peach-bg: #FDE8DE;     --c-peach-ink: #E06A45;     --c-peach-deep: #7A3018;
+    --c-mint-bg: #DCF0E4;      --c-mint-ink: #1E7A46;      --c-mint-deep: #14522D;
+    --c-lavender-bg: #ECEAF8;  --c-lavender-ink: #7C63DB;  --c-lavender-deep: #3F2D7A;
+    --c-sky-bg: #DFE9F0;       --c-sky-ink: #3E5C76;       --c-sky-deep: #2A3E52;
+    --c-yellow-bg: #FCF1CD;    --c-yellow-ink: #B45309;    --c-yellow-deep: #6B4C0B;
+    --c-rose-bg: #FBE3E6;      --c-rose-ink: #C4384A;      --c-rose-deep: #8C2733;
+    --c-sand-bg: #F1EEE1;      --c-sand-ink: #A08A5B;      --c-sand-deep: #55471F;
+    --c-grey-bg: #ECEDE7;      --c-grey-ink: #6E7684;      --c-grey-deep: #2F3745;
+    --c-copper-bg: #FCE3D6;    --c-copper-ink: #D14900;    --c-copper-deep: #8A3400;
   }
   body {
     background: #FFFFFF !important;
-    color: #191918 !important;
+    color: #1B2A41 !important;
   }
 }

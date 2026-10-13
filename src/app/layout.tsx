@@ -68,8 +68,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#FBFAF9" },
-    { media: "(prefers-color-scheme: dark)", color: "#070B16" },
+    { media: "(prefers-color-scheme: light)", color: "#F7F7F4" },
+    { media: "(prefers-color-scheme: dark)", color: "#0D1626" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -82,18 +82,21 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
-        {/* Pre-paint theme boot — no flash. Family standard: DARK default,
-            light only when explicitly stored (mirrors Smart Menu/SmartBot). */}
+        {/* Pre-paint theme boot — no flash. r152 (Phase 5 daylight): the
+            DAYLIGHT theme is the default; the night-dispatch `.dark` class
+            is applied ONLY when explicitly stored. Mirrors the provider
+            (next-themes defaultTheme="light") — one resolution path. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('smart-order-theme');if(t==='light'){document.documentElement.classList.add('light')}else{document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('smart-order-theme');if(t==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.add('light')}}catch(e){document.documentElement.classList.add('light')}})();`,
           }}
         />
-        {/* Madarek parity: preload the two FIRST-PAINT arabic subsets
-            (400 + 700, ~86KB) — fonts.css uses font-display: swap; preloading
-            moves the font swap ahead of the first contentful paint. */}
-        <link rel="preload" href="/fonts/plex-sans-arabic-400-normal-arabic.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/plex-sans-arabic-700-normal-arabic.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        {/* r152: preload the two FIRST-PAINT arabic subsets (Tajawal 400 +
+            700, ~18KB — the Phase 5 body/heading face); fonts.css uses
+            font-display: swap; preloading moves the swap ahead of the
+            first contentful paint. */}
+        <link rel="preload" href="/fonts/tajawal-400-normal-arabic.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/tajawal-700-normal-arabic.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="stylesheet" href="/fonts/fonts.css" />
       </head>
       <body
