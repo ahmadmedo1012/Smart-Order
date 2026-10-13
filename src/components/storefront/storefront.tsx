@@ -295,6 +295,9 @@ export function Storefront({
                   <h2 className="font-heading font-bold text-sm">مميز</h2>
                   <Badge variant="saffron">اختيار المتجر</Badge>
                 </div>
+                {/* r152 Route & Node: the traveled road introduces the
+                    featured chapter — dashed orange line + node. */}
+                <div className="route-divider mb-3" aria-hidden="true" />
                 <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
                   {featured.map((p, i) => (
                     /* r132-F1a (A9 SO-9): first 4 above-the-fold images eager
@@ -307,7 +310,13 @@ export function Storefront({
             )}
             <section aria-label="قائمة المنتجات">
               {regular.length > 0 && (
-                <h2 className="font-heading font-bold text-sm mb-3">كل المنتجات</h2>
+                <div className="mb-4 mt-2">
+                  {/* r152 Route & Node: the quiet dashed road separates the
+                      storefront chapters — the route line that guides
+                      product → cart → checkout. */}
+                  <div className="route-divider route-divider-quiet mb-3" aria-hidden="true" />
+                  <h2 className="font-heading font-bold text-sm">كل المنتجات</h2>
+                </div>
               )}
               <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
                 {regular.map((p, i) => (

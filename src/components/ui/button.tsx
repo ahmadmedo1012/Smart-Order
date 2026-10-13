@@ -51,7 +51,10 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-orange text-orange-foreground shadow-sm hover:-translate-y-[2px] hover:shadow-(--shadow-card-h) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-[linear-gradient(105deg,transparent_30%,oklch(1_0_0/0.22)_50%,transparent_70%)] before:-translate-x-full before:transition-transform before:duration-(--t-cinema) before:ease-out hover:before:translate-x-full",
+          /* r152: the delivery-orange press register — the
+             --accent-pressed step (deep daylight / luminous night)
+             joins the canonical scale+micro-tier press. */
+          "bg-orange text-orange-foreground shadow-sm hover:-translate-y-[2px] hover:shadow-(--shadow-card-h) active:bg-(--accent-pressed) before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-[linear-gradient(105deg,transparent_30%,oklch(1_0_0/0.18)_50%,transparent_70%)] before:-translate-x-full before:transition-transform before:duration-(--t-cinema) before:ease-out hover:before:translate-x-full",
         flame:
           /* r133 (A10 §2): hover:brightness-110 retired — the reference
              flame-equivalents lift + neutral shadow, never a filter

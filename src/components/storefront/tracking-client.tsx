@@ -168,8 +168,9 @@ export function TrackingClient({
             </div>
           ) : (
             <div className="mt-3">
-              {/* Solid pastel status chip — the canonical badge family
-                  (W1-F P2-16): -bg ground + -deep ink, no alpha wash. */}
+              {/* STATUS STAMP (r152): the shipping-stamp chip — squared
+                  stamp corner + 1px family border over the solid family
+                  ground (ORDER_STATUS_CHIP carries the family trio). */}
               <span
                 /* r140 (P3-10): الحالة تتغير كل 15 ثانية بالاستطلاع — بلا
                    aria-live كان الانتقال صامتًا لقارئ الشاشة (لافتة
@@ -178,7 +179,7 @@ export function TrackingClient({
                 role="status"
                 aria-live="polite"
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.06)]",
+                  "inline-flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.06)]",
                   ORDER_STATUS_CHIP[status]
                 )}
               >
@@ -193,7 +194,13 @@ export function TrackingClient({
           </div>
         </div>
 
-        {/* Progress flow */}
+        {/* Progress flow — the ROUTE & NODE visualization (r152): the
+            six-stage TRACKING_FLOW backbone is the literal dashed
+            dispatch road — 2px dashed route line threading circular
+            station nodes. The STATE LOGIC is untouched: the same
+            TRACKING_FLOW array, the same PICKUP filter, the same
+            done/active/pending derivation (verified against
+            lib/order-machine transitions — no invented states). */}
         {!isCancelled && (
           <div className="rounded-xl border border-border bg-card p-5">
             <h2 className="font-semibold text-sm mb-4">مسار الطلب</h2>
@@ -206,12 +213,18 @@ export function TrackingClient({
                 return (
                   <li key={s} className="flex items-center gap-3.5 relative pb-4 last:pb-0">
                     {i < flow.length - 1 && (
-                      /* r128-F8 (B22): thread runs node-center → next-node-center
-                         (station geometry: top 18px = half the 36px node, h-full
-                         lands on the next node's center through the pb-4 gap) */
+                      /* r152: the dashed ROUTE segment — node-center →
+                         next-node-center (station geometry: top 18px =
+                         half the 36px node, h-full lands on the next
+                         node's center through the pb-4 gap). Traveled
+                         road = delivery orange at 50%; pending road =
+                         the hairline. */
                       <span
                         aria-hidden="true"
-                        className={cn("absolute top-[18px] h-full w-0.5 start-[17px]", done || active ? "bg-primary/40" : "bg-border")}
+                        className={cn(
+                          "absolute top-[18px] h-full w-0 start-[17px] border-s-2 border-dashed",
+                          done || active ? "border-primary/50" : "border-border"
+                        )}
                       />
                     )}
                     <span
@@ -220,7 +233,7 @@ export function TrackingClient({
                         done
                           ? "bg-primary border-primary text-primary-foreground"
                           : active
-                            ? "bg-primary/15 border-primary text-accent-foreground animate-pulse-soft"
+                            ? "bg-accent-soft border-primary text-accent-foreground animate-pulse-soft ring-4 ring-primary/10"
                             : "bg-muted border-border text-muted-foreground/60"
                       )}
                     >
