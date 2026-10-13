@@ -1155,11 +1155,53 @@ for (const [name, okFlag] of R152_LAYER) {
   else failures.push(`r152 daylight-flip gate FAILED: ${name}`);
 }
 
+// ── Phase 6 (P6-2-f1): the SHARED CHROME GRAMMAR gates — the Route &
+// Node voice on the dashboard chrome components (stamps, roads, node
+// punctuation, mono numerals). Same shape as the r152 layer: raw
+// source consumption gates, so a future edit cannot silently regress
+// the chrome back to the generic underline/slab/round-pill idiom. ────
+const P6_CHROME = [
+  ['page-header: quiet route divider option under the header row (route-divider route-divider-quiet)',
+    R('src/components/dashboard/page-header.tsx').includes('route-divider route-divider-quiet')],
+  ['page-header: mono page-meta numerals (font-mono + tabular-nums meta line)',
+    R('src/components/dashboard/page-header.tsx').includes('font-mono text-xs tabular-nums')],
+  ['underline-tabs: ACTIVE tab = shipping stamp (rounded-sm + copper family border/ground/deep ink)',
+    R('src/components/dashboard/underline-tabs.tsx').includes('rounded-sm border px-4') &&
+    R('src/components/dashboard/underline-tabs.tsx').includes('border-(--c-copper-ink)/35 bg-(--c-copper-bg) text-(--c-copper-deep)')],
+  ['underline-tabs: the generic underline indicator is RETIRED (no h-0.5 scale-x span)',
+    !R('src/components/dashboard/underline-tabs.tsx').includes('h-0.5') &&
+    !R('src/components/dashboard/underline-tabs.tsx').includes('scale-x')],
+  ['filter-pills: active pill is FRANKED (squared rounded-sm + copper family stamp + halo); idle stays round',
+    R('src/components/dashboard/filter-pills.tsx').includes('rounded-sm border-(--c-copper-ink)/35') &&
+    R('src/components/dashboard/filter-pills.tsx').includes('rounded-full border text-xs') &&
+    R('src/components/dashboard/filter-pills.tsx').includes('color-mix(in_srgb,var(--orange)_16%,transparent)')],
+  ['table-pagination: numerals ride IBM Plex Mono (font-mono tabular-nums on count + page buttons)',
+    (R('src/components/dashboard/table-pagination.tsx').match(/font-mono tabular-nums/g) || []).length >= 2],
+  ['table-pagination: squared stamp controls (rounded-sm) + active page = copper family stamp',
+    R('src/components/dashboard/table-pagination.tsx').includes('rounded-sm px-2') &&
+    R('src/components/dashboard/table-pagination.tsx').includes('border-(--c-copper-ink)/45 bg-(--c-copper-bg)')],
+  ['confirm-dialog: header hairline (border-b) on both dialogs + destructive confirm squared to the stamp',
+    (R('src/components/dashboard/confirm-dialog.tsx').match(/border-b border-border pb-4/g) || []).length >= 2 &&
+    R('src/components/dashboard/confirm-dialog.tsx').includes('rounded-sm border-(--c-rose-ink)/45')],
+  ['skeletons: RouteNodeDot station punctuation rides the table/card/list rows',
+    (R('src/components/dashboard/skeletons.tsx').match(/<RouteNodeDot/g) || []).length >= 3],
+  ['skeletons: dashed-hairline section variant (SectionSkeleton) consumed by the section fallbacks',
+    R('src/components/dashboard/skeletons.tsx').includes('border border-dashed border-border/90') &&
+    (R('src/components/dashboard/skeletons.tsx').match(/<SectionSkeleton/g) || []).length >= 6],
+  ['form-field: FieldError speaks the quiet rose stamp (squared + family border + family ground + deep ink)',
+    R('src/components/dashboard/form-field.tsx').includes('rounded-sm border border-(--c-rose-ink)/35 bg-(--c-rose-bg)') &&
+    R('src/components/dashboard/form-field.tsx').includes('text-(--c-rose-deep)')],
+];
+for (const [name, okFlag] of P6_CHROME) {
+  if (okFlag) passed += 1;
+  else failures.push(`phase6 chrome gate FAILED: ${name}`);
+}
+
 // ── report ───────────────────────────────────────────────────────────────────
 
 if (failures.length > 0) {
-  console.error(`✗ Phase 5 daylight parity snapshot FAILED (${failures.length} assertion(s)):`);
+  console.error(`✗ Route & Node parity snapshot FAILED (${failures.length} assertion(s)):`);
   for (const f of failures) console.error(`  • ${f}`);
   process.exit(1);
 }
-console.log(`✓ Phase 5 daylight parity snapshot: ${passed} assertions passed (globals.css + landing.css == the Operational Daylight Route & Node contract)`);
+console.log(`✓ Route & Node parity snapshot: ${passed} assertions passed (globals.css + landing.css == the Operational Daylight contract + the Phase 6 chrome grammar)`);
