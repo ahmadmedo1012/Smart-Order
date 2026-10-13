@@ -32,6 +32,10 @@ export default async function TrackPage({
       deliveryFee: true, paymentStatus: true, paymentMethodName: true, paymentType: true,
       customerName: true, city: true, area: true, createdAt: true,
       items: { select: { productName: true, variantName: true, quantity: true, lineTotal: true, optionsJson: true } },
+      /* P6-2-f3 (GROUP 2): the DELIVERED stamp's date — the honest
+         source is the status history (the moment the machine logged
+         DELIVERED); read-only additive select, no behavior change. */
+      history: { where: { toStatus: "DELIVERED" }, orderBy: { createdAt: "desc" }, take: 1, select: { createdAt: true } },
       business: { select: { name: true, slug: true, phone: true, whatsappNumber: true, logoUrl: true } },
     },
   });
@@ -40,6 +44,7 @@ export default async function TrackPage({
   return (
     <TrackingClient
       placed={placed === "1"}
+      deliveredAt={order.history[0]?.createdAt.toISOString() ?? null}
       order={{
         orderNumber: order.orderNumber,
         status: order.status as OrderStatus,

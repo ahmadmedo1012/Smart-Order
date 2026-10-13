@@ -27,6 +27,9 @@ import {
   MessageCircle,
   Clock,
   CheckCircle2,
+  Flag,
+  PackageCheck,
+  WifiOff,
 } from "lucide-react";
 
 interface TrackedOrder {
@@ -58,14 +61,25 @@ const FLOW_AR: Record<string, { label: string; icon: React.ElementType }> = {
 export function TrackingClient({
   order,
   placed = false,
+  deliveredAt = null,
 }: {
   order: TrackedOrder;
   placed?: boolean;
+  /* P6-2-f3 (GROUP 2): the DELIVERED stamp's date — resolved server-side
+     from the order's status history (the honest source; null when the
+     order was delivered after this SSR snapshot — the stamp then renders
+     without the date line, never a fabricated one). */
+  deliveredAt?: string | null;
 }) {
   // light polling for live updates — status AND paymentStatus (F13: the
   // receipt's "الدفع" line used to stay on its SSR snapshot forever)
   const [status, setStatus] = React.useState(order.status);
   const [paymentStatus, setPaymentStatus] = React.useState(order.paymentStatus);
+  /* P6-2-f3 (GROUP 2): display-only sync health flag — set when a poll
+     FAILS (offline), cleared on the next good poll. The 15s
+     visibility-gated cadence itself is untouched (below); this only
+     feeds the quiet «آخر تحديث معروف» hint + retry affordance. */
+  const [syncFailed, setSyncFailed] = React.useState(false);
 
   const poll = React.useCallback(async () => {
     try {
@@ -78,9 +92,12 @@ export function TrackingClient({
       if (body?.success) {
         setStatus(body.data.order.status);
         setPaymentStatus(body.data.order.paymentStatus);
+        setSyncFailed(false);
       }
     } catch {
-      /* offline — keep last known */
+      /* offline — keep last known (P6-2-f3: and surface it via the
+         quiet hint instead of failing silently forever) */
+      setSyncFailed(true);
     }
   }, []);
 
@@ -133,10 +150,12 @@ export function TrackingClient({
         {placed && !isCancelled && (
           <div
             role="status"
-            className="flex items-center gap-3 rounded-xl border border-success/30 bg-success/10 p-4"
+            /* P6-2-f3 (GROUP 2): quiet stamp alignment — squared corners
+               on the placed banner + its icon well (logic untouched). */
+            className="flex items-center gap-3 rounded-sm border border-success/30 bg-success/10 p-4"
           >
             <span
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-success/20 text-success-ink"
+              className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-success/20 text-success-ink"
               aria-hidden="true"
             >
               <CheckCircle2 className="size-5" aria-hidden="true" />
@@ -157,10 +176,32 @@ export function TrackingClient({
           <h1 className="text-xl font-bold tabular-nums font-mono">{order.orderNumber}</h1>
           <p className="mt-1 text-xs text-muted-foreground">{formatArabicDateTime(order.createdAt)}</p>
           {isCancelled ? (
-            <div className="mt-4 flex items-start gap-3 rounded-xl border border-border bg-card px-4 py-3 text-start">
-              <span className="mt-1.5 size-2 shrink-0 rounded-full bg-destructive" aria-hidden="true" />
+            /* P6-2-f3 (GROUP 2): quiet stamp alignment — the
+               cancelled/rejected card squares to the family stamp
+               (rose for rejection, grey for cancellation — the
+               ORDER_STATUS_CHIP mapping); branches/logic untouched. */
+            <div
+              className={cn(
+                "mt-4 flex items-start gap-3 rounded-sm border px-4 py-3 text-start",
+                status === "REJECTED"
+                  ? "border-(--c-rose-ink)/35 bg-(--c-rose-bg)"
+                  : "border-(--c-grey-ink)/35 bg-(--c-grey-bg)"
+              )}
+            >
+              <span
+                className={cn(
+                  "mt-1.5 size-2 shrink-0 rounded-full",
+                  status === "REJECTED" ? "bg-(--c-rose-ink)" : "bg-(--c-grey-ink)"
+                )}
+                aria-hidden="true"
+              />
               <div>
-                <div className="font-bold text-destructive-ink">
+                <div
+                  className={cn(
+                    "font-bold",
+                    status === "REJECTED" ? "text-(--c-rose-deep)" : "text-(--c-grey-deep)"
+                  )}
+                >
                   {status === "REJECTED" ? "لم يتم قبول الطلب" : "تم إلغاء الطلب"}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">تواصل مع المتجر لمعرفة المزيد</p>
@@ -211,8 +252,12 @@ export function TrackingClient({
                 const done = i < currentIdx;
                 const active = i === currentIdx;
                 return (
-                  <li key={s} className="flex items-center gap-3.5 relative pb-4 last:pb-0">
-                    {i < flow.length - 1 && (
+                  <li key={s} className="flex items-center gap-3.5 relative pb-4">
+                    {/* P6-2-f3 (GROUP 2): EVERY station now draws its spine
+                       (was i < flow.length - 1) — the last leg connects the
+                       final station to the terminus ring below through the
+                       same pb-4 overflow geometry. */}
+                    {i < flow.length && (
                       /* r152: the dashed ROUTE segment — node-center →
                          next-node-center (station geometry: top 18px =
                          half the 36px node, h-full lands on the next
@@ -251,7 +296,60 @@ export function TrackingClient({
                   </li>
                 );
               })}
+              {/* P6-2-f3 (GROUP 2): the DESTINATION TERMINUS — the ring
+                  after the last station. DELIVERED = terminus reached →
+                  CLOSED ring (solid border + quiet ring halo); pending →
+                  OPEN dashed ring (the road still unbuilt). The previous
+                  station's spine reaches into it through the same
+                  pb-4 overflow geometry. */}
+              <li className="flex items-center gap-3.5 relative">
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "relative z-10 flex size-9 items-center justify-center rounded-full border-2 shrink-0",
+                    status === "DELIVERED"
+                      ? "border-primary bg-primary/10 text-accent-foreground ring-2 ring-primary/15"
+                      : "border-dashed border-border bg-card text-muted-foreground/60"
+                  )}
+                >
+                  <Flag className="size-4" aria-hidden="true" />
+                </span>
+                <div className="flex-1">
+                  <div
+                    className={cn(
+                      "text-sm font-semibold",
+                      status !== "DELIVERED" && "text-muted-foreground"
+                    )}
+                  >
+                    الوجهة
+                  </div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">
+                    {status === "DELIVERED" ? "تم الوصول — نهاية الطريق" : "نهاية الطريق بانتظار طلبك"}
+                  </div>
+                </div>
+              </li>
             </ol>
+            {status === "DELIVERED" && (
+              /* P6-2-f3 (GROUP 2): the delivered moment — a composed
+                 TERMINAL STAMP instead of just the final node: the big
+                 squared mint-family franked block (2px dashed stamp
+                 border + icon well) + the delivery date from the order's
+                 status history (deliveredAt prop; absent → no date line,
+                 never a fabricated date). */
+              <div className="mt-5 flex items-center gap-3.5 rounded-sm border-2 border-dashed border-(--c-mint-ink)/45 bg-(--c-mint-bg) p-4">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-sm border border-(--c-mint-ink)/35 bg-card text-(--c-mint-deep)">
+                  <PackageCheck className="size-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <div className="font-heading font-bold text-sm text-(--c-mint-deep)">تم التسليم</div>
+                  {deliveredAt && (
+                    <div className="mt-0.5 text-xs text-(--c-mint-deep)/80">
+                      {formatArabicDateTime(deliveredAt)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -321,9 +419,33 @@ export function TrackingClient({
           )}
         </div>
 
-        <p className="text-center text-[11px] text-muted-foreground pb-6">
-          تُحدَّث الحالة تلقائياً كل 15 ثانية
-        </p>
+        {syncFailed && !isCancelled ? (
+          /* P6-2-f3 (GROUP 2): poll-failure hint — the last known state
+             stays on screen (the catch keeps it); this quiet muted line
+             + manual retry replaces the 15s footnote while offline. The
+             visibility-gated cadence above is untouched. */
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 pb-6 text-center"
+          >
+            <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <WifiOff className="size-3 shrink-0" aria-hidden="true" />
+              آخر تحديث معروف — تعذّر الاتصال
+            </p>
+            <button
+              type="button"
+              onClick={poll}
+              className="text-[11px] font-medium text-accent-foreground underline underline-offset-2 transition-colors hover:text-foreground"
+            >
+              إعادة المحاولة
+            </button>
+          </div>
+        ) : (
+          <p className="text-center text-[11px] text-muted-foreground pb-6">
+            تُحدَّث الحالة تلقائياً كل 15 ثانية
+          </p>
+        )}
       </main>
     </div>
   );
