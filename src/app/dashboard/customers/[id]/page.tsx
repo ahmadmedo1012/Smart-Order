@@ -122,7 +122,7 @@ export default function CustomerDetailPage() {
           <div>
             <h1 className={pageTitleClass}>{customer.name}</h1>
             <p
-              className="text-sm text-muted-foreground tabular-nums mt-0.5"
+              className="text-sm text-muted-foreground font-mono tabular-nums mt-0.5"
               dir="ltr"
             >
               {formatPhoneDisplay(customer.phone)}
@@ -152,7 +152,9 @@ export default function CustomerDetailPage() {
         </div>
       </div>
 
-      {/* Stats — compact metric tiles (22px tabular-nums metric slot) */}
+      {/* Stats — Phase 6: metric tiles speak the STAMP WELL idiom
+          (squared corner + 1px family border) and their figures ride
+          IBM Plex Mono (the dispatcher's code voice). */}
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "الطلبات", value: String(customer.stats.orderCount) },
@@ -164,12 +166,12 @@ export default function CustomerDetailPage() {
         ].map((s) => (
           <div
             key={s.label}
-            className="rounded-xl border border-border bg-card p-4 text-center"
+            className="rounded-sm border border-border bg-card p-4 text-center"
           >
             <div className="text-xs font-semibold text-muted-foreground">
               {s.label}
             </div>
-            <div className="mt-1.5 font-heading text-[22px] leading-[1.1] font-bold tabular-nums">
+            <div className="mt-1.5 font-mono text-[22px] leading-[1.1] font-bold tabular-nums">
               {s.value}
             </div>
           </div>
@@ -187,16 +189,18 @@ export default function CustomerDetailPage() {
               لا عناوين محفوظة بعد
             </p>
           ) : (
-            <ul className="mt-3 space-y-2.5">
+            /* Phase 6: kv-row hairline rhythm (order-detail idiom) —
+               the saved addresses read as ledger rows (hairline
+               separators), not grey pills. */
+            <ul className="mt-1 divide-y divide-border/60 text-sm">
               {customer.addresses.slice(0, 5).map((a) => (
-                <li
-                  key={a.id}
-                  className="text-sm rounded-lg bg-muted/50 px-3 py-2.5"
-                >
-                  <div className="text-xs text-muted-foreground">
-                    {[a.city, a.area].filter(Boolean).join(" — ")}
+                <li key={a.id} className="py-2.5 first:pt-0 last:pb-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-xs text-muted-foreground shrink-0 pt-0.5">
+                      {[a.city, a.area].filter(Boolean).join(" — ")}
+                    </span>
+                    <span className="text-end">{a.addressLine}</span>
                   </div>
-                  <div className="mt-0.5">{a.addressLine}</div>
                 </li>
               ))}
             </ul>
@@ -252,7 +256,7 @@ export default function CustomerDetailPage() {
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm tabular-nums">
+                      <span className="font-semibold text-sm font-mono tabular-nums">
                         {o.orderNumber}
                       </span>
                       <OrderStatusBadge status={o.status} />
@@ -261,7 +265,7 @@ export default function CustomerDetailPage() {
                       {formatArabicDateTime(o.createdAt)}
                     </div>
                   </div>
-                  <span className="font-bold text-sm tabular-nums shrink-0">
+                  <span className="font-bold text-sm font-mono tabular-nums shrink-0">
                     {formatLyd(o.total)}
                   </span>
                 </Link>

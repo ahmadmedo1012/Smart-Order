@@ -179,17 +179,19 @@ export default function CustomersPage() {
                       {c.name}
                     </Link>
                     <div
-                      className="text-xs text-muted-foreground tabular-nums"
+                      className="text-xs text-muted-foreground font-mono tabular-nums"
                       dir="ltr"
                     >
                       {formatPhoneDisplay(c.phone)}
                     </div>
                   </td>
-                  <td className="px-4 py-3 tabular-nums">{c.orderCount}</td>
-                  <td className="px-4 py-3 font-semibold tabular-nums">
+                  {/* Phase 6: counts and money ride IBM Plex Mono — the
+                      operational code voice. */}
+                  <td className="px-4 py-3 font-mono tabular-nums">{c.orderCount}</td>
+                  <td className="px-4 py-3 font-semibold font-mono tabular-nums">
                     {formatLyd(c.totalSpent)}
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground tabular-nums">
+                  <td className="px-4 py-3 text-muted-foreground font-mono tabular-nums">
                     {formatLyd(c.avgOrder)}
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">
@@ -239,17 +241,17 @@ export default function CustomersPage() {
                   <div className="min-w-0 flex-1">
                     <div className="font-medium text-sm truncate">{c.name}</div>
                     <div
-                      className="text-xs text-muted-foreground tabular-nums"
+                      className="text-xs text-muted-foreground font-mono tabular-nums"
                       dir="ltr"
                     >
                       {formatPhoneDisplay(c.phone)}
                     </div>
                   </div>
                   <div className="text-end shrink-0">
-                    <div className="text-sm font-semibold tabular-nums">
+                    <div className="text-sm font-semibold font-mono tabular-nums">
                       {formatLyd(c.totalSpent)}
                     </div>
-                    <div className="text-[11px] text-muted-foreground tabular-nums">
+                    <div className="text-[11px] text-muted-foreground font-mono tabular-nums">
                       {c.orderCount} طلب
                     </div>
                   </div>

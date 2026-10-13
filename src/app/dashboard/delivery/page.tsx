@@ -88,14 +88,21 @@ export default function DeliveryPage() {
             description="بدون مناطق، يستطيع العملاء طلب الاستلام من الفرع فقط. أضف مناطق مثل:"
             action={
               <div className="flex flex-wrap justify-center gap-2">
+                {/* Phase 6: the example chips read as STATIONS on the
+                    route — a leading route node + the fee figure in IBM
+                    Plex Mono (the road leads somewhere priced). */}
                 {EXAMPLES.map((ex) => (
                   <button
                     key={ex.name}
                     onClick={() => setCreating(true)}
                     className="inline-flex h-8 items-center rounded-full border border-border bg-card px-3.5 text-xs font-semibold text-muted-foreground transition-[color,border-color,transform] duration-(--t-fast) hover:-translate-y-px hover:border-foreground/25 hover:text-foreground active:scale-[0.97]"
                   >
+                    <span
+                      className="me-1.5 size-1.5 rounded-full border border-primary/55 bg-card"
+                      aria-hidden="true"
+                    />
                     {ex.name} —{" "}
-                    <span className="ms-1 tabular-nums">{ex.fee} د.ل</span>
+                    <span className="ms-1 font-mono tabular-nums">{ex.fee} د.ل</span>
                   </button>
                 ))}
               </div>
@@ -116,20 +123,17 @@ export default function DeliveryPage() {
                 <div className="font-semibold text-sm flex items-center gap-2">
                   {z.name}
                   {!z.isActive && (
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                    <span className="rounded-sm border border-(--c-grey-ink)/35 bg-(--c-grey-bg) px-2 py-0.5 text-[11px] font-medium text-(--c-grey-deep)">
                       معطلة
                     </span>
                   )}
                 </div>
-                <div className="text-xs text-muted-foreground mt-0.5">
-                  <span className="tabular-nums">
-                    التوصيل: {formatLyd(z.fee)}
-                  </span>
+                {/* Phase 6: fee/minOrder figures ride IBM Plex Mono — the
+                    operational code voice. */}
+                <div className="text-xs text-muted-foreground mt-0.5 font-mono tabular-nums">
+                  <span>التوصيل: {formatLyd(z.fee)}</span>
                   {z.minOrder > 0 && (
-                    <span className="tabular-nums">
-                      {" "}
-                      · الحد الأدنى: {formatLyd(z.minOrder)}
-                    </span>
+                    <span>{" · الحد الأدنى: "}{formatLyd(z.minOrder)}</span>
                   )}
                 </div>
               </div>
@@ -296,7 +300,9 @@ function ZoneDialog({
         showCloseButton={false}
         className="max-w-sm gap-0 overflow-hidden rounded-xl border-border bg-card p-0 shadow-xl"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-border/60 p-5">
+        {/* Phase 6: dialog header hairline normalized to the full 1px
+            border (the ConfirmDialog chrome hairline idiom). */}
+        <div className="flex items-start justify-between gap-3 border-b border-border p-5">
           <div>
             <DialogTitle className="font-heading text-lg font-semibold text-foreground">
               {zone ? "تعديل المنطقة" : "منطقة توصيل جديدة"}
@@ -344,7 +350,7 @@ function ZoneDialog({
                 inputMode="decimal"
                 placeholder="8"
                 dir="ltr"
-                className="text-start tabular-nums"
+                className="font-mono text-start tabular-nums"
                 aria-invalid={!!errors.fee}
                 aria-describedby={errors.fee ? "z-fee-error" : undefined}
               />
@@ -361,13 +367,15 @@ function ZoneDialog({
                 inputMode="decimal"
                 placeholder="اختياري"
                 dir="ltr"
-                className="text-start tabular-nums"
+                className="font-mono text-start tabular-nums"
               />
             </div>
           </div>
           {zone && (
-            /* r131 (F3): raw accent checkbox → the Switch primitive. */
-            <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+            /* r131 (F3): raw accent checkbox → the Switch primitive.
+               Phase 6: the switch row squares to the stamp container
+               (rounded-sm, hairline border). */
+            <div className="flex items-center justify-between rounded-sm border px-4 py-3">
               <Label htmlFor="z-active">المنطقة مفعّلة</Label>
               <Switch
                 id="z-active"
