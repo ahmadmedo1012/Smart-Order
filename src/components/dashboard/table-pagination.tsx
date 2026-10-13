@@ -3,11 +3,13 @@
 import { cn } from "@/lib/utils";
 
 /**
- * TablePagination — canonical Madarek `.table-pagination`
- * (components.css:899-946): flex-between footer attached to the table,
- * count on the start side + windowed numbered buttons on the end side.
- * · buttons 36px (44px touch floor below sm)
- * · active page = accent-soft ground + accent border + accent ink
+ * TablePagination — the table footer navigator, re-based on the
+ * Route & Node chrome (Phase 6):
+ * · buttons 36px (44px touch floor below sm), SQUARED stamp corners
+ *   (rounded-sm) with 1px borders on the framed controls
+ * · numerals ride IBM Plex Mono + tabular-nums (operational codes)
+ * · active page = the shipping STAMP (copper family ground + 1px
+ *   family-ink border + family deep ink — badge.tsx language)
  * · disabled step 0.45, ellipsis gap between windows
  */
 
@@ -36,7 +38,7 @@ function pageWindow(page: number, totalPages: number): Array<number | "gap"> {
  r133 (A10): press feedback joins the app family (0.97 @ micro) —
  pagination was the only chrome surface without it. */
 const stepBtn =
-  "inline-flex h-11 min-w-11 items-center justify-center rounded-md px-2 text-[13px] font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-(--t-fast) ease-smooth active:scale-[0.97] active:duration-(--t-micro) disabled:pointer-events-none disabled:opacity-45 disabled:active:scale-100 sm:h-9 sm:min-w-9";
+  "inline-flex h-11 min-w-11 items-center justify-center rounded-sm px-2 text-[13px] font-semibold transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-(--t-fast) ease-smooth active:scale-[0.97] active:duration-(--t-micro) disabled:pointer-events-none disabled:opacity-45 disabled:active:scale-100 sm:h-9 sm:min-w-9";
 
 export function TablePagination({
   page,
@@ -61,8 +63,8 @@ export function TablePagination({
         className,
       )}
     >
-      <p className="text-xs text-muted-foreground tabular-nums">
-        {total} {unitLabel}
+      <p className="text-xs text-muted-foreground">
+        <span className="font-mono tabular-nums">{total}</span> {unitLabel}
       </p>
       <nav aria-label="تصفح الصفحات" className="flex items-center gap-1.5">
         <button
@@ -94,11 +96,11 @@ export function TablePagination({
               className={cn(
                 stepBtn,
                 p === page
-                  ? "border border-primary/50 bg-accent-soft text-accent-foreground"
+                  ? "border border-(--c-copper-ink)/45 bg-(--c-copper-bg) text-(--c-copper-deep)"
                   : "border border-transparent text-muted-foreground hover:border-border hover:bg-muted hover:text-foreground",
               )}
             >
-              <span className="tabular-nums">{p}</span>
+              <span className="font-mono tabular-nums">{p}</span>
             </button>
           ),
         )}

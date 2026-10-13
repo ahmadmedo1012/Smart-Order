@@ -9,7 +9,40 @@ import { cn } from "@/lib/utils";
  * lists — with status semantics (role=status + aria-busy + sr-only
  * label) so screen readers announce the wait. The `.skeleton` class
  * rides the 1200ms linear sweep and goes static under RM.
+ *
+ * Route & Node chrome (Phase 6): skeleton ROWS carry tiny node dots
+ * at line starts (RouteNodeDot — the route-station hint: rows read as
+ * stations on the road, not anonymous bars), and section-level
+ * placeholders get the DASHED hairline variant (SectionSkeleton — the
+ * road at rest, an unbuilt section instead of a blank slab).
  */
+
+/** RouteNodeDot — tiny route-station punctuation for skeleton lines
+ * (mirrors the .route-divider-node geometry: ring + card ground). */
+export function RouteNodeDot({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "inline-block size-1.5 shrink-0 rounded-full border border-muted-foreground/40 bg-card",
+        className,
+      )}
+    />
+  );
+}
+
+/** SectionSkeleton — the DASHED-hairline section placeholder (the road
+ * at rest): the family shimmer ground + a dashed border, so an
+ * unloaded SECTION reads as unbuilt road rather than a blank slab.
+ * Height via className; stands where a titled section will land. */
+export function SectionSkeleton({ className }: { className?: string }) {
+  return (
+    <Skeleton
+      aria-hidden="true"
+      className={cn("rounded-xl border border-dashed border-border/90", className)}
+    />
+  );
+}
 
 /** Page-level wrapper: status semantics (SM SkeletonPage pattern). */
 function SkeletonPage({
@@ -111,7 +144,10 @@ export function TableSkeleton({
       <div className="divide-y divide-border/60">
         {Array.from({ length: rows }, (_, i) => (
           <div key={i} className="flex items-center gap-6 px-4 py-3.5">
-            <Skeleton className="h-4 w-16" />
+            <span className="flex items-center gap-2">
+              <RouteNodeDot />
+              <Skeleton className="h-4 w-16" />
+            </span>
             <Skeleton className="h-4 w-28 max-w-[40%]" />
             <Skeleton className="h-4 w-14" />
             <Skeleton className="h-5 w-16 rounded-full" />
@@ -146,9 +182,10 @@ export function CardListSkeleton({
           key={i}
           className="rounded-xl border border-border bg-card p-4 space-y-2.5"
         >
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <RouteNodeDot />
             <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-5 w-16 rounded-full" />
+            <Skeleton className="h-5 w-16 rounded-full ms-auto" />
           </div>
           <div className="flex items-center justify-between gap-2">
             <Skeleton className="h-3.5 w-28 max-w-[55%]" />
@@ -176,6 +213,7 @@ function ListRowsSkeleton({
           key={i}
           className="flex items-center gap-3 rounded-xl border border-border bg-card p-4"
         >
+          <RouteNodeDot />
           <Skeleton className="size-10 rounded-lg shrink-0" />
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-32 max-w-[60%]" />
@@ -270,8 +308,8 @@ export function DashboardSkeleton() {
       <HeaderSkeleton />
       <KpiGridSkeleton />
       <div className="grid gap-4 lg:grid-cols-3">
-        <Skeleton className="h-64 rounded-xl" />
-        <Skeleton className="h-64 rounded-xl lg:col-span-2" />
+        <SectionSkeleton className="h-64" />
+        <SectionSkeleton className="h-64 lg:col-span-2" />
       </div>
     </SkeletonPage>
   );
@@ -353,8 +391,8 @@ export function SettingsSkeleton() {
   return (
     <SkeletonPage label="جارٍ تحميل الإعدادات…" className="max-w-2xl">
       <HeaderSkeleton action={false} />
-      <Skeleton className="h-36 rounded-xl" />
-      <Skeleton className="h-[420px] rounded-xl" />
+      <SectionSkeleton className="h-36" />
+      <SectionSkeleton className="h-[420px]" />
     </SkeletonPage>
   );
 }
@@ -363,10 +401,10 @@ export function OnboardingSkeleton() {
   return (
     <SkeletonPage label="جارٍ تحميل الإعداد…" className="max-w-2xl">
       <HeaderSkeleton action={false} />
-      <Skeleton className="h-16 rounded-xl" />
-      <Skeleton className="h-32 rounded-xl" />
-      <Skeleton className="h-32 rounded-xl" />
-      <Skeleton className="h-32 rounded-xl" />
+      <SectionSkeleton className="h-16" />
+      <SectionSkeleton className="h-32" />
+      <SectionSkeleton className="h-32" />
+      <SectionSkeleton className="h-32" />
     </SkeletonPage>
   );
 }

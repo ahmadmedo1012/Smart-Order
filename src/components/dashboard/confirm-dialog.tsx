@@ -21,6 +21,12 @@ import { cn } from "@/lib/utils";
  * Arabic text, solid destructive confirm, footer gap at every
  * breakpoint, focus returns to the trigger on close (Radix built-in),
  * Escape + scrim click cancel.
+ *
+ * Route & Node chrome (Phase 6): the header block carries a hairline
+ * separator (border-b — the dialog's own quiet road between the
+ * question and the actions), and the DESTRUCTIVE confirm is squared
+ * to the stamp corner (rounded-sm) with the 1px rose-family-ink
+ * border aligned to the badge destructive stamp geometry.
  */
 export function ConfirmDialog({
   open,
@@ -46,7 +52,7 @@ export function ConfirmDialog({
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent dir="rtl">
-        <AlertDialogHeader>
+        <AlertDialogHeader className="border-b border-border pb-4">
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description && (
             <AlertDialogDescription>{description}</AlertDialogDescription>
@@ -57,6 +63,7 @@ export function ConfirmDialog({
           <AlertDialogAction
             variant={destructive ? "destructive-solid" : "default"}
             disabled={busy}
+            className={destructive ? "rounded-sm border-(--c-rose-ink)/45" : undefined}
             /* keep the dialog controlled by the parent: preventDefault
  stops Radix from force-closing before the mutation settles
  (parent closes on success, stays open + toasts on error). */
@@ -126,7 +133,7 @@ export function PromptDialog({
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent dir="rtl">
-        <AlertDialogHeader>
+        <AlertDialogHeader className="border-b border-border pb-4">
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description && (
             <AlertDialogDescription>{description}</AlertDialogDescription>
