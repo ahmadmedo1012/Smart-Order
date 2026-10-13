@@ -164,8 +164,11 @@ export default function AdminPaymentsPage() {
                     <div>
                       <div className="text-sm font-bold">
                         باقة {PLAN_AR[p.planName] ?? p.planName}
+                        {/* Phase 6: the amount rides IBM Plex Mono — the
+                            operational code voice (ar-LY dot grouping
+                            renders in the mono stack's Latin digits). */}
                         <span
-                          className="ms-2 text-accent-foreground tabular-nums"
+                          className="ms-2 font-mono text-accent-foreground tabular-nums"
                           dir="ltr"
                         >
                           {/* r136: عبر نقطة الوصل — تجميع ar-LY عند ≥1,000 */}
@@ -266,8 +269,19 @@ export default function AdminPaymentsPage() {
                 </div>
               )}
               {p.status !== "PENDING" && (
-                <div className="mt-3 text-xs text-muted-foreground">
-                  {p.status === "APPROVED" ? "تمت الموافقة" : "مرفوضة"}
+                /* Phase 6: the reviewed status speaks the squared family
+                    STAMP (mint for approved, rose for rejected) instead
+                    of quiet text — same language as the badges. */
+                <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+                  <span
+                    className={`inline-flex items-center rounded-sm border px-2.5 py-1 text-[11px] font-semibold ${
+                      p.status === "APPROVED"
+                        ? "border-(--c-mint-ink)/35 bg-(--c-mint-bg) text-(--c-mint-deep)"
+                        : "border-(--c-rose-ink)/35 bg-(--c-rose-bg) text-(--c-rose-deep)"
+                    }`}
+                  >
+                    {p.status === "APPROVED" ? "تمت الموافقة" : "مرفوضة"}
+                  </span>
                   {p.reviewedAt
                     ? ` · ${timeAgoAr(new Date(p.reviewedAt))}`
                     : ""}

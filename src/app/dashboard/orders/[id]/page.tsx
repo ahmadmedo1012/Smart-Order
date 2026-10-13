@@ -124,11 +124,18 @@ interface OrderDetail {
 }
 
 /* r131 (F3, A5 P2-3): order-status timeline rides the owner-timeline
- anatomy (Madarek owner.css:10-66) — 2px accent-tinted spine
- (28% primary into the border), 32px circular PASTEL icon nodes on
- the 9-family grounds (same status→family map as the chips), 12px
- row padding, 60ms stagger-in (RM-gated by the shell MotionConfig). */
-const TIMELINE_NODE: Record<string, { icon: LucideIcon; classes: string }> = {
+ anatomy — 32px circular PASTEL icon nodes on the 9-family grounds
+ (same status→family map as the chips), 12px row padding, 60ms
+ stagger-in (RM-gated by the shell MotionConfig).
+ Phase 6 (route grammar): the spine is now the DASHED ROUTE itself
+ (globals.css .route-spine-segment — the same 2px dashed road as
+ tracking/dividers), and TERMINAL states (DELIVERED/CANCELLED/
+ REJECTED) render their label as a squared family STAMP (the
+ end-of-route franking). */
+const TIMELINE_NODE: Record<
+  string,
+  { icon: LucideIcon; classes: string; stamp?: string }
+> = {
   NEW: {
     icon: ClipboardList,
     classes: "bg-(--c-copper-bg) text-(--c-copper-ink)",
@@ -149,9 +156,18 @@ const TIMELINE_NODE: Record<string, { icon: LucideIcon; classes: string }> = {
   DELIVERED: {
     icon: PackageCheck,
     classes: "bg-(--c-mint-bg) text-(--c-mint-ink)",
+    stamp: "border-(--c-mint-ink)/35 bg-(--c-mint-bg) text-(--c-mint-deep)",
   },
-  CANCELLED: { icon: Ban, classes: "bg-(--c-grey-bg) text-(--c-grey-ink)" },
-  REJECTED: { icon: XCircle, classes: "bg-(--c-rose-bg) text-(--c-rose-ink)" },
+  CANCELLED: {
+    icon: Ban,
+    classes: "bg-(--c-grey-bg) text-(--c-grey-ink)",
+    stamp: "border-(--c-grey-ink)/35 bg-(--c-grey-bg) text-(--c-grey-deep)",
+  },
+  REJECTED: {
+    icon: XCircle,
+    classes: "bg-(--c-rose-bg) text-(--c-rose-ink)",
+    stamp: "border-(--c-rose-ink)/35 bg-(--c-rose-bg) text-(--c-rose-deep)",
+  },
 };
 
 export default function OrderDetailPage() {
@@ -478,10 +494,13 @@ export default function OrderDetailPage() {
                         )}
                       </div>
                       <div className="text-end shrink-0">
-                        <div className="font-semibold tabular-nums">
+                        {/* Phase 6: money figures ride IBM Plex Mono —
+                            the operational code voice (the order number
+                            already speaks it since r152). */}
+                        <div className="font-semibold font-mono tabular-nums">
                           {formatLyd(item.lineTotal)}
                         </div>
-                        <div className="text-[11px] text-muted-foreground tabular-nums">
+                        <div className="text-[11px] text-muted-foreground font-mono tabular-nums">
                           {formatLyd(item.unitPrice)} × {item.quantity}
                         </div>
                       </div>
@@ -492,23 +511,24 @@ export default function OrderDetailPage() {
             </ul>
 
             <div className="mt-4 pt-4 border-t space-y-2 text-sm">
+              {/* Phase 6: the totals ledger rides IBM Plex Mono. */}
               <div className="flex justify-between text-muted-foreground">
                 <span>المجموع الفرعي</span>
-                <span className="tabular-nums">
+                <span className="font-mono tabular-nums">
                   {formatLyd(order.subtotal)}
                 </span>
               </div>
               {order.deliveryFee > 0 && (
                 <div className="flex justify-between text-muted-foreground">
                   <span>رسوم التوصيل</span>
-                  <span className="tabular-nums">
+                  <span className="font-mono tabular-nums">
                     {formatLyd(order.deliveryFee)}
                   </span>
                 </div>
               )}
               <div className="flex justify-between font-bold text-base pt-1 border-t">
                 <span>الإجمالي</span>
-                <span className="tabular-nums text-accent-foreground">
+                <span className="font-mono tabular-nums text-accent-foreground">
                   {formatLyd(order.total)}
                 </span>
               </div>
@@ -543,7 +563,7 @@ export default function OrderDetailPage() {
                 <span className="text-muted-foreground">الهاتف</span>
                 <a
                   href={`tel:${order.customerPhone}`}
-                  className="font-medium tabular-nums hover:text-accent-foreground"
+                  className="font-medium font-mono tabular-nums hover:text-accent-foreground"
                   dir="ltr"
                 >
                   <bdi>{formatPhoneDisplay(order.customerPhone)}</bdi>
@@ -677,13 +697,15 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {/* Timeline — owner-timeline anatomy (r131 F3): 2px accent-tinted
- spine + 32px pastel icon nodes + 60ms stagger. */}
+      {/* Timeline — owner-timeline anatomy (r131 F3): Phase 6 re-bases
+ spine + nodes on the DASHED ROUTE (.route-spine-segment, its first
+ consumer) — the solid tinted bar is retired; pastel icon nodes,
+ hairline row separators and the 60ms stagger stay. */}
       <Card className="border-border/80 bg-card rounded-xl p-5">
         <h2 className="font-heading font-semibold">سجل الطلب</h2>
         <ol className="mt-2 relative">
           <span
-            className="absolute top-4 bottom-4 start-[15px] w-0.5 rounded-full bg-[color-mix(in_srgb,var(--primary)_28%,var(--border))]"
+            className="route-spine-segment absolute top-4 bottom-4 start-[15px]"
             aria-hidden="true"
           />
           {order.history.map((h, i) => {
@@ -708,11 +730,23 @@ export default function OrderDetailPage() {
                   <NodeIcon className="size-4" />
                 </span>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium">
-                    {h.toStatus === "NEW"
-                      ? (h.note ?? "استُقبل الطلب")
-                      : `الحالة: ${ORDER_STATUS_AR[h.toStatus as keyof typeof ORDER_STATUS_AR] ?? h.toStatus}`}
-                  </span>
+                  {/* Phase 6: TERMINAL states get the stamp treatment —
+                      the end-of-route franking (squared family border
+                      over the pastel ground, deep ink); live states keep
+                      the plain text label. */}
+                  {node.stamp ? (
+                    <span
+                      className={`inline-flex items-center rounded-sm border px-2.5 py-1 text-[11px] font-semibold ${node.stamp}`}
+                    >
+                      {`الحالة: ${ORDER_STATUS_AR[h.toStatus as keyof typeof ORDER_STATUS_AR] ?? h.toStatus}`}
+                    </span>
+                  ) : (
+                    <span className="text-sm font-medium">
+                      {h.toStatus === "NEW"
+                        ? (h.note ?? "استُقبل الطلب")
+                        : `الحالة: ${ORDER_STATUS_AR[h.toStatus as keyof typeof ORDER_STATUS_AR] ?? h.toStatus}`}
+                    </span>
+                  )}
                 </div>
                 {/* r132 (A2 F6): the operator's note is the whole point of
                     the "يظهر في السجل" promise — the old startsWith("تم")

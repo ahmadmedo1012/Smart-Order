@@ -205,7 +205,11 @@ export default function OrdersPage() {
     <div className="space-y-5">
       <PageHeader
         title="الطلبات"
-        subtitle={<span className="tabular-nums">{meta.total} طلب</span>}
+        /* Phase 6 (route grammar): the operational count moved from the
+           subtitle to the MONO meta line and the header row ends in the
+           quiet route divider — the same adoption as products. */
+        meta={<span>{meta.total} طلب</span>}
+        divider
         actions={
           <>
             {newCount > 0 && (
@@ -424,8 +428,10 @@ export default function OrdersPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="truncate max-w-36">{o.customerName}</div>
+                      {/* Phase 6: phones ride IBM Plex Mono (dir=ltr kept
+                          for the LTR digit run). */}
                       <div
-                        className="text-xs text-muted-foreground tabular-nums"
+                        className="text-xs text-muted-foreground font-mono tabular-nums"
                         dir="ltr"
                       >
                         {o.customerPhone}
@@ -440,7 +446,7 @@ export default function OrdersPage() {
                     <td className="px-4 py-3">
                       <PaymentStatusBadge status={o.paymentStatus} />
                     </td>
-                    <td className="px-4 py-3 font-bold tabular-nums">
+                    <td className="px-4 py-3 font-bold font-mono tabular-nums">
                       {formatLyd(o.total)}
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
@@ -488,7 +494,7 @@ export default function OrdersPage() {
                     <span className="text-muted-foreground truncate">
                       {o.customerName}
                     </span>
-                    <span className="font-bold tabular-nums">
+                    <span className="font-bold font-mono tabular-nums">
                       {formatLyd(o.total)}
                     </span>
                   </div>
