@@ -8,18 +8,26 @@ import { createOrderViaApi } from "./helpers";
  */
 
 test.describe("تتبع الطلب", () => {
-  test("توكن غير صالح → 404", async ({ page }) => {
-    const res = await page.goto("/track/short");
-    expect(res?.status()).toBe(404);
+  /* ملاحظة نقلٍ صادقة (Next 16 streaming): مسار /track/[token] لديه
+     loading.tsx — قذيفة الصفحة تُرسل برأس 200 ثم notFound() يُرسم داخل
+     التدفق. الحقيقة المرئية للزبون (وحقيقة SEO: noindex مضبوط على
+     المسار) هي صفحة 404 نفسها — لذلك نثبت محتواها ونمنع أي تسريب
+     لواجهة التتبع، لا رقم النقل. */
+  test("توكن غير صالح → صفحة 404 (حارس الصيغة)", async ({ page }) => {
+    await page.goto("/track/short");
     await expect(page.getByRole("heading", { name: "404", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "الصفحة غير موجودة" })).toBeVisible();
+    // لا واجهة تتبع: لا ختم حالة ولا درب محطات ولا رقم طلب
+    await expect(page.locator("ol")).toHaveCount(0);
+    await expect(page.getByText("مسار الطلب", { exact: true })).toHaveCount(0);
   });
 
-  test("توكن سليم الشكل غير موجود في القاعدة → 404", async ({ page }) => {
+  test("توكن سليم الشكل غير موجود في القاعدة → صفحة 404", async ({ page }) => {
     // 32 محرفًا سداسيًا عشريًا: يجتاز حارس الصيغة لكنه ليس توكن طلب
-    const res = await page.goto("/track/0123456789abcdef0123456789abcdef");
-    expect(res?.status()).toBe(404);
+    await page.goto("/track/0123456789abcdef0123456789abcdef");
     await expect(page.getByRole("heading", { name: "الصفحة غير موجودة" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "404", exact: true })).toBeVisible();
+    await expect(page.locator("ol")).toHaveCount(0);
   });
 
   test("درب المحطات كامل لطلب توصيل — 6 محطات + خاتمة الوجهة، NEW نشطة", async ({ page }) => {

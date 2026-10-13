@@ -23,11 +23,10 @@ test.describe("رحلة العميل — المتجر ← السلة ← إتم�
     await expect(page.getByRole("heading", { name: "كل المنتجات" })).toBeVisible();
     await expect(page.locator("main article")).toHaveCount(6, { timeout: 20_000 });
 
-    // ── 2) حوار المنتج ──
+    // ── 2) حوار المنتج (اسمه المتاح = اسم المنتج عبر DialogTitle) ──
     await page.getByRole("button", { name: "تفاصيل بيتزا مارغريتا" }).first().click();
-    const dialog = page.getByRole("dialog");
+    const dialog = page.getByRole("dialog", { name: "بيتزا مارغريتا" });
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole("heading", { name: "بيتزا مارغريتا" })).toBeVisible();
     await expect(dialog.getByText("صوص طماطم، موزاريلا، ريحان طازج")).toBeVisible();
 
     // ── 3) إضافة إلى السلة ──
@@ -108,10 +107,12 @@ test.describe("رحلة العميل — المتجر ← السلة ← إتم�
     await expect(page.getByText("الوجهة")).toBeVisible();
     await expect(page.getByText("نهاية الطريق بانتظار طلبك")).toBeVisible();
 
-    // إيصال الطلب: الصنف + رسوم التوصيل 5 د.ل (أحادي)
-    await expect(page.getByText("شارع الجمهورية، مقابل مبنى البريد")).toBeVisible();
-    const receiptDelivery = page.getByText("التوصيل", { exact: true });
-    await expect(receiptDelivery).toBeVisible();
+    // سطر العميل: الاسم · التوصيل · المدينة والمنطقة (العنوان الكامل
+    // لا يُعرض في التتبع العام — سطر العميل هو الاسم/النوع/المدينة/المنطقة)
+    await expect(page.getByText("أحمد المهدي · توصيل · طرابلس الوسط")).toBeVisible();
+
+    // إيصال الطلب: الصنف + رسوم التوصيل 5 د.ل + الإجمالي 50 د.ل (أحادي)
+    await expect(page.getByText("التوصيل", { exact: true })).toBeVisible();
     const monoTotal = page.getByText("50 د.ل", { exact: true });
     await expect(monoTotal).toBeVisible();
     await expect(monoTotal).toHaveCSS("font-family", /Plex Mono/);
