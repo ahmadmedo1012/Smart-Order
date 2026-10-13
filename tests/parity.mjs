@@ -1197,6 +1197,74 @@ for (const [name, okFlag] of P6_CHROME) {
   else failures.push(`phase6 chrome gate FAILED: ${name}`);
 }
 
+// ── Phase 6 (P6-2-f2): the CRUD SCREENS ADOPTION gates — the merchant
+// surfaces consume the chrome grammar the f1 commit exposed: mono
+// operational figures on every CRUD screen, route dividers between
+// chapters, squared family stamps on chips/pills/tiles, the dashed
+// route spine on the owner timeline, and route-station upload/empty
+// treatments. Same consumption-pin shape as the P6_CHROME layer. ─────
+const P6_SCREENS = [
+  ['products: PageHeader adopts the mono meta line + quiet route divider (counts as codes)',
+    R('src/app/dashboard/products/page.tsx').includes('divider') &&
+    R('src/app/dashboard/products/page.tsx').includes('meta=')],
+  ['products: card-grid price figures ride IBM Plex Mono',
+    (R('src/app/dashboard/products/page.tsx').match(/font-mono/g) || []).length >= 1],
+  ['products: featured/unavailable chips are squared family stamps (1px border, no rounded-full)',
+    R('src/app/dashboard/products/page.tsx').includes('rounded-sm border border-(--c-yellow-ink)/40') &&
+    !R('src/app/dashboard/products/page.tsx').includes('rounded-full bg-(--c-yellow-bg)')],
+  ['product-editor: price/variant/option/stock money fields ride IBM Plex Mono',
+    (R('src/components/dashboard/product-editor.tsx').match(/font-mono/g) || []).length >= 5],
+  ['product-editor: section headers carry the stamp rhythm (copper family well) + quiet route dividers between chapters',
+    (R('src/components/dashboard/product-editor.tsx').match(/route-divider route-divider-quiet/g) || []).length >= 2 &&
+    (R('src/components/dashboard/product-editor.tsx').match(/rounded-sm border border-\(--c-copper-ink\)\/35 bg-\(--c-copper-bg\)/g) || []).length >= 2],
+  ['product-editor: the empty image upload tile reads as a route station (RouteNodeDot + dashed road)',
+    R('src/components/dashboard/product-editor.tsx').includes('RouteNodeDot') &&
+    R('src/components/dashboard/product-editor.tsx').includes('border-t-2 border-dashed border-primary/45')],
+  ['categories: route-numbered list (mono ordinal inside a route node) + full dialog header hairline',
+    R('src/app/dashboard/categories/page.tsx').includes('rounded-full border-2 border-primary/55 bg-card font-mono') &&
+    R('src/app/dashboard/categories/page.tsx').includes('border-b border-border p-5')],
+  ['customers: phones + money + counts ride IBM Plex Mono (desktop table AND mobile cards, dir=ltr kept)',
+    (R('src/app/dashboard/customers/page.tsx').match(/font-mono/g) || []).length >= 6],
+  ['customer-detail: metric tiles are squared stamp wells with mono figures; addresses speak the kv-row hairline rhythm',
+    R('src/app/dashboard/customers/[id]/page.tsx').includes('rounded-sm border border-border bg-card p-4 text-center') &&
+    R('src/app/dashboard/customers/[id]/page.tsx').includes('divide-y divide-border/60')],
+  ['delivery: fee/minOrder figures ride IBM Plex Mono; example chips are route stations (node + mono fee)',
+    (R('src/app/dashboard/delivery/page.tsx').match(/font-mono/g) || []).length >= 3 &&
+    R('src/app/dashboard/delivery/page.tsx').includes('size-1.5 rounded-full border border-primary/55')],
+  ['payments: type/disabled labels + the enable pill are squared family stamps; aria-pressed kept; transfer numbers mono',
+    R('src/app/dashboard/payments/page.tsx').includes('rounded-sm border border-(--c-grey-ink)/35') &&
+    R('src/app/dashboard/payments/page.tsx').includes('rounded-sm border px-3') &&
+    R('src/app/dashboard/payments/page.tsx').includes('aria-pressed={m.isActive}') &&
+    R('src/app/dashboard/payments/page.tsx').includes('font-mono tabular-nums')],
+  ['staff: the OWNER chip is the squared copper family stamp',
+    R('src/app/dashboard/staff/page.tsx').includes('rounded-sm border border-(--c-copper-ink)/35 bg-(--c-copper-bg)')],
+  ['settings: store-link card opens with the quiet route divider; logo upload tile is a route station',
+    R('src/app/dashboard/settings/page.tsx').includes('route-divider route-divider-quiet') &&
+    R('src/app/dashboard/settings/page.tsx').includes('RouteNodeDot')],
+  ['onboarding: progress meter is the dashed route (nodes + dashed spine, traveled primary/45)',
+    R('src/app/dashboard/onboarding/page.tsx').includes('border-t-2 border-dashed') &&
+    R('src/app/dashboard/onboarding/page.tsx').includes('rounded-full border-2 bg-card')],
+  ['orders list: PageHeader adopts the mono meta line + quiet route divider; money/phones mono',
+    R('src/app/dashboard/orders/page.tsx').includes('divider') &&
+    R('src/app/dashboard/orders/page.tsx').includes('meta=') &&
+    (R('src/app/dashboard/orders/page.tsx').match(/font-mono/g) || []).length >= 3],
+  ['order detail: the timeline spine is the DASHED ROUTE (.route-spine-segment consumer — solid tinted bar retired)',
+    R('src/app/dashboard/orders/[id]/page.tsx').includes('route-spine-segment absolute') &&
+    !R('src/app/dashboard/orders/[id]/page.tsx').includes('w-0.5 rounded-full bg-[color-mix')],
+  ['order detail: terminal timeline states (DELIVERED/CANCELLED/REJECTED) render squared family stamps',
+    (R('src/app/dashboard/orders/[id]/page.tsx').match(/stamp: "border-\(--c-(mint|grey|rose)-ink\)\/35/g) || []).length === 3],
+  ['order detail: the totals ledger + item figures ride IBM Plex Mono',
+    (R('src/app/dashboard/orders/[id]/page.tsx').match(/font-mono/g) || []).length >= 6],
+  ['admin payments: reviewed statuses are squared family stamps (mint/rose) + amounts mono',
+    R('src/app/dashboard/admin/payments/page.tsx').includes('border-(--c-mint-ink)/35 bg-(--c-mint-bg)') &&
+    R('src/app/dashboard/admin/payments/page.tsx').includes('border-(--c-rose-ink)/35 bg-(--c-rose-bg)') &&
+    R('src/app/dashboard/admin/payments/page.tsx').includes('font-mono text-accent-foreground tabular-nums')],
+];
+for (const [name, okFlag] of P6_SCREENS) {
+  if (okFlag) passed += 1;
+  else failures.push(`phase6 screens gate FAILED: ${name}`);
+}
+
 // ── report ───────────────────────────────────────────────────────────────────
 
 if (failures.length > 0) {
@@ -1204,4 +1272,4 @@ if (failures.length > 0) {
   for (const f of failures) console.error(`  • ${f}`);
   process.exit(1);
 }
-console.log(`✓ Route & Node parity snapshot: ${passed} assertions passed (globals.css + landing.css == the Operational Daylight contract + the Phase 6 chrome grammar)`);
+console.log(`✓ Route & Node parity snapshot: ${passed} assertions passed (globals.css + landing.css == the Operational Daylight contract + the Phase 6 chrome grammar + the CRUD screens adoption)`);
