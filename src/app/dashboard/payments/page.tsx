@@ -114,18 +114,24 @@ export default function PaymentsPage() {
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold text-sm flex items-center gap-2 flex-wrap">
                       {m.name}
-                      <span className="inline-flex items-center rounded-full bg-(--c-grey-bg) px-2.5 py-1 text-[11px] font-semibold text-(--c-grey-deep)">
+                      {/* Phase 6: the type + disabled labels speak the
+                          squared shipping-stamp idiom (status-badges
+                          language: 1px family border over the pastel
+                          family ground + family deep ink). */}
+                      <span className="inline-flex items-center rounded-sm border border-(--c-grey-ink)/35 bg-(--c-grey-bg) px-2.5 py-1 text-[11px] font-semibold text-(--c-grey-deep)">
                         {PAYMENT_TYPE_AR[m.type]}
                       </span>
                       {!m.isActive && (
-                        <span className="inline-flex items-center rounded-full bg-(--c-grey-bg) px-2.5 py-1 text-[11px] font-semibold text-(--c-grey-deep)">
+                        <span className="inline-flex items-center rounded-sm border border-(--c-grey-ink)/35 bg-(--c-grey-bg) px-2.5 py-1 text-[11px] font-semibold text-(--c-grey-deep)">
                           معطلة
                         </span>
                       )}
                     </div>
+                    {/* Phase 6: transfer numbers ride IBM Plex Mono — the
+                        operational code voice. */}
                     {config?.number && (
                       <div
-                        className="text-xs text-muted-foreground mt-1 tabular-nums flex items-center gap-1.5"
+                        className="text-xs text-muted-foreground mt-1 font-mono tabular-nums flex items-center gap-1.5"
                         dir="ltr"
                       >
                         <Phone className="size-3" aria-hidden="true" />
@@ -158,10 +164,15 @@ export default function PaymentsPage() {
                          النتيجة. الآن نص الزر فعل ما سيحدثه + الحالة
                          معلنة بaria-pressed (نمط r133 role=group). */
                       aria-pressed={m.isActive}
-                      className={`inline-flex h-8 items-center rounded-full border border-transparent px-3 text-xs font-semibold transition-colors duration-(--t-fast) active:scale-[0.97] ${
+                      /* Phase 6: the enable/disable pill squares to the
+                         shipping stamp (1px family border over the pastel
+                         ground) — mint family for the live method, grey
+                         for the disabled one. aria-pressed semantics
+                         intact (r140 P3-4). */
+                      className={`inline-flex h-8 items-center rounded-sm border px-3 text-xs font-semibold transition-colors duration-(--t-fast) active:scale-[0.97] ${
                         m.isActive
-                          ? "bg-(--c-mint-bg) text-(--c-mint-deep)"
-                          : "bg-(--c-grey-bg) text-(--c-grey-deep)"
+                          ? "border-(--c-mint-ink)/35 bg-(--c-mint-bg) text-(--c-mint-deep)"
+                          : "border-(--c-grey-ink)/35 bg-(--c-grey-bg) text-(--c-grey-deep)"
                       }`}
                     >
                       {m.isActive ? "تعطيل" : "تفعيل"}
@@ -322,7 +333,11 @@ function MethodDialog({
         showCloseButton={false}
         className="max-w-sm gap-0 overflow-hidden rounded-xl border-border bg-card p-0 shadow-xl"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-border/60 p-5">
+        {/* Phase 6: dialog header hairline normalized to the full 1px
+            border (the ConfirmDialog chrome hairline idiom); the
+            transfer-number field renders its figures in IBM Plex Mono
+            (stamp rhythm). */}
+        <div className="flex items-start justify-between gap-3 border-b border-border p-5">
           <div>
             <DialogTitle className="font-heading text-lg font-semibold text-foreground">
               طريقة دفع جديدة
@@ -390,7 +405,7 @@ function MethodDialog({
                 placeholder="0912345678"
                 inputMode="tel"
                 dir="ltr"
-                className="text-start tabular-nums"
+                className="font-mono text-start tabular-nums"
                 aria-invalid={!!errors.number}
                 aria-describedby={errors.number ? "m-number-error" : undefined}
               />

@@ -18,6 +18,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { FieldError } from "@/components/dashboard/form-field";
+import { RouteNodeDot } from "@/components/dashboard/skeletons";
 import { SettingsSkeleton } from "@/components/dashboard/skeletons";
 import { compressImage } from "@/lib/compress";
 import { LIBYA_CITIES } from "@/lib/constants";
@@ -177,18 +178,25 @@ export default function SettingsPage() {
         subtitle="بيانات عملك كما تظهر للعملاء"
       />
 
-      {/* Store link + publish */}
+      {/* Store link + publish — Phase 6: the card opens with its header
+          row and the QUIET ROUTE DIVIDER (the chapter break from the
+          link row to the publish controls) — the copy/open/publish
+          cluster reads as one route station. */}
       <div className="rounded-xl border border-border bg-card p-5">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <Globe
+            className="size-4 text-accent-foreground"
+            aria-hidden="true"
+          />
+          رابط متجرك
+        </div>
+        <div
+          aria-hidden="true"
+          className="route-divider route-divider-quiet mt-3"
+        />
+        <div className="mt-4 flex items-center justify-between gap-3 flex-wrap">
           <div className="min-w-0">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <Globe
-                className="size-4 text-accent-foreground"
-                aria-hidden="true"
-              />
-              رابط متجرك
-            </div>
-            <div className="mt-2 flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <code
                 className="rounded-lg bg-muted px-3 py-1.5 text-xs truncate max-w-64 sm:max-w-96"
                 dir="ltr"
@@ -236,10 +244,10 @@ export default function SettingsPage() {
           </div>
           <div className="flex flex-col items-end gap-2">
             <span
-              className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+              className={`inline-flex items-center rounded-sm border px-2.5 py-1 text-[11px] font-semibold ${
                 settings.isPublished
-                  ? "bg-(--c-mint-bg) text-(--c-mint-deep)"
-                  : "bg-(--c-grey-bg) text-(--c-grey-deep)"
+                  ? "border-(--c-mint-ink)/35 bg-(--c-mint-bg) text-(--c-mint-deep)"
+                  : "border-(--c-grey-ink)/35 bg-(--c-grey-bg) text-(--c-grey-deep)"
               }`}
             >
               {settings.isPublished
@@ -282,7 +290,11 @@ export default function SettingsPage() {
                 </button>
               </>
             ) : (
-              <label className="size-full flex items-center justify-center text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+              /* Phase 6: the empty logo tile reads as a STATION on the
+                 route — node dots flank the upload affordance with a
+                 dashed hairline road (states.tsx RouteStationRoad
+                 idiom, scaled to the tile). */
+              <label className="size-full flex flex-col items-center justify-center gap-2 text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
                 {uploadingLogo ? (
                   <span
                     className="size-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-accent-foreground"
@@ -291,6 +303,14 @@ export default function SettingsPage() {
                 ) : (
                   <ImagePlus className="size-6" aria-hidden="true" />
                 )}
+                <span
+                  className="flex items-center gap-1.5"
+                  aria-hidden="true"
+                >
+                  <RouteNodeDot className="border-primary/55" />
+                  <span className="h-0 w-4 border-t-2 border-dashed border-primary/45" />
+                  <RouteNodeDot className="border-primary/55" />
+                </span>
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"

@@ -198,7 +198,7 @@ export default function OnboardingPage() {
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground tabular-nums">
+            <span className="text-xs text-muted-foreground font-mono tabular-nums">
               خطوة {n}
             </span>
             {done && (
@@ -253,7 +253,7 @@ export default function OnboardingPage() {
             <span className="tabular-nums">{totalSteps}</span> خطوات مكتملة
           </p>
           {doneCount === totalSteps ? (
-            <span className="inline-flex items-center rounded-full bg-(--c-mint-bg) px-2.5 py-1 text-[11px] font-semibold text-(--c-mint-deep)">
+            <span className="inline-flex items-center rounded-sm border border-(--c-mint-ink)/35 bg-(--c-mint-bg) px-2.5 py-1 text-[11px] font-semibold text-(--c-mint-deep)">
               اكتمل الإعداد
             </span>
           ) : (
@@ -262,8 +262,13 @@ export default function OnboardingPage() {
             </span>
           )}
         </div>
+        {/* Phase 6: the progress meter speaks the ROUTE — step nodes
+            (the .route-divider-node geometry) connected by a DASHED
+            spine; traveled segments ride primary/45, unbuilt ones stay
+            hairline (the road at rest). role=progressbar semantics
+            from r131 (F3, A5 P3-4) intact. */}
         <div
-          className="mt-3 flex gap-1.5"
+          className="mt-3 flex items-center gap-1.5"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={totalSteps}
@@ -271,12 +276,22 @@ export default function OnboardingPage() {
           aria-label={`تقدم الإعداد: ${doneCount} من ${totalSteps}`}
         >
           {stepStates.map((done, i) => (
-            <span
-              key={i}
-              className={`h-2 flex-1 rounded-full transition-colors duration-(--t-base) ${
-                done ? "bg-primary" : "bg-muted"
-              }`}
-            />
+            <React.Fragment key={i}>
+              {i > 0 && (
+                <span
+                  aria-hidden="true"
+                  className={`h-0 flex-1 border-t-2 border-dashed ${
+                    stepStates[i - 1] ? "border-primary/45" : "border-border"
+                  }`}
+                />
+              )}
+              <span
+                aria-hidden="true"
+                className={`size-2.5 shrink-0 rounded-full border-2 bg-card transition-colors duration-(--t-base) ${
+                  done ? "border-primary/55" : "border-border"
+                }`}
+              />
+            </React.Fragment>
           ))}
         </div>
       </div>

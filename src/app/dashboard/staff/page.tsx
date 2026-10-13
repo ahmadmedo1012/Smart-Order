@@ -127,7 +127,9 @@ export default function StaffPage() {
                     ui/select primitive (sm rung, halo focus) — was a
                     raw native h-8 select with the retired ring recipe. */}
                 {s.role === "OWNER" ? (
-                  <span className="inline-flex items-center rounded-full bg-(--c-copper-bg) px-2.5 py-1 text-[11px] font-semibold text-(--c-copper-deep) shrink-0">
+                  /* Phase 6: the OWNER stamp squares to the shipping-stamp
+                      idiom (copper family border/ground/deep ink). */
+                  <span className="inline-flex items-center rounded-sm border border-(--c-copper-ink)/35 bg-(--c-copper-bg) px-2.5 py-1 text-[11px] font-semibold text-(--c-copper-deep) shrink-0">
                     {ROLE_AR[s.role]}
                   </span>
                 ) : (
@@ -306,7 +308,11 @@ function StaffDialog({
         showCloseButton={false}
         className="max-w-sm gap-0 overflow-hidden rounded-xl border-border bg-card p-0 shadow-xl"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-border/60 p-5">
+        {/* Phase 6: dialog header hairline normalized to the full 1px
+            border (the ConfirmDialog chrome hairline idiom) — the
+            invite dialog header carries the stamp rhythm; the role
+            selector rides the franked FilterPills grammar (shared). */}
+        <div className="flex items-start justify-between gap-3 border-b border-border p-5">
           <div>
             <DialogTitle className="font-heading text-lg font-semibold text-foreground">
               عضو فريق جديد
