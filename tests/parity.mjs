@@ -1265,6 +1265,70 @@ for (const [name, okFlag] of P6_SCREENS) {
   else failures.push(`phase6 screens gate FAILED: ${name}`);
 }
 
+// ── Phase 6 (P6-2-f3): the CUSTOMER MONEY PATH gates — the checkout
+// stamp tiles + the USSD re-tone + the journey route + mono money
+// figures; the tracking terminus + offline hint + composed DELIVERED
+// stamp; the shell light-mode route grammar + the «المزيد» bottom
+// sheet; and the two new route-level loading skeletons. Same
+// consumption-pin shape as the layers above. ─────────────────────────
+const P6_STOREFRONT = [
+  ['checkout: fulfillment tiles are squared stamps (rounded-sm + 1px family border; selected = orange border + soft wash; aria-pressed kept)',
+    R('src/components/storefront/checkout/fulfillment-section.tsx').includes('rounded-sm border p-3.5') &&
+    R('src/components/storefront/checkout/fulfillment-section.tsx').includes('aria-pressed={selected}')],
+  ['checkout: zone tiles are squared stamps; fee/minOrder figures ride IBM Plex Mono',
+    R('src/components/storefront/checkout/delivery-details-section.tsx').includes('rounded-sm border p-2.5') &&
+    (R('src/components/storefront/checkout/delivery-details-section.tsx').match(/font-mono/g) || []).length >= 3],
+  ['checkout: payment provider tiles are squared stamps (aria-pressed kept)',
+    R('src/components/storefront/checkout/payment-section.tsx').includes('rounded-sm border text-[13px]') &&
+    R('src/components/storefront/checkout/payment-section.tsx').includes('aria-pressed={selected}')],
+  ['checkout: the USSD quick-code box is re-toned to the identity (steel family stamp — NOT success-green); the copy CTA is delivery orange',
+    R('src/components/storefront/checkout/payment-section.tsx').includes('rounded-sm border border-(--c-sky-ink)/35 bg-(--c-sky-bg)') &&
+    !R('src/components/storefront/checkout/payment-section.tsx').includes('bg-success/10') &&
+    R('src/components/storefront/checkout/payment-section.tsx').includes('bg-primary px-3 text-xs font-medium text-primary-foreground')],
+  ['checkout: the journey route indicator rides the page top (store → checkout → done: dashed segments + RM-safe pulsing active node)',
+    R('src/components/storefront/checkout-client.tsx').includes('aria-label="مسار الطلب"') &&
+    R('src/components/storefront/checkout-client.tsx').includes('border-t-2 border-dashed') &&
+    R('src/components/storefront/checkout-client.tsx').includes('animate-pulse-soft')],
+  ['checkout: money figures ride IBM Plex Mono (summary rows + the sticky bar + the squared order-number stamp on success)',
+    R('src/components/storefront/checkout/sticky-submit-bar.tsx').includes('font-mono font-bold text-lg tabular-nums') &&
+    R('src/components/storefront/checkout/cart-summary-section.tsx').includes('font-mono tabular-nums font-medium') &&
+    R('src/components/storefront/checkout/success-screen.tsx').includes('rounded-sm bg-primary/10 border border-primary/25')],
+  ['tracking: the destination terminus ring follows the last station (closed when DELIVERED, open dashed while pending)',
+    R('src/components/storefront/tracking-client.tsx').includes('الوجهة') &&
+    R('src/components/storefront/tracking-client.tsx').includes('"border-dashed border-border bg-card text-muted-foreground/60"') &&
+    R('src/components/storefront/tracking-client.tsx').includes('ring-2 ring-primary/15')],
+  ['tracking: poll failure surfaces the quiet offline hint (آخر تحديث معروف + retry affordance) with the 15s visibility-gated cadence intact',
+    R('src/components/storefront/tracking-client.tsx').includes('آخر تحديث معروف') &&
+    R('src/components/storefront/tracking-client.tsx').includes('إعادة المحاولة') &&
+    R('src/components/storefront/tracking-client.tsx').includes('setSyncFailed(true)') &&
+    R('src/components/storefront/tracking-client.tsx').includes('if (!document.hidden) poll();')],
+  ['tracking: the DELIVERED moment is a composed terminal stamp (squared mint 2px dashed + history-sourced date, never fabricated)',
+    R('src/components/storefront/tracking-client.tsx').includes('border-2 border-dashed border-(--c-mint-ink)/45') &&
+    R('src/components/storefront/tracking-client.tsx').includes('deliveredAt') &&
+    R('src/app/track/[token]/page.tsx').includes('toStatus: "DELIVERED"')],
+  ['tracking: the placed banner + the cancelled/rejected cards are quiet squared family stamps (rose/grey per ORDER_STATUS_CHIP)',
+    R('src/components/storefront/tracking-client.tsx').includes('rounded-sm border border-success/30') &&
+    R('src/components/storefront/tracking-client.tsx').includes('"border-(--c-rose-ink)/35 bg-(--c-rose-bg)"')],
+  ['shell: the light-mode sidebar carries the route-line/nav-node grammar (dashed vertical hairline + node dots, light-only)',
+    R('src/components/dashboard/shell.tsx').includes('border-s border-dashed border-border/80 dark:hidden') &&
+    R('src/components/dashboard/shell.tsx').includes('size-1.5 rounded-full border bg-card dark:hidden')],
+  ['shell: the mobile «المزيد» opens a real bottom-sheet menu (44px rows; primary + categories/delivery/payments/staff/settings)',
+    R('src/components/dashboard/shell.tsx').includes('aria-haspopup="dialog"') &&
+    R('src/components/dashboard/shell.tsx').includes('side="bottom"') &&
+    R('src/components/dashboard/shell.tsx').includes('min-h-11 items-center gap-2.5 rounded-sm') &&
+    R('src/components/dashboard/shell.tsx').includes('const MORE_NAV')],
+  ['loading: shape-matched route skeletons exist for checkout (form sections + journey road) and track (station road, RM-safe pulse)',
+    existsSync(new URL('../src/app/store/[slug]/checkout/loading.tsx', import.meta.url)) &&
+    existsSync(new URL('../src/app/track/[token]/loading.tsx', import.meta.url)) &&
+    readFileSync(new URL('../src/app/store/[slug]/checkout/loading.tsx', import.meta.url), 'utf8').includes('border-t-2 border-dashed') &&
+    readFileSync(new URL('../src/app/track/[token]/loading.tsx', import.meta.url), 'utf8').includes('animate-pulse-soft') &&
+    readFileSync(new URL('../src/app/track/[token]/loading.tsx', import.meta.url), 'utf8').includes('border-s-2 border-dashed')],
+];
+for (const [name, okFlag] of P6_STOREFRONT) {
+  if (okFlag) passed += 1;
+  else failures.push(`phase6 storefront gate FAILED: ${name}`);
+}
+
 // ── report ───────────────────────────────────────────────────────────────────
 
 if (failures.length > 0) {
@@ -1272,4 +1336,4 @@ if (failures.length > 0) {
   for (const f of failures) console.error(`  • ${f}`);
   process.exit(1);
 }
-console.log(`✓ Route & Node parity snapshot: ${passed} assertions passed (globals.css + landing.css == the Operational Daylight contract + the Phase 6 chrome grammar + the CRUD screens adoption)`);
+console.log(`✓ Route & Node parity snapshot: ${passed} assertions passed (globals.css + landing.css == the Operational Daylight contract + the Phase 6 chrome grammar + the CRUD screens adoption + the customer money path)`);
