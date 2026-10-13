@@ -1,4 +1,6 @@
 "use client";
+import { countedArabicPhrase } from "@/lib/arabic-plural";
+import { normalizeArabic } from "@/lib/arabic";
 
 import * as React from "react";
 import Image from "next/image";
@@ -105,11 +107,14 @@ export default function ProductsPage() {
 
   if (error) return <ErrorState retry={load} />;
 
+  /* r150: normalizeArabic parity with the storefront search — the same
+     product finds the same way on both surfaces (hamza/alef forms). */
+  const needle = normalizeArabic(q.trim());
   const filtered = (products ?? []).filter(
     (p) =>
-      !q.trim() ||
-      p.name.includes(q.trim()) ||
-      (p.category?.name ?? "").includes(q.trim()),
+      !needle ||
+      normalizeArabic(p.name).includes(needle) ||
+      normalizeArabic(p.category?.name ?? "").includes(needle),
   );
 
   return (
@@ -205,7 +210,13 @@ export default function ProductsPage() {
                     <h3 className="font-semibold text-sm truncate">{p.name}</h3>
                     <p className="text-xs text-muted-foreground mt-0.5 truncate">
                       {p.category?.name ?? "بدون قسم"}
-                      {p.variants.length > 0 && ` · ${p.variants.length} أحجام`}
+                      {p.variants.length > 0 &&
+                        ` · ${countedArabicPhrase(p.variants.length, "حجم", {
+                          one: "حجم واحد",
+                          two: "حجمان",
+                          few: "أحجام",
+                          many: "حجمًا",
+                        })}`}
                     </p>
                   </div>
                   <span className="font-bold text-sm tabular-nums shrink-0">

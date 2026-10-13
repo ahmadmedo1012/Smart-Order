@@ -168,7 +168,7 @@ export default function PaymentsPage() {
                     </button>
                     <button
                       onClick={() => setDeleting(m)}
-                      className="rounded-lg p-2 hover:bg-destructive/10 transition-colors"
+                      className="rounded-lg size-10 flex items-center justify-center hover:bg-destructive/10 transition-colors"
                       aria-label={`حذف ${m.name}`}
                     >
                       <Trash2
@@ -332,7 +332,7 @@ function MethodDialog({
             </DialogDescription>
           </div>
           <DialogClose
-            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="rounded-md size-11 flex items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label="إغلاق"
           >
             <X className="size-4.5" aria-hidden="true" />

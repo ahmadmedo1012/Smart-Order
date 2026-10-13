@@ -148,7 +148,7 @@ export function PaymentSection({
                       toast.error("تعذّر النسخ");
                     }
                   }}
-                  className="flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90"
+                  className="flex h-11 shrink-0 items-center gap-1.5 rounded-md bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90"
                   title="نسخ رمز التحويل السريع"
                   aria-label="نسخ رمز التحويل السريع"
                 >

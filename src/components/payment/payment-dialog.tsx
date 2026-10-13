@@ -317,7 +317,7 @@ export function PaymentDialog({
                               window.location.href = `tel:${encodedUSSD}`;
                             }, 150);
                           }}
-                          className="flex h-9 items-center gap-1.5 rounded-md bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90"
+                          className="flex h-11 items-center gap-1.5 rounded-md bg-success px-3 text-xs font-medium text-success-foreground transition-colors hover:bg-success/90"
                           title="نسخ الرمز وفتح الاتصال"
                         >
                           <AnimatedCopy className="size-3.5" />

@@ -46,6 +46,7 @@ import {
 import { toast } from "sonner";
 import {
   ArrowRight,
+  ArrowLeft,
   MoreHorizontal,
   MessageCircle,
   Phone,
@@ -330,7 +331,10 @@ export default function OrderDetailPage() {
                         className="font-semibold"
                       >
                         {primary.label}
-                        <ChevronDown className="size-4" aria-hidden="true" />
+                        {/* r150: honest affordance — the action opens the
+                            transition-confirm dialog, not a dropdown; the
+                            ChevronDown arrow was a misleading affordance. */}
+                        <ArrowLeft className="size-4" aria-hidden="true" />
                       </Button>
                     )}
                     {destructive.length > 0 && (

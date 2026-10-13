@@ -160,7 +160,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute end-1.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-ring/60"
+                  className="absolute end-1.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center text-muted-foreground transition-colors hover:text-foreground "
                   aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
                 >
                   {showPassword ? <AnimatedEyeOff className="size-4" /> : <AnimatedEye className="size-4" />}
@@ -197,7 +197,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowForgot(true)}
-                className="-my-1 py-2 text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-accent-foreground hover:underline"
+                className="inline-flex min-h-11 items-center text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-accent-foreground hover:underline"
               >
                 نسيت كلمة المرور؟
               </button>

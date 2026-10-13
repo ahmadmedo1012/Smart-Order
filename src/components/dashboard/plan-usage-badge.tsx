@@ -45,7 +45,7 @@ export function PlanUsageBadge({
       <a
         href="/pricing"
         className={cn(
-          "inline-flex items-center gap-2 rounded-full bg-(--c-copper-bg) px-3 py-1 text-xs font-semibold text-(--c-copper-deep) transition-[color,background-color,transform] duration-(--t-fast) hover:-translate-y-px",
+          "inline-flex min-h-11 items-center gap-2 rounded-full bg-(--c-copper-bg) px-3 py-1 text-xs font-semibold text-(--c-copper-deep) transition-[color,background-color,transform] duration-(--t-fast) hover:-translate-y-px",
           className
         )}
       >

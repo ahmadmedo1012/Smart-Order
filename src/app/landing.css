@@ -109,7 +109,10 @@
 .landing .ln-mono {
   font-family: var(--ln-mono);
   font-size: 12px;
-  letter-spacing: 0.08em;
+  /* r150: the Arabic-tracking law reaches the landing sheet — the mono
+     runs carry Arabic copy (hero «الطريق مفتوح»). Tracking survives only
+     on pure-Latin runs. */
+  letter-spacing: 0;
   color: var(--ln-cream-dim);
   font-variant-numeric: tabular-nums;
   direction: ltr;
@@ -125,7 +128,8 @@
   font-family: var(--ln-mono);
   font-size: 12px;
   font-weight: var(--fw-medium);
-  letter-spacing: 0.08em;
+  /* r150: chapter labels carry Arabic («01 — …») — tracking law wins. */
+  letter-spacing: 0;
   color: var(--ln-lime);
   font-variant-numeric: tabular-nums;
   direction: inherit;
@@ -1678,7 +1682,8 @@
   margin-top: 10px;
   color: var(--ln-cream-dim);
   font-size: 11px;
-  letter-spacing: 0.08em;
+  /* r150: Arabic citation copy — tracking law. */
+  letter-spacing: 0;
   opacity: 0.85;
 }
 .landing .landing-footer-desc {
@@ -2954,7 +2959,8 @@
 .landing .ln-cta-meta {
   margin-block-start: var(--sp-3);
   font-size: 0.68rem;
-  letter-spacing: 0.08em;
+  /* r150: Arabic meta copy — tracking law. */
+  letter-spacing: 0;
   color: var(--ln-cream-dim);
   opacity: 0.8;
 }

@@ -211,7 +211,7 @@ export default function SettingsPage() {
                     toast.error("تعذّر النسخ");
                   }
                 }}
-                className="rounded-lg border border-border p-2 hover:bg-muted transition-colors"
+                className="rounded-lg border border-border size-10 flex items-center justify-center hover:bg-muted transition-colors"
                 aria-label="نسخ الرابط"
               >
                 {copied ? (
@@ -227,7 +227,7 @@ export default function SettingsPage() {
                 href={`/store/${settings.slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-lg border border-border p-2 hover:bg-muted transition-colors"
+                className="rounded-lg border border-border size-10 flex items-center justify-center hover:bg-muted transition-colors"
                 aria-label="فتح المتجر"
               >
                 <ExternalLink className="size-3.5" aria-hidden="true" />
@@ -275,7 +275,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, logoUrl: "" }))}
-                  className="absolute top-1 end-1 rounded-full bg-background/90 shadow p-1"
+                  className="absolute top-1 end-1 rounded-full bg-background/90 shadow size-8 flex items-center justify-center after:absolute after:-inset-2 after:content-['']"
                   aria-label="إزالة الشعار"
                 >
                   <X className="size-3" aria-hidden="true" />

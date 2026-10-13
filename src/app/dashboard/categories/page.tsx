@@ -120,7 +120,7 @@ export default function CategoriesPage() {
               <div className="flex gap-1 shrink-0">
                 <button
                   onClick={() => setEditing(c)}
-                  className="rounded-lg p-2 hover:bg-muted transition-colors"
+                  className="rounded-lg size-10 flex items-center justify-center hover:bg-muted transition-colors"
                   aria-label={`تعديل ${c.name}`}
                 >
                   <Pencil
@@ -130,7 +130,7 @@ export default function CategoriesPage() {
                 </button>
                 <button
                   onClick={() => setDeleting(c)}
-                  className="rounded-lg p-2 hover:bg-destructive/10 transition-colors"
+                  className="rounded-lg size-10 flex items-center justify-center hover:bg-destructive/10 transition-colors"
                   aria-label={`حذف ${c.name}`}
                 >
                   <Trash2
@@ -292,7 +292,7 @@ function CategoryDialog({
             </DialogDescription>
           </div>
           <DialogClose
-            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="rounded-md size-11 flex items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label="إغلاق"
           >
             <X className="size-4.5" aria-hidden="true" />
@@ -344,7 +344,7 @@ function CategoryDialog({
                     <button
                       type="button"
                       onClick={() => setImageUrl("")}
-                      className="absolute top-1 end-1 rounded-full bg-background/90 shadow p-1"
+                      className="absolute top-1 end-1 rounded-full bg-background/90 shadow size-8 flex items-center justify-center after:absolute after:-inset-2 after:content-['']"
                       aria-label="إزالة الصورة"
                     >
                       <X className="size-3" aria-hidden="true" />

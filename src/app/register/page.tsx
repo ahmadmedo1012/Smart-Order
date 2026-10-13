@@ -355,7 +355,7 @@ function RegisterWizard() {
                 <button
                   type="button"
                   onClick={() => setStep("plan")}
-                  className="text-xs font-medium text-accent-foreground underline-offset-4 hover:underline"
+                  className="inline-flex min-h-11 items-center text-xs font-medium text-accent-foreground underline-offset-4 hover:underline"
                 >
                   تغيير الباقة
                 </button>

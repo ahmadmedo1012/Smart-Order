@@ -131,7 +131,7 @@ export function ProductCard({
           {(product.variants.length > 0 || product.optionGroups.length > 0) && product.isAvailable && (
             <button
               onClick={() => setOpen(true)}
-              className="mt-1.5 text-[11px] text-accent-foreground font-medium hover:underline"
+              className="mt-1.5 inline-flex min-h-11 items-center text-[11px] text-accent-foreground font-medium hover:underline"
             >
               {/* r140 (P3-6): جمع معدود مصروف — «1 أحجام · 1 إضافات» كانت
                   غير نحوية؛ محرك العائلة (توأم arabic-plural.ts):

@@ -246,7 +246,7 @@ export function DashboardShell({
                 <Link
                   href={`/store/${biz.slug}`}
                   target="_blank"
-                  className="flex items-center gap-2 rounded-lg px-3 h-9 text-xs text-muted-foreground hover:text-accent-foreground hover:bg-primary/5 transition-colors"
+                  className="flex items-center gap-2 rounded-lg px-3 h-11 text-xs text-muted-foreground hover:text-accent-foreground hover:bg-primary/5 transition-colors"
                 >
                   <ExternalLink className="size-3.5" aria-hidden="true" />
                   معاينة المتجر
@@ -257,7 +257,7 @@ export function DashboardShell({
               )}
               <button
                 onClick={logout}
-                className="mt-1 w-full flex items-center gap-2 rounded-lg px-3 h-9 text-xs text-muted-foreground hover:text-destructive-ink hover:bg-destructive/5 transition-colors"
+                className="mt-1 w-full flex items-center gap-2 rounded-lg px-3 h-11 text-xs text-muted-foreground hover:text-destructive-ink hover:bg-destructive/5 transition-colors"
               >
                 <LogOut className="size-3.5" aria-hidden="true" />
                 تسجيل الخروج
@@ -304,7 +304,7 @@ export function DashboardShell({
                   <div className="absolute bottom-0 inset-x-0 p-3 border-t border-border/60">
                     <button
                       onClick={logout}
-                      className="w-full flex items-center gap-2 rounded-lg px-3 h-9 text-xs text-muted-foreground hover:text-destructive-ink transition-colors"
+                      className="w-full flex items-center gap-2 rounded-lg px-3 h-11 text-xs text-muted-foreground hover:text-destructive-ink transition-colors"
                     >
                       <LogOut className="size-3.5" aria-hidden="true" />
                       تسجيل الخروج

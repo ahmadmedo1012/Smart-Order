@@ -234,7 +234,7 @@ export function CheckoutClient({
               <div className="text-sm font-bold text-destructive-ink">تعذّر تحميل بيانات المتجر</div>
               <p className="mt-0.5 text-xs text-muted-foreground">مناطق التوصيل وطرق الدفع غير متاحة — تحقق من اتصالك وأعد المحاولة.</p>
             </div>
-            <Button variant="outline" size="sm" onClick={load} className="h-9 shrink-0">
+            <Button variant="outline" onClick={load} className="shrink-0">
               إعادة المحاولة
             </Button>
           </div>

@@ -60,6 +60,14 @@ export function CartDrawer({
           title="سلتك فارغة"
           description="تصفح المنتجات وأضف ما يعجبك"
           className="flex-1"
+          action={
+            <Button asChild variant="outline" className="mt-2">
+              <Link href={`/store/${slug}`}>
+                متابعة التصفح
+                <ArrowLeft className="size-4" aria-hidden="true" />
+              </Link>
+            </Button>
+          }
         />
       ) : (
         <>
@@ -132,7 +140,7 @@ export function CartDrawer({
             {/* note editor per item (compact) */}
             {items.some((i) => !i.note) && (
               <details className="text-xs text-muted-foreground">
-                <summary className="cursor-pointer select-none hover:text-foreground">إضافة ملاحظة لأحد العناصر</summary>
+                <summary className="inline-flex min-h-11 cursor-pointer select-none items-center hover:text-foreground">إضافة ملاحظة لأحد العناصر</summary>
                 <div className="mt-2 space-y-1.5">
                   {items.filter((i) => !i.note).map((i) => (
                     <input
@@ -163,7 +171,7 @@ export function CartDrawer({
             </p>
             <Button
               asChild
-              className="w-full h-12 text-base font-bold"
+              className="w-full text-base font-bold"
               onClick={onCheckout}
             >
               <Link href={`/store/${slug}/checkout`}>

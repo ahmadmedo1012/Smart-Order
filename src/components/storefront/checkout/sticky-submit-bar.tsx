@@ -35,9 +35,10 @@ export function StickySubmitBar({
         </div>
         {/* r131-F2 (P0-1): type=submit + form= — the sticky bar stays
             outside <main> yet submits the real checkout form (Enter works
-            from every field). size=lg is the canonical 44px money CTA
-            (13/600 label canon; the h-12/text-base/font-bold override is
-            retired). */}
+            from every field). size=lg is the canonical 48px money CTA
+            rung (r134: lg = h-12; the r150 wave unified the checkout
+            money CTAs — sticky bar, success screen, cart drawer — on
+            this ONE spelling). */}
         <Button
           type="submit"
           form="checkout-form"

@@ -15,10 +15,10 @@ export function StorefrontSkeleton() {
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-3 w-20" />
           </div>
-          <Skeleton className="size-10 rounded-lg" />
+          <Skeleton className="size-11 rounded-lg" />
         </div>
         <div className="mx-auto max-w-4xl px-4 py-2.5">
-          <Skeleton className="h-10 rounded-xl" />
+          <Skeleton className="h-11 rounded-xl" />
         </div>
       </div>
       <main className="mx-auto max-w-4xl px-4 py-5">

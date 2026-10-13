@@ -136,7 +136,7 @@ export default function DeliveryPage() {
               <div className="flex gap-1 shrink-0">
                 <button
                   onClick={() => setEditing(z)}
-                  className="rounded-lg p-2 hover:bg-muted transition-colors"
+                  className="rounded-lg size-10 flex items-center justify-center hover:bg-muted transition-colors"
                   aria-label={`تعديل ${z.name}`}
                 >
                   <Pencil
@@ -146,7 +146,7 @@ export default function DeliveryPage() {
                 </button>
                 <button
                   onClick={() => setDeleting(z)}
-                  className="rounded-lg p-2 hover:bg-destructive/10 transition-colors"
+                  className="rounded-lg size-10 flex items-center justify-center hover:bg-destructive/10 transition-colors"
                   aria-label={`حذف ${z.name}`}
                 >
                   <Trash2
@@ -306,7 +306,7 @@ function ZoneDialog({
             </DialogDescription>
           </div>
           <DialogClose
-            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="rounded-md size-11 flex items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label="إغلاق"
           >
             <X className="size-4.5" aria-hidden="true" />

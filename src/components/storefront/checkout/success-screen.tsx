@@ -8,7 +8,13 @@ import type { CheckoutResult } from "./types";
  * (step === "success" && result branch). Pure presentation — receives the
  * settled result state; the redirect itself lives in the parent submit. */
 export function SuccessScreen({ result, slug }: { result: CheckoutResult; slug: string }) {
-  const trackUrl = `${window.location.origin}/track/${result.publicToken}`;
+  /* r150: SSR-safe absolute URL — guarded read (this screen is
+   client-only post-submit, but the guard keeps it prerender-safe
+   without a setState-in-effect cascade). */
+  const trackUrl =
+    typeof window === "undefined"
+      ? `/track/${result.publicToken}`
+      : `${window.location.origin}/track/${result.publicToken}`;
   return (
     <div className="min-h-screen bg-muted/30 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md text-center">
@@ -28,7 +34,7 @@ export function SuccessScreen({ result, slug }: { result: CheckoutResult; slug: 
         </p>
 
         <div className="mt-6 space-y-2.5">
-          <Button asChild className="w-full h-12 font-bold text-base">
+          <Button asChild size="lg" className="w-full">
             <Link href={`/track/${result.publicToken}`}>
               تتبع حالة الطلب
               <ArrowLeft className="size-5 ms-2" aria-hidden="true" />
@@ -39,7 +45,7 @@ export function SuccessScreen({ result, slug }: { result: CheckoutResult; slug: 
               href={`https://wa.me/${result.whatsapp.number}?text=${encodeURIComponent(result.whatsapp.message)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="whatsapp-btn w-full h-12 rounded-lg font-bold text-base inline-flex items-center justify-center gap-2 transition-colors"
+              className="whatsapp-btn w-full h-12 rounded-lg font-bold text-base inline-flex items-center justify-center gap-2 transition-colors" /* r150: whatsapp hand-rolled twin keeps its 48px row with the lg CTA above */
             >
               <MessageCircle className="size-5" aria-hidden="true" />
               إرسال تفاصيل الطلب عبر واتساب
@@ -47,7 +53,7 @@ export function SuccessScreen({ result, slug }: { result: CheckoutResult; slug: 
           )}
           <Link
             href={`/store/${slug}`}
-            className="block w-full h-11 rounded-lg border border-border font-semibold text-sm flex items-center justify-center gap-2 hover:bg-muted transition-colors"
+            className="flex w-full h-11 items-center justify-center gap-2 rounded-lg border border-border font-semibold text-sm hover:bg-muted transition-colors"
           >
             <PartyPopper className="size-4" aria-hidden="true" />
             متابعة التصفح

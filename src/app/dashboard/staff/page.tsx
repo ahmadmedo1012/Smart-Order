@@ -167,7 +167,7 @@ export default function StaffPage() {
                 {s.role !== "OWNER" && (
                   <button
                     onClick={() => setRemoving(s)}
-                    className="rounded-lg p-2 hover:bg-destructive/10 transition-colors shrink-0"
+                    className="rounded-lg size-10 flex items-center justify-center hover:bg-destructive/10 transition-colors shrink-0"
                     aria-label={`إزالة ${s.user.name}`}
                   >
                     <Trash2
@@ -316,7 +316,7 @@ function StaffDialog({
             </DialogDescription>
           </div>
           <DialogClose
-            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="rounded-md size-11 flex items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label="إغلاق"
           >
             <X className="size-4.5" aria-hidden="true" />

@@ -231,7 +231,7 @@ function CardGridSkeleton({
 function DetailSkeleton() {
   return (
     <div className="max-w-4xl mx-auto space-y-5" aria-hidden="true">
-      <Skeleton className="h-9 w-32 rounded-md" />
+      <Skeleton className="h-11 w-32 rounded-md" />
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="space-y-2.5">
           <Skeleton className="h-9 w-48 max-w-[70%]" />

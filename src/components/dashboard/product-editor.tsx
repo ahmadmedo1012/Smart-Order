@@ -130,8 +130,12 @@ export function ProductEditor({
 
   /* Pristine snapshot for the dirty check — the same mapping that
      seeded the useState drafts above (formatLydAmount round-trip
-     included), so toggles/typoes/added rows all count as dirty. */
-  const pristine = {
+     included), so toggles/typoes/added rows all count as dirty.
+     r150: memoized on the source product — the full object (all
+     variants/groups/options) used to be rebuilt and deep-compared on
+     EVERY keystroke; now it rebuilds only when the editor opens on a
+     different product. */
+  const pristine = React.useMemo(() => ({
     name: product?.name ?? "",
     description: product?.description ?? "",
     categoryId: product?.categoryId ?? "none",
@@ -157,7 +161,7 @@ export function ProductEditor({
           priceDelta: formatLydAmount(o.priceDelta),
         })),
       })) ?? [],
-  };
+  }), [product]);
   const dirty =
     name !== pristine.name ||
     description !== pristine.description ||
@@ -384,9 +388,9 @@ export function ProductEditor({
                 )}
               </div>
               <div className="space-y-2">
-                <Label>القسم</Label>
+                <Label htmlFor="p-category">القسم</Label>
                 <Select value={categoryId} onValueChange={setCategoryId}>
-                  <SelectTrigger>
+                  <SelectTrigger id="p-category">
                     <SelectValue placeholder="اختر القسم" />
                   </SelectTrigger>
                   <SelectContent>
@@ -414,7 +418,7 @@ export function ProductEditor({
 
             {/* Image */}
             <section className="space-y-2">
-              <Label>صورة المنتج</Label>
+              <Label id="p-image-label">صورة المنتج</Label>
               <div className="flex items-start gap-4">
                 <div className="relative size-28 rounded-xl border border-dashed border-border bg-muted/50 overflow-hidden shrink-0">
                   {imageUrl ? (
