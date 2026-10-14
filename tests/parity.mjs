@@ -619,6 +619,93 @@ for (const [name, okFlag] of LANDING_LAYER) {
   else failures.push(`landing layer gate FAILED: ${name}`);
 }
 
+// ── P9-3-d (E3): the landing NIGHT DISPATCH stage — dark pins ───────────────
+// The dark landing rides the app's REAL class convention: next-themes
+// attribute="class" + the pre-paint boot in layout.tsx toggle .dark/.light
+// on <html>; globals.css gates its own night dispatch on .dark. The landing
+// token twin gates on html.dark .landing (specificity (0,2,1) > the daylight
+// .landing (0,1,0) — value flip, zero edits to the daylight rules above).
+// Additive pins only: every daylight pin above still passes byte-identical.
+const landingDarkBody = landingBlocks.find((x) => x.prelude === 'html.dark .landing')?.body;
+if (!landingDarkBody) throw new Error('html.dark .landing top-level block not found in landing.css (P9-3-d dark stage missing)');
+const landingDarkScope = { ...dark, ...parseDecls(landingDarkBody) };
+const LANDING_DARK_TOKENS = {
+  /* night ground family — the globals.css night dispatch values */
+  '--ln-ink': '#0D1626',       // night ground
+  '--ln-ink-2': '#152238',     // raised navy surface
+  '--ln-cream': '#F1F0EA',     // paper ink — 15.8:1 AAA
+  '--ln-cream-dim': '#B9C2D2', // night secondary — 10.1:1 AAA
+  /* the luminous orange tier (globals night --primary): 7.0:1 text on
+     ground / 7.0:1 as on-fill ink — daylight #D14900 measures 4.0:1 (below the floor) */
+  '--ln-lime': '#FF7A38',
+  '--ln-lime-deep': '#FF8A50', // night hover BRIGHTENS (globals accent-hover)
+  /* luminous steel — daylight #3E5C76 is 2.3:1 on the night ground */
+  '--ln-violet': '#8FBBF2',    // 9.1:1
+  /* pale navy hairlines */
+  '--ln-line': 'rgba(185, 194, 210, 0.16)',
+  '--ln-line-soft': 'rgba(185, 194, 210, 0.08)',
+  '--ln-grain-op': '0.03',     // white-speck grain at whisper opacity
+  /* §15a hazard trio — the night text tiers */
+  '--ln-amber': '#F2C48D',     // luminous road-sign amber — 11.3:1
+  '--ln-danger': '#F4938F',    // luminous rose — 8.1:1
+  '--ln-danger-deep': '#FFB4AF',
+  /* night glass: raised navy at the glass alphas */
+  '--ln-glass': 'rgba(21, 34, 56, 0.72)',
+  '--ln-glass-strong': 'rgba(21, 34, 56, 0.90)',
+};
+for (const [token, value] of Object.entries(LANDING_DARK_TOKENS)) {
+  pin(landingDarkScope, 'landing-dark', token, value);
+}
+
+const landingHeaderSrc = readFileSync(new URL('../src/components/landing/LandingHeader.tsx', import.meta.url), 'utf8');
+const heroDepthSrc = readFileSync(new URL('../src/components/landing/HeroDepthLayer.tsx', import.meta.url), 'utf8');
+const globalErrorSrc = readFileSync(new URL('../src/app/global-error.tsx', import.meta.url), 'utf8');
+const LANDING_DARK_LAYER = [
+  ['dark gate rides the REAL class convention (html.dark .landing — mirrors globals.css .dark; next-themes attribute="class")',
+    landingBlocks.some((x) => x.prelude === 'html.dark .landing')],
+  ['dark grain twin: white speck (feColorMatrix rows → 1) under html.dark — black noise would vanish on navy',
+    /html\.dark \.landing \.ln-grain \{[^}]*background-image: url\("data:image\/svg\+xml,[^"]*0 0 0 0 1 0 0 0 0 1 0 0 0 0 1/.test(landingCssRaw)],
+  ['dark scrolled rail twin: rgb(13 22 38 / 0.92) — the night ground at the 92% spec',
+    /html\.dark \.landing \.landing-header\.scrolled \{ background: rgb\(13 22 38 \/ 0\.92\); \}/.test(landingRaw)],
+  ['dark roadmark twin: raised-navy sign glass rgba(21, 34, 56, 0.85) — white 0.85 would blast at night',
+    /html\.dark \.landing \.ln-roadmark \{ background: rgba\(21, 34, 56, 0\.85\); \}/.test(landingRaw)],
+  ['dark station-sign twin: raised-navy chip rgba(21, 34, 56, 0.70)',
+    /html\.dark \.landing \.ln-station-sign \{ background: rgba\(21, 34, 56, 0\.70\); \}/.test(landingRaw)],
+  ['dark dash-roles twin: raised-navy card glass rgba(21, 34, 56, 0.78)',
+    /html\.dark \.landing \.ln-dash-roles \{ background: rgba\(21, 34, 56, 0\.78\); \}/.test(landingRaw)],
+  ['dark selection twin: luminous steel + night ink (the daylight violet-deep + ink pair breaks dark-on-dark)',
+    /html\.dark \.landing ::selection \{ background: #8FBBF2; color: #0D1626; \}/.test(landingRaw)],
+  ['dark ghost-pill twin: pale hairline rgb(185 194 210 / 0.30) — the navy 0.34 hairline vanishes on navy',
+    /html\.dark \.landing \.ln-btn-ghost \{[^}]*border: 1px solid rgb\(185 194 210 \/ 0\.30\);/.test(landingRaw)],
+  ['dark accent washes ride the LUMINOOUS orange (rgba(255, 122, 56, ·) — the daylight 209,73,0 tints dim to mud on navy)',
+    /html\.dark \.landing \.ln-station-node\.is-active \{ background: rgba\(255, 122, 56, 0\.08\); \}/.test(landingRaw) &&
+    /html\.dark \.landing \.ln-dash-action:hover \{ background: rgba\(255, 122, 56, 0\.12\); \}/.test(landingRaw) &&
+    /html\.dark \.landing \.ln-pay-ico \{ background: rgba\(255, 122, 56, 0\.11\); \}/.test(landingRaw)],
+  ['dark keep-pill twin: night ground glass rgb(13 22 38 / 0.55)',
+    /html\.dark \.landing \.ln-keep-pill \{ background: rgb\(13 22 38 \/ 0\.55\); \}/.test(landingRaw)],
+  ['dark quiet cells: pale washes (fulfillment/items/pay-fact ride rgba(185, 194, 210, 0.05))',
+    /html\.dark \.landing \.ln-dash-fulfillment \{ background: rgba\(185, 194, 210, 0\.05\); \}/.test(landingRaw) &&
+    /html\.dark \.landing \.ln-pay-fact \{ background: rgba\(185, 194, 210, 0\.05\); \}/.test(landingRaw)],
+  ['dark FAQ item twin: pale wash rgb(185 194 210 / 0.03)',
+    /html\.dark \.landing \.ln-faq-item \{ background: rgb\(185 194 210 \/ 0\.03\); \}/.test(landingRaw)],
+  ['E3 toggle wiring: LandingHeader imports the family ThemeToggle (shared component, no fork)',
+    landingHeaderSrc.includes('import { ThemeToggle } from "@/components/shared/theme-toggle";')],
+  ['E3 toggle wiring: the toggle rides its own .landing-header-tools slot AFTER the burger (end-of-rail; survives the ≤1080px CTA hide)',
+    /<div className="landing-header-tools">\s*<ThemeToggle \/>\s*<\/div>/.test(landingHeaderSrc) &&
+    landingHeaderSrc.indexOf('className="landing-header-tools"') > landingHeaderSrc.indexOf('className="landing-burger"')],
+  ['E3 hero depth layer: waypoints paint currentColor (theme-blind fix — the hardcoded navy fill is gone)',
+    heroDepthSrc.includes('fill="currentColor"') && !heroDepthSrc.includes('fill="rgba(27,42,65,0.5)")')],
+  ['E3 hero depth layer: both stages owned in CSS — daylight keeps the byte-identical ink, night points to pale ink',
+    /\.landing \.ln-hero-depth \{ color: rgba\(27, 42, 65, 0\.5\); \}/.test(landingRaw) &&
+    /html\.dark \.landing \.ln-hero-depth \{ color: rgba\(185, 194, 210, 0\.5\); \}/.test(landingRaw)],
+  ['E5 emoji ban (global-error): the warning glyph is an inline lucide-style SVG, zero emoji code points in the file',
+    globalErrorSrc.includes('<svg') && !/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u.test(globalErrorSrc)],
+];
+for (const [name, okFlag] of LANDING_DARK_LAYER) {
+  if (okFlag) passed += 1;
+  else failures.push(`landing dark-stage gate FAILED: ${name}`);
+}
+
 // ── P4-W3c (B1): the ≥1-consumer tripwire ────────────────────────────────────
 // Audit systemic #1: pinned tokens drifted into dead definitions. Every
 // pinned token in the four high-traffic families must have ≥1 REAL

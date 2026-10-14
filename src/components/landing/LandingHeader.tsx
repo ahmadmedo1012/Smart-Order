@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Menu, X, ChevronDown, ArrowLeft, Route, BarChart3, Banknote, ShoppingBag } from "lucide-react";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 /* r128 Stage B (F4b) — the landing header, converted from the product
    MainNav to the canonical Madarek chrome (PORT-KIT §4, smart-link
@@ -19,7 +20,13 @@ import { Menu, X, ChevronDown, ArrowLeft, Route, BarChart3, Banknote, ShoppingBa
      narrative: stations/store/dashboard/payments;
    · megamenu with tone-coded icon wells (Escape + onBlur close, focus
      return to the trigger);
-   · burger + mobile drawer ≤1024px.
+   · burger + mobile drawer ≤1024px;
+   · P9-3-d (E3): the family ThemeToggle rides the rail in its own
+     .landing-header-tools slot AFTER the burger — end-of-rail at every
+     breakpoint, so it survives the ≤1080px .landing-header-cta hide
+     (the same placement law Smart-Menu P9-3-b landed) and stays visible
+     at 1440px AND 390px. RTL: the links' margin-inline-start:auto keeps
+     pushing the rail tail (burger+toggle) to the inline-end edge.
    The product MainNav keeps serving every non-landing surface. */
 
 const SPY_SECTIONS = "#stations, #store, #dashboard, #payments";
@@ -199,6 +206,14 @@ export function LandingHeader() {
           >
             {menuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
           </button>
+
+          {/* P9-3-d (E3) — the theme toggle: family twin (size-11 chip, spring
+              icon swap, Arabic aria labels «الوضع الليلي/النهاري»), focus rides
+              the global :focus-visible contract. Its own slot so the ≤1080px
+              CTA hide can never swallow it. */}
+          <div className="landing-header-tools">
+            <ThemeToggle />
+          </div>
         </div>
 
         {menuOpen && (

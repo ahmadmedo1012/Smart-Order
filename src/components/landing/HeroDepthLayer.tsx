@@ -12,6 +12,14 @@ import { useEffect, useRef } from "react"
  * at ~0.2× the scroll rate while the scene sits at z0 and the text
  * column at z1, so the copy appears closer than the waypoint field.
  *
+ * P9-3-d (E3 — theme-blind fix): the waypoints were a HARDCODED
+ * navy fill (invisible on the night ground). The dots now paint
+ * currentColor and landing.css owns both stages: daylight keeps the
+ * byte-identical rgba(27,42,65,.5) ink, the dark stage re-points the
+ * same layer to pale waypoint ink rgba(185,194,210,.5) — pure CSS,
+ * zero JS repaint needed (the static-SVG equivalent of the Smart-Link
+ * P9-3-a canvas MutationObserver repaint).
+ *
  * Perf: one passive scroll listener + one rAF. The canonical component
  * consumed Madarek's useReducedMotion hook; this port reads the media
  * query inline (the repo's port convention) — semantics byte-equal.
@@ -85,7 +93,7 @@ export function HeroDepthLayer() {
           cx={s.cx}
           cy={s.cy}
           r={s.r}
-          fill="rgba(27,42,65,0.5)"
+          fill="currentColor"
           opacity={s.op}
         />
       ))}

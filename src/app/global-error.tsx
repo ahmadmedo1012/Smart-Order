@@ -48,11 +48,29 @@ export default function GlobalError({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 28,
             }}
             aria-hidden="true"
           >
-            ⚠️
+            {/* P9-3-d (E5): the warning-sign emoji glyph retired — UI icons
+                are SVG in this repo (lucide family). The lucide
+                alert-triangle outline is inlined (this boundary ships no CSS
+                bundle / no lucide chunk — the boundary's zero-dependency
+                doctrine); stroke = the delivery-orange ink #B23E00, ≥4.5:1
+                on the 12% wash. */}
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#B23E00"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <path d="M12 9v4" />
+              <path d="M12 17h.01" />
+            </svg>
           </div>
           <h1 style={{ fontSize: 28, fontWeight: 700, margin: "0 0 12px" }}>
             حدث خطأ في المنصة

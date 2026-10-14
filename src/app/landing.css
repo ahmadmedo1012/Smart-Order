@@ -3030,3 +3030,224 @@
   .landing .ln-station-node,
   .landing .ln-pay-station { transition: none; }
 }
+
+
+/* ═════════════════════════════════════════════════════════════════════
+   §16 · P9-3-d (E3) — NIGHT DISPATCH: the deliberate dark landing stage.
+   ─────────────────────────────────────────────────────────────────────
+   The r152 daylight flip made .landing paint the Route & Node world in
+   BOTH themes. The landing now follows the app's REAL class convention
+   (next-themes attribute="class"; the pre-paint boot in layout.tsx and
+   the ThemeProvider resolve DAYLIGHT default / explicit dark — the same
+   .dark class globals.css gates its own night dispatch on). Gate:
+   html.dark .landing — mirrors globals.css, never touches the light
+   rules (additive only; every daylight pin above stays byte-identical).
+
+   The night identity is the SAME route-and-node world after dark:
+   deep-navy ground, raised navy surfaces, paper ink, LUMINOOUS delivery
+   orange (the globals.css night family #FF7A38 — daylight #D14900 dims
+   to 4.0:1 on navy, below the 4.5:1 text floor, so the accent climbs one luminous rung), luminous
+   steel, Plex Mono codes ride the same --ln-* chain (ink tiers flip by
+   token), and the stamps/dashed-route grammar is untouched. Contrast
+   ledger (measured, WCAG 2.1 relative luminance):
+     paper ink  #F1F0EA on #0D1626 ........ 15.8:1  AAA
+     secondary  #B9C2D2 on #0D1626 ........ 10.1:1  AAA (8.9:1 on card)
+     orange txt #FF7A38 on #0D1626 ........ 7.0:1   AA  (6.1:1 on #152238)
+     on-orange  #0D1626 on #FF7A38 ........ 7.0:1   AA  (ground-as-void-ink,
+                                                         the globals night
+                                                         primary pattern)
+     hover      #FF8A50 on #0D1626 ........ 7.7:1   AA
+     steel txt  #8FBBF2 on #0D1626 ........ 9.1:1   AAA
+     amber txt  #F2C48D on #0D1626 ........ 11.3:1  AAA
+     danger txt #F4938F on #0D1626 ........ 8.1:1   AAA
+     danger hov #FFB4AF on #0D1626 ........ 10.7:1  AAA
+   Stamps/dashed route/lime-roster discipline all survive: --ln-lime
+   stays THE one accent fill; hairlines go pale-navy; the grain flips
+   to white speck (the SM light-speck twin); the QR plate deliberately
+   keeps a PAPER ground (a QR is a physical scan contract — dark
+   modules on paper, scannable in both stages).
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* ── 16a · the token flip — every --ln-* name, night values ────────── */
+html.dark .landing {
+  /* ground family: night dispatch ground + raised surface (globals.css) */
+  --ln-ink:        #0D1626;   /* night ground — the ink navy family */
+  --ln-ink-2:      #152238;   /* raised navy — scene separation (surface) */
+  --ln-cream:      #F1F0EA;   /* paper ink — 15.8:1 AAA on the night ground */
+  --ln-cream-dim:  #B9C2D2;   /* night secondary — 10.1:1 AAA (globals muted) */
+  /* the delivery orange climbs to the LUMINOOUS tier (globals night
+     --primary #FF7A38): 7.0:1 as text on ground, 7.0:1 as on-fill ink
+     (#0D1626 ground-as-void-ink on the luminous fill). */
+  --ln-lime:       #FF7A38;   /* luminous delivery orange — 7.0:1 on ground */
+  --ln-lime-deep:  #FF8A50;   /* night hover step BRIGHTENS (globals accent-hover) — 7.7:1 */
+  /* steel (accent 2) goes luminous too: daylight #3E5C76 is 2.3:1 on
+     the night ground; #8FBBF2 (the globals night sky family) 9.1:1. */
+  --ln-violet:     #8FBBF2;   /* luminous steel — 9.1:1 on ground */
+  --ln-violet-deep:#2A3E52;   /* depth fills only (never text) */
+  --ln-line:       rgba(185, 194, 210, 0.16);  /* pale navy hairline */
+  --ln-line-soft:  rgba(185, 194, 210, 0.08);  /* soft step */
+  --ln-grain-op:   0.03;      /* white speck at whisper opacity (SM twin) */
+
+  /* §15a hazard trio — the night tiers (text duty):
+     amber climbs to the ship-amber luminous rung 11.3:1; the rose
+     family mirrors globals night --destructive (luminous rose ink). */
+  --ln-amber:      #F2C48D;   /* luminous road-sign amber — 11.3:1 on ground */
+  --ln-danger:     #F4938F;   /* luminous rose — 8.1:1 on ground */
+  --ln-danger-deep:#FFB4AF;   /* hover/quiet variant — 10.7:1 */
+  /* night glass: the raised navy family at the glass alphas */
+  --ln-glass:      rgba(21, 34, 56, 0.72);
+  --ln-glass-strong: rgba(21, 34, 56, 0.90);
+  /* §r141 ship family — the warm route gold already sits at 11.3:1 on
+     the night ground and its warm glass fill reads raised on navy:
+     values UNCHANGED (measured above in the ledger). */
+}
+
+/* ── 16b · chrome twins — raw literals the tokens cannot reach ─────── */
+
+/* selection: violet-deep + ground ink breaks at night (dark-on-dark);
+   the night pair is luminous steel + night ink — 9.1:1 */
+html.dark .landing ::selection { background: #8FBBF2; color: #0D1626; }
+
+/* film grain — black noise is invisible on navy: white speck twin
+   (feColorMatrix rows → 1: the same 0.55 alpha, inverted channel) */
+html.dark .landing .ln-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23m)'/%3E%3C/svg%3E");
+}
+
+/* top progress ribbon — navy track wash → pale track wash */
+html.dark .landing .landing-progress { background: rgb(185 194 210 / 0.10); }
+
+/* header scrolled rail — the night ground at the 92% spec */
+html.dark .landing .landing-header.scrolled { background: rgb(13 22 38 / 0.92); }
+
+/* rail interaction washes (spy active / open group / link + burger
+   hover / megamenu item hover) — navy washes are invisible on navy:
+   pale washes at the same perceptual step */
+html.dark .landing header[data-active-section="trust"] .landing-nav-link[href="#trust"],
+html.dark .landing header[data-active-section="sectors"] .landing-nav-link[href="#sectors"],
+html.dark .landing header[data-active-section="journey"] .landing-nav-link[href="#journey"],
+html.dark .landing header[data-active-section="progress"] .landing-nav-link[href="#progress"],
+html.dark .landing header[data-active-section="venues"] .landing-nav-link[href="#venues"],
+html.dark .landing header[data-active-section="roles"] .landing-nav-link[href="#roles"] {
+  background: rgb(185 194 210 / 0.10);
+}
+html.dark .landing .landing-nav-group.open .landing-nav-link { background: rgb(185 194 210 / 0.05); }
+html.dark .landing .landing-megamenu-item:hover,
+html.dark .landing .landing-megamenu-item:focus-visible { background: rgb(185 194 210 / 0.06); }
+html.dark .landing .landing-nav-link:hover { background: rgb(185 194 210 / 0.05); }
+html.dark .landing .landing-burger:hover { background: rgb(185 194 210 / 0.05); }
+
+/* megamenu icon wells — pale/steel washes (the icons ride cream-dim,
+   which flips by token) */
+html.dark .landing .ln-menu-ico.gold,
+html.dark .landing .ln-menu-ico.mist { background: rgb(185 194 210 / 0.08); }
+html.dark .landing .ln-menu-ico.azure { background: rgb(143 187 242 / 0.16); }
+
+/* the conversion pill's 1px chrome rings — navy rings vanish on navy:
+   night elevation rings (the globals night shadow ink family) */
+html.dark .landing .ln-btn-gold {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.30),
+    0 4px 12px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(2, 6, 14, 0.32);
+}
+html.dark .landing .ln-btn-gold:hover {
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 8px 20px rgba(0, 0, 0, 0.40),
+    0 0 0 1px rgba(2, 6, 14, 0.36);
+}
+
+/* the ghost pill — hairline + hover tint + hover hairline (pale family) */
+html.dark .landing .ln-btn-ghost {
+  border: 1px solid rgb(185 194 210 / 0.30);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.30);
+}
+html.dark .landing .ln-btn-ghost:hover {
+  background: rgb(185 194 210 / 0.08);
+  border-color: rgb(185 194 210 / 0.48);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* chapter / trust / footer seam gradients — navy breath → pale breath */
+html.dark .landing .ln-chapter::before {
+  background: linear-gradient(180deg, transparent 0%, rgba(185,194,210,0.03) 50%, transparent 100%);
+}
+html.dark .landing .ln-trust::before {
+  background: linear-gradient(180deg, transparent 0%, rgba(185,194,210,0.03) 100%);
+}
+html.dark .landing .landing-footer::before {
+  background: linear-gradient(180deg, transparent 0%, rgba(185,194,210,0.03) 100%);
+}
+
+/* ── 16c · hero twins ───────────────────────────────────────────────── */
+
+/* the one sanctioned steel depth radial — luminous steel at night */
+html.dark .landing .ln-keep-sky {
+  background: radial-gradient(46% 54% at 30% 44%, rgb(143 187 242 / 0.08) 0%, transparent 70%);
+}
+html.dark .landing .ln-keep-sky::after {
+  background: radial-gradient(ellipse at 70% 60%, rgba(185,194,210,0.03) 0%, transparent 60%);
+}
+
+/* the dispatch-grid waypoints — P9-3-d: HeroDepthLayer paints
+   currentColor; daylight keeps the literal below (byte-identical to
+   the pre-P9 hardcoded fill), night points the same field to pale ink.
+   Pure CSS — no canvas repaint machinery needed for a static SVG. */
+.landing .ln-hero-depth { color: rgba(27, 42, 65, 0.5); }
+html.dark .landing .ln-hero-depth { color: rgba(185, 194, 210, 0.5); }
+
+/* the trust pill — night ground glass under the orange hairline */
+html.dark .landing .ln-keep-pill { background: rgb(13 22 38 / 0.55); }
+
+/* the roadmark board — white sign glass → raised-navy sign glass
+   (figures ride --ln-lime: 6.1:1 on #152238) */
+html.dark .landing .ln-roadmark { background: rgba(21, 34, 56, 0.85); }
+
+/* ── 16d · stations / store / dash / pay twins ──────────────────────── */
+
+/* the station sign chip — white chip → raised navy chip (its icon
+   rides --ln-cream-dim, token-flipped) */
+html.dark .landing .ln-station-sign { background: rgba(21, 34, 56, 0.70); }
+
+/* the accent washes — the daylight delivery-orange tints dim to mud on
+   navy; the night washes ride the LUMINOOUS orange at the same steps */
+html.dark .landing .ln-station-node.is-active { background: rgba(255, 122, 56, 0.08); }
+html.dark .landing .ln-dash-step.is-current { background: rgba(255, 122, 56, 0.08); }
+html.dark .landing .ln-stations-actor { background: rgba(255, 122, 56, 0.06); }
+html.dark .landing .ln-stations-actor-ico { background: rgba(255, 122, 56, 0.14); }
+html.dark .landing .ln-stations-cta-warm:hover { background: rgba(255, 122, 56, 0.10); }
+html.dark .landing .ln-dash-fulfillment-btn.is-active { background: rgba(255, 122, 56, 0.12); }
+html.dark .landing .ln-dash-action { background: rgba(255, 122, 56, 0.07); }
+html.dark .landing .ln-dash-action:hover { background: rgba(255, 122, 56, 0.12); }
+html.dark .landing .ln-dash-pay-btn { background: rgba(255, 122, 56, 0.09); }
+html.dark .landing .ln-dash-pay-btn:hover { background: rgba(255, 122, 56, 0.15); }
+html.dark .landing .ln-pay-ico { background: rgba(255, 122, 56, 0.11); }
+html.dark .landing .ln-cta-crossing {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 122, 56, 0.10) 0 22px,
+    transparent 22px 48px
+  );
+}
+
+/* quiet navy cell washes → pale cell washes (the raised-cell read) */
+html.dark .landing .ln-dash-fulfillment { background: rgba(185, 194, 210, 0.05); }
+html.dark .landing .ln-dash-items { background: rgba(185, 194, 210, 0.05); }
+html.dark .landing .ln-pay-fact { background: rgba(185, 194, 210, 0.05); }
+html.dark .landing .ln-faq-item { background: rgb(185 194 210 / 0.03); }
+
+/* the dash roles card — white card glass → raised navy card glass
+   (night --ln-glass-strong family at the card's own alpha) */
+html.dark .landing .ln-dash-roles { background: rgba(21, 34, 56, 0.78); }
+
+/* the QR plate stays PAPER on purpose — a QR is a physical scan
+   contract: dark modules (--ln-ink → #0D1626) on paper (--ln-cream →
+   #F1F0EA). Both tokens flip; the plate stays scannable. No twin. */
+
+/* ── 16e · the header tools slot (theme-neutral, P9-3-d) ────────────── */
+.landing .landing-header-tools {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
