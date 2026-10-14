@@ -173,6 +173,7 @@ export function OrderJourneySection() {
       <div className="ln-chapter-head">
         {/* the route station node — chapter 01 on the line */}
         <span className="ln-route-stop" data-route-stop aria-hidden="true" />
+        <span className="ln-micro" aria-hidden="true">{"SMART ORDER — 001 · ROUTE"}</span>
         <span className="ln-label">{'01 — المحطات الست'}</span>
         <RevealCssClass as="h2" className="ln-chapter-title" delay={1}>
           الطريق من «جديد» <em>إلى باب العميل</em>

@@ -560,8 +560,11 @@ const landingRaw = landingCssRaw.replace(/\s+/g, ' ');
    --ln-violet = steel. The landing stays a FIXED world (theme-locked
    LIGHT now — .landing carries no .dark overrides by design). */
 const LANDING_TOKENS = {
-  '--ln-ink': '#F7F7F4',
-  '--ln-ink-2': '#EFEFEA',
+  /* P12-2d-2 (spec-smart-order.md S5): the editorial chapters ride the
+     warm #FBFAF8-family paper — landing-scoped (the PRODUCT globals keep
+     their own #F7F7F4 daylight; only these two pins moved honestly). */
+  '--ln-ink': '#FBFAF8',
+  '--ln-ink-2': '#F2F1EC',
   '--ln-cream': '#1B2A41',
   '--ln-cream-dim': '#4E5A6E',
   /* P12-2d (spec-smart-order.md): the route orange lands on the

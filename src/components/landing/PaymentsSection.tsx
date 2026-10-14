@@ -45,6 +45,7 @@ export function PaymentsSection() {
     <section id="payments" className="ln-chapter ln-pay">
       <div className="ln-chapter-head">
         <span className="ln-route-stop" data-route-stop aria-hidden="true" />
+        <span className="ln-micro" aria-hidden="true">{"SMART ORDER — 004 · PAYMENTS"}</span>
         <span className="ln-label">{'04 — محطات الدفع'}</span>
         <RevealCssClass as="h2" className="ln-chapter-title" delay={1}>
           المال يعبر <em>بطرق ليبيا</em>
@@ -61,7 +62,7 @@ export function PaymentsSection() {
           {PAYMENT_TYPES.map((method, i) => {
             const Icon = METHOD_ICON[method];
             return (
-              <li key={method} className="ln-pay-station" data-method={method}>
+              <li key={method} className="ln-pay-station ln-bracket" data-method={method}>
                 <span className="ln-pay-index ln-mono" aria-hidden="true">
                   {String(i + 1).padStart(2, "0")}
                 </span>
@@ -83,7 +84,7 @@ export function PaymentsSection() {
 
       <RevealCssClass as="div" delay={3}>
         <div className="ln-pay-facts">
-          <div className="ln-pay-fact">
+          <div className="ln-pay-fact ln-bracket">
             <CheckCheck size={16} aria-hidden="true" />
             <div>
               <strong>رمز التحويل السريع (USSD) يُولَّد تلقائياً</strong>
@@ -94,7 +95,7 @@ export function PaymentsSection() {
               <code className="ln-mono" dir="ltr">{USSD_SAMPLE}</code>
             </div>
           </div>
-          <div className="ln-pay-fact">
+          <div className="ln-pay-fact ln-bracket">
             <Smartphone size={16} aria-hidden="true" />
             <div>
               <strong>سقف التحويل الواحد {WALLET_CAP_LYD} د.ل</strong>
@@ -104,7 +105,7 @@ export function PaymentsSection() {
               </p>
             </div>
           </div>
-          <div className="ln-pay-fact">
+          <div className="ln-pay-fact ln-bracket">
             <Banknote size={16} aria-hidden="true" />
             <div>
               <strong>الدفع عند التوصيل محطة في الرحلة</strong>

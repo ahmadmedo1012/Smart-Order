@@ -57,8 +57,11 @@
      INK (12.6:1 on paper) — the old dark-stage inversion, kept
      coherent by value, so every `bg: ink / color: cream` pair and
      every `bg: lime / color: ink` pair stays readable after the flip. */
-  --ln-ink:        #F7F7F4;   /* daylight paper ground */
-  --ln-ink-2:      #EFEFEA;   /* soft step — scene separation */
+  --ln-ink:        #FBFAF8;   /* P12-2d-2: the warm editorial paper (spec
+                                #FBFAF8-family) — was the product #F7F7F4;
+                                landing-scoped, the product surfaces keep
+                                their own paper */
+  --ln-ink-2:      #F2F1EC;   /* warm editorial step — scene separation */
   --ln-cream:      #1B2A41;   /* primary text (ink navy) — 12.6:1 AAA */
   --ln-cream-dim:  #4E5A6E;   /* secondary text — 6.4:1 AA+ */
   --ln-lime:       #C24E00;   /* accent 1 — P12 route orange (spec: ≈4.6:1 on paper, large+small text) */
@@ -3626,3 +3629,92 @@ html.dark .landing .ln-keep-sky {
 /* P12-b addendum — the eyebrow base rhythm (the old base rule never
    existed; only the ≤560px landscape override carried a margin) */
 .landing .ln-keep-eyebrow { margin-block-end: var(--sp-4); }
+
+/* ── P12-e · S5 (P12-2d-2) — the technical mono layer across chapters ───
+   spec-smart-order.md S5: every section heading speaks the editorial
+   display voice (Noto Kufi 700 Arabic — the hero's), mono uppercase
+   micro-eyebrows («SMART ORDER — 002»), hairline rules under the heads,
+   bracket-corner framing, and the rounded/SaaS-glass card language
+   retires across the LANDING (both stages — every rule below rides the
+   stage-flipping tokens, so the dark twin comes free). Monumental stat
+   treatment stays where it already lives: the hero roadmark (REAL DB
+   counts only). */
+.landing .ln-chapter-title,
+.landing .ln-cta-title {
+  font-family: var(--ln-display-ar);
+}
+
+/* the mono uppercase micro-eyebrow — pure-Latin runs (tracking law r150
+   only zeroed ARABIC tracking; Latin mono keeps the editorial tracking) */
+.landing .ln-micro {
+  font-family: var(--ln-mono);
+  font-size: 10px;
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ln-lime-text);
+  direction: ltr;
+  unicode-bidi: isolate;
+  margin-block-end: 8px;
+}
+
+/* the hairline rule — every chapter head closes on a technical line */
+.landing .ln-chapter-head {
+  padding-block-end: var(--sp-5);
+  border-block-end: 1px solid var(--ln-line);
+}
+.landing .ln-faq-head {
+  padding-block-end: var(--sp-5);
+  border-block-end: 1px solid var(--ln-line);
+}
+.landing .ln-faq-head { max-inline-size: 860px; margin-inline: auto; }
+.landing .ln-faq-head .ln-chapter-title { max-inline-size: 22ch; }
+
+/* the flat editorial plate — replaces the SaaS glass cards (the
+   storefront scene islands: QR / cart / WhatsApp chip) */
+.landing .ln-plate {
+  background: var(--ln-ink-2);
+  border: 1px solid var(--ln-line);
+  border-radius: 2px;
+  box-shadow: 0 1px 0 rgb(27 42 65 / 0.05);
+}
+html.dark .landing .ln-plate { box-shadow: 0 1px 0 rgb(0 0 0 / 0.35); }
+
+/* square corners — the rounded-card language retires on the landing
+   (stations chips/actor, payment stations + facts, FAQ rows, dash
+   furniture). 2px is the editorial corner (matches .ln-btn-solid). */
+.landing .ln-faq-item { border-radius: 2px; }
+.landing .ln-faq-q { border-radius: 2px; }
+.landing .ln-pay-station { border-radius: 2px; }
+.landing .ln-pay-fact { border-radius: 2px; }
+.landing .ln-pay-ico { border-radius: 2px; }
+.landing .ln-pay-index {
+  border-radius: 2px;
+  border: 1px solid var(--ln-line);
+  color: var(--ln-lime-text);
+}
+.landing .ln-stations-actor { border-radius: 2px; }
+.landing .ln-stations-actor-ico { border-radius: 2px; }
+.landing .ln-stations-chip { border-radius: 2px; }
+.landing .ln-stations-chip-dot { box-shadow: none; }
+/* the dash furniture + the QR frame join the retirement (the stepper
+   DOTS stay circular — they are route nodes, not cards) */
+.landing .ln-store-qr-frame { border-radius: 2px; }
+.landing .ln-dash-console { border-radius: 2px; }
+.landing .ln-dash-fulfillment { border-radius: 2px; }
+.landing .ln-dash-fulfillment-btn { border-radius: 2px; }
+.landing .ln-dash-demo-chip { border-radius: 2px; }
+.landing .ln-dash-items { border-radius: 2px; }
+.landing .ln-dash-action { border-radius: 2px; }
+.landing .ln-dash-payment { border-radius: 2px; }
+.landing .ln-dash-pay-btn { border-radius: 2px; }
+.landing .ln-dash-roles { border-radius: 2px; }
+.landing .ln-dash-role { border-radius: 2px; }
+
+/* the footer band joins the mono layer — column headings ride the mono
+   voice (Latin runs tracked; Arabic continues via the --ln-mono chain) */
+.landing .landing-footer-heading {
+  font-family: var(--ln-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}

@@ -133,7 +133,9 @@ export function StorefrontScene() {
         </IPhoneMockup>
       </m.div>
 
-      {/* the QR plate — scan → store */}
+      {/* the QR plate — scan → store. P12-2d-2 (S5): the SaaS glass card
+          (glass-strong + rounded-2xl + shadow-xl) retires — flat editorial
+          plate (.ln-plate: --ln-ink-2 ground + hairline + 2px corners). */}
       <m.div
         initial={{ opacity: 0, y: 14 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -142,7 +144,7 @@ export function StorefrontScene() {
         className="ln-store-qr"
       >
         <div className="animate-float-slow">
-          <div className="glass-strong flex flex-col gap-2.5 rounded-2xl p-4 shadow-xl">
+          <div className="ln-plate flex flex-col gap-2.5 p-4">
             <div className="ln-store-qr-frame" aria-hidden="true">
               <QrPlate />
             </div>
@@ -165,7 +167,7 @@ export function StorefrontScene() {
         className="ln-store-cart"
       >
         <div className="animate-float-slow [animation-delay:1.6s]">
-          <div className="glass-strong flex flex-col gap-3 rounded-2xl p-4 shadow-xl">
+          <div className="ln-plate flex flex-col gap-3 p-4">
             <div className="flex items-center gap-2">
               <span className="flex size-8 items-center justify-center rounded-full bg-accent-foreground/15">
                 <ShoppingBag className="size-4 text-accent-foreground" aria-hidden="true" />
@@ -214,7 +216,7 @@ export function StorefrontScene() {
         transition={{ delay: 0.45, ...springDefault }}
         className="ln-store-wa"
       >
-        <div className="glass-strong flex items-center gap-2 rounded-full px-3 py-1.5 shadow-lg">
+        <div className="ln-plate flex items-center gap-2 px-3 py-1.5">
           <span className="relative flex size-6 items-center justify-center rounded-full bg-whatsapp/15">
             <MessageCircle className="size-3.5 text-whatsapp" aria-hidden="true" />
             <span className="absolute -top-0.5 -end-0.5 size-2 rounded-full bg-whatsapp ring-2 ring-background" />

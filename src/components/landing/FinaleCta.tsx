@@ -18,6 +18,7 @@ export function FinaleCta() {
         {/* the terminus node — the line ends here */}
         <span className="ln-cta-terminus ln-route-stop" data-route-stop aria-hidden="true" />
 
+        <span className="ln-micro" aria-hidden="true">{"SMART ORDER — 005 · ACCESS"}</span>
         <span className="ln-label">{'05 — الوصول · ACCESS'}</span>
         <RevealCssClass as="h2" className="ln-cta-title" delay={1}>
           اطلب — <em>أو اصنع متجرك</em>

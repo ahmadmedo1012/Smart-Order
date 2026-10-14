@@ -51,6 +51,7 @@ export function LandingFaq() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <div className="ln-faq-head">
+        <span className="ln-micro" aria-hidden="true">{"SMART ORDER — 006 · FAQ"}</span>
         <span className="ln-label">{"الأسئلة الشائعة · FAQ"}</span>
         <RevealCssClass as="h2" className="ln-chapter-title" delay={1}>
           أسئلة يسألها <em>أصحاب المتاجر</em>
@@ -58,7 +59,7 @@ export function LandingFaq() {
       </div>
       <div className="ln-faq-list">
         {FAQS.map((f) => (
-          <details key={f.q} className="ln-faq-item">
+          <details key={f.q} className="ln-faq-item ln-bracket">
             {/* r129 P3-5: the chevron the .ln-faq-q svg rotate rules
                 always expected — the summary affordance now paints */}
             <summary className="ln-faq-q">
