@@ -166,6 +166,26 @@
   --radius-2xl: 20px;
   --radius-3xl: 28px;
 
+  /* ── Elevation bridge (P10 coordinator render-verification): the
+     4-tier ladder was defined only as :root/.dark custom properties —
+     but Tailwind v4 shadow-* utilities resolve the --shadow-* THEME
+     NAMESPACE at build time, never the :root var, so every plain
+     `shadow-sm` (cards, stamps, theme-toggle, pricing) sat on the
+     engine default (10% black, identical in BOTH stages — the r152
+     "navy-inked daylight / paper never gets muddy grey shadows" canon
+     was violated in daylight and the night recipe never applied).
+     Registering the namespace here (same bridge grammar as the
+     --color-* ramps above) inlines var(--elev-N) into the utilities;
+     the runtime :root (daylight navy two-layer) / .dark (30% black +
+     inset highlight) flip then governs every plain shadow-sm/md/lg/xl
+     consumer. The named composites (--shadow-card/-h/-pop/-modal)
+     stay :root-only — they are consumed via the shadow-(--…) arbitrary
+     syntax which reads the runtime var directly. ── */
+  --shadow-sm: var(--elev-1);
+  --shadow-md: var(--elev-2);
+  --shadow-lg: var(--elev-3);
+  --shadow-xl: var(--elev-4);
+
   /* ── Easing — Madarek canonical curves (tokens.css §4.2):
      --ease-smooth = Madarek --ease-out, the exponential settle
      cubic-bezier(0.16, 1, 0.3, 1) — exact.

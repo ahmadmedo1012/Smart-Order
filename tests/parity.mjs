@@ -1471,6 +1471,12 @@ const P10_ROUTES = [
     (R('src/app/dashboard/onboarding/page.tsx').match(/after:-inset-2 after:content-\[''\]/g) || []).length >= 2],
   ['P10-1b receipt-upload clear: the destructive text CTA rides the family 44px floor (inline-flex min-h-11 items-center)',
     R('src/components/payment/receipt-upload.tsx').includes('inline-flex min-h-11 shrink-0 items-center')],
+  ['P10 bridge (coordinator): the --shadow-* THEME namespace is registered in @theme inline (sm/md/lg/xl → var(--elev-N)) — without it every plain shadow-* utility sits on the engine default in BOTH stages (rendered-proven on /track dark: 10% black, no night recipe). The ladder must stay bridged.',
+    R('src/app/globals.css').includes('--shadow-sm: var(--elev-1);') &&
+    R('src/app/globals.css').includes('--shadow-md: var(--elev-2);') &&
+    R('src/app/globals.css').includes('--shadow-lg: var(--elev-3);') &&
+    R('src/app/globals.css').includes('--shadow-xl: var(--elev-4);') &&
+    /@theme inline[\s\S]{0,9000}--shadow-sm: var\(--elev-1\)/.test(R('src/app/globals.css'))],
 ];
 for (const [name, okFlag] of P10_ROUTES) {
   if (okFlag) passed += 1;
