@@ -220,7 +220,9 @@ export function TrackingClient({
                 role="status"
                 aria-live="polite"
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.06)]",
+                  /* P10-1b: shadow-sm = --elev-1 — التوأم الليلي للتوهين؛
+                     الحرفية السوداء 6% كانت تختفي على بطاقة الليل. */
+                  "inline-flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm font-semibold shadow-sm",
                   ORDER_STATUS_CHIP[status]
                 )}
               >

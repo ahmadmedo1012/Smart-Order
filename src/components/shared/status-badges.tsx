@@ -15,7 +15,10 @@ import { Badge } from "@/components/ui/badge";
  * OUT→sky (steel), PREPARING→yellow (amber), READY→copper, DELIVERED→
  * mint (green), CANCELLED→grey, REJECTED→rose, PAID→mint, REFUNDED→
  * rose, UNPAID→grey. The 9 families are tokenized in globals
- * (`--c-<family>-bg/-ink/-deep`) and flip with the theme.
+ * (`--c-<family>-bg/-ink/-deep`) and flip with the theme. The stamp LIFT
+ * rides the elevation ladder (shadow-sm = --elev-1) for the same reason:
+ * the raw 6%-black literal it replaced had no night twin and vanished on
+ * the night-dispatch card (P10-1b).
  */
 export const ORDER_STATUS_CHIP: Record<OrderStatus, string> = {
   NEW: "border-(--c-copper-ink)/35 bg-(--c-copper-bg) text-(--c-copper-deep)",
@@ -40,7 +43,7 @@ export function OrderStatusBadge({
   return (
     <Badge
       className={cn(
-        "h-auto gap-1.5 px-2.5 py-1 text-[11px] font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.06)] transition-transform duration-(--t-fast) ease-smooth hover:-translate-y-px",
+        "h-auto gap-1.5 px-2.5 py-1 text-[11px] font-semibold shadow-sm transition-transform duration-(--t-fast) ease-smooth hover:-translate-y-px",
         ORDER_STATUS_CHIP[status],
         className
       )}
@@ -61,7 +64,7 @@ export function PaymentStatusBadge({ status, className }: { status: PaymentStatu
   return (
     <Badge
       className={cn(
-        "h-auto px-2.5 py-1 text-[11px] font-semibold shadow-[0_1px_2px_rgb(0_0_0/0.06)] transition-transform duration-(--t-fast) ease-smooth hover:-translate-y-px",
+        "h-auto px-2.5 py-1 text-[11px] font-semibold shadow-sm transition-transform duration-(--t-fast) ease-smooth hover:-translate-y-px",
         PAYMENT_CHIP[status],
         className
       )}

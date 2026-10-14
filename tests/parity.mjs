@@ -1442,6 +1442,41 @@ for (const [name, okFlag] of P6_E2E) {
   else failures.push(`phase6 browser-e2e gate FAILED: ${name}`);
 }
 
+// ── P10-1b (Phase 10 routes wave): the authed/interiors route-quality
+// gates — the two defect families this wave closed at root, each with the
+// family's own twin grammar as the proof of intent: (1) the status stamps
+// rode a RAW 6%-black elevation literal with no night twin (invisible on
+// the #152238 night-dispatch card) — now the elevation ladder rung
+// (shadow-sm = --elev-1, flips via the .dark block, same reason the
+// families flip); (2) four sub-44px controls on the money/CRUD paths
+// (image-remove p-1 ≈22px, two onboarding chip-deletes ≈12px firing API
+// DELETEs, the receipt-upload clear ≈16px) — each now carries the exact
+// twin grammar its sibling surface already uses (size-8 + after:-inset-2
+// from categories/settings image-remove; inline-flex min-h-11 from the
+// login/register text CTAs). Consumption pins, same shape as the layers
+// above. ─────────────────────────────────────────────────────────────
+const P10_ROUTES = [
+  ['P10-1b stamp elevation: status-badges (both maps) + the tracking chip ride the theme ladder (shadow-sm) — zero raw rgb(0_0_0/0.06) literals',
+    R('src/components/shared/status-badges.tsx').includes('font-semibold shadow-sm') &&
+    (R('src/components/shared/status-badges.tsx').match(/shadow-sm/g) || []).length >= 2 &&
+    R('src/components/storefront/tracking-client.tsx').includes('font-semibold shadow-sm') &&
+    !R('src/components/shared/status-badges.tsx').includes('shadow-[0_1px_2px_rgb(0_0_0/0.06)]') &&
+    !R('src/components/storefront/tracking-client.tsx').includes('shadow-[0_1px_2px_rgb(0_0_0/0.06)]')],
+  ['P10-1b image-remove hit floor: the product-editor tile button carries the categories/settings twin (size-8 + the ::after -inset-2 extension)',
+    R('src/components/dashboard/product-editor.tsx').includes("flex size-8 items-center justify-center rounded-full bg-background/90 shadow after:absolute after:-inset-2 after:content-['']") &&
+    R('src/app/dashboard/categories/page.tsx').includes('after:-inset-2') &&
+    R('src/app/dashboard/settings/page.tsx').includes('after:-inset-2')],
+  ['P10-1b onboarding chip deletes: categories + zones chips ride the 44px hit floor (size-8 + after:-inset-2) — destructive API DELETEs never below the floor',
+    (R('src/app/dashboard/onboarding/page.tsx').match(/relative flex size-8 items-center justify-center rounded-full/g) || []).length >= 2 &&
+    (R('src/app/dashboard/onboarding/page.tsx').match(/after:-inset-2 after:content-\[''\]/g) || []).length >= 2],
+  ['P10-1b receipt-upload clear: the destructive text CTA rides the family 44px floor (inline-flex min-h-11 items-center)',
+    R('src/components/payment/receipt-upload.tsx').includes('inline-flex min-h-11 shrink-0 items-center')],
+];
+for (const [name, okFlag] of P10_ROUTES) {
+  if (okFlag) passed += 1;
+  else failures.push(`p10-1b routes gate FAILED: ${name}`);
+}
+
 // ── report ───────────────────────────────────────────────────────────────────
 
 if (failures.length > 0) {

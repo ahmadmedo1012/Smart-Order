@@ -436,10 +436,14 @@ export function ProductEditor({
                       <button
                         type="button"
                         onClick={() => setImageUrl("")}
-                        className="absolute top-1 end-1 rounded-full bg-background/90 shadow p-1"
+                        /* P10-1b: the hit-floor twin the categories/settings
+                           image-remove buttons carry (size-8 + the ::after
+                           -inset-2 extension = 48px) — p-1 was a ~22px
+                           target in the tile corner. */
+                        className="absolute top-1 end-1 flex size-8 items-center justify-center rounded-full bg-background/90 shadow after:absolute after:-inset-2 after:content-['']"
                         aria-label="إزالة الصورة"
                       >
-                        <X className="size-3.5" aria-hidden="true" />
+                        <X className="size-3" aria-hidden="true" />
                       </button>
                     </>
                   ) : (

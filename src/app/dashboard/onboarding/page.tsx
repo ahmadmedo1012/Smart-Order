@@ -370,7 +370,10 @@ export default function OnboardingPage() {
                     }
                   }}
                   aria-label={`حذف ${c.name}`}
-                  className="text-muted-foreground hover:text-destructive-ink"
+                  /* P10-1b: destructive chip delete rides the 44px hit floor
+                     (size-8 + the ::after -inset-2 extension) — the bare
+                     size-3 icon was a ~12px target for an API DELETE. */
+                  className="relative flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-destructive-ink after:absolute after:-inset-2 after:content-['']"
                 >
                   <Trash2 className="size-3" aria-hidden="true" />
                 </button>
@@ -441,7 +444,10 @@ export default function OnboardingPage() {
                     }
                   }}
                   aria-label={`حذف ${z.name}`}
-                  className="text-muted-foreground hover:text-destructive-ink"
+                  /* P10-1b: destructive chip delete rides the 44px hit floor
+                     (size-8 + the ::after -inset-2 extension) — the bare
+                     size-3 icon was a ~12px target for an API DELETE. */
+                  className="relative flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-destructive-ink after:absolute after:-inset-2 after:content-['']"
                 >
                   <Trash2 className="size-3" aria-hidden="true" />
                 </button>

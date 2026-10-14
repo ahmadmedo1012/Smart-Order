@@ -73,7 +73,10 @@ export function ReceiptUpload({
           <button
             type="button"
             onClick={() => onReceiptChange("")}
-            className="shrink-0 text-xs text-destructive-ink transition-colors hover:underline"
+            /* P10-1b: the family 44px text-CTA floor (inline-flex min-h-11 —
+               the login forgot-password / register change-plan spelling) —
+               bare text-xs was a ~16px target for a destructive clear. */
+            className="inline-flex min-h-11 shrink-0 items-center text-xs text-destructive-ink transition-colors hover:underline"
           >
             حذف الصورة
           </button>
