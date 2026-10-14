@@ -102,13 +102,14 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
-        {/* Pre-paint theme boot — no flash. r152 (Phase 5 daylight): the
-            DAYLIGHT theme is the default; the night-dispatch `.dark` class
-            is applied ONLY when explicitly stored. Mirrors the provider
-            (next-themes defaultTheme="light") — one resolution path. */}
+        {/* Pre-paint theme boot — no flash. P12-3d (evaluator P1): the
+            NIGHT theme is the default (the United-Carriers deep-space hero
+            owns the arrival); the daylight `.light` class is applied ONLY
+            when explicitly stored. Mirrors the provider
+            (next-themes defaultTheme="dark") — one resolution path. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('smart-order-theme');if(t==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.add('light')}}catch(e){document.documentElement.classList.add('light')}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('smart-order-theme');if(t==='light'){document.documentElement.classList.add('light')}else{document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}})();`,
           }}
         />
         {/* r152: preload the two FIRST-PAINT arabic subsets (Tajawal 400 +

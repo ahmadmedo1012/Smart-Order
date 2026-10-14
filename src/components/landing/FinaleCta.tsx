@@ -2,10 +2,9 @@ import Link from "next/link";
 import { RevealCssClass } from "@/hooks/useReveal";
 import { MagneticGoldLink } from "@/components/landing/MagneticGoldLink";
 
-/* r142 «الخط» — FinaleCta «الوصول»: the road's terminus.
- * The converging orbit rings retire with the orbit identity; the line
- * (RouteSpine) ends HERE at the terminus node ([data-route-stop]), and
- * a crosswalk stripe band marks the arrival. Two verbs, one fork:
+/* P12-3d: FinaleCta «الوصول» — the arrival chapter. The page-wide
+ * road spine is retired (evaluator P1, prohibited thin-line family);
+ * a crosswalk stripe band still marks the arrival. Two verbs, one fork:
  * اطلب (the storefront) — أو اصنع متجرك (register). */
 
 export function FinaleCta() {
@@ -16,7 +15,7 @@ export function FinaleCta() {
 
       <div className="ln-cta-inner">
         {/* the terminus node — the line ends here */}
-        <span className="ln-cta-terminus ln-route-stop" data-route-stop aria-hidden="true" />
+        <span className="ln-cta-terminus" aria-hidden="true" />
 
         <span className="ln-micro" aria-hidden="true">{"SMART ORDER — 005 · ACCESS"}</span>
         <span className="ln-label">{'05 — الوصول · ACCESS'}</span>

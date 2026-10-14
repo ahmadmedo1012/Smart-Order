@@ -93,7 +93,6 @@ export function DashboardSection() {
   return (
     <section id="dashboard" className="ln-chapter ln-dash">
       <div className="ln-chapter-head">
-        <span className="ln-route-stop" data-route-stop aria-hidden="true" />
         <span className="ln-micro" aria-hidden="true">{"SMART ORDER — 003 · CONSOLE"}</span>
         <span className="ln-label">{'03 — لوحة التاجر'}</span>
         <RevealCssClass as="h2" className="ln-chapter-title" delay={1}>

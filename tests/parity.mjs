@@ -904,29 +904,20 @@ for (const [name, okFlag] of R129_LAYER) {
   else failures.push(`r129 layer gate FAILED: ${name}`);
 }
 
-// ── r142 «الخط»: the RouteSpine page-road pins (the OrbitScene port
-//    retires with the orbit identity; the same craft discipline is
-//    re-asserted on the page-scale road engine) ─────────────────────────
-const routeSpineSrc = readFileSync(new URL('../src/components/landing/RouteSpine.tsx', import.meta.url), 'utf8');
+// ── P12-3d: the RouteSpine page-road pins are RETIRED HONESTLY — the
+//    evaluator ruled the page-wide thin line + scroll parcel is the
+//    prohibited road/package family (brief §6). The route language now
+//    lives in the hero dotted-globe arcs + the journey route-map. The
+//    same craft discipline is re-asserted on the surviving surfaces. ────
 const heroSectionSrc = readFileSync(new URL('../src/components/landing/hero-section.tsx', import.meta.url), 'utf8');
 const pageSrc = readFileSync(new URL('../src/app/page.tsx', import.meta.url), 'utf8');
 const journeySrc = readFileSync(new URL('../src/components/landing/OrderJourneySection.tsx', import.meta.url), 'utf8');
 const constantsSrc = readFileSync(new URL('../src/lib/constants.ts', import.meta.url), 'utf8');
 const ROUTE_SPINE = [
-  ['RouteSpine: the road IS the page — one SVG line from the hero origin through every chapter to the finale',
-    pageSrc.includes('<RouteSpine />') && routeSpineSrc.includes('getPointAtLength') && routeSpineSrc.includes('screenCTM')],
-  ['RouteSpine: the parcel is GLUED to the drawn path (physical px, RTL-safe, scale-proof — the OrderJourney r141 kit at page scale)',
-    routeSpineSrc.includes('getScreenCTM') && routeSpineSrc.includes('parcelRef')],
-  ['RouteSpine: the shared-belt doctrine — ONE passive scroll listener + ONE rAF (imperative DOM writes, no render per frame)',
-    (routeSpineSrc.match(/passive: true/g) || []).length >= 2 && routeSpineSrc.includes('requestAnimationFrame')],
-  ['RouteSpine: waypoints are REAL anchors — every chapter plants a [data-route-stop] marker in document order',
-    routeSpineSrc.includes('[data-route-stop]') || routeSpineSrc.includes("data-route-stop")],
-  ['RouteSpine: gentle drawn-road sway (SWAY 18px on runs ≥ 320px, clamped to the corridor)',
-    routeSpineSrc.includes('SWAY = 18') && routeSpineSrc.includes('SWAY_MIN = 320') && routeSpineSrc.includes('EDGE = 14')],
-  ['RouteSpine: reduced-motion = COMPLETELY static road — no scroll listener, --sp pinned to 1, parcel parked',
-    /prefers-reduced-motion/.test(routeSpineSrc) && routeSpineSrc.includes('--sp')],
-  ['RouteSpine: no-JS degrades cleanly — the road paints nothing until first placement (opacity-gated)',
-    routeSpineSrc.includes('opacity') && routeSpineSrc.includes('ResizeObserver')],
+  ['P12-3d: the page-wide road spine is GONE — RouteSpine.tsx deleted, no <RouteSpine /> mount, no road/parcel CSS',
+    !existsSync(new URL('../src/components/landing/RouteSpine.tsx', import.meta.url)) && !pageSrc.includes('<RouteSpine />')],
+  ['P12-3d: the route language survives where it belongs — journey route-map nodes (data-route-stop on ln-routemap-node buttons)',
+    journeySrc.includes('ln-routemap-node') && journeySrc.includes('data-route-stop')],
   ['hero: P12-2d — the dotted-globe network scene (GlobeMount → dynamic ssr:false) owns the frame; the dimensional road-scene images (package/scooter/route) retired',
     heroSectionSrc.includes('GlobeMount') && !heroSectionSrc.includes('/images/shipping/')],
   ['hero: the LCP doctrine holds — h1 server-rendered via the r92 settle (never opacity 0; the globe is a client-only decor island)',
@@ -1206,10 +1197,10 @@ const R152_LAYER = [
   ['night dispatch survives as the explicit .dark override (ground #0D1626 / luminous orange #FF7A38)',
     norm(resolve(dark, dark['--background'] ?? '')) === '#0D1626' &&
     norm(resolve(dark, dark['--primary'] ?? '')) === '#FF7A38'],
-  ['the boot script paints LIGHT by default (dark only when stored)',
-    rawLayout.includes("if(t==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.add('light')}")],
-  ['next-themes defaultTheme="light" (one resolution path with the boot script)',
-    rawThemeProvider.includes('defaultTheme="light"')],
+  ['P12-3d: NIGHT is the arrival default — the boot script paints DARK unless "light" is explicitly stored (the United-Carriers deep-space hero owns the arrival)',
+    rawLayout.includes("if(t==='light'){document.documentElement.classList.add('light')}else{document.documentElement.classList.add('dark')}")],
+  ['P12-3d: next-themes defaultTheme="dark" (one resolution path with the boot script; :root CSS stage tokens unchanged)',
+    rawThemeProvider.includes('defaultTheme="dark"')],
   ['first-paint preloads are the Tajawal arabic subsets (400 + 700)',
     rawLayout.includes('/fonts/tajawal-400-normal-arabic.woff2') &&
     rawLayout.includes('/fonts/tajawal-700-normal-arabic.woff2') &&

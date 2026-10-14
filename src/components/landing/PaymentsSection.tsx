@@ -44,7 +44,6 @@ export function PaymentsSection() {
   return (
     <section id="payments" className="ln-chapter ln-pay">
       <div className="ln-chapter-head">
-        <span className="ln-route-stop" data-route-stop aria-hidden="true" />
         <span className="ln-micro" aria-hidden="true">{"SMART ORDER — 004 · PAYMENTS"}</span>
         <span className="ln-label">{'04 — محطات الدفع'}</span>
         <RevealCssClass as="h2" className="ln-chapter-title" delay={1}>

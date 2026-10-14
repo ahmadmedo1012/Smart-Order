@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import { SITE_URL } from "@/app/layout";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroSection } from "@/components/landing/hero-section";
-import { RouteSpine } from "@/components/landing/RouteSpine";
 import { OrderJourneySection } from "@/components/landing/OrderJourneySection";
 import { StorefrontSection } from "@/components/landing/StorefrontSection";
 import { DashboardSection } from "@/components/landing/DashboardSection";
@@ -61,11 +60,10 @@ async function getLandingStats(): Promise<{ totalStores: number; totalOrders: nu
 /* ═══════════════════════════════════════════════════════════════════════
    r142 «الخط» — the page IS the road.
    ─────────────────────────────────────────────────────────────────────
-   One continuous route line (RouteSpine) runs from under the hero
-   package down through EVERY chapter — each chapter head plants a
-   [data-route-stop] station node, the six order states thread the line
-   through themselves, and the road terminates at the finale. The
-   narrative is the logistics one, end to end:
+   P12-3d (evaluator P1): the page-wide road line + scroll parcel
+   (RouteSpine) is RETIRED — the prohibited thin-line/package family.
+   The route language now lives in the hero's dotted-globe arcs and the
+   journey's route-map nodes. The narrative stays the logistics one:
 
      00 — الطريق مفتوح (hero: the P12 dotted-globe network scene +
           the live roadmark board)
@@ -78,9 +76,8 @@ async function getLandingStats(): Promise<{ totalStores: number; totalOrders: nu
 
    The page stays a SERVER component — the h1 and hero copy render
    inline (instant-paint LCP doctrine, r8/r9). Client islands are
-   exactly: LandingHeader (chrome/spy/menus), RouteSpine (the line +
-   the scroll parcel), GlobeMount → GlobeScene (the dotted-globe
-   canvas, dynamic ssr:false), OrderJourneySection (route-map tabs),
+   exactly: LandingHeader (chrome/spy/menus), GlobeMount → GlobeScene
+   (the dotted-globe canvas, dynamic ssr:false), OrderJourneySection (route-map tabs),
    StorefrontScene + DashboardSection (motion/machine islands), CountUp
    (hero roadmark) and the RevealCssClass observers.
 
@@ -127,11 +124,10 @@ export default async function LandingPage() {
           LandingPage.tsx:340); without it the focus jump lands on main
           without an AT-announced landmark change */}
       <main id="main" tabIndex={-1} className="flex-1">
-        {/* ═══ «الخط» — the route root: every chapter below is a station
-            on ONE continuous road; RouteSpine draws the road and rides
-            the parcel along it (fully static under reduced-motion). ═══ */}
+        {/* ═══ the landing root — chapters in narrative order
+            (P12-3d: the page-wide spine retired; routes live in the
+            globe + journey map). ═══ */}
         <div className="ln-route-root relative">
-          <RouteSpine />
 
           {/* ═══ 00 — الطريق مفتوح: the dimensional road scene + h1 LCP ═══ */}
           <HeroSection trustCount={stats.totalStores} totalOrders={stats.totalOrders} />

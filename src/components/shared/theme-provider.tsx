@@ -7,14 +7,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <NextThemesProvider
       attribute="class"
-      /* r152 (Phase 5 daylight flip): the default theme is LIGHT —
-       * the daylight operations room. The `.dark` night-dispatch
-       * override is opt-in via the toggle. The pre-paint boot script
-       * in layout.tsx implements the same resolution (DAYLIGHT
-       * default; dark ONLY when explicitly stored) and still ignores
-       * the OS preference — one resolution path: boot script ==
-       * provider, both light-default. */
-      defaultTheme="light"
+      /* P12-3d fix (evaluator P1): the default theme is DARK — the
+       * United-Carriers night-dispatch hero owns the arrival (deep-space
+       * globe + orange arcs). The `.light` daylight operations stage is
+       * opt-in via the toggle. The pre-paint boot script in layout.tsx
+       * implements the same resolution (NIGHT default; light ONLY when
+       * explicitly stored) and still ignores the OS preference — one
+       * resolution path: boot script == provider, both dark-default. */
+      defaultTheme="dark"
       enableSystem={false}
       /* r131 (F9b fleet hardening): enableSystem={false} EXPLICIT —
        * next-themes v0.4.6 defaults enableSystem to true, so omitting

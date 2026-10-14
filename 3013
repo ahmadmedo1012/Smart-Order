@@ -3,6 +3,5 @@
 - Network:       http://21.0.17.189:3000
 
 ✓ Starting...
-⨯ Unable to acquire lock at /home/z/repos/smart-order/.next/dev/lock, is another instance of next dev running?
-  Suggestion: If you intended to restart next dev, terminate the other process, and then try again.
+✓ Ready in 1034ms
 [?25h

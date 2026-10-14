@@ -21,7 +21,7 @@ import { TRACKING_FLOW, ORDER_STATUS_AR, type OrderStatus } from '@/lib/constant
      invented, nothing dropped.
    · Every stage still names WHO ACTS (الزبون / التاجر / مندوب
      التوصيل) with the action phrased from the real state machine.
-   · The stop buttons keep [data-route-stop] — the page spine still
+   · The stop buttons keep [data-route-stop] (map-local node markers; the page
      threads the journey.
 
    Mechanics: WAI-ARIA horizontal tablist (roving tabindex,
@@ -172,7 +172,6 @@ export function OrderJourneySection() {
     <section id="stations" className="ln-chapter ln-stations">
       <div className="ln-chapter-head">
         {/* the route station node — chapter 01 on the line */}
-        <span className="ln-route-stop" data-route-stop aria-hidden="true" />
         <span className="ln-micro" aria-hidden="true">{"SMART ORDER — 001 · ROUTE"}</span>
         <span className="ln-label">{'01 — المحطات الست'}</span>
         <RevealCssClass as="h2" className="ln-chapter-title" delay={1}>

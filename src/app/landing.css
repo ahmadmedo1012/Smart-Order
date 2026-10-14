@@ -2213,21 +2213,6 @@
   margin-block-start: -3px;
   background: rgba(27,42,65,0.55);
 }
-/* chapter station nodes — zero-size anchors rendered as road nodes;
-   absolute at their static position keeps the engine's center reading */
-.landing .ln-route-stop {
-  position: absolute;
-  inline-size: 12px;
-  block-size: 12px;
-  margin-inline-start: -6px;
-  margin-block-start: -6px;
-  border-radius: var(--ln-radius-pill);
-  background: var(--ln-ink);
-  border: 2px solid var(--ln-lime);
-  box-shadow: 0 0 12px rgba(209,73,0,0.35);
-  z-index: 2;
-}
-
 /* ── 15b · الهيرو — the dimensional road scene ─────────────────────── */
 .landing .ln-hero-scene {
   aspect-ratio: 1 / 1.02;
