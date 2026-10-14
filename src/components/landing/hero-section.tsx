@@ -114,9 +114,10 @@ export function HeroSection({
                 style={{ background: "var(--ln-lime)" }}
                 aria-hidden="true"
               />
-              {/* أرقام غربية حية (سياسة format.ts) — كانت عبر toArabicNumber
-                  من وحدة client فانفجر الترطيب الخادمي على Vercel فقط
-                  (محلياً trustCount=0 لم ينفّذ السطر). */}
+              {/* أرقام غربية حية (سياسة src/lib/money.ts — canon الأرقام
+                  الغربية في هذا المنتج؛ لا وحدة format.ts هنا) — كانت عبر
+                  toArabicNumber من وحدة client فانفجر الترطيب الخادمي على
+                  Vercel فقط (محلياً trustCount=0 لم ينفّذ السطر). */}
               أكثر من {trustCount} متجر يثقون بنا
             </div>
           )}

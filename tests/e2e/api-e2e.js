@@ -116,6 +116,41 @@ async function main() {
   const zoneId = zone.body?.data?.zone?.id;
   ok("delivery zone created", !!zoneId);
 
+  // ---------- 4.5 categories [id]: PATCH + DELETE semantics (P13-2d) ----------
+  // The /api/categories/[id] route was missing entirely (audit P0): the
+  // dashboard PATCH/DELETE + onboarding DELETE all 404'd. These pin the
+  // archive-if-products contract the ConfirmDialog promises:
+  // «سيُؤرشف القسم إن كان يحتوي منتجات، وإلا يُحذف نهائياً».
+  console.log("— الأقسام: تعديل وحذف (أرشفة عند وجود منتجات)");
+  const meB = await B.call("/api/auth/me");
+  const bizBId = meB.body?.data?.user?.memberships?.[0]?.business?.id;
+  ok("business B session resolves (tenant-isolation setup)", !!bizBId, JSON.stringify(meB.body).slice(0, 120));
+
+  const cat2 = await A.call("/api/categories", { method: "POST", body: JSON.stringify({ businessId: bizAId, name: "حلويات" }) });
+  const cat2Id = cat2.body?.data?.category?.id;
+  ok("empty category created (rename/delete flow)", !!cat2Id, JSON.stringify(cat2.body).slice(0, 100));
+
+  const rename = await A.call(`/api/categories/${cat2Id}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, name: "مشروبات", description: null, imageUrl: null }) });
+  ok("category PATCH renames (nullable clear fields)", rename.body?.data?.category?.name === "مشروبات" && rename.body?.data?.category?.description === null, JSON.stringify(rename.body).slice(0, 120));
+
+  const xTenantOwn = await B.call(`/api/categories/${cat2Id}?businessId=${bizBId}`);
+  ok("cross-tenant category DELETE isolated (B's own biz + A's id → 404)", xTenantOwn.status === 404 || xTenantOwn.body?.error?.code === "NOT_FOUND", JSON.stringify(xTenantOwn.body).slice(0, 80));
+
+  const xTenantSpoof = await B.call(`/api/categories/${cat2Id}?businessId=${bizAId}`);
+  ok("businessId spoofing on category DELETE rejected", xTenantSpoof.status === 403 || xTenantSpoof.body?.error?.code === "FORBIDDEN", JSON.stringify(xTenantSpoof.body).slice(0, 80));
+
+  const delEmpty = await A.call(`/api/categories/${cat2Id}?businessId=${bizAId}`);
+  ok("empty category hard-deleted", delEmpty.body?.data?.deleted === true && delEmpty.body?.data?.archived === undefined, JSON.stringify(delEmpty.body).slice(0, 100));
+
+  // catId (أطباق رئيسية) carries the product created above → must archive
+  const delFull = await A.call(`/api/categories/${catId}?businessId=${bizAId}`);
+  ok("category with products archives (never hard-deleted)", delFull.body?.data?.archived === true && delFull.body?.data?.deleted === undefined, JSON.stringify(delFull.body).slice(0, 100));
+
+  const listAfter = await A.call(`/api/categories?businessId=${bizAId}`);
+  const names = (listAfter.body?.data?.categories || []).map((c) => c.name);
+  ok("archived + deleted categories vanish from the list", !names.includes("مشروبات") && !names.includes("أطباق رئيسية"), JSON.stringify(names).slice(0, 100));
+
+
   const slug = bizA?.slug || "unknown";
   ok("business has public slug", !!slug, JSON.stringify(bizA).slice(0, 80));
 

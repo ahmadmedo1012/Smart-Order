@@ -101,10 +101,11 @@ export async function POST(req: NextRequest) {
     const count = await db.product.count({ where: { businessId: member.businessId, isArchived: false } });
     if (count >= 500) return fail("وصلت للحد الأقصى من المنتجات (500)", 422);
 
-    // categoryId ownership check
+    // categoryId ownership check (P13-2d: archived categories are dead —
+    // new products can only join a live one)
     if (input.categoryId) {
       const cat = await db.category.findFirst({
-        where: { id: input.categoryId, businessId: member.businessId },
+        where: { id: input.categoryId, businessId: member.businessId, isArchived: false },
       });
       if (!cat) return fail("القسم المحدد غير موجود", 422, "VALIDATION");
     }

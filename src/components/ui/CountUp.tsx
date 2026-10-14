@@ -27,6 +27,11 @@ function formatterFor(decimals: number): Intl.NumberFormat {
   let fmt = formatters.get(decimals);
   if (!fmt) {
     fmt = new Intl.NumberFormat('ar-LY', {
+      // P13-2d (T4): pinned explicitly — ar-LY resolves to latn on this
+      // ICU build (verified: format(12345) = "12.345"), but a different
+      // ICU/full-icu build could resolve the default to arab digits and
+      // silently flip every landing counter to ١٢.٣٤٥.
+      numberingSystem: 'latn',
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });

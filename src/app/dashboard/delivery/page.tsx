@@ -19,7 +19,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { formatLyd } from "@/lib/money";
+import { formatLyd, formatLydAmount } from "@/lib/money";
 import { useDirtyClose } from "@/hooks/use-dirty-close";
 import { toast } from "sonner";
 import { Truck, Plus, Pencil, Trash2, X } from "lucide-react";
@@ -222,13 +222,16 @@ function ZoneDialog({
   const [errors, setErrors] = React.useState<{ name?: string; fee?: string }>(
     {},
   );
+  /* P13-2d (T4): form drafts seed via formatLydAmount (the money.ts
+     form-seed contract, same as product-editor) — was a local
+     (fee/1000).toFixed(3).replace(/\.?0+$/, "") that trimmed "12.500"
+     to "12.5", drifting the form-seed contract for zero benefit
+     (parseLyd round-trips both). Output: "12.500". */
   const [fee, setFee] = React.useState(
-    zone ? (zone.fee / 1000).toFixed(3).replace(/\.?0+$/, "") : "",
+    zone ? formatLydAmount(zone.fee) : "",
   );
   const [minOrder, setMinOrder] = React.useState(
-    zone && zone.minOrder > 0
-      ? (zone.minOrder / 1000).toFixed(3).replace(/\.?0+$/, "")
-      : "",
+    zone && zone.minOrder > 0 ? formatLydAmount(zone.minOrder) : "",
   );
   const [isActive, setIsActive] = React.useState(zone?.isActive ?? true);
   const [saving, setSaving] = React.useState(false);
@@ -238,11 +241,8 @@ function ZoneDialog({
      count as dirty (product-editor recipe via useDirtyClose). */
   const pristine = {
     name: zone?.name ?? "",
-    fee: zone ? (zone.fee / 1000).toFixed(3).replace(/\.?0+$/, "") : "",
-    minOrder:
-      zone && zone.minOrder > 0
-        ? (zone.minOrder / 1000).toFixed(3).replace(/\.?0+$/, "")
-        : "",
+    fee: zone ? formatLydAmount(zone.fee) : "",
+    minOrder: zone && zone.minOrder > 0 ? formatLydAmount(zone.minOrder) : "",
     isActive: zone?.isActive ?? true,
   };
   const dirty =

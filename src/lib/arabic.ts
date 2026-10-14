@@ -102,3 +102,20 @@ export function normalizeArabic(input: string): string {
     .toLowerCase()
     .trim();
 }
+
+/* P13-2d (T3, plan-features drift): live plan rows seeded pre-r133 (and
+ * re-injected since by scripts/seed-family.js + scripts/e2e-seed.mjs
+ * upserts) carry Arabic-Indic digits in their feature strings
+ * («١٥ منتجاً و٣ أقسام»). The fleet policy is Western digits in UI, and
+ * the /api/plans self-seed runs seed-on-EMPTY only (count > 0 → return),
+ * so existing rows can never heal through it. This repo deliberately
+ * ships no `prisma migrate` (CLAUDE.md — prod sync is schema-only
+ * `db push`), so the root-cause-correct smallest fix is an idempotent,
+ * display-safe fold at the TWO plan-features read seams
+ * (api/plans safeParseFeatures + pricing/page.tsx safeParse): fresh rows
+ * come from the Western-digit seeds, existing rows render Western here
+ * — and any future seed regression is neutralized at render. Meaning
+ * never changes: only the digit glyphs fold (٠-٩ → 0-9). */
+export function westernNumerals(input: string): string {
+  return String(input ?? "").replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+}

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { westernNumerals } from "@/lib/arabic";
 
 export const runtime = "nodejs";
 
@@ -95,7 +96,11 @@ export async function GET() {
 function safeParseFeatures(raw: string): string[] {
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((f) => typeof f === "string") : [];
+    /* P13-2d (T3): display-safe Arabic-Indic → Western fold — rows seeded
+     * pre-r133 carry «١٥ منتجاً و٣ أقسام»; the fleet policy is Western
+     * digits. The seed itself is seed-on-EMPTY, so existing rows never
+     * heal through it (rationale documented in lib/arabic.ts). */
+    return Array.isArray(parsed) ? parsed.filter((f) => typeof f === "string").map(westernNumerals) : [];
   } catch {
     return [];
   }

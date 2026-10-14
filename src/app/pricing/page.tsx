@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PricingClient } from "@/components/pricing/pricing-client";
 import { db } from "@/lib/db";
+import { westernNumerals } from "@/lib/arabic";
 
 export const metadata: Metadata = {
   /* r132 (F1c, A11 P1/P2): suffix stripped — the root template already
@@ -42,7 +43,11 @@ async function getPlans() {
 function safeParse(raw: string): string[] {
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((f) => typeof f === "string") : [];
+    /* P13-2d (T3): same display-safe Western-digit fold as /api/plans
+     * safeParseFeatures — this SSR seam reads the DB directly, so rows
+     * seeded pre-r133 would otherwise render Arabic-Indic here before
+     * any /api/plans hit (rationale documented in lib/arabic.ts). */
+    return Array.isArray(parsed) ? parsed.filter((f) => typeof f === "string").map(westernNumerals) : [];
   } catch {
     return [];
   }

@@ -173,7 +173,12 @@ export function OrderJourneySection() {
       <div className="ln-chapter-head">
         {/* the route station node — chapter 01 on the line */}
         <span className="ln-micro" aria-hidden="true">{"SMART ORDER — 001 · ROUTE"}</span>
-        <span className="ln-label">{'01 — المحطات الست'}</span>
+        {/* P13-2d (T2): the map has FIVE stops (STOPS:001-005) and the lede
+            already says «خمس محطات» — the chapter label was the lone «الست»
+            holdout. The panel counter «المرحلة N من 6» stays truthful: it
+            counts the six REAL TRACKING_FLOW stages (kitchen carries both
+            PREPARING + READY). */}
+        <span className="ln-label">{'01 — المحطات الخمس'}</span>
         <RevealCssClass as="h2" className="ln-chapter-title" delay={1}>
           الطريق من «جديد» <em>إلى باب العميل</em>
         </RevealCssClass>

@@ -88,7 +88,8 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     if (!product) return fail("المنتج غير موجود", 404, "NOT_FOUND");
 
     if (input.categoryId) {
-      const cat = await db.category.findFirst({ where: { id: input.categoryId, businessId: member.businessId } });
+      // P13-2d: archived categories can't receive products (dead rows)
+      const cat = await db.category.findFirst({ where: { id: input.categoryId, businessId: member.businessId, isArchived: false } });
       if (!cat) return fail("القسم المحدد غير موجود", 422, "VALIDATION");
     }
 

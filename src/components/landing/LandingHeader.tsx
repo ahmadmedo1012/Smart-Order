@@ -156,7 +156,8 @@ export function LandingHeader() {
                 <a href="#stations" className="landing-megamenu-item">
                   <span className="ln-menu-ico gold" aria-hidden="true"><Route size={20} /></span>
                   <span className="landing-megamenu-item-body">
-                    <span className="landing-megamenu-item-title">المحطات الست</span>
+                    {/* P13-2d (T2): «الخمس» — the journey map has 5 stops (STOPS 001–005); was the lone «الست» mismatch vs the chapter lede «خمس محطات». */}
+                    <span className="landing-megamenu-item-title">المحطات الخمس</span>
                     <span className="landing-megamenu-item-desc">من «جديد» إلى باب العميل</span>
                   </span>
                 </a>
@@ -218,7 +219,7 @@ export function LandingHeader() {
 
         {menuOpen && (
           <nav className="landing-mobile-menu" aria-label="قائمة الجوال" onClick={() => setMenuOpen(false)}>
-            <a href="#stations" className="ln-btn-ghost">المحطات الست</a>
+            <a href="#stations" className="ln-btn-ghost">المحطات الخمس</a>
             <a href="#store" className="ln-btn-ghost">متجر يعمل فوراً</a>
             <a href="#dashboard" className="ln-btn-ghost">لوحة التاجر</a>
             <a href="#payments" className="ln-btn-ghost">محطات الدفع</a>

@@ -158,7 +158,19 @@ export default function GlobeScene() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    /* P13-2d (T4): reduced-motion is re-read LIVE now — was a one-shot
+       const at mount, so flipping the OS/system setting mid-session left
+       the canvas on the wrong regime (loop kept running for RM users,
+       poster frozen for everyone else until reload). The change listener
+       routes back through setRunning, which owns the poster/loop toggle
+       and repaints the static frame when RM turns on. */
+    const reducedMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let reduced = reducedMq.matches;
+    const onReducedChange = () => {
+      reduced = reducedMq.matches;
+      setRunning(visible && !document.hidden);
+    };
+    reducedMq.addEventListener('change', onReducedChange);
     let W = 0, H = 0, R = 0, CX = 0, CY = 0;
     let rotY = -0.349; // 20°E front — the Med/Libya focus
     let vel = 0;
@@ -401,6 +413,7 @@ export default function GlobeScene() {
       io.disconnect();
       mo.disconnect();
       ro.disconnect();
+      reducedMq.removeEventListener('change', onReducedChange);
       document.removeEventListener('visibilitychange', onVis);
       canvas.removeEventListener('pointerdown', onDown);
       canvas.removeEventListener('pointermove', onMove);
