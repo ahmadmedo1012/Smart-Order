@@ -2,54 +2,37 @@
 
 import { useState, type KeyboardEvent } from 'react';
 import Link from 'next/link';
-import {
-  ArrowLeft,
-  RotateCcw,
-  ClipboardList,
-  BadgeCheck,
-  Clock,
-  PackageCheck,
-  Truck,
-  Home,
-  User,
-  Store,
-  type LucideIcon,
-} from 'lucide-react';
+import { ArrowLeft, RotateCcw, Truck, User, Store, type LucideIcon } from 'lucide-react';
 import { RevealCssClass } from '@/hooks/useReveal';
 import { TRACKING_FLOW, ORDER_STATUS_AR, type OrderStatus } from '@/lib/constants';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   r142 «الخط» — OrderJourneySection «المحطات الست»:
-   the page's first station chapter — the order's REAL lifecycle as an
-   interactive vertical road the spine itself threads through.
+   P12-2d — OrderJourneySection «المحطات الست» → the ROUTE MAP.
+   ─────────────────────────────────────────────────────────────────────
+   The vertical road retires; the journey is now a HORIZONTAL ROUTE MAP
+   (spec S4): five connected macro stops — متجر → طلب → مطبخ → مندوب →
+   باب المنزل — drawn as an orange quadratic-bump route line (the same
+   arc/node language as the hero globe) with mono indices 001–005.
 
-   Truthful by construction (family honesty doctrine, carried from r141):
-   · The six stations ARE the real tracking flow — derived from
-     `TRACKING_FLOW` (lib/constants), the same source the customer
-     tracking page and the owner timeline render. Nothing invented.
-   · Every stage names WHO ACTS — الزبون / التاجر / مندوب التوصيل —
-     with the action phrased from the real state machine (lib/
-     order-machine.ts transition labels: تأكيد الطلب، بدء التحضير،
-     جاهز للاستلام، خرج للتوصيل، تم التسليم) and real intake channels
-     (المتجر الرقمي + واتساب). مندوب التوصيل is the code's own term
-     (PAYMENT_TYPE_DESCRIPTIONS: «ادفع نقداً لمندوب التوصيل»).
-   · Stage colors ride the product's real status-chip families
-     (status-badges.tsx: NEW→copper, CONFIRMED/OUT→sky, PREPARING→
-     yellow, READY→copper, DELIVERED→mint) — the same --c-* tokens.
+   Truthful by construction (unchanged doctrine):
+   · The REAL TRACKING_FLOW stages stay the engine — the five macro
+     stops MAP onto the six real states (مطبخ carries PREPARING + READY,
+     both rendered in the panel with their full real copy); nothing
+     invented, nothing dropped.
+   · Every stage still names WHO ACTS (الزبون / التاجر / مندوب
+     التوصيل) with the action phrased from the real state machine.
+   · The stop buttons keep [data-route-stop] — the page spine still
+     threads the journey.
 
-   Mechanics: a WAI-ARIA vertical tablist (roving tabindex, ArrowUp/
-   ArrowDown/Home/End) — clicking a station opens its detail panel and
-   lights its sign on the line. The page-level spine (RouteSpine)
-   anchors on these very buttons ([data-route-stop]), so the road
-   literally runs through the six states. Everything stands still under
-   prefers-reduced-motion (no autonomous motion here at all).
+   Mechanics: WAI-ARIA horizontal tablist (roving tabindex,
+   ArrowLeft/ArrowRight = next/prev in RTL, Home/End). Clicking a stop
+   opens its panel; the route line dashes drift (RM: static, §P12-d).
    ═══════════════════════════════════════════════════════════════════════ */
 
 type Actor = 'customer' | 'merchant' | 'courier';
 
 type Stage = {
   key: OrderStatus;
-  icon: LucideIcon;
   blurb: string;
   actor: Actor;
   action: string;
@@ -68,13 +51,11 @@ const ACTOR_ICON: Record<Actor, LucideIcon> = {
   courier: Truck,
 };
 
-/* Per-stage copy — every line maps to a shipped capability. Keyed by
- * the FULL OrderStatus union; the journey derives from TRACKING_FLOW,
- * so the stations can never drift from the real tracking order. */
+/* Per-stage copy — every line maps to a shipped capability (preserved
+ * verbatim from the r142 wave). Keyed by the FULL OrderStatus union. */
 const STAGE_META: Record<OrderStatus, Stage> = {
   NEW: {
     key: 'NEW',
-    icon: ClipboardList,
     blurb:
       'الطلب يصل لحظة إرساله من متجرك الرقمي أو واتساب — بصوره وملاحظاته وعنوانه، بلا مكالمات ولا قص ولصق.',
     actor: 'customer',
@@ -83,7 +64,6 @@ const STAGE_META: Record<OrderStatus, Stage> = {
   },
   CONFIRMED: {
     key: 'CONFIRMED',
-    icon: BadgeCheck,
     blurb:
       'تؤكد الطلب من لوحة التحكم بضغطة واحدة — وينقص من قائمة طلباتك الجديدة فوراً.',
     actor: 'merchant',
@@ -92,7 +72,6 @@ const STAGE_META: Record<OrderStatus, Stage> = {
   },
   PREPARING: {
     key: 'PREPARING',
-    icon: Clock,
     blurb:
       'المطبخ أو المخزن يبدأ التجهيز والعميل يرى الحالة تتحدث هي أيضاً — لا أحد يسأل «وين وصلني؟».',
     actor: 'merchant',
@@ -101,7 +80,6 @@ const STAGE_META: Record<OrderStatus, Stage> = {
   },
   READY: {
     key: 'READY',
-    icon: PackageCheck,
     blurb:
       'الطلب جاهز — للتيك أوي يستلمه العميل من الكاشير، وللتوصيل ينتظر المندوب.',
     actor: 'merchant',
@@ -110,7 +88,6 @@ const STAGE_META: Record<OrderStatus, Stage> = {
   },
   OUT_FOR_DELIVERY: {
     key: 'OUT_FOR_DELIVERY',
-    icon: Truck,
     blurb:
       'خرج للتوصيل ضمن مناطقك المعرّفة مسبقاً برسوم واضحة — العميل يعرف قيمة التوصيل قبل أن يطلب.',
     actor: 'courier',
@@ -119,7 +96,6 @@ const STAGE_META: Record<OrderStatus, Stage> = {
   },
   DELIVERED: {
     key: 'DELIVERED',
-    icon: Home,
     blurb:
       'وصل لباب العميل — والدفع يتم محلياً: نقداً عند التسليم أو بالطرق الليبية المتاحة لديك.',
     actor: 'customer',
@@ -130,7 +106,6 @@ const STAGE_META: Record<OrderStatus, Stage> = {
      present only to satisfy the full union; kept honest and short. */
   CANCELLED: {
     key: 'CANCELLED',
-    icon: Clock,
     blurb: 'أُلغي الطلب.',
     actor: 'merchant',
     action: 'إلغاء الطلب',
@@ -138,7 +113,6 @@ const STAGE_META: Record<OrderStatus, Stage> = {
   },
   REJECTED: {
     key: 'REJECTED',
-    icon: Clock,
     blurb: 'رُفض الطلب.',
     actor: 'merchant',
     action: 'رفض الطلب',
@@ -146,141 +120,173 @@ const STAGE_META: Record<OrderStatus, Stage> = {
   },
 };
 
-/* THE journey = the REAL tracking flow (lib/constants) — same order the
- * customer tracking page and the owner timeline render. */
-const STAGES: Stage[] = TRACKING_FLOW.map((key) => STAGE_META[key]);
-const COUNT = STAGES.length;
+/* THE journey = the REAL tracking flow (lib/constants). The FIVE macro
+ * stops map the six real stages onto the route map (مطبخ carries both
+ * PREPARING + READY — the panel renders each with its full real copy). */
+type Stop = {
+  key: string;
+  index: string;
+  name: string;
+  stages: OrderStatus[];
+};
+
+const STOPS: Stop[] = [
+  { key: 'store', index: '001', name: 'متجر', stages: ['NEW'] },
+  { key: 'order', index: '002', name: 'طلب', stages: ['CONFIRMED'] },
+  { key: 'kitchen', index: '003', name: 'مطبخ', stages: ['PREPARING', 'READY'] },
+  { key: 'courier', index: '004', name: 'مندوب', stages: ['OUT_FOR_DELIVERY'] },
+  { key: 'door', index: '005', name: 'باب المنزل', stages: ['DELIVERED'] },
+];
+const COUNT = STOPS.length;
+/* the six real stages, in TRACKING_FLOW order — panel kickers ride this */
+const FLOW_INDEX: Record<OrderStatus, number> = Object.fromEntries(
+  TRACKING_FLOW.map((k, i) => [k, i + 1]),
+) as Record<OrderStatus, number>;
+const FLOW_TOTAL = TRACKING_FLOW.length;
+
+/* the route line — quadratic bumps between the five stop centers
+ * (viewBox 1000×128 maps 1:1 onto the fixed 128px row; dot centers y=32) */
+const ROUTE_PATH =
+  'M 100 32 Q 200 6 300 32 Q 400 6 500 32 Q 600 6 700 32 Q 800 6 900 32';
 
 export function OrderJourneySection() {
   const [active, setActive] = useState(0);
-  const stage = STAGES[active];
-  const ActorIcon = ACTOR_ICON[stage.actor];
-  const StageIcon = stage.icon;
+  const stop = STOPS[active]!;
+  const stages = stop.stages.map((k) => STAGE_META[k]!);
 
-  /* WAI-ARIA vertical tabs — the list flows top→down, so ArrowDown
-   * walks forward along the journey. */
+  /* WAI-ARIA horizontal tabs — the route flows right→left (RTL), so
+   * ArrowLeft walks forward along the journey. */
   const onTablistKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     let next: number | null = null;
-    if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') next = (active + 1) % COUNT;
-    else if (e.key === 'ArrowUp' || e.key === 'ArrowRight') next = (active - 1 + COUNT) % COUNT;
+    if (e.key === 'ArrowLeft') next = (active + 1) % COUNT;
+    else if (e.key === 'ArrowRight') next = (active - 1 + COUNT) % COUNT;
     else if (e.key === 'Home') next = 0;
     else if (e.key === 'End') next = COUNT - 1;
     if (next === null) return;
     e.preventDefault();
     setActive(next);
-    document.getElementById(`ln-station-tab-${STAGES[next]!.key}`)?.focus();
+    document.getElementById(`ln-stop-tab-${STOPS[next]!.key}`)?.focus();
   };
 
   return (
     <section id="stations" className="ln-chapter ln-stations">
       <div className="ln-chapter-head">
-        {/* the road station node — chapter 01 on the line */}
+        {/* the route station node — chapter 01 on the line */}
         <span className="ln-route-stop" data-route-stop aria-hidden="true" />
         <span className="ln-label">{'01 — المحطات الست'}</span>
         <RevealCssClass as="h2" className="ln-chapter-title" delay={1}>
           الطريق من «جديد» <em>إلى باب العميل</em>
         </RevealCssClass>
         <RevealCssClass as="p" className="ln-chapter-lede" delay={2}>
-          ست محطات على خطٍّ واحد — نفس المراحل التي يراها صاحب المتجر في
-          لوحته وعملاؤه في صفحة التتبّع. اختر محطة لتعرف ماذا يحدث ومَن
-          يتصرف.
+          خمس محطات على خطٍّ واحد — متجر، طلب، مطبخ، مندوب، باب المنزل —
+          نفس المراحل التي يراها صاحب المتجر في لوحته وعملاؤه في صفحة
+          التتبّع. اختر محطة لتعرف ماذا يحدث ومَن يتصرف.
         </RevealCssClass>
       </div>
 
       <RevealCssClass as="div" delay={2}>
-        <div className="ln-stations-grid">
-          {/* ── the vertical road of stations (the spine threads THESE
-              buttons — data-route-stop) ── */}
+        {/* ── the horizontal ROUTE MAP (the spine threads THESE buttons —
+            data-route-stop) ── */}
+        <div className="ln-routemap">
+          <svg
+            className="ln-routemap-svg"
+            viewBox="0 0 1000 128"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path className="ln-routemap-path" d={ROUTE_PATH} />
+          </svg>
           <div
-            className="ln-stations-tabs"
+            className="ln-routemap-row"
             role="tablist"
-            aria-label="مراحل الطلب"
-            aria-orientation="vertical"
+            aria-label="مراحل الطلب على الخط"
+            aria-orientation="horizontal"
             onKeyDown={onTablistKeyDown}
           >
-            <ol className="ln-stations-list">
-              {STAGES.map((s, i) => {
-                const Icon = s.icon;
-                return (
-                  <li key={s.key} className="ln-stations-item">
-                    <button
-                      type="button"
-                      role="tab"
-                      id={`ln-station-tab-${s.key}`}
-                      aria-selected={i === active}
-                      aria-controls="ln-stations-panel"
-                      tabIndex={i === active ? 0 : -1}
-                      data-route-stop
-                      data-stage={s.key}
-                      className={`ln-station-node${i < active ? ' is-passed' : ''}${i === active ? ' is-active' : ''}`}
-                      onClick={() => setActive(i)}
-                    >
-                      <span className="ln-station-sign" aria-hidden="true">
-                        <Icon size={20} strokeWidth={2.2} />
-                      </span>
-                      <span className="ln-station-name">{ORDER_STATUS_AR[s.key]}</span>
-                      <span className="ln-mono ln-station-index" aria-hidden="true">
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ol>
+            {STOPS.map((s, i) => {
+              const stageCode = s.stages.join('·');
+              return (
+                <button
+                  key={s.key}
+                  type="button"
+                  role="tab"
+                  id={`ln-stop-tab-${s.key}`}
+                  aria-selected={i === active}
+                  aria-controls="ln-stations-panel"
+                  tabIndex={i === active ? 0 : -1}
+                  data-route-stop
+                  data-stage={s.stages[0]}
+                  className={`ln-routemap-node${i < active ? ' is-passed' : ''}${i === active ? ' is-active' : ''}`}
+                  onClick={() => setActive(i)}
+                >
+                  <span className="ln-routemap-idx" aria-hidden="true">
+                    {s.index}
+                  </span>
+                  <span className="ln-routemap-dot" aria-hidden="true" />
+                  <span className="ln-routemap-name">{s.name}</span>
+                  <span className="ln-routemap-sub" aria-hidden="true">
+                    {stageCode}
+                  </span>
+                </button>
+              );
+            })}
           </div>
+        </div>
 
-          {/* ── the detail panel — what happens + WHO ACTS ── */}
-          <div
-            id="ln-stations-panel"
-            role="tabpanel"
-            aria-labelledby={`ln-station-tab-${stage.key}`}
-            tabIndex={0}
-            className="ln-stations-panel"
-          >
-            <div className="ln-stations-panel-inner" key={stage.key}>
-              <p className="ln-mono ln-stations-kicker">
-                {`المرحلة ${active + 1} من ${COUNT}`}
-              </p>
-              <div className="ln-stations-statusrow">
-                <span className="ln-stations-chip" data-stage={stage.key}>
-                  <span className="ln-stations-chip-dot" aria-hidden="true" />
-                  {ORDER_STATUS_AR[stage.key]}
-                </span>
-                <span className="ln-mono" aria-hidden="true">
-                  {`STAGE ${stage.key}`}
-                </span>
-              </div>
-              <h3 className="ln-stations-title">{ORDER_STATUS_AR[stage.key]}</h3>
-              <p className="ln-stations-desc">{stage.blurb}</p>
-
-              <div className="ln-stations-actor">
-                <span className="ln-stations-actor-ico" aria-hidden="true">
-                  <ActorIcon size={18} />
-                </span>
-                <div className="ln-stations-actor-body">
-                  <strong>مَن يتصرف: {ACTOR_AR[stage.actor]}</strong>
-                  <span>{stage.action}</span>
+        {/* ── the detail panel — what happens + WHO ACTS (all six real
+            stages preserved; مطبخ renders PREPARING + READY together) ── */}
+        <div
+          id="ln-stations-panel"
+          role="tabpanel"
+          aria-labelledby={`ln-stop-tab-${stop.key}`}
+          tabIndex={0}
+          className="ln-stations-panel"
+        >
+          {stages.map((stage) => {
+            const ActorIcon = ACTOR_ICON[stage.actor];
+            return (
+              <div className="ln-stations-panel-inner ln-bracket" key={stage.key}>
+                <p className="ln-mono ln-stations-kicker">
+                  {`المرحلة ${FLOW_INDEX[stage.key]} من ${FLOW_TOTAL}`}
+                </p>
+                <div className="ln-stations-statusrow">
+                  <span className="ln-stations-chip" data-stage={stage.key}>
+                    <span className="ln-stations-chip-dot" aria-hidden="true" />
+                    {ORDER_STATUS_AR[stage.key]}
+                  </span>
+                  <span className="ln-mono" aria-hidden="true">
+                    {`STAGE ${stage.key}`}
+                  </span>
                 </div>
-                <span className="ln-stations-actor-stage" aria-hidden="true">
-                  <StageIcon size={15} />
-                </span>
-              </div>
+                <h3 className="ln-stations-title">{ORDER_STATUS_AR[stage.key]}</h3>
+                <p className="ln-stations-desc">{stage.blurb}</p>
 
-              <p className="ln-stations-note">
-                <RotateCcw size={15} aria-hidden="true" />
-                {stage.machine}
-              </p>
+                <div className="ln-stations-actor">
+                  <span className="ln-stations-actor-ico" aria-hidden="true">
+                    <ActorIcon size={18} />
+                  </span>
+                  <div className="ln-stations-actor-body">
+                    <strong>مَن يتصرف: {ACTOR_AR[stage.actor]}</strong>
+                    <span>{stage.action}</span>
+                  </div>
+                </div>
 
-              <div className="ln-stations-actions">
-                <Link href="/store/demo-store" className="ln-btn-ghost ln-stations-cta-warm">
-                  جرّب متجراً حقيقياً من المنصّة
-                  <ArrowLeft size={15} aria-hidden="true" />
-                </Link>
-                <Link href="/register" className="ln-btn-ghost">
-                  ابدأ رحلتك
-                </Link>
+                <p className="ln-stations-note">
+                  <RotateCcw size={15} aria-hidden="true" />
+                  {stage.machine}
+                </p>
               </div>
-            </div>
+            );
+          })}
+
+          <div className="ln-stations-actions">
+            <Link href="/store/demo-store" className="ln-btn-ghost ln-stations-cta-warm">
+              جرّب متجراً حقيقياً من المنصّة
+              <ArrowLeft size={15} aria-hidden="true" />
+            </Link>
+            <Link href="/register" className="ln-btn-ghost">
+              ابدأ رحلتك
+            </Link>
           </div>
         </div>
       </RevealCssClass>

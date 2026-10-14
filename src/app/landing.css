@@ -61,7 +61,7 @@
   --ln-ink-2:      #EFEFEA;   /* soft step — scene separation */
   --ln-cream:      #1B2A41;   /* primary text (ink navy) — 12.6:1 AAA */
   --ln-cream-dim:  #4E5A6E;   /* secondary text — 6.4:1 AA+ */
-  --ln-lime:       #D14900;   /* accent 1 — DELIVERY ORANGE */
+  --ln-lime:       #C24E00;   /* accent 1 — P12 route orange (spec: ≈4.6:1 on paper, large+small text) */
   --ln-lime-deep:  #B23E00;   /* hover/active orange — the press step */
   --ln-violet:     #3E5C76;   /* accent 2 — STEEL (large text/accent) */
   --ln-violet-deep:#2A3E52;   /* steel depth fills only */
@@ -3071,15 +3071,19 @@
 /* ── 16a · the token flip — every --ln-* name, night values ────────── */
 html.dark .landing {
   /* ground family: night dispatch ground + raised surface (globals.css) */
-  --ln-ink:        #0D1626;   /* night ground — the ink navy family */
+  /* P12-2d: the night ground climbs down to the deep-space navy-black
+     #05070D (spec-smart-order.md — the dotted-globe hero stage); the
+     raised-navy surface family stays #152238, the night glass literals
+     in §16b stay put (they read as raised cards on the darker ground). */
+  --ln-ink:        #05070D;   /* deep-space ground — the globe stage */
   --ln-ink-2:      #152238;   /* raised navy — scene separation (surface) */
-  --ln-cream:      #F1F0EA;   /* paper ink — 15.8:1 AAA on the night ground */
-  --ln-cream-dim:  #B9C2D2;   /* night secondary — 10.1:1 AAA (globals muted) */
-  /* the delivery orange climbs to the LUMINOOUS tier (globals night
-     --primary #FF7A38): 7.0:1 as text on ground, 7.0:1 as on-fill ink
-     (#0D1626 ground-as-void-ink on the luminous fill). */
-  --ln-lime:       #FF7A38;   /* luminous delivery orange — 7.0:1 on ground */
-  --ln-lime-deep:  #FF8A50;   /* night hover step BRIGHTENS (globals accent-hover) — 7.7:1 */
+  --ln-cream:      #F1F0EA;   /* paper ink — 16.5:1 AAA on #05070D */
+  --ln-cream-dim:  #B9C2D2;   /* night secondary — 11.1:1 AAA */
+  /* P12-2d: the route orange moves to the reference #FF6B00 (3.9:1 on
+     #05070D — LARGE text / arcs / fills only; small-text duties read
+     --ln-lime-text = #FF8A50 7.7:1, see the P12 appendix). */
+  --ln-lime:       #FF6B00;   /* route orange — arcs, fills, large accents */
+  --ln-lime-deep:  #FF8A50;   /* night hover BRIGHTENS (globals accent-hover) — 7.7:1 */
   /* steel (accent 2) goes luminous too: daylight #3E5C76 is 2.3:1 on
      the night ground; #8FBBF2 (the globals night sky family) 9.1:1. */
   --ln-violet:     #8FBBF2;   /* luminous steel — 9.1:1 on ground */
@@ -3251,3 +3255,306 @@ html.dark .landing .ln-dash-roles { background: rgba(21, 34, 56, 0.78); }
   align-items: center;
   flex-shrink: 0;
 }
+
+/* ═════════════════════════════════════════════════════════════════════
+   §P12 — P12-2d «الكرّة والخطوط» — the United-style editorial wave
+   ─────────────────────────────────────────────────────────────────────
+   spec-smart-order.md (S1–S5): the interactive dotted globe + orange
+   route arcs (GlobeScene canvas island), the 60/40 split hero with the
+   grey-line-1/white-punchline Kufi headline, the deep-atmosphere
+   backdrop, the monumental roadmark stats, bracket-corner cards, and
+   the horizontal route-map journey. This appendix rides AFTER §16 so
+   same-specificity rules here win the cascade; every pinned §16 literal
+   above stays byte-identical (the parity pins ride the FIRST .landing /
+   html.dark .landing blocks — the appendix adds tokens, never redefines
+   pinned ones except the two spec-mandated accent flips done inline:
+   light --ln-lime #D14900→#C24E00, dark --ln-lime #FF7A38→#FF6B00,
+   dark --ln-ink #0D1626→#05070D).
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* ── P12-a · tokens — globe stage + editorial voices ──────────────────── */
+.landing {
+  /* the globe canvas reads these off the cascade (GlobeScene readTheme) */
+  --globe-dot: #1B2A41;                 /* navy ink dots on paper */
+  --globe-arc: #C24E00;                 /* deep route orange on paper */
+  --globe-glow: rgba(62, 92, 118, 0.16); /* steel breath under the globe */
+  /* small-text orange tier: dark #FF6B00 is 3.9:1 (large/decorative only
+     per spec) — 12px mono labels climb to this rung in both stages */
+  --ln-lime-text: #C24E00;              /* = light --ln-lime, 4.6:1 AA */
+  /* editorial display voices (next/font vars from layout.tsx; the
+     product surfaces keep the Tajawal contract untouched) */
+  --ln-display-ar: var(--font-display-arabic, 'Noto Kufi Arabic'), Tajawal, var(--font-sans, sans-serif);
+  --ln-display-la: var(--font-display-latin, 'Archivo'), ui-sans-serif, sans-serif;
+}
+html.dark .landing {
+  --globe-dot: #FFFFFF;                 /* white dots on #05070D */
+  --globe-arc: #FF6B00;                 /* the reference route orange */
+  --globe-glow: rgba(41, 98, 255, 0.16); /* #2962FF low-alpha under-globe glow */
+  --ln-lime-text: #FF8A50;              /* 7.7:1 small-text tier on #05070D */
+}
+
+/* the 12px chapter labels + mono accents ride the small-text orange tier */
+.landing .ln-label { color: var(--ln-lime-text); }
+
+/* ── P12-b · the hero — 60/40 split, globe bleeding off top-right ─────── */
+.landing .ln-keep-hero {
+  display: flex;
+  flex-direction: column;
+  min-block-size: max(600px, 92svh);
+}
+.landing .ln-hero-frame {
+  position: relative;
+  z-index: 2;                /* text always wins the decor */
+  flex: 1;
+  display: flex;
+  align-items: flex-end;     /* the copy sits LOWER-left */
+  inline-size: 100%;
+  max-inline-size: 1280px;
+  margin-inline: auto;
+  padding: clamp(7rem, 16vh, 10rem) var(--page-gutter-mobile) clamp(2.5rem, 6vh, 4rem);
+}
+.landing .ln-hero-copy {
+  inline-size: min(100%, 58%);  /* the 60/40 split (copy ~60 / globe ~40) */
+  margin-inline-start: auto;    /* RTL: pushes the block to the physical LEFT */
+}
+@media (min-width: 1024px) {
+  .landing .ln-hero-frame { padding-inline: var(--page-gutter); }
+}
+@media (max-width: 1023px) {
+  .landing .ln-hero-copy { inline-size: 100%; }
+}
+
+/* the globe stage — bleeds off the TOP-RIGHT frame edge (physical). */
+.landing .ln-globe-stage {
+  position: absolute;
+  z-index: 1;
+  top: -16%;
+  right: -14%;
+  inline-size: min(58vw, 860px);
+  aspect-ratio: 1;
+  pointer-events: none;      /* the wrapper never blocks the page */
+}
+.landing .ln-globe-stage .ln-globe-canvas { pointer-events: auto; }
+@media (max-width: 1023px) {
+  /* 390px: the globe becomes a centered backdrop behind the lockup */
+  .landing .ln-globe-stage {
+    top: 5%;
+    right: 50%;
+    transform: translateX(50%);
+    inline-size: min(92vw, 430px);
+    opacity: 0.55;
+  }
+}
+.landing .ln-globe-canvas {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  touch-action: pan-y;       /* horizontal drag rotates, vertical still scrolls */
+  cursor: grab;
+}
+.landing .ln-globe-canvas.is-dragging { cursor: grabbing; }
+
+/* S3 — deep-atmosphere backdrop: layered radial glows (the #2962FF
+   under-globe breath rides the canvas glow too) over the dot grid. */
+.landing .ln-keep-sky {
+  background:
+    radial-gradient(42% 46% at 78% 30%, rgba(194, 78, 0, 0.07) 0%, transparent 70%),
+    radial-gradient(46% 54% at 30% 44%, rgb(62 92 118 / 0.10) 0%, transparent 70%),
+    radial-gradient(60% 60% at 50% 115%, rgba(27, 42, 65, 0.05) 0%, transparent 60%);
+}
+html.dark .landing .ln-keep-sky {
+  background:
+    radial-gradient(42% 46% at 78% 30%, rgba(255, 107, 0, 0.09) 0%, transparent 70%),
+    radial-gradient(48% 52% at 72% 36%, rgb(41 98 255 / 0.14) 0%, transparent 75%),
+    radial-gradient(60% 60% at 50% 115%, rgb(41 98 255 / 0.07) 0%, transparent 65%);
+}
+
+/* S2 — the editorial headline: Kufi 700, grey line-1 + white punchline */
+.landing .ln-h1-editorial {
+  font-family: var(--ln-display-ar);
+}
+.landing .ln-h1-line { display: block; color: var(--ln-cream); }
+.landing .ln-h1-line-dim { color: var(--ln-cream-dim); }
+/* the eyebrow rides the small-text orange tier */
+.landing .ln-keep-eyebrow .ln-mono { color: var(--ln-lime-text); }
+.landing .ln-keep-pill { border-color: rgb(194 78 0 / 0.30); }
+
+/* S2 — the primary SOLID CTA: ground/ink inversion (dark: paper bg,
+   deep-space ink text; light: navy ink bg, paper text). 48px floor,
+   2px focus ring, sharp editorial corners. */
+.landing .ln-btn-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: 12px 30px;
+  min-block-size: 48px;
+  background: var(--ln-cream);
+  color: var(--ln-ink);
+  font-size: 15px;
+  font-weight: var(--fw-bold);
+  border-radius: 2px;
+  transition: background var(--ln-t-fast) var(--ln-ease), color var(--ln-t-fast) var(--ln-ease);
+}
+.landing .ln-btn-solid:hover {
+  background: var(--ln-cream-dim);
+  color: var(--ln-ink);
+}
+.landing .ln-btn-solid:focus-visible {
+  outline: 2px solid var(--ln-lime);
+  outline-offset: 2px;
+}
+/* editorial corners for the outline family too */
+.landing .ln-btn-ghost { border-radius: 2px; }
+
+/* S5 — the monumental roadmark: huge Kufi figures + mono captions +
+   hairline separators (the REAL DB counts only — honesty policy). */
+.landing .ln-roadmark-item .ln-roadmark-value {
+  font-family: var(--ln-display-ar);
+  font-size: clamp(2.6rem, 6vw, 4.6rem);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  color: var(--ln-cream);
+}
+.landing .ln-roadmark-label {
+  font-family: var(--ln-mono);
+  font-size: 11px;
+  color: var(--ln-cream-dim);
+}
+.landing .ln-roadmark-item + .ln-roadmark-item {
+  border-inline-start: 1px solid var(--ln-line);
+  padding-inline-start: clamp(var(--sp-6), 5vw, 56px);
+}
+
+/* ── P12-c · S5 — bracket-corner cards (the editorial frame language) ─── */
+.landing .ln-bracket { position: relative; }
+.landing .ln-bracket::before,
+.landing .ln-bracket::after {
+  content: '';
+  position: absolute;
+  inline-size: 14px;
+  block-size: 14px;
+  pointer-events: none;
+  border: 0 solid var(--ln-lime-text);
+}
+.landing .ln-bracket::before {
+  inset-block-start: -1px;
+  inset-inline-start: -1px;
+  border-block-start-width: 1.5px;
+  border-inline-start-width: 1.5px;
+}
+.landing .ln-bracket::after {
+  inset-block-end: -1px;
+  inset-inline-end: -1px;
+  border-block-end-width: 1.5px;
+  border-inline-end-width: 1.5px;
+}
+
+/* ── P12-d · S4 — the horizontal route-map journey (المتجر → الباب) ───── */
+.landing .ln-routemap {
+  position: relative;
+  max-inline-size: var(--marketing-max-w);
+  margin-inline: auto;
+  margin-block: var(--sp-7) 0;
+}
+.landing .ln-routemap-svg {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none;
+}
+.landing .ln-routemap-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--sp-1);
+  block-size: 128px;           /* fixed height → the SVG y-map is exact */
+}
+.landing .ln-routemap-node {
+  display: grid;
+  grid-template-rows: 20px 16px 1fr;
+  justify-items: center;
+  align-items: start;
+  gap: 4px;
+  padding: 0 2px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.landing .ln-routemap-node:focus-visible {
+  outline: 2px solid var(--ln-lime);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.landing .ln-routemap-idx {
+  font-family: var(--ln-mono);
+  font-size: 11px;
+  line-height: 20px;
+  color: var(--ln-lime-text);
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+}
+.landing .ln-routemap-dot {
+  margin-block-start: 1.5px;   /* dot center = 20px index row + 8px ≈ y28 */
+  inline-size: 13px;
+  block-size: 13px;
+  border-radius: 50%;
+  background: var(--ln-ink);
+  border: 2px solid var(--ln-lime-text);
+  transition: background var(--ln-t-fast) var(--ln-ease), box-shadow var(--ln-t-fast) var(--ln-ease);
+}
+.landing .ln-routemap-node.is-active .ln-routemap-dot {
+  background: var(--ln-lime-text);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--ln-lime-text) 22%, transparent);
+}
+.landing .ln-routemap-node.is-passed .ln-routemap-dot { opacity: 0.75; }
+.landing .ln-routemap-name {
+  font-size: 14px;
+  font-weight: var(--fw-bold);
+  color: var(--ln-cream-dim);
+  text-align: center;
+  line-height: 1.2;
+}
+.landing .ln-routemap-node.is-active .ln-routemap-name { color: var(--ln-cream); }
+.landing .ln-routemap-sub {
+  font-family: var(--ln-mono);
+  font-size: 10px;
+  color: var(--ln-cream-dim);
+  opacity: 0.75;
+  text-align: center;
+  line-height: 1.3;
+}
+/* the animated route line — dash drift, RM off below */
+.landing .ln-routemap-path {
+  stroke: var(--ln-lime-text);
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 7 9;
+  animation: ln-routemap-dash 1.6s linear infinite;
+}
+@keyframes ln-routemap-dash {
+  to { stroke-dashoffset: -16; }
+}
+@media (max-width: 640px) {
+  .landing .ln-routemap-name { font-size: 12px; }
+  .landing .ln-routemap-sub { font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing .ln-routemap-path { animation: none; }
+}
+
+/* P12-d addendum — the journey panel under the route map (the old grid
+   wrapper retired with the vertical road): stacked real-stage blocks */
+.landing .ln-stations-panel {
+  display: grid;
+  gap: var(--sp-4);
+  max-inline-size: var(--marketing-max-w);
+  margin-inline: auto;
+  margin-block-start: var(--sp-6);
+}
+
+/* P12-b addendum — the eyebrow base rhythm (the old base rule never
+   existed; only the ≤560px landscape override carried a margin) */
+.landing .ln-keep-eyebrow { margin-block-end: var(--sp-4); }

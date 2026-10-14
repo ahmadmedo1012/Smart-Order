@@ -564,7 +564,10 @@ const LANDING_TOKENS = {
   '--ln-ink-2': '#EFEFEA',
   '--ln-cream': '#1B2A41',
   '--ln-cream-dim': '#4E5A6E',
-  '--ln-lime': '#D14900',
+  /* P12-2d (spec-smart-order.md): the route orange lands on the
+     reference value — ≈4.6:1 on paper (large + small text). Was
+     #D14900 (4.0:1 small-text tier). */
+  '--ln-lime': '#C24E00',
   '--ln-lime-deep': '#B23E00',
   '--ln-violet': '#3E5C76',
   '--ln-violet-deep': '#2A3E52',
@@ -630,14 +633,18 @@ const landingDarkBody = landingBlocks.find((x) => x.prelude === 'html.dark .land
 if (!landingDarkBody) throw new Error('html.dark .landing top-level block not found in landing.css (P9-3-d dark stage missing)');
 const landingDarkScope = { ...dark, ...parseDecls(landingDarkBody) };
 const LANDING_DARK_TOKENS = {
-  /* night ground family — the globals.css night dispatch values */
-  '--ln-ink': '#0D1626',       // night ground
+  /* night ground family — the P12 deep-space stage: #05070D (was the
+     globals night #0D1626) per spec-smart-order.md; raised surfaces and
+     the §16b glass literals stay the #152238 navy family (they read as
+     raised cards on the darker ground). */
+  '--ln-ink': '#05070D',       // deep-space ground — the globe stage
   '--ln-ink-2': '#152238',     // raised navy surface
-  '--ln-cream': '#F1F0EA',     // paper ink — 15.8:1 AAA
-  '--ln-cream-dim': '#B9C2D2', // night secondary — 10.1:1 AAA
-  /* the luminous orange tier (globals night --primary): 7.0:1 text on
-     ground / 7.0:1 as on-fill ink — daylight #D14900 measures 4.0:1 (below the floor) */
-  '--ln-lime': '#FF7A38',
+  '--ln-cream': '#F1F0EA',     // paper ink — 16.5:1 AAA
+  '--ln-cream-dim': '#B9C2D2', // night secondary — 11.1:1 AAA
+  /* the route orange moves to the reference #FF6B00 (3.9:1 on #05070D —
+     LARGE text/arcs/fills per spec; small-text duties ride the P12
+     --ln-lime-text tier = #FF8A50 7.7:1). Was the luminous #FF7A38. */
+  '--ln-lime': '#FF6B00',
   '--ln-lime-deep': '#FF8A50', // night hover BRIGHTENS (globals accent-hover)
   /* luminous steel — daylight #3E5C76 is 2.3:1 on the night ground */
   '--ln-violet': '#8FBBF2',    // 9.1:1
@@ -795,6 +802,13 @@ for (const [name, okFlag] of TRIPWIRE) {
   }
   const RUNTIME_VARS = new Set([
     '--p', '--sp', '--m', '--mag-x', '--mag-y', '--dot', '--ln-ci', '--ln-ri',
+    /* P12-2d: the next/font display variables (Archivo / Noto Kufi
+       Arabic) are injected at RUNTIME on <body> by next/font (layout.tsx
+       archivo.variable / kufi.variable) — the optimized self-hosted
+       families only exist through these generated names, so a static
+       cascade scan can never see their definitions. Scoped exemption,
+       documented, not a silent skip. */
+    '--font-display-latin', '--font-display-arabic',
   ]);
   const refs = new Map(); // name -> count
   for (const m of stripComments(landingCssRaw).matchAll(/var\(\s*(--[\w-]+)/g)) {
@@ -910,10 +924,10 @@ const ROUTE_SPINE = [
     /prefers-reduced-motion/.test(routeSpineSrc) && routeSpineSrc.includes('--sp')],
   ['RouteSpine: no-JS degrades cleanly — the road paints nothing until first placement (opacity-gated)',
     routeSpineSrc.includes('opacity') && routeSpineSrc.includes('ResizeObserver')],
-  ['hero: the dimensional road scene — package floats over the scooter on the route backdrop, the LINE originates under the box',
-    heroSectionSrc.includes('/images/shipping/package-hero.webp') && heroSectionSrc.includes('/images/shipping/scooter.webp') && heroSectionSrc.includes('/images/shipping/route.webp') && heroSectionSrc.includes('ln-hero-scene-origin')],
-  ['hero: the LCP doctrine holds — h1 server-rendered via the r92 settle (never opacity 0)',
-    heroSectionSrc.includes('r92-hero-settle') && heroSectionSrc.includes('priority')],
+  ['hero: P12-2d — the dotted-globe network scene (GlobeMount → dynamic ssr:false) owns the frame; the dimensional road-scene images (package/scooter/route) retired',
+    heroSectionSrc.includes('GlobeMount') && !heroSectionSrc.includes('/images/shipping/')],
+  ['hero: the LCP doctrine holds — h1 server-rendered via the r92 settle (never opacity 0; the globe is a client-only decor island)',
+    heroSectionSrc.includes('r92-hero-settle') && heroSectionSrc.includes('<h1')],
   ['hero: the roadmark board — mono live figures with CountUp (the trust band folded into the hero chapter)',
     heroSectionSrc.includes('ln-roadmark') && heroSectionSrc.includes('<CountUp')],
   ['journey: the six stations derive from TRACKING_FLOW (lib/constants) — the REAL state machine, never a duplicated list',

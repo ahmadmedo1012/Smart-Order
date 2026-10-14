@@ -47,7 +47,7 @@ export function StorefrontSection() {
       <RevealCssClass as="div" delay={3}>
         <ul className="ln-store-proof">
           {PROOF.map((p) => (
-            <li key={p.title} className="ln-store-proof-item">
+            <li key={p.title} className="ln-store-proof-item ln-bracket">
               <strong>{p.title}</strong>
               <span>{p.desc}</span>
             </li>

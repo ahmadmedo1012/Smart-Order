@@ -67,26 +67,29 @@ async function getLandingStats(): Promise<{ totalStores: number; totalOrders: nu
    through themselves, and the road terminates at the finale. The
    narrative is the logistics one, end to end:
 
-     00 — الطريق مفتوح (hero: dimensional package/scooter scene + the
-          live roadmark board)
-     01 — المحطات الست (the REAL TRACKING_FLOW as interactive stations
+     00 — الطريق مفتوح (hero: the P12 dotted-globe network scene +
+          the live roadmark board)
+     01 — المحطات الست (the REAL TRACKING_FLOW as route-map stops
           with مَن يتصرف: الزبون/التاجر/مندوب التوصيل)
      02 — المتجر (the storefront actually working: phone + QR + cart)
      03 — لوحة التاجر (the REAL state machine, interactive + payments)
      04 — محطات الدفع (the REAL PAYMENT_TYPES as toll plates + USSD)
      05 — الوصول (اطلب — أو اصنع متجرك) → FAQ
 
-   The page stays a SERVER component — the h1 and hero scene render
+   The page stays a SERVER component — the h1 and hero copy render
    inline (instant-paint LCP doctrine, r8/r9). Client islands are
    exactly: LandingHeader (chrome/spy/menus), RouteSpine (the line +
-   the scroll parcel), OrderJourneySection (stations tabs),
+   the scroll parcel), GlobeMount → GlobeScene (the dotted-globe
+   canvas, dynamic ssr:false), OrderJourneySection (route-map tabs),
    StorefrontScene + DashboardSection (motion/machine islands), CountUp
    (hero roadmark) and the RevealCssClass observers.
 
    The Madarek-generic chapters of r128–r141 (sectors constellation,
    journey light path, progress story, venues, roles, logistics band,
-   marquee, orbit canvas) retire with this redesign — the logistics
-   identity now owns the WHOLE page.
+   marquee, orbit canvas) retire with this redesign — and the r142
+   dimensional road/package hero retired with P12 (the dotted globe +
+   orange route arcs now own the frame). The logistics identity still
+   owns the WHOLE page.
    ═══════════════════════════════════════════════════════════════════════ */
 export default async function LandingPage() {
   const stats = await getLandingStats();

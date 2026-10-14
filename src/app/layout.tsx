@@ -1,6 +1,26 @@
 import type { Metadata, Viewport } from "next";
+import { Archivo, Noto_Kufi_Arabic } from "next/font/google";
 import { Providers } from "@/app/providers";
 import "./globals.css";
+
+/* P12-2d — the editorial display pair (spec-smart-order.md):
+ * Latin display Archivo 700–800 (the free BT-Steinhart stand-in, tight
+ * ALL-CAPS grotesk) + Arabic display Noto Kufi Arabic 700 (the same
+ * editorial weight for the RTL headline). Both exposed as CSS variables
+ * and consumed ONLY by the landing sheet (landing.css) — the product
+ * surfaces keep their Tajawal body/heading contract untouched. */
+const archivo = Archivo({
+  weight: ["700", "800"],
+  subsets: ["latin"],
+  variable: "--font-display-latin",
+  display: "swap",
+});
+const kufi = Noto_Kufi_Arabic({
+  weight: ["700"],
+  subsets: ["arabic"],
+  variable: "--font-display-arabic",
+  display: "swap",
+});
 
 /** Canonical production origin (order.smart-link.ly, Vercel + Neon).
  * The old smart-order.onrender.com host is retired — keep OG/canonical/
@@ -100,7 +120,7 @@ export default function RootLayout({
         <link rel="stylesheet" href="/fonts/fonts.css" />
       </head>
       <body
-        className="font-sans antialiased bg-background text-foreground min-h-screen flex flex-col"
+        className={`${archivo.variable} ${kufi.variable} font-sans antialiased bg-background text-foreground min-h-screen flex flex-col`}
         style={{ background: "var(--background-radial), var(--background)" }}
       >
         <Providers>{children}</Providers>
