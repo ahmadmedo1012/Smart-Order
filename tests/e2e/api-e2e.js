@@ -133,22 +133,33 @@ async function main() {
   const rename = await A.call(`/api/categories/${cat2Id}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, name: "مشروبات", description: null, imageUrl: null }) });
   ok("category PATCH renames (nullable clear fields)", rename.body?.data?.category?.name === "مشروبات" && rename.body?.data?.category?.description === null, JSON.stringify(rename.body).slice(0, 120));
 
-  const xTenantOwn = await B.call(`/api/categories/${cat2Id}?businessId=${bizBId}`);
+  const xTenantOwn = await B.call(`/api/categories/${cat2Id}?businessId=${bizBId}`, { method: "DELETE" });
   ok("cross-tenant category DELETE isolated (B's own biz + A's id → 404)", xTenantOwn.status === 404 || xTenantOwn.body?.error?.code === "NOT_FOUND", JSON.stringify(xTenantOwn.body).slice(0, 80));
 
-  const xTenantSpoof = await B.call(`/api/categories/${cat2Id}?businessId=${bizAId}`);
+  const xTenantSpoof = await B.call(`/api/categories/${cat2Id}?businessId=${bizAId}`, { method: "DELETE" });
   ok("businessId spoofing on category DELETE rejected", xTenantSpoof.status === 403 || xTenantSpoof.body?.error?.code === "FORBIDDEN", JSON.stringify(xTenantSpoof.body).slice(0, 80));
 
-  const delEmpty = await A.call(`/api/categories/${cat2Id}?businessId=${bizAId}`);
+  const delEmpty = await A.call(`/api/categories/${cat2Id}?businessId=${bizAId}`, { method: "DELETE" });
   ok("empty category hard-deleted", delEmpty.body?.data?.deleted === true && delEmpty.body?.data?.archived === undefined, JSON.stringify(delEmpty.body).slice(0, 100));
 
-  // catId (أطباق رئيسية) carries the product created above → must archive
-  const delFull = await A.call(`/api/categories/${catId}?businessId=${bizAId}`);
+  // dedicated category + product for the archive branch — the flow's own
+  // catId must stay ACTIVE so the later publish/order sections keep working
+  // (first run of this suite caught the cascade: archiving catId here
+  // blocks the publish gate "أضف قسماً واحداً ومنتجاً واحداً على الأقل").
+  const catArch = await A.call("/api/categories", { method: "POST", body: JSON.stringify({ businessId: bizAId, name: "قسم الأرشفة" }) });
+  const catArchId = catArch.body?.data?.category?.id;
+  const prodArch = await A.call("/api/products", {
+    method: "POST",
+    body: JSON.stringify({ businessId: bizAId, categoryId: catArchId, name: "منتج أرشيف", description: "وصف", price: "5.000", isAvailable: true }),
+  });
+  ok("archive-branch product created", !!prodArch.body?.data?.product?.id, JSON.stringify(prodArch.body).slice(0, 100));
+
+  const delFull = await A.call(`/api/categories/${catArchId}?businessId=${bizAId}`, { method: "DELETE" });
   ok("category with products archives (never hard-deleted)", delFull.body?.data?.archived === true && delFull.body?.data?.deleted === undefined, JSON.stringify(delFull.body).slice(0, 100));
 
   const listAfter = await A.call(`/api/categories?businessId=${bizAId}`);
   const names = (listAfter.body?.data?.categories || []).map((c) => c.name);
-  ok("archived + deleted categories vanish from the list", !names.includes("مشروبات") && !names.includes("أطباق رئيسية"), JSON.stringify(names).slice(0, 100));
+  ok("archived + deleted categories vanish from the list (flow's own catId stays)", !names.includes("مشروبات") && !names.includes("قسم الأرشفة") && names.includes("أطباق رئيسية"), JSON.stringify(names).slice(0, 100));
 
 
   const slug = bizA?.slug || "unknown";
