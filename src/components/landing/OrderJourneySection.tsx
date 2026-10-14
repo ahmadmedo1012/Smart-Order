@@ -188,13 +188,28 @@ export function OrderJourneySection() {
         {/* ── the horizontal ROUTE MAP (the spine threads THESE buttons —
             data-route-stop) ── */}
         <div className="ln-routemap">
+          {/* two route geometries: the horizontal map (≥768px) and the
+              VERTICAL variant (≤767px — nodes stack on a rail, the line
+              still threads them; spec S4: no horizontal squeeze) */}
           <svg
-            className="ln-routemap-svg"
+            className="ln-routemap-svg ln-routemap-svg-h"
             viewBox="0 0 1000 128"
             preserveAspectRatio="none"
             aria-hidden="true"
           >
             <path className="ln-routemap-path" d={ROUTE_PATH} />
+          </svg>
+          <svg
+            className="ln-routemap-svg ln-routemap-svg-v"
+            viewBox="0 0 12 600"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path
+              className="ln-routemap-path"
+              d="M 6 2 C 11 130, 1 260, 6 390 C 11 500, 1 560, 6 598"
+              vectorEffect="non-scaling-stroke"
+            />
           </svg>
           <div
             className="ln-routemap-row"
