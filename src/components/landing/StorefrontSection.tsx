@@ -29,7 +29,6 @@ export function StorefrontSection() {
   return (
     <section id="store" className="ln-chapter ln-store">
       <div className="ln-chapter-head">
-        <span className="ln-route-stop" data-route-stop aria-hidden="true" />
         <span className="ln-micro" aria-hidden="true">{"SMART ORDER — 002 · STORE"}</span>
         <span className="ln-label">{'02 — المتجر'}</span>
         <RevealCssClass as="h2" className="ln-chapter-title" delay={1}>

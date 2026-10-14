@@ -69,9 +69,6 @@ export function HeroSection({
         <GlobeMount />
       </div>
 
-      {/* the route origin — the line (RouteSpine) starts in the hero */}
-      <span className="ln-route-stop" data-route-stop aria-hidden="true" />
-
       {/* 60/40 split — copy LOWER-LEFT (globe owns the top-right) */}
       <div className="ln-hero-frame">
         <div className="ln-hero-copy">
