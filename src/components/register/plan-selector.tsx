@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/scroll-reveal";
 import { Sparkles, Star, Crown, Building2, Flame, type LucideIcon } from "lucide-react";
 import type { Plan } from "@/lib/plan-types";
-import { toArabicNumber } from "@/lib/plan-types";
+import { toArabicNumber, foldRestatedLimits } from "@/lib/plan-types";
 
 /** Plan metadata by name (family PLAN_META pattern — survives reordering).
  *  r128-F8 (B20): icon chips flat — no gradient grounds (§7 discipline). */
@@ -23,6 +23,14 @@ function itemsPhrase(plan: Plan): string {
   const products = plan.maxProducts >= 9999 ? "منتجات غير محدودة" : `${plan.maxProducts} منتجاً`;
   const orders = plan.maxOrders >= 99999 ? "طلبات غير محدودة" : `${plan.maxOrders} طلباً شهرياً`;
   return `${products} · ${orders}`;
+}
+
+/* P14 (2-d/3-d): the itemsPhrase line is this card's single limits
+ * carrier — the feature checks below ride the same display fold as the
+ * pricing page (bullets restating maxProducts/maxOrders fold out; every
+ * other entitlement passes through). */
+function cardFeatures(plan: Plan): string[] {
+  return foldRestatedLimits(plan.features, plan.maxProducts, plan.maxOrders);
 }
 
 /**
@@ -99,16 +107,16 @@ export function PlanSelector({
               </div>
               <p className="mb-3 text-xs text-muted-foreground">{itemsPhrase(plan)}</p>
               <div className="mb-4 flex-1 space-y-1.5">
-                {plan.features.slice(0, 4).map((f, j) => (
+                {cardFeatures(plan).slice(0, 4).map((f, j) => (
                   <div key={j} className="flex items-center gap-2 text-xs">
                     {/* Family feature marks — bright flame checks */}
                     <MotionCheck className="size-3 shrink-0 text-accent-foreground" />
                     <span>{f}</span>
                   </div>
                 ))}
-                {plan.features.length > 4 && (
+                {cardFeatures(plan).length > 4 && (
                   <p className="text-xs font-medium text-accent-foreground">
-                    +{plan.features.length - 4} ميزات أخرى
+                    +{cardFeatures(plan).length - 4} ميزات أخرى
                   </p>
                 )}
               </div>

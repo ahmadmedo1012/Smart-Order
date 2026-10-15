@@ -11,6 +11,13 @@ export const runtime = "nodejs";
  * Self-seeding: on an empty plans table (fresh deployment) the family
  * catalog is upserted once, idempotently — so /pricing never renders an
  * empty state on a cold database (same philosophy as Smart Menu /api/seed).
+ *
+ * P14 (2-d/3-d): the seed's feature bullets no longer restate the numeric
+ * limits — the card's limits block (المنتجات/الطلبات الشهرية, from the
+ * maxProducts/maxOrders columns) is the single visual carrier of those two
+ * numbers. Entitlements beyond those two limits («3 أقسام»، «أقسام غير
+ * محدودة»…) stay. Rows seeded before this change heal at display time via
+ * lib/plan-types.ts foldRestatedLimits.
  */
 const FAMILY_PLANS = [
   {
@@ -21,7 +28,7 @@ const FAMILY_PLANS = [
     maxProducts: 15,
     maxOrders: 100,
     sortOrder: 1,
-    features: ["متجر رقمي يعمل فوراً", "15 منتجاً و3 أقسام", "100 طلب شهرياً", "منطقة توصيل واحدة", "طرق دفع محلية"],
+    features: ["متجر رقمي يعمل فوراً", "3 أقسام", "منطقة توصيل واحدة", "طرق دفع محلية"],
   },
   {
     name: "Basic",
@@ -31,7 +38,7 @@ const FAMILY_PLANS = [
     maxProducts: 100,
     maxOrders: 1000,
     sortOrder: 2,
-    features: ["كل ميزات المجانية", "100 منتج وأقسام غير محدودة", "1000 طلب شهرياً", "مناطق توصيل متعددة", "تتبع مباشر للعميل", "دعم فني عبر واتساب"],
+    features: ["كل ميزات المجانية", "أقسام غير محدودة", "مناطق توصيل متعددة", "تتبع مباشر للعميل", "دعم فني عبر واتساب"],
   },
   {
     name: "Premium",
@@ -41,7 +48,7 @@ const FAMILY_PLANS = [
     maxProducts: 9999,
     maxOrders: 10000,
     sortOrder: 3,
-    features: ["كل ميزات الأساسي", "منتجات غير محدودة", "10000 طلب شهرياً", "حسابات فريق (3 أعضاء)", "إشعارات واتساب فورية", "تقارير أداء أسبوعية", "دعم أولوية"],
+    features: ["كل ميزات الأساسي", "حسابات فريق (3 أعضاء)", "إشعارات واتساب فورية", "تقارير أداء أسبوعية", "دعم أولوية"],
   },
   {
     name: "Pro",
@@ -51,7 +58,7 @@ const FAMILY_PLANS = [
     maxProducts: 9999,
     maxOrders: 99999,
     sortOrder: 4,
-    features: ["كل ميزات بريميوم", "طلبات غير محدودة", "فريق غير محدود", "متاجر متعددة من حساب واحد", "إحصاءات متقدمة", "مدير حساب مخصص"],
+    features: ["كل ميزات بريميوم", "فريق غير محدود", "متاجر متعددة من حساب واحد", "إحصاءات متقدمة", "مدير حساب مخصص"],
   },
 ];
 

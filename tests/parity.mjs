@@ -924,7 +924,7 @@ const ROUTE_SPINE = [
     heroSectionSrc.includes('r92-hero-settle') && heroSectionSrc.includes('<h1')],
   ['hero: the roadmark board — mono live figures with CountUp (the trust band folded into the hero chapter)',
     heroSectionSrc.includes('ln-roadmark') && heroSectionSrc.includes('<CountUp')],
-  ['journey: the six stations derive from TRACKING_FLOW (lib/constants) — the REAL state machine, never a duplicated list',
+  ['journey: the real-state kickers derive from TRACKING_FLOW (lib/constants) — the REAL state machine, never a duplicated list',
     journeySrc.includes('TRACKING_FLOW') && constantsSrc.includes('TRACKING_FLOW: OrderStatus[]')],
   ['journey: the FULL union is covered — NEW → CONFIRMED → PREPARING → READY → OUT_FOR_DELIVERY → DELIVERED',
     /NEW:/.test(constantsSrc) && /CONFIRMED:/.test(constantsSrc) && /PREPARING:/.test(constantsSrc) && /READY:/.test(constantsSrc) && /OUT_FOR_DELIVERY:/.test(constantsSrc) && /DELIVERED:/.test(constantsSrc)],
@@ -1489,6 +1489,39 @@ const P10_ROUTES = [
 for (const [name, okFlag] of P10_ROUTES) {
   if (okFlag) passed += 1;
   else failures.push(`p10-1b routes gate FAILED: ${name}`);
+}
+
+// ── P14 (2-d/3-d): the STORY/MACHINE wording split + the pricing limits
+// dedup. Five journey-story stops vs six real TRACKING_FLOW states — both
+// counted honestly, each NAMED for what it is (the numbers are never
+// falsified to match); the plan cards carry every numeric limit in exactly
+// ONE visual block (the limits block), with feature bullets that restate
+// those two numbers folding out at display time — every genuine entitlement
+// preserved. ────────────────────────────────────────────────────────────
+const P14_D = [
+  ['P14 journey: the five-stop STORY and the six-state MACHINE are each named — chapter/lede say «خمس محطات», the panel kicker says «حالة تتبّع فعلية N من 6» (TRACKING_FLOW count)',
+    journeySrc.includes('خمس محطات') &&
+    journeySrc.includes('حالة تتبّع فعلية ${FLOW_INDEX[stage.key]} من ${FLOW_TOTAL}') &&
+    !journeySrc.includes('المرحلة ${FLOW_INDEX')],
+  ['P14 journey: the false «نفس المراحل» conflation (five stops == what the dashboard/tracking render) is retired — the lede separates the story from the real six-state tracking track',
+    !journeySrc.includes('نفس المراحل') && journeySrc.includes('ست حالات')],
+  ['P14 pricing: ONE visual block per number — both plan surfaces (pricing card + register wizard) fold limit-restating feature bullets via lib/plan-types foldRestatedLimits',
+    R('src/components/pricing/pricing-client.tsx').includes('foldRestatedLimits(plan.features, plan.maxProducts, plan.maxOrders)') &&
+    R('src/components/register/plan-selector.tsx').includes('foldRestatedLimits(plan.features, plan.maxProducts, plan.maxOrders)') &&
+    R('src/lib/plan-types.ts').includes('export function foldRestatedLimits')],
+  ['P14 pricing: the three seed sources stopped restating the numeric limits in features (api/plans FAMILY_PLANS + seed-family + e2e-seed stay twins; «3 أقسام» entitlement survives)',
+    !R('src/app/api/plans/route.ts').includes('15 منتجاً و3 أقسام') &&
+    !R('src/app/api/plans/route.ts').includes(' طلب شهرياً') &&
+    !R('scripts/seed-family.js').includes('15 منتجاً و3 أقسام') &&
+    !R('scripts/seed-family.js').includes(' طلب شهرياً') &&
+    !R('scripts/e2e-seed.mjs').includes('15 منتجاً و3 أقسام') &&
+    !R('scripts/e2e-seed.mjs').includes(' طلب شهرياً') &&
+    R('scripts/seed-family.js').includes('"3 أقسام"') &&
+    R('scripts/e2e-seed.mjs').includes('"3 أقسام"')],
+];
+for (const [name, okFlag] of P14_D) {
+  if (okFlag) passed += 1;
+  else failures.push(`p14 2-d/3-d gate FAILED: ${name}`);
 }
 
 // ── report ───────────────────────────────────────────────────────────────────

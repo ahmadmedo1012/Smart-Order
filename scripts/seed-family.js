@@ -3,6 +3,11 @@
  * demo store the landing header links to. Safe to re-run — upserts by
  * natural keys. Works against the DATABASE_URL it is invoked with.
  *
+ * P14 (2-d/3-d): feature bullets no longer restate the numeric limits
+ * (المنتجات/الطلبات الشهرية) — the plan card's limits block is the single
+ * visual carrier of those two numbers; pre-fold rows heal at display time
+ * via lib/plan-types.ts foldRestatedLimits.
+ *
  * Usage: node scripts/seed-family.js
  */
 const { PrismaClient } = require("@prisma/client");
@@ -19,8 +24,7 @@ const PLANS = [
     sortOrder: 1,
     features: [
       "متجر رقمي يعمل فوراً",
-      "15 منتجاً و3 أقسام",
-      "100 طلب شهرياً",
+      "3 أقسام",
       "منطقة توصيل واحدة",
       "طرق دفع محلية",
     ],
@@ -35,8 +39,7 @@ const PLANS = [
     sortOrder: 2,
     features: [
       "كل ميزات المجانية",
-      "100 منتج وأقسام غير محدودة",
-      "1000 طلب شهرياً",
+      "أقسام غير محدودة",
       "مناطق توصيل متعددة",
       "تتبع مباشر للعميل",
       "دعم فني عبر واتساب",
@@ -52,8 +55,6 @@ const PLANS = [
     sortOrder: 3,
     features: [
       "كل ميزات الأساسي",
-      "منتجات غير محدودة",
-      "10000 طلب شهرياً",
       "حسابات فريق (3 أعضاء)",
       "إشعارات واتساب فورية",
       "تقارير أداء أسبوعية",
@@ -70,7 +71,6 @@ const PLANS = [
     sortOrder: 4,
     features: [
       "كل ميزات بريميوم",
-      "طلبات غير محدودة",
       "فريق غير محدود",
       "متاجر متعددة من حساب واحد",
       "إحصاءات متقدمة",

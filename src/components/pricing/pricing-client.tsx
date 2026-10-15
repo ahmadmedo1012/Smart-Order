@@ -13,7 +13,7 @@ import { CountUp } from "@/components/ui/CountUp";
 import { useMagnetic } from "@/hooks/useMagnetic";
 import { PageScrollProgress } from "@/components/shared/page-scroll-progress";
 import { api } from "@/lib/client";
-import { type Plan, toArabicNumber } from "@/lib/plan-types";
+import { type Plan, toArabicNumber, foldRestatedLimits } from "@/lib/plan-types";
 
 /** Plan metadata by name (not index) — family PLAN_META pattern.
  *  r128-F8 (B18): badges flat — no gradient grounds (§7 discipline). */
@@ -141,13 +141,19 @@ function PlanCard({ plan, index, yearly }: { plan: Plan; index: number; yearly: 
         </div>
 
         <div className="mb-8 flex-1 space-y-3">
-          {plan.features.map((feature: string, i: number) => (
-            <div key={i} className="flex items-start gap-3 text-sm">
-              {/* Family feature bullets — dot marks instead of animated checks */}
-              <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-accent-foreground/60" />
-              <span className="text-muted-foreground">{feature}</span>
-            </div>
-          ))}
+          {/* P14 (2-d/3-d): bullets that restate the two limits above fold
+              out at display time — one number, one visual block; every
+              entitlement beyond those two limits stays (mixed bullets keep
+              their tail, e.g. «3 أقسام»). */}
+          {foldRestatedLimits(plan.features, plan.maxProducts, plan.maxOrders).map(
+            (feature: string, i: number) => (
+              <div key={i} className="flex items-start gap-3 text-sm">
+                {/* Family feature bullets — dot marks instead of animated checks */}
+                <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-accent-foreground/60" />
+                <span className="text-muted-foreground">{feature}</span>
+              </div>
+            ),
+          )}
         </div>
 
         {/* r128-F8 (B15/B18): the popular plan's CTA rides the magnetic pull;

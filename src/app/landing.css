@@ -2320,7 +2320,9 @@
   color: var(--ln-cream-dim);
 }
 
-/* ── 15d · المحطات الست — the interactive state timeline ───────────── */
+/* ── 15d · محطات الرحلة الخمس — route map + the real-state panel
+   (P14 2-d/3-d: five story stops; the panel kickers count the six REAL
+   TRACKING_FLOW states — story and machine labeled separately) ──────── */
 .landing .ln-stations-grid {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
@@ -2405,7 +2407,8 @@
 .landing .ln-stations-kicker {
   font-size: 0.7rem;
   /* r151 (LIVE-AUDIT-SO1 P2-1): 0.05em zeroed — the kicker renders Arabic
-     («المرحلة 1 من 6»); the r150 tracking law wins over the mono-latin
+     («حالة تتبّع فعلية 1 من 6», P14 2-d/3-d — the real-state count, not
+     the five-stop story); the r150 tracking law wins over the mono-latin
      display convention (Arabic runs continue via the --ln-mono chain). */
   letter-spacing: 0;
   color: var(--ln-cream-dim);

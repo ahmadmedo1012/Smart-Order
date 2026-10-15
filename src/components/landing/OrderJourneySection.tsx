@@ -7,7 +7,7 @@ import { RevealCssClass } from '@/hooks/useReveal';
 import { TRACKING_FLOW, ORDER_STATUS_AR, type OrderStatus } from '@/lib/constants';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   P12-2d — OrderJourneySection «المحطات الست» → the ROUTE MAP.
+   P12-2d — OrderJourneySection (the old «المحطات الست» vertical road) → the ROUTE MAP.
    ─────────────────────────────────────────────────────────────────────
    The vertical road retires; the journey is now a HORIZONTAL ROUTE MAP
    (spec S4): five connected macro stops — متجر → طلب → مطبخ → مندوب →
@@ -23,6 +23,12 @@ import { TRACKING_FLOW, ORDER_STATUS_AR, type OrderStatus } from '@/lib/constant
      التوصيل) with the action phrased from the real state machine.
    · The stop buttons keep [data-route-stop] (map-local node markers; the page
      threads the journey.
+
+   P14 (2-d/3-d) — the STORY and the MACHINE are counted as two
+   different things, never conflated: the five stops are the journey
+   STORY («محطات الرحلة»); the panel kicker counts the SIX real
+   states («حالة تتبّع فعلية N من 6» — TRACKING_FLOW, the same flow
+   the tracking page renders). The lede says exactly that.
 
    Mechanics: WAI-ARIA horizontal tablist (roving tabindex,
    ArrowLeft/ArrowRight = next/prev in RTL, Home/End). Clicking a stop
@@ -173,19 +179,21 @@ export function OrderJourneySection() {
       <div className="ln-chapter-head">
         {/* the route station node — chapter 01 on the line */}
         <span className="ln-micro" aria-hidden="true">{"SMART ORDER — 001 · ROUTE"}</span>
-        {/* P13-2d (T2): the map has FIVE stops (STOPS:001-005) and the lede
-            already says «خمس محطات» — the chapter label was the lone «الست»
-            holdout. The panel counter «المرحلة N من 6» stays truthful: it
-            counts the six REAL TRACKING_FLOW stages (kitchen carries both
-            PREPARING + READY). */}
+        {/* P13-2d (T2) + P14 (2-d/3-d): the map has FIVE stops (STOPS:001-005)
+            and the chapter/lede say «خمس محطات» — the STORY. The panel counter
+            now NAMES its denominator — «حالة تتبّع فعلية N من 6» counts the six
+            REAL TRACKING_FLOW states (مطبخ carries both PREPARING + READY), so
+            the five-stop story and the six-state machine are counted
+            separately and never read as one broken number. */}
         <span className="ln-label">{'01 — المحطات الخمس'}</span>
         <RevealCssClass as="h2" className="ln-chapter-title" delay={1}>
           الطريق من «جديد» <em>إلى باب العميل</em>
         </RevealCssClass>
         <RevealCssClass as="p" className="ln-chapter-lede" delay={2}>
-          خمس محطات على خطٍّ واحد — متجر، طلب، مطبخ، مندوب، باب المنزل —
-          نفس المراحل التي يراها صاحب المتجر في لوحته وعملاؤه في صفحة
-          التتبّع. اختر محطة لتعرف ماذا يحدث ومَن يتصرف.
+          خمس محطات على خطٍّ واحد تحكي رحلة الطلب — متجر، طلب، مطبخ، مندوب،
+          باب المنزل — وخلف القصة درب تتبّع فعلي من ست حالات، هو ما يراه
+          صاحب المتجر في لوحته وعملاؤه في صفحة التتبّع (المطبخ يجمع حالتي
+          التحضير والجاهزية). اختر محطة لتعرف ماذا يحدث ومَن يتصرف.
         </RevealCssClass>
       </div>
 
@@ -267,7 +275,7 @@ export function OrderJourneySection() {
             return (
               <div className="ln-stations-panel-inner ln-bracket" key={stage.key}>
                 <p className="ln-mono ln-stations-kicker">
-                  {`المرحلة ${FLOW_INDEX[stage.key]} من ${FLOW_TOTAL}`}
+                  {`حالة تتبّع فعلية ${FLOW_INDEX[stage.key]} من ${FLOW_TOTAL}`}
                 </p>
                 <div className="ln-stations-statusrow">
                   <span className="ln-stations-chip" data-stage={stage.key}>

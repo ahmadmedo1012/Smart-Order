@@ -67,8 +67,9 @@ async function getLandingStats(): Promise<{ totalStores: number; totalOrders: nu
 
      00 — الطريق مفتوح (hero: the P12 dotted-globe network scene +
           the live roadmark board)
-     01 — المحطات الست (the REAL TRACKING_FLOW as route-map stops
-          with مَن يتصرف: الزبون/التاجر/مندوب التوصيل)
+     01 — المحطات الخمس (the journey STORY: five route-map stops that map
+          the six REAL TRACKING_FLOW states — the panel kickers count the
+          real six; مَن يتصرف: الزبون/التاجر/مندوب التوصيل)
      02 — المتجر (the storefront actually working: phone + QR + cart)
      03 — لوحة التاجر (the REAL state machine, interactive + payments)
      04 — محطات الدفع (the REAL PAYMENT_TYPES as toll plates + USSD)
@@ -132,7 +133,9 @@ export default async function LandingPage() {
           {/* ═══ 00 — الطريق مفتوح: the dimensional road scene + h1 LCP ═══ */}
           <HeroSection trustCount={stats.totalStores} totalOrders={stats.totalOrders} />
 
-          {/* ═══ 01 — المحطات الست: the REAL TRACKING_FLOW as stations ═══ */}
+          {/* ═══ 01 — المحطات الخمس: the journey story mapping the REAL
+                six-state TRACKING_FLOW (P14 2-d/3-d — story and machine
+                counted separately, never conflated) ═══ */}
           <OrderJourneySection />
 
           {/* ═══ 02 — المتجر: the storefront working (phone + QR + cart) ═══ */}
