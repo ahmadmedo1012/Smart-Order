@@ -176,6 +176,18 @@ export function CheckoutClient({
           })),
         }
       );
+      /* 4-c (P15, 3-c audit P1 «the stale error rides the confirmation»):
+         the sonner wrapper pins every toast.error to duration: Infinity
+         (r133 A11 doctrine — errors persist until the human acts). An
+         earlier failed submit's «أدخل اسمك الكامل» therefore survived
+         the client navigation to /track/…?placed=1 and sat beside
+         «تم استلام طلبك!» for 18+ seconds (only a hard reload cleared
+         it). The error's reason is RESOLVED at this point — the order
+         committed — so retiring the queue here is not soft-dismissal,
+         it is the doctrine's own exit condition. toast.dismiss() with
+         no id clears the whole queue; called BEFORE the replay info
+         toast so that one (default duration) still renders. */
+      toast.dismiss();
       if (r.data.order.replay) {
         toast.info("تم استلام طلبك مسبقاً");
       }

@@ -31,6 +31,15 @@ export default function LoginPage() {
   const [showForgot, setShowForgot] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  /* 4-c (P15, 3-c audit P2 «login below the family bar»): empty-submit
+     fell through to NATIVE validation bubbles (English browser chrome)
+     while /register runs the Arabic per-field contract. Field-level
+     errors + first-invalid focus bring login to the same law (the
+     server-error banner keeps its role=alert path untouched). */
+  const [fieldErrors, setFieldErrors] = React.useState<{
+    email?: string;
+    password?: string;
+  }>({});
   /* r133 (A1 S5): /login?expired=1 arrives from the 401 session-expiry
      funnel (lib/client.ts) — the toast there dies with the navigation,
      so the login page finishes the story with a quiet banner. The flag
@@ -48,6 +57,19 @@ export default function LoginPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    /* 4-c: the register contract — Arabic per-field errors, aria-invalid,
+     * focus on the first offender. noValidate on the <form> (already
+     * present) keeps the native bubbles out of the way. */
+    const fe: typeof fieldErrors = {};
+    if (!email.trim()) fe.email = "أدخل البريد الإلكتروني";
+    else if (!/^\S+@\S+\.\S+$/.test(email.trim())) fe.email = "البريد الإلكتروني غير صحيح";
+    if (!password) fe.password = "أدخل كلمة المرور";
+    setFieldErrors(fe);
+    const firstInvalid = (["email", "password"] as const).find((k) => fe[k]);
+    if (firstInvalid) {
+      document.getElementById(firstInvalid)?.focus();
+      return;
+    }
     setLoading(true);
     try {
       await api.post("/api/auth/login", { email, password });
@@ -58,6 +80,10 @@ export default function LoginPage() {
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "تعذّر تسجيل الدخول، حاول مرة أخرى";
       setError(message);
+      /* 4-c: the wrong-credentials banner lands — focus returns to the
+       * email field so the next keystroke goes to the fix (the same
+       * wrong-creds refocus the Smart-Menu login ships). */
+      document.getElementById("email")?.focus();
     } finally {
       setLoading(false);
     }
@@ -147,10 +173,20 @@ export default function LoginPage() {
                   autoComplete="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  aria-invalid={!!error}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (fieldErrors.email) setFieldErrors((x) => ({ ...x, email: undefined }));
+                  }}
+                  aria-invalid={!!fieldErrors.email || !!error}
+                  aria-describedby={fieldErrors.email ? "email-error" : undefined}
                 />
               </div>
+              {/* 4-c: the register contract — per-field Arabic message. */}
+              {fieldErrors.email && (
+                <p id="email-error" role="alert" className="text-sm text-destructive-ink">
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">كلمة المرور</Label>
@@ -163,8 +199,12 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  aria-invalid={!!error}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (fieldErrors.password) setFieldErrors((x) => ({ ...x, password: undefined }));
+                  }}
+                  aria-invalid={!!fieldErrors.password || !!error}
+                  aria-describedby={fieldErrors.password ? "password-error" : undefined}
                 />
                 {/* Eye toggle — 44px hit area via the button itself (family) */}
                 <button
@@ -176,6 +216,12 @@ export default function LoginPage() {
                   {showPassword ? <AnimatedEyeOff className="size-4" /> : <AnimatedEye className="size-4" />}
                 </button>
               </div>
+              {/* 4-c: the register contract — per-field Arabic message. */}
+              {fieldErrors.password && (
+                <p id="password-error" role="alert" className="text-sm text-destructive-ink">
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
 
             {error && (

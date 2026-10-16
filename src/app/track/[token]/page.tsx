@@ -6,10 +6,34 @@ import type { OrderStatus, PaymentStatus } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "تتبع الطلب",
-  robots: { index: false, follow: false },
-};
+/* 4-c (P15, 3-c audit P2 «track-404 keeps the track title»): the static
+ * metadata stamped «تتبع الطلب | سمارت أوردر» on the 404 body too — the
+ * store route already had the right law (unavailable → «المتجر غير
+ * متاح»); the track route now speaks it too. The order query below is
+ * the page's own (a single cheap indexed publicToken lookup; adding
+ * React cache() here would duplicate the select shape for zero
+ * measurable gain on a noindex route). */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}): Promise<Metadata> {
+  const { token } = await params;
+  if (!/^[0-9a-f-]{16,64}$/i.test(token)) {
+    return { title: "الطلب غير متاح", robots: { index: false, follow: false } };
+  }
+  const order = await db.order.findUnique({
+    where: { publicToken: token },
+    select: { orderNumber: true },
+  });
+  if (!order) {
+    return { title: "الطلب غير متاح", robots: { index: false, follow: false } };
+  }
+  return {
+    title: `تتبع الطلب ${order.orderNumber}`,
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function TrackPage({
   params,
