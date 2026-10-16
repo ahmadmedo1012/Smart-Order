@@ -3366,7 +3366,17 @@ html.dark .landing .ln-keep-sky {
   font-family: var(--ln-display-ar);
 }
 .landing .ln-h1-line { display: block; color: var(--ln-cream); }
-.landing .ln-h1-line-dim { color: var(--ln-cream-dim); }
+/* P18-W5 (final audit round 2): the dim prefix was --ln-cream-dim
+   (#B9C2D2 night / #4E5A6E day) — only a whisper below the
+   punchline, so the UC emphasis-by-subtraction law didn't register
+   (VLM read the H1 as single-voice). The h1's dim line gets its own
+   recessed grade — night #7E8CA3 ≈ 6.5:1 on #05070D, day #5E6B80 on
+   paper: both comfortably large-text AA, an unmistakable two-voice
+   step. Line 2 keeps the full ink. */
+html.dark .landing .ln-h1-line-dim,
+.dark .landing .ln-h1-line-dim { color: #7E8CA3; }
+html.light .landing .ln-h1-line-dim,
+.light .landing .ln-h1-line-dim { color: #5E6B80; }
 /* the eyebrow rides the small-text orange tier */
 .landing .ln-keep-eyebrow .ln-mono { color: var(--ln-lime-text); }
 .landing .ln-keep-pill { border-color: rgb(194 78 0 / 0.30); }
