@@ -319,7 +319,7 @@ export default function OrderDetailPage() {
             <OrderStatusBadge status={order.status} />
             <PaymentStatusBadge status={order.paymentStatus} />
           </div>
-          <p className="mt-1.5 text-sm text-muted-foreground flex items-center gap-1.5">
+          <p className="mt-1.5 text-sm text-muted-foreground flex items-center gap-1.5 font-mono tabular-nums">
             <Clock className="size-3.5" aria-hidden="true" />
             {formatArabicDateTime(order.createdAt)}
           </p>

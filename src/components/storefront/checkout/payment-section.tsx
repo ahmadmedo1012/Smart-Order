@@ -1,11 +1,12 @@
 import type { Dispatch, SetStateAction } from "react";
+import * as React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FieldError } from "@/components/dashboard/form-field";
 import { toast } from "sonner";
 import { AnimatedCopy } from "@/components/ui/animated-icons";
 import { libyanaUssdCode, madarUssdCode, WALLET_CAP_LYD } from "@/lib/payment-constants";
 import { formatPhoneDisplay } from "@/lib/phone";
-import { Coins } from "lucide-react";
+import { Check, Coins } from "lucide-react";
 import { paymentIcon } from "./payment-icon";
 import type { FieldErrors, StoreData } from "./types";
 
@@ -39,6 +40,29 @@ export function PaymentSection({
   overWalletCap: boolean;
   total: number;
 }) {
+  /* P18-W2-d (W1-d #8 — USSD copy feedback state): the copy action
+     answers INLINE, not only via toast — the button flips to a franked
+     ✓ «تم النسخ» state for ~2s (the same transient grammar the family
+     AnimatedCopy answer uses). The 2s timer is display-only state; the
+     clipboard write itself is awaited and its FAILURE surfaces (the
+     transfer-number button used to fire-and-forget — no await, no
+     catch, a silent dead copy on non-secure contexts). */
+  const [copiedKey, setCopiedKey] = React.useState<string | null>(null);
+  const copyText = React.useCallback(
+    async (key: string, text: string, okMsg: string) => {
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopiedKey(key);
+        window.setTimeout(() => {
+          setCopiedKey((k) => (k === key ? null : k));
+        }, 2_000);
+        toast.success(okMsg);
+      } catch {
+        toast.error("تعذّر النسخ — انسخ الرقم يدوياً");
+      }
+    },
+    [],
+  );
   return (
     <section className="mt-3 space-y-3 rounded-xl border border-border bg-card p-4">
       <h2 className="flex items-center gap-2 text-sm font-semibold">
@@ -107,14 +131,17 @@ export function PaymentSection({
               <button
                 type="button"
                 onClick={() => {
-                  navigator.clipboard.writeText(paymentConfig.number!);
-                  toast.success("تم نسخ الرقم");
+                  copyText("number", paymentConfig.number!, "تم نسخ الرقم");
                 }}
-                className="flex size-11 items-center justify-center rounded-md border border-border/30 transition-colors hover:bg-muted"
-                title="نسخ الرقم"
                 aria-label="نسخ الرقم"
+                title={copiedKey === "number" ? "تم النسخ" : "نسخ الرقم"}
+                className="flex size-11 items-center justify-center rounded-md border border-border/30 transition-colors hover:bg-muted"
               >
-                <AnimatedCopy className="size-3.5" />
+                {copiedKey === "number" ? (
+                  <Check className="size-4 text-success-ink" aria-hidden="true" />
+                ) : (
+                  <AnimatedCopy className="size-3.5" />
+                )}
               </button>
             </div>
           </div>
@@ -145,24 +172,28 @@ export function PaymentSection({
                 </span>
                 <button
                   type="button"
-                  onClick={async () => {
+                  onClick={() => {
                     const code =
                       paymentMethod.type === "LIBYANA"
                         ? libyanaUssdCode(paymentConfig.number!, total / 1000)
                         : madarUssdCode(paymentConfig.number!, total / 1000);
-                    try {
-                      await navigator.clipboard.writeText(code);
-                      toast.success("تم نسخ الرمز");
-                    } catch {
-                      toast.error("تعذّر النسخ");
-                    }
+                    copyText("ussd", code, "تم نسخ الرمز");
                   }}
                   className="flex h-11 shrink-0 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                   title="نسخ رمز التحويل السريع"
                   aria-label="نسخ رمز التحويل السريع"
                 >
-                  <AnimatedCopy className="size-3.5" />
-                  نسخ
+                  {copiedKey === "ussd" ? (
+                    <>
+                      <Check className="size-3.5" aria-hidden="true" />
+                      تم النسخ
+                    </>
+                  ) : (
+                    <>
+                      <AnimatedCopy className="size-3.5" />
+                      نسخ
+                    </>
+                  )}
                 </button>
               </div>
             </div>

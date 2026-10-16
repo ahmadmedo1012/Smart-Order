@@ -449,7 +449,7 @@ export default function OrdersPage() {
                     <td className="px-4 py-3 font-bold font-mono tabular-nums">
                       {formatLyd(o.total)}
                     </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap font-mono tabular-nums">
                       {formatArabicDateTime(o.createdAt)}
                     </td>
                     <td className="px-2 opacity-0 transition-opacity duration-(--t-fast) group-hover/row:opacity-100 focus-within:opacity-100">
@@ -501,7 +501,7 @@ export default function OrdersPage() {
                   <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground">
                     <span>{FULFILLMENT_AR[o.fulfillmentType]}</span>
                     <span aria-hidden="true">·</span>
-                    <span className="tabular-nums">
+                    <span className="tabular-nums font-mono">
                       {formatArabicDateTime(o.createdAt)}
                     </span>
                   </div>

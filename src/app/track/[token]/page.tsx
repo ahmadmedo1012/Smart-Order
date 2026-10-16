@@ -56,19 +56,30 @@ export default async function TrackPage({
       deliveryFee: true, paymentStatus: true, paymentMethodName: true, paymentType: true,
       customerName: true, city: true, area: true, createdAt: true,
       items: { select: { productName: true, variantName: true, quantity: true, lineTotal: true, optionsJson: true } },
-      /* P6-2-f3 (GROUP 2): the DELIVERED stamp's date — the honest
-         source is the status history (the moment the machine logged
-         DELIVERED); read-only additive select, no behavior change. */
-      history: { where: { toStatus: "DELIVERED" }, orderBy: { createdAt: "desc" }, take: 1, select: { createdAt: true } },
+      /* P18-W2-d (W1-d priority #1 — UC «every leg of the journey»): the
+         FULL machine log ships to the client — each completed route node
+         renders its REAL timestamp from this history (mono fact voice,
+         poll-refreshed). Still the honest source, no new writer, no
+         fabricated legs: rows exist exactly when the order-machine logged
+         a transition. The P6-2-f3 DELIVERED stamp date is derived from
+         the same rows (the first row where toStatus === "DELIVERED"). */
+      history: { orderBy: { createdAt: "asc" }, select: { toStatus: true, createdAt: true } },
       business: { select: { name: true, slug: true, phone: true, whatsappNumber: true, logoUrl: true } },
     },
   });
   if (!order) notFound();
 
+  /* P6-2-f3 (GROUP 2): the DELIVERED stamp's date — first history row
+     where toStatus: "DELIVERED" (the moment the machine logged it);
+     absent → null → the stamp renders without the date line, never a
+     fabricated one. */
+  const deliveredAt =
+    order.history.find((h) => h.toStatus === "DELIVERED")?.createdAt.toISOString() ?? null;
+
   return (
     <TrackingClient
       placed={placed === "1"}
-      deliveredAt={order.history[0]?.createdAt.toISOString() ?? null}
+      deliveredAt={deliveredAt}
       order={{
         orderNumber: order.orderNumber,
         status: order.status as OrderStatus,
@@ -88,6 +99,10 @@ export default async function TrackPage({
           quantity: i.quantity,
           lineTotal: i.lineTotal,
           options: i.optionsJson ? (JSON.parse(i.optionsJson) as Array<{ name: string }>).map((o) => o.name) : [],
+        })),
+        statusHistory: order.history.map((h) => ({
+          toStatus: h.toStatus,
+          createdAt: h.createdAt.toISOString(),
         })),
         business: order.business,
       }}

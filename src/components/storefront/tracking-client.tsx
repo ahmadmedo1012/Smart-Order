@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { formatLyd } from "@/lib/money";
-import { formatArabicDateTime, timeAgoAr } from "@/lib/arabic";
+import { formatArabicDateTime, formatStationStampAr, timeAgoAr } from "@/lib/arabic";
 import { toE164 } from "@/lib/phone";
 import { waLink, buildStatusUpdateMessage } from "@/lib/whatsapp";
 import {
@@ -48,6 +48,11 @@ interface TrackedOrder {
   city: string | null;
   area: string | null;
   createdAt: string;
+  /* P18-W2-d (W1-d #1): the machine's own log — one row per real
+     transition the order ever took (toStatus + createdAt, asc). The
+     ONLY source of the per-station timestamps: a station without a
+     row never happened yet, and renders no stamp. */
+  statusHistory?: Array<{ toStatus: string; createdAt: string }>;
   items: Array<{ productName: string; variantName: string | null; quantity: number; lineTotal: number; options: string[] }>;
   business: { name: string; slug: string; phone: string | null; whatsappNumber: string | null; logoUrl: string | null };
 }
@@ -151,17 +156,40 @@ export function TrackingClient({
   // receipt's "الدفع" line used to stay on its SSR snapshot forever)
   const [status, setStatus] = React.useState(order.status);
   const [paymentStatus, setPaymentStatus] = React.useState(order.paymentStatus);
+  /* P18-W2-d: the history log polls too — a station that transitions
+     while the customer watches gets its real timestamp within the same
+     15s cycle (the API already returned it; only the render ignored it). */
+  const [statusHistory, setStatusHistory] = React.useState(order.statusHistory ?? []);
   /* P6-2-f3 (GROUP 2): display-only sync health flag — set when a poll
      FAILS (offline), cleared on the next good poll. The 15s
      visibility-gated cadence itself is untouched (below); this only
      feeds the quiet «آخر تحديث معروف» hint + retry affordance. */
   const [syncFailed, setSyncFailed] = React.useState(false);
 
-  /* P16-4c telemetry: the order-age chip is the ONLY clock-derived text
-     on the page — it renders after mount (SSR paints no clock text, so
-     server and client can never disagree → zero hydration drift) and
-     re-reads the REAL placed-at timestamp every 30s. No data → no chip. */
+  /* P16-4c telemetry: the order-age chip and the P18-W2-d station
+     stamps are the clock-derived text of the page — they render after
+     mount (SSR paints no clock text, so server and client can never
+     disagree → zero hydration drift) and the age re-reads the REAL
+     placed-at timestamp every 30s. No data → no chip. */
   const [ageText, setAgeText] = React.useState<string | null>(null);
+
+  /* P18-W2-d: the per-station stamps are clock-TEXT — formatted after
+     mount only, so SSR paints no clock text and server/client can
+     never disagree (the same hydration-drift law the age chip rides).
+     The DATA is SSR'd (statusHistory state above); only the formatted
+     string waits for mount. */
+  const [showStamps, setShowStamps] = React.useState(false);
+  React.useEffect(() => setShowStamps(true), []);
+
+  /* P18-W2-d: station → its real first-arrival timestamp. First
+     occurrence wins: payment-confirm rows repeat the CURRENT status,
+     so the first row is the moment the machine actually reached the
+     station. Stations never reached simply have no entry. */
+  const stationTimes = React.useMemo(() => {
+    const m = new Map<string, string>();
+    for (const h of statusHistory) if (!m.has(h.toStatus)) m.set(h.toStatus, h.createdAt);
+    return m;
+  }, [statusHistory]);
 
   const poll = React.useCallback(async () => {
     try {
@@ -174,6 +202,7 @@ export function TrackingClient({
       if (body?.success) {
         setStatus(body.data.order.status);
         setPaymentStatus(body.data.order.paymentStatus);
+        if (Array.isArray(body.data.order.history)) setStatusHistory(body.data.order.history);
         setSyncFailed(false);
       }
     } catch {
@@ -265,9 +294,13 @@ export function TrackingClient({
         };
 
   const claim = statusClaim(status, order.fulfillmentType);
+  /* P18-W2-d: the DELIVERED moment prefers the LIVE history (a delivery
+     that lands after this SSR snapshot gets its real date on the next
+     poll) and falls back to the SSR-resolved prop. Never fabricated. */
+  const deliveredStamp = stationTimes.get("DELIVERED") ?? deliveredAt;
   const elapsedMs =
-    status === "DELIVERED" && deliveredAt
-      ? new Date(deliveredAt).getTime() - new Date(order.createdAt).getTime()
+    status === "DELIVERED" && deliveredStamp
+      ? new Date(deliveredStamp).getTime() - new Date(order.createdAt).getTime()
       : null;
 
   return (
@@ -462,6 +495,17 @@ export function TrackingClient({
                       const Icon = meta.icon;
                       const done = i < currentIdx;
                       const active = i === currentIdx;
+                      /* P18-W2-d (W1-d #1): this station's REAL timestamp —
+                         the history row the machine wrote when the order
+                         reached it. No row → nothing rendered (a station
+                         ahead of the order never happened; never a fake
+                         time). Mount-gated: the mono stamp is clock text
+                         (the clock-free-SSR law above). */
+                      const stampIso = stationTimes.get(s);
+                      const stamp =
+                        showStamps && stampIso
+                          ? formatStationStampAr(stampIso, order.createdAt)
+                          : null;
                       return (
                         <li
                           key={s}
@@ -488,13 +532,25 @@ export function TrackingClient({
                                   ? "border-(--c-copper-ink)/45 bg-(--c-copper-bg) text-(--c-copper-deep)"
                                   : done
                                     ? "border-border bg-card text-muted-foreground"
-                                    : "border-border/70 bg-muted/40 text-muted-foreground/70"
+                                    /* P18-W2-d (VLM flag): the pending pill
+                                       climbed from /70 to the full muted ink —
+                                       11px text at ~3.3:1 failed AA; the
+                                       dashed border already says "not yet". */
+                                    : "border-border/70 bg-muted/40 text-muted-foreground"
                               )}
                             >
                               {meta.label}
                             </span>
                             {active && (
                               <div className="text-[11px] text-accent-foreground mt-0.5">المرحلة الحالية</div>
+                            )}
+                            {stamp && (
+                              <time
+                                dateTime={stampIso}
+                                className="mt-0.5 block font-mono text-[10px] leading-4 tabular-nums text-muted-foreground"
+                              >
+                                {stamp}
+                              </time>
                             )}
                           </div>
                           {done && (
@@ -531,6 +587,17 @@ export function TrackingClient({
                         <div className="text-[11px] text-muted-foreground mt-0.5">
                           {status === "DELIVERED" ? "تم الوصول — نهاية الطريق" : "نهاية الطريق بانتظار طلبك"}
                         </div>
+                        {/* P18-W2-d: the terminus carries the delivery leg's
+                            real stamp when it exists (same mono voice as
+                            the stations; never a fabricated arrival). */}
+                        {status === "DELIVERED" && showStamps && stationTimes.get("DELIVERED") && (
+                          <time
+                            dateTime={stationTimes.get("DELIVERED")}
+                            className="mt-0.5 block font-mono text-[10px] leading-4 tabular-nums text-muted-foreground"
+                          >
+                            {formatStationStampAr(stationTimes.get("DELIVERED")!, order.createdAt)}
+                          </time>
+                        )}
                       </div>
                     </li>
                   </ol>
@@ -584,9 +651,9 @@ export function TrackingClient({
                   </span>
                   <div className="min-w-0">
                     <div className="font-heading font-bold text-sm text-(--c-mint-deep)">تم التسليم</div>
-                    {deliveredAt && (
+                    {deliveredStamp && (
                       <div className="mt-0.5 text-xs text-(--c-mint-deep)/80">
-                        {formatArabicDateTime(deliveredAt)}
+                        {formatArabicDateTime(deliveredStamp)}
                       </div>
                     )}
                   </div>

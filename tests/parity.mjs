@@ -619,6 +619,9 @@ const LANDING_LAYER = [
       .includes('intersectionRatio > 0.35')],
   ['.ln-grain veil present (the --ln-grain-op consumer)',
     /\.landing \.ln-grain \{/.test(landingRaw)],
+  ['P18-W2-d eyebrow contrast: the LIGHT small-text orange tier rides the DEEP step #B23E00 (5.6:1 on paper; was #C24E00 4.59:1 — VLM-flagged borderline)',
+    landingRaw.includes('--ln-lime-text: #B23E00;') &&
+    !landingRaw.includes('--ln-lime-text: #C24E00;')],
   ['landing scope isolation: globals.css carries ZERO --ln-* declarations (R4 — product pins untouched)',
     !/--ln-[\w-]+\s*:/.test(rawCss)],
   ['landing scope isolation (negative): the Orbit-Ink ground tokens stay out of :root (no --ln-ink / --ln-cream in globals.css)',
@@ -1408,8 +1411,12 @@ const P6_STOREFRONT = [
     R('src/components/storefront/tracking-client.tsx').includes('if (!document.hidden) poll();')],
   ['tracking: the DELIVERED moment is a composed terminal stamp (squared mint 2px dashed + history-sourced date, never fabricated)',
     R('src/components/storefront/tracking-client.tsx').includes('border-2 border-dashed border-(--c-mint-ink)/45') &&
-    R('src/components/storefront/tracking-client.tsx').includes('deliveredAt') &&
-    R('src/app/track/[token]/page.tsx').includes('toStatus: "DELIVERED"')],
+    R('src/components/storefront/tracking-client.tsx').includes('deliveredStamp') &&
+    /* P18-W2-d re-anchor (value only, same law): the page now selects the
+       WHOLE machine log (it feeds the per-station legs) and derives the
+       DELIVERED date from the first matching row — still the honest
+       history source, still never fabricated. */
+    R('src/app/track/[token]/page.tsx').includes('h.toStatus === "DELIVERED"')],
   ['tracking: the placed banner + the cancelled/rejected cards are quiet squared family stamps (rose/grey per ORDER_STATUS_CHIP)',
     R('src/components/storefront/tracking-client.tsx').includes('rounded-sm border border-success/30') &&
     R('src/components/storefront/tracking-client.tsx').includes('"border-(--c-rose-ink)/35 bg-(--c-rose-bg)"')],
@@ -1433,6 +1440,23 @@ const P6_STOREFRONT = [
     R('src/app/globals.css').includes('@keyframes tk-run-v {') &&
     R('src/app/globals.css').includes('@keyframes tk-run-h {') &&
     R('src/components/storefront/tracking-client.tsx').includes('showRunner = !isCancelled && status !== "DELIVERED"')],
+  /* P18-W2-d (W1-d priority #1 — UC «every leg of the journey»): the
+     per-station REAL timestamps. The API already returned statusHistory;
+     now the client renders it — each reached station carries the moment
+     the machine logged it, in the mono fact voice, poll-refreshed. A
+     station with no history row renders NO stamp (never fabricated). */
+  ['P18-W2-d per-station legs: each route station renders its REAL history timestamp (formatStationStampAr mono stamp + first-occurrence map + mount-gated clock law)',
+    R('src/components/storefront/tracking-client.tsx').includes('formatStationStampAr(') &&
+    R('src/components/storefront/tracking-client.tsx').includes('stationTimes.get(s)') &&
+    R('src/components/storefront/tracking-client.tsx').includes('showStamps') &&
+    R('src/lib/arabic.ts').includes('export function formatStationStampAr(')],
+  ['P18-W2-d the machine log ships AND polls: page selects the WHOLE history asc into statusHistory, the 15s poll refreshes it, the API keeps returning it',
+    R('src/app/track/[token]/page.tsx').includes('statusHistory: order.history.map(') &&
+    R('src/app/track/[token]/page.tsx').includes('orderBy: { createdAt: "asc" }') &&
+    R('src/components/storefront/tracking-client.tsx').includes('setStatusHistory(body.data.order.history)') &&
+    R('src/app/api/public/track/[token]/route.ts').includes('history: order.history')],
+  ['P18-W2-d station-stamp contrast: the pending pill rides the FULL muted ink (11px text was /70 ≈3.3:1 — AA fail)',
+    !R('src/components/storefront/tracking-client.tsx').includes('text-muted-foreground/70')],
   ['shell: the light-mode sidebar carries the route-line/nav-node grammar (dashed vertical hairline + node dots, light-only)',
     R('src/components/dashboard/shell.tsx').includes('border-s border-dashed border-border/80 dark:hidden') &&
     R('src/components/dashboard/shell.tsx').includes('size-1.5 rounded-full border bg-card dark:hidden')],

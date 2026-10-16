@@ -60,6 +60,37 @@ export function formatArabicDate(date: Date | string): string {
   return `${d.getDate()} ${AR_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+/* ── P18-W2-d (UC «every leg of the journey»): compact machine stamps ──────
+ * The per-station timestamps on the tracking route map ride the mono FACT
+ * voice — the full formatArabicDateTime sentence is too wide under a
+ * station pill, so the legs get a compact two-tier stamp: clock-only
+ * within the order's own day, day + clock when the leg crossed midnight.
+ * Deterministic string building (no Intl) → byte-identical everywhere;
+ * consumers render them mount-gated (the tracking clock-free-SSR law). */
+export function formatArabicClock(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const m = String(d.getMinutes()).padStart(2, "0");
+  const ampm = d.getHours() < 12 ? "ص" : "م";
+  const h12 = d.getHours() % 12 === 0 ? 12 : d.getHours() % 12;
+  return `${h12}:${m} ${ampm}`;
+}
+
+export function formatArabicDayShort(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return `${d.getDate()} ${AR_MONTHS[d.getMonth()]}`;
+}
+
+/** Station stamp — clock within the reference day, day+clock otherwise. */
+export function formatStationStampAr(date: Date | string, withinDayOf: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const ref = typeof withinDayOf === "string" ? new Date(withinDayOf) : withinDayOf;
+  const sameDay =
+    d.getFullYear() === ref.getFullYear() &&
+    d.getMonth() === ref.getMonth() &&
+    d.getDate() === ref.getDate();
+  return sameDay ? formatArabicClock(d) : `${formatArabicDayShort(d)} · ${formatArabicClock(d)}`;
+}
+
 /** Counted relative-time phrase — r133 (A12 S6): the «منذ 5 دقيقة»
  * plural bug is fixed with the counted-plural engine (SB _unitPhrase /
  * madarek countAr shape): 1 = واحد/واحدة, 2 = dual, 3-10 = plural,

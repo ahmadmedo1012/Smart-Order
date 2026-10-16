@@ -211,7 +211,12 @@ export function ProductDialog({
                     >
                       <div className="text-xs font-semibold">{v.name}</div>
                       {v.priceDelta !== 0 && (
-                        <div className="text-[11px] mt-0.5 tabular-nums">{formatLyd(price)}</div>
+                        /* P18-W2-d (two-voice): variant prices ride the
+                            mono chip grammar (family hairline + soft
+                            ground + tabular Plex digits). */
+                        <div className="mt-1 inline-flex items-center rounded-sm border border-border/70 bg-muted/50 px-1.5 py-0.5 font-mono text-[11px] tabular-nums">
+                          {formatLyd(price)}
+                        </div>
                       )}
                     </button>
                   );
@@ -264,7 +269,7 @@ export function ProductDialog({
                         </span>
                         <span className="text-sm font-medium flex-1">{o.name}</span>
                         {o.priceDelta !== 0 && (
-                          <span className="text-xs text-muted-foreground tabular-nums">
+                          <span className="font-mono text-xs text-muted-foreground tabular-nums">
                             {o.priceDelta > 0 ? "+" : ""}
                             {formatLyd(o.priceDelta)}
                           </span>
@@ -335,7 +340,7 @@ export function ProductDialog({
               {available ? (
                 <>
                   <ShoppingBag className="size-5 me-1.5" aria-hidden="true" />
-                  إضافة — <span className="tabular-nums">{formatLyd(unitPrice * quantity)}</span>
+                  إضافة — <span className="font-mono tabular-nums">{formatLyd(unitPrice * quantity)}</span>
                 </>
               ) : (
                 "غير متاح حالياً"

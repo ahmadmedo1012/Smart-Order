@@ -44,7 +44,11 @@ test.describe("رحلة العميل — المتجر ← السلة ← إتم�
 
     // ── 5) إتمام الطلب ──
     await page.getByRole("link", { name: "إتمام الطلب" }).click();
-    await expect(page.getByRole("heading", { level: 1, name: "إتمام الطلب" })).toBeVisible();
+    /* P18-W2-d: the checkout h1 speaks the two-voice dim-prefix grammar
+       (dim «طلبك» + live claim) — the accessible name is the full claim. */
+    await expect(
+      page.getByRole("heading", { level: 1, name: "طلبك على بعد خطوة من الإرسال" }),
+    ).toBeVisible();
 
     // مؤشر الرحلة: 3 عقد، الوسطى هي الخطوة النشطة
     const journey = page.locator('ol[aria-label="مسار الطلب"]');

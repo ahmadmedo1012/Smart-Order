@@ -254,7 +254,15 @@ export function CheckoutClient({
       {/* r133 (A11 S2): tabIndex={-1} on the skip-link target so
           Safari/Firefox move keyboard focus into <main> on skip. */}
       <main id="main" tabIndex={-1} aria-busy={!data && !loadError} className="mx-auto max-w-2xl px-4 py-5 pb-32 focus:outline-none">
-        <h1 className="font-heading text-xl font-bold">إتمام الطلب</h1>
+        {/* P18-W2-d (two-voice law — UC P4 dim-prefix extended to the
+            checkout heading): the stable context «طلبك» rides the dim
+            ink, the live claim carries the full ink — the SAME grammar
+            as the tracking h2 («طلبك …»), so the customer funnel reads
+            as one product voice from cart to door. */}
+        <h1 className="font-heading text-xl font-bold leading-tight">
+          <span className="text-muted-foreground">طلبك</span>{" "}
+          <span className="text-foreground">على بعد خطوة من الإرسال</span>
+        </h1>
 
         {/* P6-2-f3 (GROUP 1): the journey route — store → checkout →
             done. Traveled road (into the form) = delivery orange at
@@ -369,7 +377,15 @@ export function CheckoutClient({
         <CartSummarySection items={items} />
       </main>
 
-      <StickySubmitBar data={data} subtotal={subtotal} deliveryFee={deliveryFee} total={total} submitting={submitting} minOrderUnmet={minOrderUnmet} />
+      <StickySubmitBar
+        data={data}
+        subtotal={subtotal}
+        deliveryFee={deliveryFee}
+        total={total}
+        submitting={submitting}
+        minOrderUnmet={minOrderUnmet}
+        minOrderAmount={zone?.minOrder}
+      />
     </div>
   );
 }

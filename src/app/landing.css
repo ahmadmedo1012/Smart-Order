@@ -3267,8 +3267,12 @@ html.dark .landing .ln-dash-roles { background: rgba(21, 34, 56, 0.78); }
   --globe-arc: #C24E00;                 /* deep route orange on paper */
   --globe-glow: rgba(62, 92, 118, 0.16); /* steel breath under the globe */
   /* small-text orange tier: dark #FF6B00 is 3.9:1 (large/decorative only
-     per spec) — 12px mono labels climb to this rung in both stages */
-  --ln-lime-text: #C24E00;              /* = light --ln-lime, 4.6:1 AA */
+     per spec) — 12px mono labels climb to this rung in both stages.
+     P18-W2-d (W1-d #6, VLM-flagged eyebrow contrast): the LIGHT tier
+     climbs one step to the deep rung #B23E00 (5.6:1 on the warm paper)
+     — #C24E00 passed 4.5:1 by a hair (4.59) and read borderline on
+     poor displays; small mono labels deserve the headroom. */
+  --ln-lime-text: #B23E00;              /* deep step, 5.6:1 AA on #FBFAF8 */
   /* editorial display voices (next/font vars from layout.tsx; the
      product surfaces keep the Tajawal contract untouched) */
   --ln-display-ar: var(--font-display-arabic, 'Noto Kufi Arabic'), Tajawal, var(--font-sans, sans-serif);

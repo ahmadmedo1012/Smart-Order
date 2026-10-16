@@ -164,7 +164,9 @@ export function CartDrawer({
           <div className="border-t border-border p-4 pb-5 safe-bottom shrink-0 space-y-3 bg-card">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">المجموع التقديري</span>
-              <span className="font-bold tabular-nums">{formatLyd(subtotal)}</span>
+              {/* P18-W2-d (two-voice): money figures ride the mono fact
+                  voice — the checkout summary already speaks it. */}
+              <span className="font-bold tabular-nums font-mono">{formatLyd(subtotal)}</span>
             </div>
             <p className="text-[11px] text-muted-foreground">
               رسوم التوصيل تُحسب في الخطوة التالية حسب منطقتك

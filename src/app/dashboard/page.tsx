@@ -134,6 +134,9 @@ export default function DashboardOverview() {
 
   const { stats } = data;
   const maxRevenue = Math.max(...data.weekSeries.map((d) => d.revenue), 1);
+  /* the axis label shows only when the week has a real non-zero peak —
+     an all-zero week renders no «الذروة 0.001 د.ل» nonsense */
+  const weekPeak = data.weekSeries.reduce((m, d) => Math.max(m, d.revenue), 0);
 
   const cards = [
     /* MetricCard anatomy (Madarek components.css:144-219 + polish v15):
@@ -201,7 +204,16 @@ export default function DashboardOverview() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="نظرة عامة"
+        /* P18-W2-d (two-voice law — UC P4 dim-prefix extended to the
+           dashboard headers): the stable context «عمليات» rides the dim
+           ink and the live unit «اليوم» carries the full ink — dim the
+           beginning, emphasize the end (the tracking «طلبك …» grammar). */
+        title={
+          <>
+            <span className="text-muted-foreground">عمليات</span>{" "}
+            <span className="text-foreground">اليوم</span>
+          </>
+        }
         subtitle="ملخص يومك وما يحتاج انتباهك الآن"
         actions={
           <Button asChild>
@@ -240,7 +252,14 @@ export default function DashboardOverview() {
         </div>
       )}
 
-      {/* KPI strip — .grid-4 MetricCards (2×2 ≤lg, 60ms stagger capped) */}
+      {/* KPI strip — the OPERATIONS INSTRUMENT ROW (P18-W2-d / W1-d #2+#3,
+          UC P1 two-voice): the values are machine FACTS, so they ride the
+          IBM Plex Mono tabular voice (Latin/digits mono, «د.ل» on the
+          Arabic fallback — the same mixed-script stack as order numbers
+          and telemetry chips); the labels sit at the technical
+          micro-label rung. Card anatomy (44px pastel well + hairline
+          border + 132px min) keeps the family stamp grammar — restrained
+          light-first daylight, no cinematic effects. */}
       <div className="grid gap-5 grid-cols-2 lg:grid-cols-4">
         {cards.map(({ label, value, icon: Icon, tone, well, rim }, i) => (
           <m.div
@@ -256,11 +275,11 @@ export default function DashboardOverview() {
             <Card className="group relative min-h-[132px] justify-between gap-4 border-border/80 p-6 transition-[border-color,box-shadow,transform] duration-(--t-base) hover:-translate-y-0.5 hover:border-foreground/25 after:absolute after:inset-y-3 after:end-0 after:w-0.5 after:origin-bottom after:scale-y-0 after:rounded-s-sm after:bg-primary after:transition-transform after:duration-(--t-slow) after:ease-spring-soft hover:after:scale-y-100">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <span className="text-xs font-semibold text-muted-foreground">
+                  <span className="text-[11px] font-medium text-muted-foreground">
                     {label}
                   </span>
                   <m.div
-                    className="mt-2 font-heading text-[30px] leading-[1.1] font-bold tabular-nums [font-feature-settings:'tnum'_1,'lnum'_1]"
+                    className="mt-2 font-mono text-[28px] leading-[1.1] font-bold tabular-nums"
                     initial={{ opacity: 0, scale: 0.92 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.7, ease: [0.34, 1.36, 0.64, 1] }}
@@ -284,10 +303,19 @@ export default function DashboardOverview() {
       <div className="route-divider route-divider-quiet" aria-hidden="true" />
 
       <div className="grid gap-4 lg:grid-cols-3">
-        {/* Week chart */}
+        {/* Week chart — the ops-viz centerpiece (P18-W2-d / W1-d #3):
+            REAL axis labels (the week's true max, mono) + the TODAY bar
+            at full delivery-orange (the accent law: orange = live/
+            active state) while past days sit at 75%. All values real
+            (the API series); no invented axis or trend. */}
         <Card className="border-border/80">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">إيراد آخر 7 أيام</CardTitle>
+            <div className="flex items-baseline justify-between gap-2">
+              <CardTitle className="text-base">إيراد آخر 7 أيام</CardTitle>
+              <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                {weekPeak > 0 ? `الذروة ${formatLyd(weekPeak)}` : "أسبوع بلا إيراد بعد"}
+              </span>
+            </div>
           </CardHeader>
           <CardContent>
             {/* r140 (P2-4): المخطط كان بديلًا نصيًا بلا — القيم الوحيدة في
@@ -302,7 +330,9 @@ export default function DashboardOverview() {
               role="group"
               aria-label="مخطط أعمدة إيراد آخر 7 أيام — البيانات الكاملة في الجدول التالي"
             >
-              {data.weekSeries.map((d) => (
+              {data.weekSeries.map((d, dayIdx) => {
+                const isToday = dayIdx === data.weekSeries.length - 1;
+                return (
                 <div
                   key={d.day}
                   className="flex-1 flex flex-col items-center gap-1.5 group rounded-t-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -314,17 +344,24 @@ export default function DashboardOverview() {
                     {d.orders} طلب
                   </span>
                   <div
-                    className="w-full rounded-t-md bg-primary/85 group-hover:bg-primary group-focus-visible:bg-primary transition-colors min-h-[3px]"
+                    className={`w-full rounded-t-md transition-colors min-h-[3px] ${
+                      isToday ? "bg-primary" : "bg-primary/75 group-hover:bg-primary group-focus-visible:bg-primary"
+                    }`}
                     style={{
                       height: `${Math.max(4, (d.revenue / maxRevenue) * 100)}%`,
                     }}
                     title={`${formatLyd(d.revenue)}`}
                   />
-                  <span className="text-[11px] text-muted-foreground tabular-nums">
+                  <span
+                    className={`font-mono text-[11px] tabular-nums ${
+                      isToday ? "text-accent-foreground font-semibold" : "text-muted-foreground"
+                    }`}
+                  >
                     {d.day}
                   </span>
                 </div>
-              ))}
+                );
+              })}
             </div>
             {/* البديل النصي الكامل — يوم ← إيراد ← طلبات */}
             <table className="sr-only">
@@ -348,7 +385,7 @@ export default function DashboardOverview() {
             </table>
             <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">عملاء جدد اليوم</span>
-              <span className="font-bold tabular-nums flex items-center gap-1.5">
+              <span className="font-mono font-bold text-sm tabular-nums flex items-center gap-1.5">
                 <UserPlus className="size-4 text-chart-3" aria-hidden="true" />
                 {stats.newCustomersToday}
               </span>
@@ -356,11 +393,20 @@ export default function DashboardOverview() {
           </CardContent>
         </Card>
 
-        {/* Recent orders */}
+        {/* Recent orders — the LIVE FEED (P18-W2-d / W1-d #3, UC P6):
+            every machine fact on the row rides the mono voice (order
+            number, elapsed age, amount); the honest poll cadence is
+            stated as a mono micro-label — real (the 20s visibility-gated
+            poll above), never a decorative "live" ping. */}
         <Card className="border-border/80 lg:col-span-2">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">أحدث الطلبات</CardTitle>
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base">أحدث الطلبات</CardTitle>
+                <span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+                  تحديث تلقائي كل 20 ث
+                </span>
+              </div>
               <Button
                 asChild
                 variant="ghost"
@@ -404,13 +450,13 @@ export default function DashboardOverview() {
                           <span aria-hidden="true">·</span>
                           <span>{FULFILLMENT_AR[o.fulfillmentType]}</span>
                           <span aria-hidden="true">·</span>
-                          <span className="tabular-nums">
+                          <span className="tabular-nums font-mono">
                             {timeAgoAr(o.createdAt)}
                           </span>
                         </div>
                       </div>
                       <div className="text-end shrink-0">
-                        <div className="font-bold text-sm tabular-nums">
+                        <div className="font-mono font-bold text-sm tabular-nums">
                           {formatLyd(o.total)}
                         </div>
                         <div className="mt-1">
@@ -440,7 +486,7 @@ export default function DashboardOverview() {
                 aria-hidden="true"
               />
               <div>
-                <div className="font-medium tabular-nums">
+                <div className="font-medium tabular-nums font-mono">
                   {stats.productCount} منتج
                 </div>
                 <div className="text-xs text-muted-foreground mt-0.5">
@@ -454,7 +500,7 @@ export default function DashboardOverview() {
                 aria-hidden="true"
               />
               <div>
-                <div className="font-medium tabular-nums">
+                <div className="font-medium tabular-nums font-mono">
                   {stats.zoneCount} منطقة توصيل
                 </div>
                 <div className="text-xs text-muted-foreground mt-0.5">نشطة</div>
@@ -466,7 +512,7 @@ export default function DashboardOverview() {
                 aria-hidden="true"
               />
               <div>
-                <div className="font-medium tabular-nums">
+                <div className="font-medium tabular-nums font-mono">
                   {stats.todayCancelled} ملغي/مرفوض اليوم
                 </div>
                 <div className="text-xs text-muted-foreground mt-0.5">

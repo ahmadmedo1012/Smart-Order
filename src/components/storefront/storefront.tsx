@@ -19,7 +19,6 @@ import { waLink } from "@/lib/whatsapp";
 import { normalizeArabic } from "@/lib/arabic";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
 import { pillClasses } from "@/components/dashboard/filter-pills";
 import {
   Search,
@@ -290,10 +289,22 @@ export function Storefront({
         ) : (
           <>
             {featured.length > 0 && (
-              <section aria-label="منتجات مميزة" className="mb-6">
-                <div className="flex items-center gap-2 mb-3">
+              /* P18-W2-d (W1-d #7 — the featured band register): the
+                 merchant's picks sit in their own BAND — a soft copper
+                 wash panel with the mono micro-label «اختيار المتجر»
+                 (the operational voice) + the traveled route divider —
+                 a distinct chapter, not a tinted clone of the product
+                 grid. The copper family IS the accent-soft chip ground,
+                 so the wash stays inside the daylight accent law. */
+              <section
+                aria-label="منتجات مميزة"
+                className="mb-6 rounded-xl border border-(--c-copper-ink)/25 bg-(--c-copper-bg)/45 p-4"
+              >
+                <div className="mb-2 flex items-center gap-2.5">
                   <h2 className="font-heading font-bold text-sm">مميز</h2>
-                  <Badge variant="saffron">اختيار المتجر</Badge>
+                  <span className="inline-flex items-center rounded-sm border border-(--c-copper-ink)/35 bg-card px-2 py-0.5 font-mono text-[10px] font-medium text-(--c-copper-deep)">
+                    اختيار المتجر
+                  </span>
                 </div>
                 {/* r152 Route & Node: the traveled road introduces the
                     featured chapter — dashed orange line + node. */}
@@ -349,8 +360,10 @@ export function Storefront({
         <div className="lg:hidden sticky bottom-0 z-(--z-dropdown) border-t border-border bg-background/95 backdrop-blur-md safe-bottom">
           <div className="px-4 py-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">
-              <div className="text-xs text-muted-foreground tabular-nums">{count} عنصر في السلة</div>
-              <div className="font-bold text-sm tabular-nums">{formatLyd(cartEstimatedSubtotal(items))}</div>
+              {/* P18-W2-d (two-voice): cart count + subtotal are machine
+                  facts — mono voice on the mobile money bar. */}
+              <div className="text-xs text-muted-foreground tabular-nums font-mono">{count} عنصر في السلة</div>
+              <div className="font-bold text-sm tabular-nums font-mono">{formatLyd(cartEstimatedSubtotal(items))}</div>
             </div>
             <Button onClick={() => setCartOpen(true)} className="h-11 font-semibold">
               <ShoppingBag className="size-4 me-1.5" aria-hidden="true" />

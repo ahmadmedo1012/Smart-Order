@@ -115,7 +115,13 @@ export function ProductCard({
             <p className="mt-1 text-[11px] text-muted-foreground line-clamp-1 leading-relaxed">{product.description}</p>
           )}
           <div className="mt-auto pt-2.5 flex items-center justify-between gap-2">
-            <span className="font-bold text-sm tabular-nums">{formatLyd(product.price)}</span>
+            {/* P18-W2-d (W1-d #7 — mono price chips): the price is a
+                machine fact, so it rides the mono chip grammar (family
+                hairline border + soft ground + IBM Plex Mono tabular
+                digits) instead of bare display-type numerals. */}
+            <span className="inline-flex items-center rounded-sm border border-border/70 bg-muted/50 px-2 py-0.5 font-mono text-sm font-bold tabular-nums">
+              {formatLyd(product.price)}
+            </span>
             {/* r149 (SO5): the quick-add rides the 44px touch canon
                 (size-11; the r131 40px icon-button recipe is retired by
                 the r149 fleet floor — same grammar otherwise). */}
