@@ -267,16 +267,15 @@
 /* Scroll-spy active state — nav link highlighted when its section is
    visible (R2, the INTENDED form): the observer writes
    data-active-section on the HEADER element and these rules read it
-   there, matching each anchor by href. Section ids follow the
-   PORT-KIT §5/§6 slot mapping for Smart-Order (trust / sector orbit /
-   journey / progress / partner venues / roles) — keep this list in
-   lockstep with the section ids the page ships. */
-.landing header[data-active-section="trust"] .landing-nav-link[href="#trust"],
-.landing header[data-active-section="sectors"] .landing-nav-link[href="#sectors"],
-.landing header[data-active-section="journey"] .landing-nav-link[href="#journey"],
-.landing header[data-active-section="progress"] .landing-nav-link[href="#progress"],
-.landing header[data-active-section="venues"] .landing-nav-link[href="#venues"],
-.landing header[data-active-section="roles"] .landing-nav-link[href="#roles"] {
+   there, matching each anchor by href. P16-4c: the selectors now ride
+   the FOUR LIVE section ids (stations/store/dashboard/payments — the
+   r142 «الخط» spine) and the observer picks by scale-independent
+   band coverage (LandingHeader.tsx) — both halves of the old
+   double-dead pair (retired ids + unreachable ratio filter) are closed. */
+.landing header[data-active-section="stations"] .landing-nav-link[href="#stations"],
+.landing header[data-active-section="store"] .landing-nav-link[href="#store"],
+.landing header[data-active-section="dashboard"] .landing-nav-link[href="#dashboard"],
+.landing header[data-active-section="payments"] .landing-nav-link[href="#payments"] {
   color: var(--ln-cream);
   background: rgb(27 42 65 / 0.08);
 }
@@ -3118,12 +3117,10 @@ html.dark .landing .landing-header.scrolled { background: rgb(13 22 38 / 0.92); 
 /* rail interaction washes (spy active / open group / link + burger
    hover / megamenu item hover) — navy washes are invisible on navy:
    pale washes at the same perceptual step */
-html.dark .landing header[data-active-section="trust"] .landing-nav-link[href="#trust"],
-html.dark .landing header[data-active-section="sectors"] .landing-nav-link[href="#sectors"],
-html.dark .landing header[data-active-section="journey"] .landing-nav-link[href="#journey"],
-html.dark .landing header[data-active-section="progress"] .landing-nav-link[href="#progress"],
-html.dark .landing header[data-active-section="venues"] .landing-nav-link[href="#venues"],
-html.dark .landing header[data-active-section="roles"] .landing-nav-link[href="#roles"] {
+html.dark .landing header[data-active-section="stations"] .landing-nav-link[href="#stations"],
+html.dark .landing header[data-active-section="store"] .landing-nav-link[href="#store"],
+html.dark .landing header[data-active-section="dashboard"] .landing-nav-link[href="#dashboard"],
+html.dark .landing header[data-active-section="payments"] .landing-nav-link[href="#payments"] {
   background: rgb(185 194 210 / 0.10);
 }
 html.dark .landing .landing-nav-group.open .landing-nav-link { background: rgb(185 194 210 / 0.05); }

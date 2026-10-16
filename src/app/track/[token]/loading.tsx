@@ -19,12 +19,12 @@ export default function Loading() {
       className="min-h-screen bg-muted/30"
     >
       <header className="bg-background border-b border-border safe-top">
-        <div className="mx-auto max-w-lg px-4 h-14 flex items-center gap-3">
+        <div className="mx-auto max-w-lg lg:max-w-2xl px-4 h-14 flex items-center gap-3">
           <Skeleton className="h-5 w-32" />
           <Skeleton className="ms-auto size-8 rounded-md" />
         </div>
       </header>
-      <main className="mx-auto max-w-lg px-4 py-6 space-y-4">
+      <main className="mx-auto max-w-lg lg:max-w-2xl px-4 py-6 space-y-4">
         {/* order header card */}
         <div className="rounded-xl border border-border bg-card p-5 text-center space-y-3">
           <Skeleton className="mx-auto h-6 w-36" />

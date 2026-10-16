@@ -609,10 +609,14 @@ const LANDING_LAYER = [
     /@media \(prefers-reduced-motion: reduce\) \{ \.landing \.ln-marquee-track \{ animation: none; \}/.test(landingRaw)],
   ['--sp consumer: journey light path scrubs stroke-dashoffset calc(1 - var(--sp, 0))',
     landingRaw.includes('stroke-dashoffset: calc(1 - var(--sp, 0));')],
-  ['scroll-spy in R2 form: header[data-active-section] selectors cover all six landing ids',
-    ['trust', 'sectors', 'journey', 'progress', 'venues', 'roles'].every(
+  ['scroll-spy in R2 form (P16-4c re-anchor): header[data-active-section] selectors cover the FOUR LIVE landing ids + the observer picks by scale-independent band coverage',
+    ['stations', 'store', 'dashboard', 'payments'].every(
       (id) => landingRaw.includes(`header[data-active-section="${id}"]`),
-    )],
+    ) &&
+    readFileSync(new URL('../src/components/landing/LandingHeader.tsx', import.meta.url), 'utf8')
+      .includes('coverage = bandH > 0 ? coverH / bandH : 0') &&
+    !readFileSync(new URL('../src/components/landing/LandingHeader.tsx', import.meta.url), 'utf8')
+      .includes('intersectionRatio > 0.35')],
   ['.ln-grain veil present (the --ln-grain-op consumer)',
     /\.landing \.ln-grain \{/.test(landingRaw)],
   ['landing scope isolation: globals.css carries ZERO --ln-* declarations (R4 — product pins untouched)',
@@ -1233,9 +1237,14 @@ const R152_LAYER = [
     rawButton2.includes('active:bg-(--accent-pressed)')],
   ['ROUTE & NODE motif primitives are defined (route-divider + route-spine-segment)',
     rawCss.includes('.route-divider {') && rawCss.includes('.route-spine-segment {')],
-  ['tracking rides the dashed road: tracking-client threads border-s-2 border-dashed route segments',
+  ['tracking rides the dashed road (P16-4c re-anchor): the route-object SVG owns the spine now — tk-route dashes + traveled bed over the station ol (the r152 per-li border spans retired with the same contract intact)',
     readFileSync(new URL('../src/components/storefront/tracking-client.tsx', import.meta.url), 'utf8')
-      .includes('border-s-2 border-dashed')],
+      .includes('tk-route-traveled') &&
+    readFileSync(new URL('../src/components/storefront/tracking-client.tsx', import.meta.url), 'utf8')
+      .includes('aria-label="مسار الطلب"') &&
+    rawCss.includes('.tk-route {') &&
+    rawCss.includes('.tk-route-traveled {') &&
+    rawCss.includes('stroke-dasharray: 3 5;')],
   ['status stamps: badge.tsx rides the squared stamp (rounded-sm) with family-ink borders',
     readFileSync(new URL('../src/components/ui/badge.tsx', import.meta.url), 'utf8')
       .includes('rounded-sm border px-2') &&
@@ -1404,6 +1413,26 @@ const P6_STOREFRONT = [
   ['tracking: the placed banner + the cancelled/rejected cards are quiet squared family stamps (rose/grey per ORDER_STATUS_CHIP)',
     R('src/components/storefront/tracking-client.tsx').includes('rounded-sm border border-success/30') &&
     R('src/components/storefront/tracking-client.tsx').includes('"border-(--c-rose-ink)/35 bg-(--c-rose-bg)"')],
+  /* P16-4c (United Carriers → Smart Order): the route-object hero, the
+     two-voice status law, the partial-dim claim, and the honest
+     telemetry chips — consumption pins so the language cannot silently
+     regress to the generic status-card idiom. */
+  ['P16-4c two-voice status law: mono facts row (order number + LTR tabular-nums timestamp) + the partial-dim display claim (dim «طلبك» prefix, live ink keyed swap)',
+    R('src/components/storefront/tracking-client.tsx').includes('dir="ltr"') &&
+    R('src/components/storefront/tracking-client.tsx').includes('text-muted-foreground">طلبك</span>') &&
+    R('src/components/storefront/tracking-client.tsx').includes('statusClaim(') &&
+    R('src/components/storefront/tracking-client.tsx').includes('animate-price-swap-in')],
+  ['P16-4c telemetry chips stay honest: real placed-at age (timeAgoAr, mount-gated so SSR paints no clock text), counted items, live payment state, history-sourced delivery elapsed only',
+    R('src/components/storefront/tracking-client.tsx').includes('timeAgoAr(order.createdAt)') &&
+    R('src/components/storefront/tracking-client.tsx').includes('itemsCountAr(order.items.length)') &&
+    R('src/components/storefront/tracking-client.tsx').includes('elapsedAr(') &&
+    R('src/components/storefront/tracking-client.tsx').includes('deliveredAt') &&
+    !R('src/components/storefront/tracking-client.tsx').includes('منذ التسليم')],
+  ['P16-4c runner: the parcel marker rests at the CURRENT node (base transform = node) and animates on the ambient-drift rung — the global reduced-motion belt halts it',
+    R('src/app/globals.css').includes('.tk-runner-v {') &&
+    R('src/app/globals.css').includes('@keyframes tk-run-v {') &&
+    R('src/app/globals.css').includes('@keyframes tk-run-h {') &&
+    R('src/components/storefront/tracking-client.tsx').includes('showRunner = !isCancelled && status !== "DELIVERED"')],
   ['shell: the light-mode sidebar carries the route-line/nav-node grammar (dashed vertical hairline + node dots, light-only)',
     R('src/components/dashboard/shell.tsx').includes('border-s border-dashed border-border/80 dark:hidden') &&
     R('src/components/dashboard/shell.tsx').includes('size-1.5 rounded-full border bg-card dark:hidden')],

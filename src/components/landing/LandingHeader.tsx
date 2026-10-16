@@ -82,22 +82,33 @@ export function LandingHeader() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        /* Collect all entries first, then pick the one with most overlap. */
-        const visible: Array<{ id: string; ratio: number }> = [];
+        /* P16-4c (the deferred P15 P2, closed): the r128 ratio>0.35
+           filter was structurally unreachable — the live chapters are
+           1179-1682px tall while the -20%/-40% root band is ~360px, so
+           intersectionRatio could never exceed ~0.31 and
+           data-active-section was NEVER set (live-verified in the P15
+           audit; the CSS half was orphaned on retired ids at the same
+           time). Scale-independent coverage instead (the Smart-Link
+           twin fix): the share of the ROOT BAND the section covers —
+           a 1400px chapter crossing the 360px band scores 1.0. */
+        const visible: Array<{ id: string; coverage: number }> = [];
         for (const entry of entries) {
-          if (entry.intersectionRatio > 0.35) {
-            visible.push({ id: entry.target.id, ratio: entry.intersectionRatio });
+          const bandH = entry.rootBounds?.height ?? 0;
+          const coverH = entry.intersectionRect.height;
+          const coverage = bandH > 0 ? coverH / bandH : 0;
+          if (coverage > 0.1) {
+            visible.push({ id: entry.target.id, coverage });
           }
         }
-        /* Pick the section with the most viewport coverage; tie-break by order. */
-        visible.sort((a, b) => b.ratio - a.ratio);
+        /* Pick the section with the most band coverage; tie-break by order. */
+        visible.sort((a, b) => b.coverage - a.coverage);
         if (visible.length > 0) {
           header.dataset.activeSection = visible[0]!.id;
         } else {
           delete header.dataset.activeSection;
         }
       },
-      { threshold: [0, 0.35, 0.5, 0.65, 1], rootMargin: "-20% 0px -40% 0px" },
+      { threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: "-20% 0px -40% 0px" },
     );
 
     for (const s of sections) observer.observe(s);

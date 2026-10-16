@@ -1419,6 +1419,71 @@
   border-inline-start: 2px dashed color-mix(in srgb, var(--primary) 45%, transparent);
 }
 
+/* ── P16-4c (UC route-object hero): the tracking delivery path ──────
+   The 2.5D dashed route SVG: hairline pending road, delivery-orange
+   traveled road with its soft bed underlay, and the runner — the
+   parcel marker that travels the CURRENT status's approach segment
+   and rests at the live node (never beyond it; no invented position).
+   ONE moving system (UC restraint) on the ambient-drift rung; the
+   global prefers-reduced-motion belt (0.01ms / 1 iteration above)
+   halts the runner at its resting pose — the base transform IS the
+   current node, so the static frame still says "the order is here".
+   Geometry vars (--tk-dy/--tk-dx/--tk-sway) are written inline by
+   tracking-client from the real TRACKING_FLOW positions. */
+.tk-route {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 2;
+  stroke-dasharray: 3 5;
+  stroke-linecap: round;
+}
+.tk-route-bed {
+  fill: none;
+  stroke: color-mix(in srgb, var(--primary) 10%, transparent);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+.tk-route-traveled {
+  fill: none;
+  stroke: color-mix(in srgb, var(--primary) 55%, transparent);
+  stroke-width: 2.5;
+  stroke-dasharray: 4 5;
+  stroke-linecap: round;
+}
+.tk-runner {
+  position: absolute;
+  inline-size: 12px;
+  block-size: 12px;
+  border-radius: var(--r-full);
+  background: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
+  z-index: 5;
+}
+.tk-runner-v {
+  transform: translateY(var(--tk-dy, 64px));
+  animation: tk-run-v var(--motion-duration-ambient-drift, 6s) var(--ease-smooth) infinite;
+}
+.tk-runner-h {
+  transform: translateX(var(--tk-dx, -84px));
+  animation: tk-run-h var(--motion-duration-ambient-drift, 6s) var(--ease-smooth) infinite;
+}
+@keyframes tk-run-v {
+  0% { transform: translate(0, 0); opacity: 0; }
+  14% { opacity: 1; }
+  48% { transform: translate(var(--tk-sway, 0px), calc(var(--tk-dy, 64px) * 0.5)); }
+  78% { transform: translate(0, var(--tk-dy, 64px)); opacity: 1; }
+  86% { transform: translate(0, var(--tk-dy, 64px)); opacity: 0.9; }
+  100% { transform: translate(0, var(--tk-dy, 64px)); opacity: 0; }
+}
+@keyframes tk-run-h {
+  0% { transform: translate(0, 0); opacity: 0; }
+  14% { opacity: 1; }
+  48% { transform: translate(calc(var(--tk-dx, -84px) * 0.5), var(--tk-sway, 0px)); }
+  78% { transform: translate(var(--tk-dx, -84px), 0); opacity: 1; }
+  86% { transform: translate(var(--tk-dx, -84px), 0); opacity: 0.9; }
+  100% { transform: translate(var(--tk-dx, -84px), 0); opacity: 0; }
+}
+
 /* Safe-area padding for mobile checkout bars */
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
