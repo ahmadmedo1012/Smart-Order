@@ -15,10 +15,40 @@ import { normalizeLibyanPhone, toE164 } from "@/lib/phone";
 import { dbRateLimit, clientIp } from "@/lib/rate-limit";
 import { MAX_ORDER_ITEMS, MAX_ORDER_QUANTITY } from "@/lib/constants";
 import { buildOrderMessage } from "@/lib/whatsapp";
-import { tripoliDayStart, tripoliDateParts } from "@/lib/arabic";
+import { tripoliDayStart, tripoliDateParts, tripoliMonthStart } from "@/lib/arabic";
 import { Prisma } from "@prisma/client";
 
 export const runtime = "nodejs";
+
+/* ── W2-D2 (plan-truth) — the business's CURRENT plan ──
+ *
+ * Resolved exactly the way the subscription state itself does (no second
+ * invention): `business.planId` is written by the platform-admin approval
+ * (/api/subscriptions/[id]/review), `subscriptionEnds` is that approval's
+ * expiry — a paid plan past its window falls back to Free («يظل متجرك
+ * نشطاً حتى نهاية الفترة المدفوعة»), and a null planId (the register
+ * flow writes none) resolves to the Free plan ROW, the seeded catalog
+ * being the single source of the promised numbers. The 15/100 literal
+ * tail only covers a cold, never-seeded plans table — the schema's own
+ * column defaults, so the gate fails closed instead of fail-open. */
+type PlanCaps = { name: string; nameAr: string; maxProducts: number; maxOrders: number };
+
+async function currentPlan(tx: Prisma.TransactionClient, businessId: string): Promise<PlanCaps> {
+  const biz = await tx.business.findUnique({
+    where: { id: businessId },
+    select: {
+      subscriptionEnds: true,
+      plan: { select: { name: true, nameAr: true, maxProducts: true, maxOrders: true } },
+    },
+  });
+  const expired = !!biz?.subscriptionEnds && biz.subscriptionEnds.getTime() <= Date.now();
+  if (biz?.plan && !expired) return biz.plan;
+  const free = await tx.plan.findFirst({
+    where: { name: "Free" },
+    select: { name: true, nameAr: true, maxProducts: true, maxOrders: true },
+  });
+  return free ?? { name: "Free", nameAr: "مجاني", maxProducts: 15, maxOrders: 100 };
+}
 
 const itemSchema = z.object({
   productId: z.string().min(1),
@@ -266,6 +296,34 @@ export async function POST(req: NextRequest) {
           const todayCount = await tx.order.count({
             where: { businessId: business.id, createdAt: { gte: dayStart } },
           });
+
+          /* W2-D2 (plan-truth, R1 audit finding #1): the pricing cards'
+           * limits block promises «الطلبات الشهرية: حتى maxOrders» — this
+           * money path never enforced it. Same in-tx gate as the family
+           * reference (Smart-Menu orders route, round90-F1): the plan is
+           * resolved UNDER the Serializable transaction and the month's
+           * count uses the exact accounting the merchant already sees on
+           * the dashboard badge — «طلبات الشهر» = this Tripoli month
+           * (r136 family timezone policy), CANCELLED/REJECTED excluded
+           * (stats route contract) — so the progress bar reaching 100%
+           * and this gate firing are the SAME number, never two truths.
+           * A rejected order aborts the whole tx (no rows, no decrement)
+           * and surfaces 409 PLAN_LIMIT with the family's cap copy. */
+          const plan = await currentPlan(tx, business.id);
+          const monthOrders = await tx.order.count({
+            where: {
+              businessId: business.id,
+              status: { notIn: ["CANCELLED", "REJECTED"] },
+              createdAt: { gte: tripoliMonthStart() },
+            },
+          });
+          if (monthOrders >= plan.maxOrders) {
+            throw new ApiFailError(
+              `لقد وصلت للحد الأقصى للطلبات الشهرية (${plan.maxOrders}) في خطتك. قم بترقية خطتك لاستقبال المزيد من الطلبات.`,
+              409,
+              "PLAN_LIMIT",
+            );
+          }
 
           let created: { id: string; orderNumber: string; publicToken: string } | null = null;
           let lastErr: unknown = null;

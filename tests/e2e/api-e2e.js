@@ -278,6 +278,54 @@ async function main() {
   }
   else { skipped++; console.log("  - order rate limit not reached (may be shared IP bucket) — skipped"); }
 
+  // ---------- 9. plan limits — the cards' promise is the gate (W2-D2) ----------
+  console.log("— حدود الباقات (W2-D2)");
+  /* R1 audit finding #1: the pricing cards promise per-plan caps the
+     backend never enforced. The limits block is the contract — Free
+     promises 15 products / 100 monthly orders / NO team accounts — and a
+     registered business carries planId=null → Free, so the boundary is
+     drivable end-to-end: fill to N (15 creations succeed), the N+1st is
+     refused with the honest Arabic cap copy. */
+  let createdCount = 0;
+  let capStatus = 0;
+  let capMsg = "";
+  for (let i = 1; i <= 17; i++) {
+    const r = await B.call("/api/products", {
+      method: "POST",
+      body: JSON.stringify({ businessId: bizBId, name: "منتج الحد " + i, price: "3.000" }),
+    });
+    if (r.body?.success === true) createdCount++;
+    else { capStatus = r.status; capMsg = r.body?.error?.message ?? ""; break; }
+  }
+  ok("products gate: N−1 creations pass on Free (the card's 15)", createdCount === 15, `created ${createdCount}`);
+  ok("products gate: creation N is refused (409 PLAN_LIMIT)", capStatus === 409 && /منتج/.test(capMsg), `status ${capStatus}`);
+  const capNum = Number((capMsg.match(/\((\d+)\)/) ?? [])[1]);
+  ok(
+    "products gate: honest Arabic message carries the plan's own number",
+    /لقد وصلت للحد الأقصى للمنتجات/.test(capMsg) && capNum === createdCount && capMsg.includes("ترقية"),
+    capMsg.slice(0, 90),
+  );
+
+  const staffTry = await B.call("/api/staff", {
+    method: "POST",
+    body: JSON.stringify({ businessId: bizBId, name: "موظف اختبار", email: rnd("staff_") + "@test.ly", password: "Test#2026Pass", role: "STAFF" }),
+  });
+  ok(
+    "staff gate: Free carries no team promise — the first staff add is refused (409 PLAN_LIMIT)",
+    staffTry.status === 409 && staffTry.body?.error?.code === "PLAN_LIMIT",
+    JSON.stringify(staffTry.body).slice(0, 100),
+  );
+  ok(
+    "staff gate: the Arabic message points at the Premium team promise",
+    /بريميوم/.test(staffTry.body?.error?.message ?? "") && /الفريق/.test(staffTry.body?.error?.message ?? ""),
+    (staffTry.body?.error?.message ?? "").slice(0, 90),
+  );
+  /* The orders gate (maxOrders/month) shares this exact in-tx contract; its
+     boundary needs 100 orders on one business — unreachable inside the
+     battery's 8-req/min public checkout rate limit — so it is driven and
+     captured as evidence against the dev DB (see w2-evidence/W2-D2) while
+     the pass-through side stays pinned by section 5's order creation. */
+
   console.log(`\nالنتيجة: ${pass} ناجح · ${fail} فاشل · ${skipped} متجاهل\n`);
   process.exit(fail > 0 ? 1 : 0);
 }
