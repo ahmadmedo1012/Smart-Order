@@ -2,6 +2,7 @@ import Link from "next/link";
 import { HeroDepthLayer } from "@/components/landing/HeroDepthLayer";
 import { GlobeMount } from "@/components/landing/GlobeMount";
 import { CountUp } from "@/components/ui/CountUp";
+import { PAYMENT_TYPES } from "@/lib/constants";
 
 /* ═══════════════════════════════════════════════════════════════════════
    P12-2d — HeroSection «الطريق مفتوح» — the United-style split hero.
@@ -35,7 +36,10 @@ export function HeroSection({
   /* the roadmark board — live DB figures, the "+" rides non-zero counts.
      (phase4) «3 مدن» سقطت: رقم ثابت بلا مصدر بين جارين أحيا من DB —
      حلّ محلها حقيقة المنتج القابلة للتحقق: الطرق الست الحقيقية
-     (constants.ts PAYMENT_TYPES — نفس الستة في محطة الدفع أسفل الصفحة). */
+     (constants.ts PAYMENT_TYPES — نفس الستة في محطة الدفع أسفل الصفحة).
+     (P19-D2) الرقم الآن مشتق من الثابت نفسه — نفس درس r140 «القالب
+     يتبع الثابت»: «6» حرفية كانت ستكذب لو نما PAYMENT_TYPES يومًا
+     بينما محطة الدفع أسفل الصفحة تعرض العدد الجديد. */
   const roadmarks = [
     {
       value: trustCount && trustCount > 0 ? `+${trustCount}` : `${trustCount ?? 0}`,
@@ -45,7 +49,7 @@ export function HeroSection({
       value: totalOrders && totalOrders > 0 ? `+${totalOrders}` : `${totalOrders ?? 0}`,
       label: "طلب عبر المنصّة",
     },
-    { value: "6", label: "طرق دفع" },
+    { value: String(PAYMENT_TYPES.length), label: "طرق دفع" },
   ];
 
   return (
