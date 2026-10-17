@@ -77,8 +77,15 @@
      the family Arabic heading floor ≥1.15 (r131-F2, documented for the
      ≤768px override below and honored by SL/SB/SM). 1.15 lifts the
      ascenders/diacritics clearance on the 2–3-line 88–108px title. The
-     parity pin (tests/parity.mjs LANDING_TOKENS) rides the same rung. */
-  --ln-h1-lh:      1.15;
+     parity pin (tests/parity.mjs LANDING_TOKENS) rides the same rung.
+     P20-D1 (measured-ink re-audit): at 1440 the r151 floor left exactly
+     0.8px worst-case clearance — canvas actualBoundingBox on the live
+     DOM: line-1 Kaf descent 29px + line-2 ascent 71.4px = 100.4px vs the
+     101.2px line box (the same measured-ink defect class Smart-Link's
+     P20-A1 lockup fix closed). 1.22 restores ~7px of junction clearance
+     at 88px while staying on the compact editorial stack; the family
+     floor law (≥1.15) still honored. Pin re-anchored value-only. */
+  --ln-h1-lh:      1.22;
   --ln-t-fast:      var(--t-fast);    /* 160ms */
   --ln-t-base:      var(--t-base);    /* 240ms */
   --ln-t-slow:      var(--t-slow);    /* 380ms */
@@ -1663,8 +1670,8 @@
 /* text always wins the sky — content z1 over decor z0 */
 .landing .ln-keep-hero > .mx-auto { position: relative; z-index: 1; }
 /* r131-F2 (A12 P1-2): the hero title rides the CANONICAL --ln-h1 scale
-   — clamp(44px, 8.2vw, 108px) over --ln-h1-lh (r151: 1.15, the family
-   Arabic heading floor — was 1.04; the exact SL/SB/SM .ln-hero-title
+   — clamp(44px, 8.2vw, 108px) over --ln-h1-lh (P20-D1: 1.22, the family
+   Arabic heading floor + measured-ink clearance — was 1.04 → 1.15 → 1.22; the exact SL/SB/SM .ln-hero-title
    block pattern now shares the floor too). The former fixed Tailwind
    ladder (36→68px) sat below canon at both ends; mobile Arabic leading
    gets the ≥1.15 override in §13 (≤768px), landscape phones in the fold
