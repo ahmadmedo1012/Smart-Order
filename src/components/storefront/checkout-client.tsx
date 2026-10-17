@@ -258,8 +258,11 @@ export function CheckoutClient({
             checkout heading): the stable context «طلبك» rides the dim
             ink, the live claim carries the full ink — the SAME grammar
             as the tracking h2 («طلبك …»), so the customer funnel reads
-            as one product voice from cart to door. */}
-        <h1 className="font-heading text-xl font-bold leading-tight">
+            as one product voice from cart to door.
+            P21-D: text-xl → text-2xl — the claim joins the tracking
+            claim's raised display register (UC one-display-voice law),
+            so the money path speaks one voice from checkout to door. */}
+        <h1 className="font-heading text-2xl font-bold leading-tight">
           <span className="text-muted-foreground">طلبك</span>{" "}
           <span className="text-foreground">على بعد خطوة من الإرسال</span>
         </h1>

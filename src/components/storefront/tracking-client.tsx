@@ -102,6 +102,16 @@ function itemsCountAr(n: number): string {
   return `${n} صنفاً`;
 }
 
+/* P21-D (UC numbered-fact register): the route eyebrow's station count —
+ * counted Arabic plurals for محطة, same grammar family as itemsCountAr.
+ * The value is REAL: flow.length stations (PICKUP filters one out). */
+function stationsCountAr(n: number): string {
+  if (n === 1) return "محطة واحدة";
+  if (n === 2) return "محطتان";
+  if (n >= 3 && n <= 10) return `${n} محطات`;
+  return `${n} محطة`;
+}
+
 function elapsedAr(ms: number): string {
   const min = Math.floor(ms / 60_000);
   if (min < 1) return "أقل من دقيقة";
@@ -316,7 +326,7 @@ export function TrackingClient({
         </div>
       </header>
 
-      <main id="main" tabIndex={-1} className="mx-auto max-w-lg lg:max-w-2xl px-4 py-6 space-y-4 focus:outline-none">
+      <main id="main" tabIndex={-1} className="mx-auto max-w-lg lg:max-w-2xl px-4 py-6 lg:py-10 space-y-4 lg:space-y-5 focus:outline-none">
         {/* r133 (A1 F9): durable checkout confirmation — the success used
             to live only in checkout component state; ?placed=1 in the URL
             survives refresh/share. */}
@@ -348,7 +358,7 @@ export function TrackingClient({
             lg+) with the marker resting on the CURRENT real status node
             and Arabic status pills pinned along the road. The receipt and
             every table come AFTER this visual beat. */}
-        <section className="rounded-xl border border-border bg-card p-5">
+        <section className="rounded-xl border border-border bg-card p-5 lg:p-7">
           {/* the FACTS voice (UC mono-for-facts): order number + timestamp
               ride the mixed-script mono stack in LTR runs (tabular-nums). */}
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
@@ -394,8 +404,12 @@ export function TrackingClient({
             <>
               {/* the CLAIM voice (UC grotesk-for-claims, RTL partial-dim):
                   the stable prefix dimmed grey, the live status words at
-                  full ink — dim the beginning, emphasize the end. */}
-              <h2 className="mt-3 font-heading text-2xl font-extrabold leading-tight lg:text-[28px]">
+                  full ink — dim the beginning, emphasize the end.
+                  P21-D (UC typographic authority): the claim steps up to
+                  the ONE display voice of the page — 26px mobile / 34px
+                  lg vs the 20px mono facts h1 = a 1.7× scale separation
+                  (UC's display-vs-micro-label law; measured was 1.4×). */}
+              <h2 className="mt-3 font-heading text-[26px] font-extrabold leading-tight tracking-tight lg:text-[34px] lg:leading-[1.15]">
                 <span className="text-muted-foreground">طلبك</span>{" "}
                 <span key={status} className="animate-price-swap-in text-foreground">
                   {claim}
@@ -457,7 +471,16 @@ export function TrackingClient({
                   the stations; the nodes stay DOM (a11y + the family
                   node grammar). */}
               <div className="mt-5">
-                <div className="mb-2 text-[11px] font-medium text-muted-foreground">مسار الطلب</div>
+                {/* P21-D (UC numbered-fact eyebrow): the route label gains
+                    its real leg count as a mono chip — the operational
+                    register UC carries on every section (the value is the
+                    real TRACKING_FLOW length, never a styled invention). */}
+                <div className="mb-2 flex items-center gap-2">
+                  <div className="text-[11px] font-medium text-muted-foreground">مسار الطلب</div>
+                  <span className="inline-flex items-center rounded-sm border border-border bg-card px-1.5 py-px font-mono text-[10px] font-medium tabular-nums text-muted-foreground">
+                    {stationsCountAr(flow.length)}
+                  </span>
+                </div>
                 <div
                   className="relative lg:mx-auto lg:w-[calc(var(--slots)*84px)]"
                   style={{ "--slots": nodeCount } as React.CSSProperties}
@@ -669,7 +692,7 @@ export function TrackingClient({
         </section>
 
         {/* Items — the receipt comes AFTER the route beat (P16-4c) */}
-        <div className="rounded-xl border border-border bg-card p-5">
+        <div className="rounded-xl border border-border bg-card p-5 lg:p-7">
           <h2 className="font-semibold text-sm mb-3">تفاصيل الطلب</h2>
           <ul className="space-y-2.5">
             {order.items.map((item, i) => (

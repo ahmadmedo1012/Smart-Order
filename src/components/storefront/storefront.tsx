@@ -154,6 +154,27 @@ export function Storefront({
     (c) => data.products.some((p) => p.categoryId === c.id)
   );
 
+  /* P21-D (Smart-Menu P20-B1's family pattern): the selected category
+   * becomes a NAMED chapter over the grid — QR customers deep in a long
+   * category keep the context of what they are browsing, with a live
+   * mono count chip (the operational register). Search results get the
+   * same treatment. "كل المنتجات" stays the default chapter name
+   * (test-pinned accessible name — the chip rides OUTSIDE the h2 so
+   * the heading's name never changes). */
+  const activeCategoryObject =
+    activeCategory !== "ALL"
+      ? (data.categories.find((c) => c.id === activeCategory) ?? null)
+      : null;
+  const chapterTitle = q
+    ? "نتائج البحث"
+    : (activeCategoryObject?.name ?? "كل المنتجات");
+  const productsCountAr = (n: number): string => {
+    if (n === 1) return "منتج واحد";
+    if (n === 2) return "منتجان";
+    if (n >= 3 && n <= 10) return `${n} منتجات`;
+    return `${n} منتجاً`;
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SkipLink />
@@ -285,6 +306,36 @@ export function Storefront({
             icon={Package}
             title={q ? "لا نتائج لبحثك" : "لا منتجات متاحة حالياً"}
             description={q ? "جرّب كلمة أخرى أو تصفح كل الأقسام" : "أعد المحاولة لاحقاً — المتجر يجهز منتجاته"}
+            /* P21-D: empty states must offer the next step (the canonical
+               states.tsx law this call was violating — action was absent).
+               Search-empty → back to the full catalog (clears query +
+               category); empty store → the store's real WhatsApp channel
+               when it exists (never a fabricated contact). */
+            action={
+              q ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setQ("");
+                    setActiveCategory("ALL");
+                  }}
+                >
+                  عرض كل المنتجات
+                </Button>
+              ) : data.business.whatsappNumber ? (
+                <Button variant="outline" size="sm" asChild>
+                  <a
+                    href={waLink(toE164(data.business.whatsappNumber))}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle className="size-3.5" aria-hidden="true" />
+                    تواصل مع المتجر
+                  </a>
+                </Button>
+              ) : undefined
+            }
           />
         ) : (
           <>
@@ -326,7 +377,14 @@ export function Storefront({
                       storefront chapters — the route line that guides
                       product → cart → checkout. */}
                   <div className="route-divider route-divider-quiet mb-3" aria-hidden="true" />
-                  <h2 className="font-heading font-bold text-sm">كل المنتجات</h2>
+                  <div className="flex items-center gap-2.5">
+                    <h2 className="font-heading font-bold text-sm">{chapterTitle}</h2>
+                    {(q || activeCategoryObject) && (
+                      <span className="inline-flex items-center rounded-sm border border-border bg-card px-2 py-0.5 font-mono text-[10px] font-medium tabular-nums text-muted-foreground">
+                        {productsCountAr(visibleProducts.length)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
               <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
