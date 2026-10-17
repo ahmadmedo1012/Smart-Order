@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, ArrowLeft, Route, BarChart3, Banknote, ShoppingBag } from "lucide-react";
+import { Menu, X, ChevronDown, ArrowLeft, Route, BarChart3, Banknote, ShoppingBag, PackageSearch } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 /* r128 Stage B (F4b) — the landing header, converted from the product
@@ -199,6 +199,14 @@ export function LandingHeader() {
             <a href="#store" className="landing-nav-link">المتجر</a>
             <a href="#dashboard" className="landing-nav-link">اللوحة</a>
             <a href="#payments" className="landing-nav-link">الدفع</a>
+            {/* W2-D1 (P21-D's one open gap): the tracking DOOR — the nav's
+                only non-anchor ROUTE link. A customer with a receipt in
+                hand needs the entry point (publicToken is unguessable);
+                /track takes order number + the phone used at order time. */}
+            <Link href="/track" className="landing-nav-link">
+              تتبع طلبك
+              <PackageSearch size={13} aria-hidden="true" />
+            </Link>
           </nav>
 
           <div className="landing-header-cta">
@@ -234,6 +242,7 @@ export function LandingHeader() {
             <a href="#store" className="ln-btn-ghost">متجر يعمل فوراً</a>
             <a href="#dashboard" className="ln-btn-ghost">لوحة التاجر</a>
             <a href="#payments" className="ln-btn-ghost">محطات الدفع</a>
+            <Link href="/track" className="ln-btn-ghost">تتبع طلبك</Link>
             <Link href="/login" className="ln-btn-ghost">تسجيل الدخول</Link>
             <Link href="/register" className="ln-btn-gold">
               أنشئ متجرك

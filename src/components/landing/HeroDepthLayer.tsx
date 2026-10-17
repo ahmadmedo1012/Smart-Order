@@ -30,6 +30,16 @@ type Star = { cx: number; cy: number; r: number; op: number }
 const STAR_COUNT = 80
 const VIEWBOX = 1200
 
+/* W2-D1 (hydration truth): the seeded trig is deterministic WITHIN one
+ * V8, but Node (server) and Chrome (client) ship different V8 builds
+ * whose Math.sin/cos can differ by 1 ULP — enough for React 19 to flag
+ * the whole tree on every landing visit (live-verified on production
+ * 49e29f8: two hydration-mismatch console errors, one per layer of the
+ * hero). Rounding to 3 decimals at the SOURCE makes the rendered values
+ * byte-identical across runtimes; at this viewBox scale the delta is
+ * 1/1000 of a unit on 1-2px decorative dots — invisible. */
+const round3 = (v: number) => Math.round(v * 1000) / 1000
+
 function makeStars(count: number, seed: number): Star[] {
   const stars: Star[] = []
   for (let i = 0; i < count; i++) {
@@ -38,7 +48,7 @@ function makeStars(count: number, seed: number): Star[] {
     const y = ((Math.cos(seed + i * 263.3) * 0.5 + 0.5) * VIEWBOX)
     const r = 0.5 + (Math.abs(Math.sin(seed + i * 179.7)) * 1.2)
     const op = 0.15 + (Math.abs(Math.sin(seed + i * 131.9)) * 0.35)
-    stars.push({ cx: x, cy: y, r, op })
+    stars.push({ cx: round3(x), cy: round3(y), r: round3(r), op: round3(op) })
   }
   return stars
 }

@@ -93,7 +93,14 @@ export default async function LandingPage() {
   const stats = await getLandingStats();
 
   return (
-    <div className="landing relative flex min-h-dvh flex-col overflow-x-clip">
+    /* suppressHydrationWarning (W2-D1): the r129 inline script below
+     * DELIBERATELY writes data-intro-seen onto this div before React
+     * hydrates (returning-visitor calm). React 19 flags the un-expected
+     * attribute on every returning-visit reload (the second hydration
+     * error live-verified on production 49e29f8) — this element is the
+     * one place a pre-hydration DOM write is BY DESIGN, and CSS is its
+     * only consumer, so the sanctioned suppression is exact. */
+    <div className="landing relative flex min-h-dvh flex-col overflow-x-clip" suppressHydrationWarning>
       {/* r129 — returning-visitor calm (canonical LandingPage.tsx:102-120,
           adapted for a server page): a blocking inline script marks
           .landing[data-intro-seen] from sessionStorage

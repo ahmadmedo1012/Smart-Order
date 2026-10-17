@@ -2,7 +2,7 @@
 
 import { useState, type KeyboardEvent } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, RotateCcw, Truck, User, Store, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, PackageSearch, RotateCcw, Truck, User, Store, type LucideIcon } from 'lucide-react';
 import { RevealCssClass } from '@/hooks/useReveal';
 import { TRACKING_FLOW, ORDER_STATUS_AR, type OrderStatus } from '@/lib/constants';
 
@@ -311,6 +311,15 @@ export function OrderJourneySection() {
             <Link href="/store/demo-store" className="ln-btn-ghost ln-stations-cta-warm">
               جرّب متجراً حقيقياً من المنصّة
               <ArrowLeft size={15} aria-hidden="true" />
+            </Link>
+            {/* W2-D1 — the chapter's story IS tracking («وعملاؤهم في صفحة
+                التتبّع»), so its customer exit leads there: the /track
+                lookup (order number + the phone used at order time —
+                the receipt in the reader's hand is the key). Placed
+                with the customer verbs before the merchant one. */}
+            <Link href="/track" className="ln-btn-ghost ln-stations-cta-warm">
+              تتبع طلبك
+              <PackageSearch size={15} aria-hidden="true" />
             </Link>
             <Link href="/register" className="ln-btn-ghost">
               ابدأ رحلتك
