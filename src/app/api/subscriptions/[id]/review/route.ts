@@ -38,12 +38,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
        The money path's own recipe (r134 W2-#6): ONE retry of the whole
        idempotent-by-CAS operation; a second conflict surfaces the
        family retry copy. Retrying is safe because the attempt either
-       committed nothing (atomic abort) or lost the CAS race (→ 409). */
+       committed nothing (atomic abort) or lost the CAS race (→ 409).
+       W5-C4 (W5-A4 P3): the retry now waits a small RANDOMIZED delay
+       (25–75ms) first — the one observed battery flake (statuses
+       [503,503,503]: zero winners) was three contenders re-colliding
+       in lockstep the instant their rollback journals released; the
+       jitter de-synchronizes the convoy so a fresh SQLite attempt
+       actually wins the lock. Semantics unchanged: still ONE retry,
+       same error copy, the CAS still pins one application. */
     const withTxRetry = async <T,>(op: () => Promise<T>): Promise<T> => {
       try {
         return await op();
       } catch (err) {
         if (!isRetryableTxError(err)) throw err;
+        await new Promise((resolve) => setTimeout(resolve, 25 + Math.random() * 50));
         try {
           return await op();
         } catch (retryErr) {

@@ -16,15 +16,59 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
   },
   async headers() {
+    /* W5-C4 (W5-A5 P2): كان هذا المتجر العضو الوحيد في العائلة بلا
+     * HSTS/CSP. المرآة العائلية: smart-link (next.config.ts r8–r13)
+     * للـCSP الساكنة + smart-menu (round89-B2) لحراسة HSTS. الفروق
+     * المقصودة عن smart-link: لا preload (لا تقييد مالك النطاق قبل
+     * قرار المالك)، ولا va.vercel-scripts.com (لا Analytics هنا —
+     * grep: صفر مستهلكات)، ولا upgrade-insecure-requests (سطر يكسر
+     * dev بـ HTTP صريح على WebKit). X-Frame-Options → DENY + COOP/
+     * CORP: كلا الشقيقين يشحنها (round89-B2 / r8) — لا iframe في
+     * الكود (QR يفتح الرابط مباشرة). */
     const security = [
       { key: "X-Content-Type-Options", value: "nosniff" },
-      { key: "X-Frame-Options", value: "SAMEORIGIN" },
+      { key: "X-Frame-Options", value: "DENY" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+      { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+      { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+      /* CSP ساكنة بلا nonce — لا middleware في هذا المستودع (نمط
+       * smart-link r5 بالضبط). App Router يبثّ دفعات self.__next_f
+       * inline لا يمكن نونتها على الصفحات المُسبَقة التصيير، فتحمل
+       * script/style ‏'unsafe-inline' (حل العائلة الموثق). التطبيق
+       * same-origin بالكامل: خطوط ذاتية الاستضافة، صور عبر
+       * /api/media، صفر سكربتات خارجية. frame-ancestors 'none' +
+       * object-src 'none' + base-uri + form-action يقتلون الافتراضيات
+       * الخطرة. */
+      {
+        key: "Content-Security-Policy",
+        value: [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline'",
+          "style-src 'self' 'unsafe-inline'",
+          "img-src 'self' data:",
+          "font-src 'self' data:",
+          "connect-src 'self'",
+          "frame-ancestors 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+          "object-src 'none'",
+        ].join("; "),
+      },
     ];
+    /* HSTS على إنتاج Vercel فقط (عين smart-menu round89-B2): على dev
+     * أو خادم محلي بـ HTTP صريح، WebKit يرقّي كل مورد فرعي إلى
+     * https://localhost فلا تُهيَّأ الصفحة أبداً — الحارس لا ينكسر
+     * شيئاً كي لا يكسر التطبيق. self-host خلف HTTPS (Render/Docker)
+     * خارج الحراسة — نفس مقايضة smart-menu، قرار المالك إذا صار
+     * self-host واقعاً منشوراً. */
+    const hsts =
+      process.env.NODE_ENV === "production" && process.env.VERCEL
+        ? [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }]
+        : [];
     return [
-      { source: "/(.*)", headers: security },
-      { source: "/api/(.*)", headers: [...security, { key: "Cache-Control", value: "no-store" }] },
+      { source: "/(.*)", headers: [...hsts, ...security] },
+      { source: "/api/(.*)", headers: [...hsts, ...security, { key: "Cache-Control", value: "no-store" }] },
       { source: "/api/media/:path", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
       /* r131 (F1, A8 perf — NO fonts cache header): the self-hosted IBM
        * Plex woff2 subsets (the two preloaded first-paint arabic files

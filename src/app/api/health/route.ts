@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { dbHealth } from "@/lib/db";
 import { getClientIp } from "@/lib/client-ip";
+import pkg from "../../../../package.json";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,7 +67,13 @@ export async function GET(request?: Request) {
       status: ok ? "ok" : "degraded",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      version: process.env.npm_package_version || "0.1.0",
+      /* W5-C4 (W5-A4 P3): Vercel's runtime never sets npm_package_version
+         (npm-only script env), so prod reported the fictional "0.1.0"
+         while package.json says 1.0.0. The static import of package.json
+         (resolveJsonModule, traced into the route bundle) is the single
+         source of truth — the npm var stays first so dev behavior is
+         byte-identical. commitSha remains the real deploy identity. */
+      version: process.env.npm_package_version || pkg.version,
       commitSha,
       db: ok ? "connected" : "error",
       dbLatencyMs: health.latencyMs,

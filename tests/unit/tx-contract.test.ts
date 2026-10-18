@@ -223,3 +223,27 @@ test("review route (W4-E1): both writes are guarded by the one-retry transient-c
   assert.match(reviewSrc, /isRetryableTxError\(/, "the transient-conflict discriminator is wired in");
   assert.match(reviewSrc, /"WRITE_CONFLICT"/, "a second conflict surfaces the family retry copy, never a raw 500");
 });
+
+test("review route (W5-C4): the single retry is preceded by a randomized 25–75ms jitter — the convoy de-synchronizer", () => {
+  /* W5-A4 P3: the battery's one observed flake ([503,503,503] — zero
+     winners, all contenders exhausted the one-retry recipe) was three
+     retriers re-colliding in lockstep the instant their rollback
+     journals released. The randomized pre-retry delay spreads the
+     convoy so a fresh SQLite attempt actually wins the write lock.
+     Semantics unchanged: still ONE retry, same 503 copy, the CAS
+     still pins the single application — only the TIMING moves. */
+  const guard = reviewSrc.slice(reviewSrc.indexOf("const withTxRetry"));
+  assert.match(
+    guard,
+    /setTimeout\(resolve, 25 \+ Math\.random\(\) \* 50\)/,
+    "the pre-retry delay must be the randomized 25–75ms window, not a fixed sleep",
+  );
+  // the delay rides the RETRY path only — after the transient-conflict
+  // gate, never in front of the first attempt.
+  const gate = guard.indexOf("isRetryableTxError(err)");
+  const delay = guard.indexOf("setTimeout(resolve");
+  assert.ok(
+    gate !== -1 && delay > gate,
+    "jitter fires after the isRetryableTxError gate and before the single retry",
+  );
+});

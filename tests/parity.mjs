@@ -955,7 +955,8 @@ const HEALTH_API = [
     healthSrc.includes('process.env.VERCEL_GIT_COMMIT_SHA || process.env.GIT_COMMIT_SHA || null')],
   ['health payload carries the observability set (uptime/version/dbLatencyMs/env/connected)',
     healthSrc.includes('uptime: process.uptime()') &&
-    healthSrc.includes('version: process.env.npm_package_version') &&
+    healthSrc.includes('version: process.env.npm_package_version || pkg.version') &&
+    healthSrc.includes('import pkg from "../../../../package.json"') &&
     healthSrc.includes('dbLatencyMs: health.latencyMs') &&
     healthSrc.includes('db: ok ? "connected" : "error"') &&
     healthSrc.includes('env: process.env.NODE_ENV')],
@@ -1150,6 +1151,22 @@ const R133_LAYER = [
     PKG.includes('"packageManager": "bun@1.3.14"')],
   ['E og-default.png day + SWR cache rule (SO-N3)',
     NEXTCFG.includes('source: "/og-default.png"') && NEXTCFG.includes('stale-while-revalidate=604800')],
+  /* W5-C4 (W5-A5 P2): the security header floor — Smart-Order was the
+     only family member without HSTS/CSP. Pinning the floor so a future
+     next.config edit cannot silently regress below it: HSTS on
+     prod+Vercel only (smart-menu round89-B2 guard — never breaks dev),
+     static CSP with the three hard defaults (frame-ancestors/object-
+     src/base-uri), COOP/CORP pair, XFO DENY (was SAMEORIGIN). */
+  ['W5-C4 security header floor: HSTS(prod+Vercel, smart-menu guard) + CSP frame-ancestors/object-src/base-uri + COOP/CORP + XFO DENY',
+    NEXTCFG.includes('Strict-Transport-Security') &&
+    NEXTCFG.includes('max-age=31536000; includeSubDomains') &&
+    NEXTCFG.includes('process.env.NODE_ENV === "production" && process.env.VERCEL') &&
+    NEXTCFG.includes("frame-ancestors 'none'") &&
+    NEXTCFG.includes("object-src 'none'") &&
+    NEXTCFG.includes("base-uri 'self'") &&
+    NEXTCFG.includes('Cross-Origin-Opener-Policy') &&
+    NEXTCFG.includes('Cross-Origin-Resource-Policy') &&
+    NEXTCFG.includes('"X-Frame-Options", value: "DENY"')],
   ['E global-error.tsx: the root boundary exists (A13 S-05)',
     exists(new URL('../src/app/global-error.tsx', import.meta.url))],
   ['E .env.example: bank/WhatsApp/seed/proxy vars documented',
