@@ -224,6 +224,38 @@ async function main() {
 
   // ---------- 6. state machine ----------
   console.log("— آلة حالات الطلب");
+
+  // (W3-F) التوأم المتسابق: طلبان متزامنان بالمفتاح نفسه — نافذة
+  // findFirst قبل الإدراج مفتوحة لكليهما، فقيد @@unique هو الحارس
+  // الحقيقي. المتسابق الخاسر كان يهرب 500 خامًا (حلقة P2002 تعيد
+  // المحاولة برقم طلب جديد — التعارض على المفتاح لا يزول أبدًا)؛
+  // الآن يميّز المسار القيد فيعيد تشغيل طلب التوأم الملزم (نفس
+  // عقد الـreplay: 200 + replay:true + نفس المعرّف). النتيجة الحتمية
+  // مهما ترتيب السباق: إنشاء واحد 201 + رد replay واحد، ومعرّف واحد،
+  // وصفر 500.
+  const twinKey = rnd("e2e-twin-");
+  const twinPayload = JSON.stringify({ ...orderPayload, idempotencyKey: twinKey, customerName: "عميل السباق" });
+  const [twinA, twinB] = await Promise.all([
+    anon.call("/api/public/orders", { method: "POST", body: twinPayload }),
+    anon.call("/api/public/orders", { method: "POST", body: twinPayload }),
+  ]);
+  const twinIds = [twinA.body?.data?.order?.id, twinB.body?.data?.order?.id];
+  const twinStatuses = [twinA.status, twinB.status];
+  const twinReplies = [twinA.body?.data?.order?.replay, twinB.body?.data?.order?.replay];
+  ok(
+    "raced idempotency twins: exactly one order is ever created (same id twice, never two)",
+    rateLimited || (twinIds[0] && twinIds[0] === twinIds[1]),
+    `ids ${JSON.stringify(twinIds)} statuses ${JSON.stringify(twinStatuses)}`
+  );
+  ok(
+    "raced idempotency twins: one 201 + one replay 200, never a raw 500",
+    rateLimited || (
+      twinStatuses.includes(201) && twinStatuses.includes(200) &&
+      twinReplies.filter((r) => r === true).length === 1
+    ),
+    `statuses ${JSON.stringify(twinStatuses)} replays ${JSON.stringify(twinReplies)} a=${JSON.stringify(twinA.body?.error ?? null).slice(0, 80)} b=${JSON.stringify(twinB.body?.error ?? null).slice(0, 80)}`
+  );
+
   const orderId = created?.id;
   const jump = await A.call(`/api/orders/${orderId}`, { method: "PATCH", body: JSON.stringify({ action: "status", status: "DELIVERED" }) });
   ok("invalid jump NEW→DELIVERED rejected", rateLimited || jump.body?.success === false, JSON.stringify(jump.body).slice(0, 100));

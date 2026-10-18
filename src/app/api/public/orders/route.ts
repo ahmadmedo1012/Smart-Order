@@ -16,6 +16,7 @@ import { dbRateLimit, clientIp } from "@/lib/rate-limit";
 import { MAX_ORDER_ITEMS, MAX_ORDER_QUANTITY } from "@/lib/constants";
 import { buildOrderMessage } from "@/lib/whatsapp";
 import { tripoliDayStart, tripoliDateParts, tripoliMonthStart } from "@/lib/arabic";
+import { isUniqueViolationOn } from "@/lib/prisma-errors";
 import { Prisma } from "@prisma/client";
 
 export const runtime = "nodejs";
@@ -73,6 +74,73 @@ const createSchema = z.object({
   items: z.array(itemSchema).min(1, "سلة الطلب فارغة").max(MAX_ORDER_ITEMS),
 });
 
+/* ── W3-F: idempotent-replay plumbing, shared by the pre-check below and
+ * the raced-twin recovery in the POST catch ──
+ *
+ * The pre-transaction findFirst is a read-then-write window: a concurrent
+ * request carrying the SAME idempotencyKey can commit between the check
+ * and this route's INSERT. The schema's @@unique([businessId,
+ * idempotencyKey]) is the REAL guard — when it fires, the twin's
+ * committed order is fetched and replayed: the exact 200/replay:true
+ * contract the pre-check serves, never a raw 500 (which is what escaped
+ * before the discriminator existed: the insert loop's P2002 retry is
+ * for ORDER NUMBER collisions and could never clear a key conflict —
+ * every attempt re-violates the same constraint). */
+async function findIdemOrder(businessId: string, idempotencyKey: string) {
+  return db.order.findFirst({
+    where: { businessId, idempotencyKey },
+    include: {
+      items: {
+        select: { productName: true, variantName: true, optionsJson: true, quantity: true, lineTotal: true },
+      },
+    },
+  });
+}
+
+type IdemOrder = NonNullable<Awaited<ReturnType<typeof findIdemOrder>>>;
+
+function idemReplayResponse(idem: IdemOrder, business: { whatsappNumber: string | null }) {
+  const waMessage = buildOrderMessage({
+    orderNumber: idem.orderNumber,
+    customerName: idem.customerName,
+    customerPhone: idem.customerPhone,
+    items: idem.items.map((l) => ({
+      productName: l.productName,
+      variantName: l.variantName,
+      options: l.optionsJson ? (JSON.parse(l.optionsJson) as Array<{ name: string }>).map((o) => o.name).join("، ") : null,
+      quantity: l.quantity,
+      lineTotal: l.lineTotal,
+    })),
+    fulfillmentType: idem.fulfillmentType as "DELIVERY" | "PICKUP",
+    city: idem.city,
+    area: idem.area,
+    addressLine: idem.addressLine,
+    subtotal: idem.subtotal,
+    deliveryFee: idem.deliveryFee,
+    total: idem.total,
+    paymentName: idem.paymentMethodName,
+    paymentType: idem.paymentType,
+    customerNote: idem.customerNote,
+  });
+  return ok(
+    {
+      order: {
+        id: idem.id,
+        orderNumber: idem.orderNumber,
+        publicToken: idem.publicToken,
+        subtotal: idem.subtotal,
+        deliveryFee: idem.deliveryFee,
+        total: idem.total,
+        replay: true,
+      },
+      whatsapp: business.whatsappNumber
+        ? { number: toE164(business.whatsappNumber), message: waMessage }
+        : null,
+    },
+    { status: 200 }
+  );
+}
+
 function orderNumberFor(date: Date, seq: number): string {
   /* r136: أجزاء التاريخ بتوقيت طرابلس — كان يقرأ ساعة الخادم المحلية
    * (UTC على Vercel) فيحمل طلب 01:30 طرابلس تاريخ الأمس في رقمه. */
@@ -113,56 +181,11 @@ export async function POST(req: NextRequest) {
      * النافذة التي صُمم مفتاح cart-session لأجلها. الآن الشكل يطابق
      * رد المسار الأول (201) مع replay: true، ورابط واتساب يُعاد
      * بناؤه من الطلب المحفوظ (الصفوف الأصلية المخزنة) بنفس منطق
-     * المسار الأول حرفيًا. */
-    const idem = await db.order.findFirst({
-      where: { businessId: business.id, idempotencyKey: input.idempotencyKey },
-      include: {
-        items: {
-          select: { productName: true, variantName: true, optionsJson: true, quantity: true, lineTotal: true },
-        },
-      },
-    });
-    if (idem) {
-      const waMessage = buildOrderMessage({
-        orderNumber: idem.orderNumber,
-        customerName: idem.customerName,
-        customerPhone: idem.customerPhone,
-        items: idem.items.map((l) => ({
-          productName: l.productName,
-          variantName: l.variantName,
-          options: l.optionsJson ? (JSON.parse(l.optionsJson) as Array<{ name: string }>).map((o) => o.name).join("، ") : null,
-          quantity: l.quantity,
-          lineTotal: l.lineTotal,
-        })),
-        fulfillmentType: idem.fulfillmentType as "DELIVERY" | "PICKUP",
-        city: idem.city,
-        area: idem.area,
-        addressLine: idem.addressLine,
-        subtotal: idem.subtotal,
-        deliveryFee: idem.deliveryFee,
-        total: idem.total,
-        paymentName: idem.paymentMethodName,
-        paymentType: idem.paymentType,
-        customerNote: idem.customerNote,
-      });
-      return ok(
-        {
-          order: {
-            id: idem.id,
-            orderNumber: idem.orderNumber,
-            publicToken: idem.publicToken,
-            subtotal: idem.subtotal,
-            deliveryFee: idem.deliveryFee,
-            total: idem.total,
-            replay: true,
-          },
-          whatsapp: business.whatsappNumber
-            ? { number: toE164(business.whatsappNumber), message: waMessage }
-            : null,
-        },
-        { status: 200 }
-      );
-    }
+     * المسار الأول حرفيًا.
+     * W3-F: مُنشئ الرد يعيش في idemReplayResponse() حتى يقدّم مسار
+     * التعافي من التوأم المتسابق أدناه الشكل نفسه بالحرف. */
+    const idem = await findIdemOrder(business.id, input.idempotencyKey);
+    if (idem) return idemReplayResponse(idem, business);
 
     // ---- Server-side re-pricing (never trust client money) ----
     const productIds = Array.from(new Set(input.items.map((i) => i.productId)));
@@ -362,6 +385,13 @@ export async function POST(req: NextRequest) {
               break;
             } catch (e) {
               lastErr = e;
+              /* W3-F: P2002 على مفتاح الـidempotency = توأم متسابق (طلب
+              متزامن بالمفتاح نفسه التزم أولًا) — لا محاولة orderNumber
+              يمكن أن تزيله (كل محاولة تنتهك القيد نفسه)؛ كسر فوري كي
+              يصل الخطأ الهارب إلى مسار التعافي في POST بدل حرق
+              المحاولتين الباقيتين. P2002 على orderNumber يبقى تصادم
+              تسلسل → محاولة تالية. */
+              if (isUniqueViolationOn(e, "idempotencyKey")) break;
               if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") continue;
               throw e;
             }
@@ -435,14 +465,33 @@ export async function POST(req: NextRequest) {
        conflict surfaces the family retry copy (checkout-client's exact
        fallback line). STOCK guards are business failures, not
        conflicts — they ride the generic throw → handleError path. */
+    /* W3-F: the raced-twin recovery — a P2002 on the idempotency KEY
+       (from the first attempt OR from the P2034 re-run, which re-inserts
+       the same key) means a concurrent same-key request committed inside
+       the pre-check's window. Replay the twin's committed order with the
+       exact pre-check shape; only if the row has vanished (never happens
+       on this contract) does the error fall through to the generic path. */
+    const replayRacedTwin = async (): Promise<ReturnType<typeof idemReplayResponse> | null> => {
+      const twin = await findIdemOrder(business.id, input.idempotencyKey);
+      return twin ? idemReplayResponse(twin, business) : null;
+    };
+
     let order: Awaited<ReturnType<typeof runOrderTx>>;
     try {
       order = await runOrderTx();
     } catch (err) {
+      if (isUniqueViolationOn(err, "idempotencyKey")) {
+        const replay = await replayRacedTwin();
+        if (replay) return replay;
+      }
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2034") {
         try {
           order = await runOrderTx();
         } catch (retryErr) {
+          if (isUniqueViolationOn(retryErr, "idempotencyKey")) {
+            const replay = await replayRacedTwin();
+            if (replay) return replay;
+          }
           if (retryErr instanceof Prisma.PrismaClientKnownRequestError && retryErr.code === "P2034") {
             return fail("تعذّر إرسال الطلب، حاول مرة أخرى", 503, "WRITE_CONFLICT");
           }
