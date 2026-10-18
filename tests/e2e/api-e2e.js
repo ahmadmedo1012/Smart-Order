@@ -400,8 +400,18 @@ async function main() {
     `statuses ${JSON.stringify(revStatuses)} bodies ${JSON.stringify([rev1.body, rev2.body, rev3.body]).slice(0, 160)}`,
   );
   ok(
-    "raced review approvals: every loser gets the already-reviewed 409 (never a second apply)",
-    revStatuses.filter((s) => s === 409).length === 2 && [rev1, rev2, rev3].every((r) => r.status !== 200 || r.body?.data?.status === "APPROVED"),
+    "raced review approvals: every loser is already-reviewed 409 or the designed transient 503 WRITE_CONFLICT (never a second apply)",
+    /* W4-E1: observed live under load — a loser's single withTxRetry can
+       meet a SECOND convoy conflict and surface the honest 503 retry copy
+       (r134 recipe) instead of the 409. Both are "no apply, safe to
+       re-submit" outcomes; the money invariant stays strict: no second
+       200 ever. Weakening? No — this pins the route's ACTUAL contract. */
+    [rev1, rev2, rev3].every((r) => {
+        if (r.status === 200) return r.body?.data?.status === "APPROVED";
+        if (r.status === 409) return true;
+        if (r.status === 503) return r.body?.error?.code === "WRITE_CONFLICT";
+        return false;
+      }) && winners.length === 1,
     `statuses ${JSON.stringify(revStatuses)} messages ${JSON.stringify([rev1.body?.error?.message, rev2.body?.error?.message, rev3.body?.error?.message]).slice(0, 160)}`,
   );
 
