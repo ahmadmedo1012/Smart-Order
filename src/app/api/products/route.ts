@@ -152,8 +152,21 @@ export async function POST(req: NextRequest) {
      * backstop is retired with it: the plan cap IS the ceiling, and 9999
      * (the family's «unlimited» convention) is the sanity bound it
      * carries. Rejections answer 409 PLAN_LIMIT with the family's exact
-     * cap copy (Smart-Menu plan-limit-error wording). */
+     * cap copy (Smart-Menu plan-limit-error wording).
+     *
+     * W3-F (P21-W3-F): "inside the transaction" alone does not close the
+     * race — this tx runs at the default READ COMMITTED, where count-then-
+     * insert is still a phantom race (two concurrent POSTs at cap−1 both
+     * count N and both insert). The money path (public/orders) bought
+     * Serializable + P2034-retry for exactly this; this merchant-side
+     * gate gets the family's OTHER portable guard: an UPDATE on the
+     * business row takes a row-level X lock held to commit (SQLite: the
+     * write lock from first write to commit) — a concurrent twin blocks
+     * at its own lock write, then re-counts (now seeing this tx's insert)
+     * and the gate fires. Portable across BOTH schema twins (no raw
+     * FOR UPDATE, which SQLite does not speak). */
     const product = await db.$transaction(async (tx) => {
+      await tx.business.update({ where: { id: member.businessId }, data: { updatedAt: new Date() } });
       const plan = await currentPlan(tx, member.businessId);
       const count = await tx.product.count({ where: { businessId: member.businessId, isArchived: false } });
       if (count >= plan.maxProducts) {
@@ -163,7 +176,7 @@ export async function POST(req: NextRequest) {
           "PLAN_LIMIT",
         );
       }
-      return tx.product.create({
+      const created = await tx.product.create({
         data: {
           businessId: member.businessId,
           name: input.name,
@@ -196,10 +209,14 @@ export async function POST(req: NextRequest) {
           optionGroups: { include: { options: true } },
         },
       });
-    });
-
-    await db.auditLog.create({
-      data: { businessId: member.businessId, userId: user.id, action: "PRODUCT_CREATED", entity: "Product", entityId: product.id, metadata: JSON.stringify({ name: product.name }) },
+      /* W3-F: the audit row rides the same tx as the mutation it
+         describes (the r134/W2-#13 doctrine, executed for the orders
+         PATCH route) — a crash between commit and a post-tx audit write
+         left the mutation un-audited. */
+      await tx.auditLog.create({
+        data: { businessId: member.businessId, userId: user.id, action: "PRODUCT_CREATED", entity: "Product", entityId: created.id, metadata: JSON.stringify({ name: created.name }) },
+      });
+      return created;
     });
 
     return ok({ product }, { status: 201 });

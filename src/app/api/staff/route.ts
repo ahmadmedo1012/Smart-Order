@@ -107,8 +107,16 @@ export async function POST(req: NextRequest) {
      * the membership insert now share ONE transaction (the Smart-Menu
      * in-tx reference pattern), and the user row is created only when a
      * seat is actually available — a refused add no longer leaves an
-     * orphan account behind (the old flow created the user first). */
+     * orphan account behind (the old flow created the user first).
+     *
+     * W3-F (P21-W3-F): READ COMMITTED still admits the phantom race
+     * (two adds at seats−1 both count, both insert) — same portable row
+     * lock as the products gate: the business-row UPDATE holds the X
+     * lock to commit on BOTH engines (SQLite write lock / Postgres row
+     * lock), so the twin re-counts after the first commits and the
+     * gate fires. */
     const membership = await db.$transaction(async (tx) => {
+      await tx.business.update({ where: { id: member.businessId }, data: { updatedAt: new Date() } });
       const plan = await currentPlan(tx, member.businessId);
       const seats = teamSeatsFor(plan.name);
       const memberCount = await tx.businessMember.count({ where: { businessId: member.businessId } });
@@ -141,21 +149,24 @@ export async function POST(req: NextRequest) {
       });
       if (existingMembership) throw new ApiFailError("هذا المستخدم عضو في الفريق مسبقاً", 409, "DUPLICATE");
 
-      return tx.businessMember.create({
+      const created = await tx.businessMember.create({
         data: { businessId: member.businessId, userId, role: input.role },
         include: { user: { select: { id: true, email: true, name: true } } },
       });
-    });
-
-    await db.auditLog.create({
-      data: {
-        businessId: member.businessId,
-        userId: user.id,
-        action: "STAFF_ADDED",
-        entity: "BusinessMember",
-        entityId: membership.id,
-        metadata: JSON.stringify({ role: input.role, email: input.email }),
-      },
+      /* W3-F: the audit row rides the same tx as the mutation it
+         describes (the r134/W2-#13 doctrine — the orders PATCH route is
+         the executed precedent). */
+      await tx.auditLog.create({
+        data: {
+          businessId: member.businessId,
+          userId: user.id,
+          action: "STAFF_ADDED",
+          entity: "BusinessMember",
+          entityId: created.id,
+          metadata: JSON.stringify({ role: input.role, email: input.email }),
+        },
+      });
+      return created;
     });
 
     return ok({ staff: membership }, { status: 201 });
