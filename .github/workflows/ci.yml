@@ -153,6 +153,12 @@ jobs:
           done
           echo "الخادم لم يصبح صحيًا"; cat server.log; exit 1
 
+      # W4-E: قسم مراجعة الاشتراك (section 10) يحتاج مدير المنصة
+      # التجريبي — scripts/make-admin.js هو التمهيد الموثق للقاعدة
+      # الطازجة (idempotent: ينشئ/يرقّي admin@smart-link.ly فقط).
+      - name: Bootstrap QA platform-admin (make-admin.js)
+        run: node scripts/make-admin.js
+
       - name: E2E API suite
         run: npm run test:e2e
 
