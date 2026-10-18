@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { ok, fail, handleError, readJson, ApiFailError } from "@/lib/api";
 import { requireAuth } from "@/lib/auth";
+import { isRetryableTxError } from "@/lib/prisma-errors";
 
 export const runtime = "nodejs";
 
@@ -27,6 +28,33 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!payment) return fail("طلب الدفع غير موجود", 404);
     if (payment.status !== "PENDING") return fail("تمت مراجعة هذا الطلب مسبقاً", 409);
 
+    /* W4-E1 (P21-W4-E): the CAS below closed the double-apply, but the e2e
+       raced-approval battery (three reviews in flight on one PENDING
+       payment) caught a residual convoy failure on the SQLite twin:
+       3+ interleaved read→write transactions make the rollback journal
+       starve one contender past the socket timeout — it escaped as a
+       raw 500 (P1008 "Socket timeout" / the collateral P2028) after a
+       ~5s stall, exactly the failure family this route was closing.
+       The money path's own recipe (r134 W2-#6): ONE retry of the whole
+       idempotent-by-CAS operation; a second conflict surfaces the
+       family retry copy. Retrying is safe because the attempt either
+       committed nothing (atomic abort) or lost the CAS race (→ 409). */
+    const withTxRetry = async <T,>(op: () => Promise<T>): Promise<T> => {
+      try {
+        return await op();
+      } catch (err) {
+        if (!isRetryableTxError(err)) throw err;
+        try {
+          return await op();
+        } catch (retryErr) {
+          if (isRetryableTxError(retryErr)) {
+            throw new ApiFailError("تعذّر تنفيذ المراجعة، حاول مرة أخرى", 503, "WRITE_CONFLICT");
+          }
+          throw retryErr;
+        }
+      }
+    };
+
     if (input.action === "APPROVE") {
       const plan = await db.plan.findUnique({ where: { id: payment.planId } });
       const ends =
@@ -42,43 +70,49 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
          transaction so the plan change and the approval stamp commit
          atomically. The loser gets the same "already reviewed" copy the
          pre-check serves. */
-      const result = await db.$transaction(async (tx) => {
-        const cas = await tx.subscriptionPayment.updateMany({
-          where: { id, status: "PENDING" },
-          data: {
-            status: "APPROVED",
-            reviewedById: user.id,
-            reviewNote: input.note || null,
-            reviewedAt: new Date(),
-          },
-        });
-        if (cas.count !== 1) {
-          throw new ApiFailError("تمت مراجعة هذا الطلب مسبقاً", 409, "ALREADY_REVIEWED");
-        }
-        if (payment.businessId) {
-          await tx.business.update({
-            where: { id: payment.businessId },
-            data: { planId: payment.planId, subscriptionEnds: ends },
+      const result = await withTxRetry(() =>
+        db.$transaction(async (tx) => {
+          const cas = await tx.subscriptionPayment.updateMany({
+            where: { id, status: "PENDING" },
+            data: {
+              status: "APPROVED",
+              reviewedById: user.id,
+              reviewNote: input.note || null,
+              reviewedAt: new Date(),
+            },
           });
-        }
-        return { status: "APPROVED" as const };
-      });
+          if (cas.count !== 1) {
+            throw new ApiFailError("تمت مراجعة هذا الطلب مسبقاً", 409, "ALREADY_REVIEWED");
+          }
+          if (payment.businessId) {
+            await tx.business.update({
+              where: { id: payment.businessId },
+              data: { planId: payment.planId, subscriptionEnds: ends },
+            });
+          }
+          return { status: "APPROVED" as const };
+        }),
+      );
 
       return ok(result);
     }
 
     /* W3-F: same CAS for the reject branch — the plain update could
        overwrite a concurrent APPROVE (a rejection stamping over an
-       approved payment that already upgraded the business). */
-    const casReject = await db.subscriptionPayment.updateMany({
-      where: { id, status: "PENDING" },
-      data: {
-        status: "REJECTED",
-        reviewedById: user.id,
-        reviewNote: input.note || null,
-        reviewedAt: new Date(),
-      },
-    });
+       approved payment that already upgraded the business).
+       W4-E1: the same one-retry guard (a lone conditional update can hit
+       the identical convoy casualty under a raced rejection). */
+    const casReject = await withTxRetry(() =>
+      db.subscriptionPayment.updateMany({
+        where: { id, status: "PENDING" },
+        data: {
+          status: "REJECTED",
+          reviewedById: user.id,
+          reviewNote: input.note || null,
+          reviewedAt: new Date(),
+        },
+      }),
+    );
     if (casReject.count !== 1) {
       return fail("تمت مراجعة هذا الطلب مسبقاً", 409, "ALREADY_REVIEWED");
     }

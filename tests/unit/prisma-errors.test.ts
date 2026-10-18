@@ -3,11 +3,15 @@
 // no @prisma/client import (the battery stays dependency-free like the
 // other units; the real Prisma error object has exactly this
 // { code, message, meta } surface).
+// W4-E1 (P21-W4-E) — also the transient-conflict discriminator
+// (isRetryableTxError): P2034/P1008/P2028 are the one-retry recipe's
+// codes; data and business errors never retry.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   uniqueViolationFields,
   isUniqueViolationOn,
+  isRetryableTxError,
 } from "../../src/lib/prisma-errors.ts";
 
 const p2002 = (target: unknown, message = "Unique constraint failed") =>
@@ -79,4 +83,32 @@ test("message fallback: SQLite-style backticked fields are normalized", () => {
   assert.equal(isUniqueViolationOn(err, "idempotencyKey"), true);
   assert.equal(isUniqueViolationOn(err, "businessId"), true);
   assert.equal(isUniqueViolationOn(err, "orderNumber"), false);
+});
+
+test("isRetryableTxError: the transient conflict codes the one-retry recipe covers (W4-E1)", () => {
+  // P2034 — write conflict / deadlock (Serializable SSI aborts, busy aborts)
+  assert.equal(isRetryableTxError({ code: "P2034", message: "Transaction failed due to a write conflict or a deadlock" }), true);
+  // P1008 — socket timeout: the SQLite rollback-journal convoy casualty
+  // observed live under a 3-way raced approval (5s stall → raw 500)
+  assert.equal(
+    isRetryableTxError({ code: "P1008", message: "Socket timeout (the database failed to respond to a query within the configured timeout)" }),
+    true,
+  );
+  // P2028 — Transaction API error: the collateral form (a query lands on
+  // a transaction the timeout already closed)
+  assert.equal(isRetryableTxError({ code: "P2028", message: "Transaction API error" }), true);
+});
+
+test("isRetryableTxError: data and business errors are NOT retryable", () => {
+  assert.equal(isRetryableTxError({ code: "P2002", meta: { target: ["id"] } }), false); // uniqueness has its own discriminator
+  assert.equal(isRetryableTxError({ code: "P2025" }), false); // record not found
+  assert.equal(isRetryableTxError({ code: "ALREADY_REVIEWED" }), false); // ApiFailError business codes never retry
+  assert.equal(isRetryableTxError({ code: "PLAN_LIMIT" }), false);
+});
+
+test("isRetryableTxError: non-objects and codeless errors never retry", () => {
+  assert.equal(isRetryableTxError(null), false);
+  assert.equal(isRetryableTxError(undefined), false);
+  assert.equal(isRetryableTxError("P2034"), false);
+  assert.equal(isRetryableTxError(new Error("boom")), false);
 });

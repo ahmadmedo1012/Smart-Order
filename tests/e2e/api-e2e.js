@@ -358,6 +358,65 @@ async function main() {
      captured as evidence against the dev DB (see w2-evidence/W2-D2) while
      the pass-through side stays pinned by section 5's order creation. */
 
+  // ---------- 10. subscription review CAS — one payment, one application (W3-F) ----------
+  console.log("— مراجعة الاشتراك: CAS واحد لكل دفعة (W3-F)");
+  /* cba655a regression pin. The PENDING pre-check alone was a
+     read-then-write window: two platform admins reviewing the same payment
+     concurrently both passed it and both approvals applied (the business
+     row written twice, the payment double-applied). The fix is the
+     orders-PATCH CAS recipe — the stamp is updateMany WHERE
+     status:"PENDING" + count assert, the business upgrade rides the SAME
+     interactive transaction. This fires a REAL concurrent race: three
+     APPROVE requests in flight on one PENDING payment (Promise.all).
+     Whatever the interleaving, exactly ONE 200 may come back and the
+     losers must get the family's already-reviewed 409 — on the pre-CAS
+     code the unconditional writes all land and several 200s return. */
+  const plansRes = await anon.call("/api/plans");
+  const premiumPlan = (plansRes.body?.data || []).find((p) => p.name === "Premium");
+  ok("plans catalog self-seeds (Premium row available for the upgrade flow)", !!premiumPlan, JSON.stringify(plansRes.body).slice(0, 80));
+
+  const subReq = await A.call("/api/subscriptions", {
+    method: "POST",
+    body: JSON.stringify({ planId: premiumPlan?.id, provider: "libyana", amount: premiumPlan?.price, phone: "0912345678", businessId: bizAId }),
+  });
+  const paymentId = subReq.body?.data?.id;
+  ok("merchant files a PENDING subscription payment", !!paymentId && subReq.body?.data?.status === "PENDING", JSON.stringify(subReq.body).slice(0, 120));
+
+  // two platform-admin sessions (scripts/make-admin.js QA credentials —
+  // the repo's own documented admin bootstrap for a fresh database)
+  const adm1 = makeCtx();
+  const adm2 = makeCtx();
+  const admLogin = (ctx) => ctx.call("/api/auth/login", { method: "POST", body: JSON.stringify({ email: "admin@smart-link.ly", password: "Admin@12345" }) });
+  const [login1, login2] = await Promise.all([admLogin(adm1), admLogin(adm2)]);
+  ok("platform-admin sessions open (make-admin.js QA creds)", login1.body?.success === true && login2.body?.success === true, JSON.stringify(login1.body).slice(0, 80));
+
+  const fireReview = (ctx) => ctx.call(`/api/subscriptions/${paymentId}/review`, { method: "POST", body: JSON.stringify({ action: "APPROVE" }) });
+  const [rev1, rev2, rev3] = await Promise.all([fireReview(adm1), fireReview(adm2), fireReview(adm1)]);
+  const revStatuses = [rev1.status, rev2.status, rev3.status];
+  const winners = [rev1, rev2, rev3].filter((r) => r.status === 200);
+  ok(
+    "raced review approvals: exactly ONE 200 — the CAS winner applies the payment once",
+    winners.length === 1 && winners[0].body?.data?.status === "APPROVED",
+    `statuses ${JSON.stringify(revStatuses)} bodies ${JSON.stringify([rev1.body, rev2.body, rev3.body]).slice(0, 160)}`,
+  );
+  ok(
+    "raced review approvals: every loser gets the already-reviewed 409 (never a second apply)",
+    revStatuses.filter((s) => s === 409).length === 2 && [rev1, rev2, rev3].every((r) => r.status !== 200 || r.body?.data?.status === "APPROVED"),
+    `statuses ${JSON.stringify(revStatuses)} messages ${JSON.stringify([rev1.body?.error?.message, rev2.body?.error?.message, rev3.body?.error?.message]).slice(0, 160)}`,
+  );
+
+  // the single application really landed: Premium (3 team seats) opened
+  // staff adds for business A — the same call section 9 refused on Free B.
+  const staffAfterUpgrade = await A.call("/api/staff", {
+    method: "POST",
+    body: JSON.stringify({ businessId: bizAId, name: "عضو بعد الموافقة", email: rnd("staffpost_") + "@test.ly", password: "Test#2026Pass", role: "STAFF" }),
+  });
+  ok(
+    "one application, one real effect: the approved Premium plan opened team seats",
+    staffAfterUpgrade.status === 201 && staffAfterUpgrade.body?.success === true,
+    JSON.stringify(staffAfterUpgrade.body).slice(0, 100),
+  );
+
   console.log(`\nالنتيجة: ${pass} ناجح · ${fail} فاشل · ${skipped} متجاهل\n`);
   process.exit(fail > 0 ? 1 : 0);
 }
