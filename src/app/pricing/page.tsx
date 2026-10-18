@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PricingClient } from "@/components/pricing/pricing-client";
 import { db } from "@/lib/db";
 import { westernNumerals } from "@/lib/arabic";
+import { healPlanClaim } from "@/lib/plan-claims";
 
 export const metadata: Metadata = {
   /* r132 (F1c, A11 P1/P2): suffix stripped — the root template already
@@ -46,8 +47,13 @@ function safeParse(raw: string): string[] {
     /* P13-2d (T3): same display-safe Western-digit fold as /api/plans
      * safeParseFeatures — this SSR seam reads the DB directly, so rows
      * seeded pre-r133 would otherwise render Arabic-Indic here before
-     * any /api/plans hit (rationale documented in lib/arabic.ts). */
-    return Array.isArray(parsed) ? parsed.filter((f) => typeof f === "string").map(westernNumerals) : [];
+     * any /api/plans hit (rationale documented in lib/arabic.ts).
+     * W6-B4: the claim heal rides the same seam (lib/plan-claims.ts) so
+     * this SSR render and the /api/plans answer can never disagree on
+     * the WhatsApp bullet. */
+    return Array.isArray(parsed)
+      ? parsed.filter((f) => typeof f === "string").map(westernNumerals).map(healPlanClaim)
+      : [];
   } catch {
     return [];
   }

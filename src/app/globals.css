@@ -50,22 +50,22 @@
  */
 
 @theme inline {
-  /* ── Font system — Arabic-first, IBM Plex Sans Arabic local-first
-     (Madarek parity). --font-cairo is the documented legacy SHIM
-     name — its VALUE is defined in public/fonts/fonts.css
-     (`:root { --font-cairo: "IBM Plex Sans Arabic" }`, currently
-     line 38) as "IBM Plex Sans Arabic" (arabic + latin subsets,
-     400-700 — the var NAME is kept as the load-bearing shim
-     contract: a var() with no fallback that resolves to an
-     undefined custom property invalidates the whole font-family
-     declaration and the body fell back to Times New Roman in prod
-     once; fonts.css defines it FIRST, before this sheet). The
-     literal "IBM Plex Sans Arabic" fallback keeps every stack
-     resolvable even when the var is absent. --font-heading is the
-     SAME display face as body (Madarek §2.1: --font-display =
-     Plex Sans Arabic — one family, weight 700 carries display).
-     --font-mono is Madarek's mixed-script stack: Latin/digits in
-     IBM Plex Mono, Arabic runs continue in Plex Sans Arabic. ── */
+  /* ── Font system (r152 "Operational Daylight") — Arabic-first, Tajawal
+     local-first. --font-cairo is the documented legacy SHIM name —
+     its VALUE is defined in public/fonts/fonts.css (currently line 33:
+     `:root { --font-cairo: "Tajawal" }`) as "Tajawal" (arabic + latin
+     subsets, 400-800 — the var NAME is kept as the load-bearing shim
+     contract: a var() with no fallback that resolves to an undefined
+     custom property invalidates the whole font-family declaration and
+     the body fell back to Times New Roman in prod once; fonts.css
+     defines it FIRST, before this sheet — see its P1 SHIM header).
+     The literal "Tajawal" fallback keeps every stack resolvable even
+     when the var is absent; "IBM Plex Sans Arabic" survives in every
+     stack as an extra resolving rung (files still on disk), never the
+     primary voice. --font-heading chains Barlow Semi Condensed (Latin
+     display — no Arabic glyphs) → Tajawal, so Arabic headings land on
+     Tajawal, never Times. --font-mono is the mixed-script stack:
+     Latin/digits in IBM Plex Mono, Arabic runs continue in Tajawal. ── */
   --font-sans: var(--font-cairo), "Tajawal", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "IBM Plex Mono", "Tajawal", "IBM Plex Sans Arabic", ui-monospace, "SFMono-Regular", monospace;
   --font-arabic: var(--font-cairo), "Tajawal", "IBM Plex Sans Arabic", system-ui, sans-serif;

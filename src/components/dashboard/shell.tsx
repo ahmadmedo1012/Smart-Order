@@ -30,6 +30,7 @@ import {
   Package,
   LayoutGrid,
   Users,
+  BarChart3,
   Truck,
   CreditCard,
   Settings,
@@ -58,6 +59,10 @@ const NAV = [
   { href: "/dashboard/products", label: "المنتجات", icon: Package },
   { href: "/dashboard/categories", label: "الأقسام", icon: LayoutGrid },
   { href: "/dashboard/customers", label: "العملاء", icon: Users },
+  /* W6-B4 (audit gap #1): the business reporting surface — best sellers,
+     30/90-day revenue trend, delivery split, CSV export. Sits with the
+     data surfaces after العملاء. */
+  { href: "/dashboard/reports", label: "التقارير", icon: BarChart3 },
   { href: "/dashboard/delivery", label: "التوصيل", icon: Truck },
   { href: "/dashboard/payments", label: "المدفوعات", icon: CreditCard },
   { href: "/dashboard/staff", label: "الفريق", icon: UserCog },
@@ -65,7 +70,7 @@ const NAV = [
 ];
 
 /* P6-2-f3 (GROUP 3): the mobile bottom-nav «المزيد» menu — the four
-   primary rows (already in the bottom bar) + the five surfaces the bar
+   primary rows (already in the bottom bar) + the six surfaces the bar
    never had room for. 44px targets in the sheet, RTL, Escape closes
    (Radix dialog semantics come with the Sheet primitive). The explicit
    element type keeps `exact` optional across the sheet's spread union. */
@@ -93,6 +98,7 @@ const MORE_NAV: Array<{
   exact?: boolean;
 }> = [
   { href: "/dashboard/categories", label: "الأقسام", icon: LayoutGrid },
+  { href: "/dashboard/reports", label: "التقارير", icon: BarChart3 },
   { href: "/dashboard/delivery", label: "التوصيل", icon: Truck },
   { href: "/dashboard/payments", label: "المدفوعات", icon: CreditCard },
   { href: "/dashboard/staff", label: "الفريق", icon: UserCog },

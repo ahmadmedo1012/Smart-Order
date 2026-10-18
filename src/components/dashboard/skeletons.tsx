@@ -409,6 +409,22 @@ export function OnboardingSkeleton() {
   );
 }
 
+/** W6-B4: reports — header + KPI strip + the two-section chart grid +
+    the top-products card, mirroring the page anatomy. */
+export function ReportsSkeleton() {
+  return (
+    <SkeletonPage label="جارٍ تحميل التقارير…">
+      <HeaderSkeleton />
+      <KpiGridSkeleton />
+      <div className="grid gap-4 lg:grid-cols-3">
+        <SectionSkeleton className="h-64 lg:col-span-2" />
+        <SectionSkeleton className="h-64" />
+      </div>
+      <SectionSkeleton className="h-56" />
+    </SkeletonPage>
+  );
+}
+
 export function OrderDetailSkeleton() {
   return <DetailSkeleton />;
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { westernNumerals } from "@/lib/arabic";
+import { healPlanClaim } from "@/lib/plan-claims";
 
 export const runtime = "nodejs";
 
@@ -48,7 +49,7 @@ const FAMILY_PLANS = [
     maxProducts: 9999,
     maxOrders: 10000,
     sortOrder: 3,
-    features: ["كل ميزات الأساسي", "حسابات فريق (3 أعضاء)", "إشعارات واتساب فورية", "تقارير أداء أسبوعية", "دعم أولوية"],
+    features: ["كل ميزات الأساسي", "حسابات فريق (3 أعضاء)", "رسائل واتساب للطلبات والتأكيدات", "تقارير أداء أسبوعية", "دعم أولوية"],
   },
   {
     name: "Pro",
@@ -106,8 +107,13 @@ function safeParseFeatures(raw: string): string[] {
     /* P13-2d (T3): display-safe Arabic-Indic → Western fold — rows seeded
      * pre-r133 carry «١٥ منتجاً و٣ أقسام»; the fleet policy is Western
      * digits. The seed itself is seed-on-EMPTY, so existing rows never
-     * heal through it (rationale documented in lib/arabic.ts). */
-    return Array.isArray(parsed) ? parsed.filter((f) => typeof f === "string").map(westernNumerals) : [];
+     * heal through it (rationale documented in lib/arabic.ts).
+     * W6-B4: the claim heal rides the same seam — rows seeded before the
+     * WhatsApp-claim reword keep the old bullet until this fold (lib/
+     * plan-claims.ts, same P13-2d doctrine). */
+    return Array.isArray(parsed)
+      ? parsed.filter((f) => typeof f === "string").map(westernNumerals).map(healPlanClaim)
+      : [];
   } catch {
     return [];
   }

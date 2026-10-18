@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { ok, fail, handleError } from "@/lib/api";
 import { getAuthUser } from "@/lib/auth";
 import { dbRateLimit, clientIp } from "@/lib/rate-limit";
+import { timingSafeEqualStr } from "@/lib/timing-safe";
 
 export const runtime = "nodejs";
 
@@ -32,7 +33,13 @@ export async function POST(req: NextRequest) {
 
     const secret = req.nextUrl.searchParams.get("secret");
     const envSecret = process.env.SEED_SECRET;
-    let authorized = !!(envSecret && secret && secret === envSecret);
+    /* W6-B4 (audit P3-a): كان المقارنة `===` سريعة الانقطاع — مقارنة قيمة
+       السر عبر توقيت المسار تكشف محارفه تباعا. الآن عبر timingSafeEqualStr
+       (lib/timing-safe — تجزئة الطرفين لثابت الطول ثم timingSafeEqual):
+       السر الخاطئ والغائب والطول المختلف كلها نفس التكلفة ونفس رد 403
+       «غير مصرح» — لا يُعرف أيّها فشل. (البوابات الأخرى باقية كما هي:
+       429 معدل المحاولات ثم جلسة مدير المنصة.) */
+    let authorized = !!(envSecret && secret && timingSafeEqualStr(secret, envSecret));
     if (!authorized) {
       const user = await getAuthUser().catch(() => null);
       authorized = !!user?.isPlatformAdmin;

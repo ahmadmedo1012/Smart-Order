@@ -1599,6 +1599,98 @@ for (const [name, okFlag] of P14_D) {
   else failures.push(`p14 2-d/3-d gate FAILED: ${name}`);
 }
 
+// ── W6-B4: the business reporting surface + the small truth fixes ─────
+// (audit W6-A4 gap #1 — "a store owner cannot answer what are my best
+// sellers / how is revenue trending"). New surface: GET /api/dashboard/
+// reports (stats-route auth pattern, bounded 30/90-day window, the
+// family's CANCELLED/REJECTED exclusion accounting, the stats route's
+// dialect-discriminated day bucketing reused verbatim, OrderItem
+// server-side aggregation) + /dashboard/reports (Arabic RTL page in the
+// dashboard's state/table idioms, plain CSS bars, client-side CSV export
+// with the UTF-8 BOM) + the «التقارير» nav row. Truth fixes riding the
+// same commit: the seed secret's constant-time compare, the globals.css
+// font-shim doc aligned to the Tajawal reality, and the pricing
+// WhatsApp-claim reword (3 seed twins + the P13-2d-style read-seam heal).
+const REPORTS_ROUTE = R('src/app/api/dashboard/reports/route.ts');
+const REPORTS_PAGE = R('src/app/dashboard/reports/page.tsx');
+const SHELL_W6 = R('src/components/dashboard/shell.tsx');
+const SEED_ROUTE_W6 = R('src/app/api/seed/route.ts');
+const PLANS_ROUTE_W6 = R('src/app/api/plans/route.ts');
+const PRICING_PAGE_W6 = R('src/app/pricing/page.tsx');
+const W6B4 = [
+  ['W6-B4 reports API: the stats-route auth pattern verbatim (requireAuth → requireBusiness(businessId) → requirePermission orders.read)',
+    REPORTS_ROUTE.includes('await requireAuth()') &&
+    REPORTS_ROUTE.includes('requireBusiness(user, q.businessId)') &&
+    REPORTS_ROUTE.includes('requirePermission(member, "orders.read")')],
+  ['W6-B4 reports API: zod-validated bounded window — 30 default, 90 the only other',
+    /days: z\.coerce/.test(REPORTS_ROUTE) &&
+    /v === 30 \|\| v === 90/.test(REPORTS_ROUTE) &&
+    REPORTS_ROUTE.includes('.default(30)')],
+  ['W6-B4 reports API: the family exclusion accounting on EVERY aggregate (NOT IN CANCELLED/REJECTED — the plan-gate month-count rule), and the server returns RAW numbers (no د.ل formatting server-side)',
+    (REPORTS_ROUTE.match(/NOT IN \('CANCELLED', 'REJECTED'\)/g) || []).length >= 2 &&
+    REPORTS_ROUTE.includes('status: { notIn: ["CANCELLED", "REJECTED"] }') &&
+    !REPORTS_ROUTE.includes('د.ل')],
+  ['W6-B4 reports API: day bucketing is the stats route\'s dialect-discriminated twin (file: check, SQLite strftime unixepoch +7200, PG to_char interval \'2 hours\', tripoliDateParts keys — never local getters)',
+    REPORTS_ROUTE.includes('process.env.DATABASE_URL?.startsWith("file:")') &&
+    REPORTS_ROUTE.includes("strftime('%Y-%m-%d', \"createdAt\"/1000 + 7200, 'unixepoch')") &&
+    REPORTS_ROUTE.includes("to_char(\"createdAt\" + interval '2 hours', 'YYYY-MM-DD')") &&
+    /tripoliDateParts\(/.test(REPORTS_ROUTE)],
+  ['W6-B4 reports API: top products are SERVER-side OrderItem aggregates (raw groupBy over the snapshots: SUM quantity + SUM lineTotal + DISTINCT orders), never client money',
+    REPORTS_ROUTE.includes('SUM(oi."quantity")') &&
+    REPORTS_ROUTE.includes('SUM(oi."lineTotal")') &&
+    REPORTS_ROUTE.includes('FROM "OrderItem" oi') &&
+    REPORTS_ROUTE.includes('JOIN "Order" o ON o."id" = oi."orderId"') &&
+    REPORTS_ROUTE.includes('LIMIT 10')],
+  ['W6-B4 reports API: zero-filled oldest→newest series; totals ride the same rows (one accounting, one rule)',
+    REPORTS_ROUTE.includes('bucket?.revenue ?? 0') &&
+    /series\.reduce\(\(s, d\) => s \+ d\.revenue, 0\)/.test(REPORTS_ROUTE) &&
+    REPORTS_ROUTE.includes('Math.round(revenue / orders)')],
+  ['W6-B4 reports page: the honest state family (ErrorState retry / «لا توجد طلبات بعد» empty / shape-matched skeleton) + money formatted client-side via formatLyd',
+    REPORTS_PAGE.includes('<ErrorState retry={load} />') &&
+    REPORTS_PAGE.includes('title="لا توجد طلبات بعد"') &&
+    REPORTS_PAGE.includes('role="status"') &&
+    REPORTS_PAGE.includes('formatLyd(')],
+  ['W6-B4 reports page: accessible chart twin (role=img strip + full sr-only data table + per-bar title) — 30/90 bars never become 90 keyboard stops',
+    REPORTS_PAGE.includes('role="img"') &&
+    REPORTS_PAGE.includes('<table className="sr-only">') &&
+    REPORTS_PAGE.includes('title={`${d.date}: إيراد ${formatLyd(d.revenue)} — ${d.orders} طلب`}')],
+  ['W6-B4 reports page: CSV export is client-side from the fetched server data, UTF-8-BOM (Excel-safe Arabic), honest filename (product-store-window-date)',
+    REPORTS_PAGE.includes('\\uFEFF') &&
+    REPORTS_PAGE.includes('text/csv;charset=utf-8') &&
+    /a\.download = `smart-order-report-\$\{business\.slug\}-\$\{data\.window\.days\}d-/.test(REPORTS_PAGE)],
+  ['W6-B4 reports page: 44px controls with their own focus rings (window pills aria-pressed min-h-11; export rides the default Button rung)',
+    REPORTS_PAGE.includes('aria-pressed={days === w}') &&
+    REPORTS_PAGE.includes('min-h-11') &&
+    REPORTS_PAGE.includes('focus-visible:ring-2')],
+  ['W6-B4 shell: the «التقارير» row rides BOTH the desktop NAV and the mobile «المزيد» sheet (BarChart3, siblings\' grammar)',
+    (SHELL_W6.match(/\/dashboard\/reports/g) || []).length === 2 &&
+    SHELL_W6.includes('label: "التقارير", icon: BarChart3')],
+  ['W6-B4 reports route chrome: Arabic segment title + the shape-matched route-level skeleton',
+    R('src/app/dashboard/reports/layout.tsx').includes('title: "التقارير"') &&
+    R('src/app/dashboard/reports/loading.tsx').includes('ReportsSkeleton') &&
+    R('src/components/dashboard/skeletons.tsx').includes('export function ReportsSkeleton()')],
+  ['W6-B4 seed secret: the === fast-exit is replaced by the digest-then-timingSafeEqual compare (lib/timing-safe), one 403 answer for every unauthorized shape',
+    SEED_ROUTE_W6.includes('timingSafeEqualStr(secret, envSecret)') &&
+    !SEED_ROUTE_W6.includes('secret === envSecret') &&
+    R('src/lib/timing-safe.ts').includes('createHash("sha256")') &&
+    R('src/lib/timing-safe.ts').includes('timingSafeEqual(da, db)')],
+  ['W6-B4 globals.css: the font-shim doc tells the Tajawal truth (fonts.css line 33 value; no stale IBM Plex primary / line 38 claim)',
+    R('src/app/globals.css').includes(':root { --font-cairo: "Tajawal" }`) as "Tajawal"') &&
+    R('src/app/globals.css').includes('line 33') &&
+    !R('src/app/globals.css').includes('line 38')],
+  ['W6-B4 pricing claim: the WhatsApp over-promise («إشعارات واتساب فورية») is retired — 3 seed twins reworded, both plan read seams heal legacy rows (P13-2d doctrine)',
+    !PLANS_ROUTE_W6.includes('إشعارات واتساب') &&
+    !R('scripts/seed-family.js').includes('إشعارات واتساب') &&
+    !R('scripts/e2e-seed.mjs').includes('إشعارات واتساب') &&
+    R('src/lib/plan-claims.ts').includes('"إشعارات واتساب فورية": "رسائل واتساب للطلبات والتأكيدات"') &&
+    PLANS_ROUTE_W6.includes('.map(healPlanClaim)') &&
+    PRICING_PAGE_W6.includes('.map(healPlanClaim)')],
+];
+for (const [name, okFlag] of W6B4) {
+  if (okFlag) passed += 1;
+  else failures.push(`w6-b4 reports gate FAILED: ${name}`);
+}
+
 // ── report ───────────────────────────────────────────────────────────────────
 
 if (failures.length > 0) {
