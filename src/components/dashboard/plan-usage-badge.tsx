@@ -56,6 +56,13 @@ export function PlanUsageBadge({
   }
 
   const isFree = plan.price === 0;
+  /* W3-F (P21-W3-F truth): the limit FAQ promises «يمكنك الترقية من لوحة
+   * التحكم في أي وقت» — the ترقية link used to render only on the Free
+   * chip, so a PAID business at 80%+ of its cap (the warn bars) had no
+   * dashboard path to /pricing. The link now rides every warn state too;
+   * Free keeps it always. */
+  const nearLimit =
+    !!usage && (usage.products >= 80 || usage.orders >= 80);
 
   return (
     <div className={cn("flex flex-wrap items-center gap-2.5", className)}>
@@ -73,7 +80,7 @@ export function PlanUsageBadge({
       </span>
       {usage && usage.products > 0 && <UsageBar label="المنتجات" pct={usage.products} />}
       {usage && usage.orders > 0 && <UsageBar label="طلبات الشهر" pct={usage.orders} />}
-      {isFree && (
+      {(isFree || nearLimit) && (
         <a
           href="/pricing"
           className="text-xs font-medium text-accent-foreground underline-offset-4 transition-colors hover:underline"
