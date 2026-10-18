@@ -50,9 +50,16 @@ interface ReportsData {
 
 /* CSV cell escaping — quote only when the value can break the row
    (comma / quote / newline); inner quotes double. */
+/* W6-B8 (independent review): CSV formula-injection guard — the same law
+   Smart-Menu's orders export shipped this wave (f835be98): a cell starting
+   with = + - @ executes as a formula when the owner opens the export in
+   Excel/LibreOffice. Product names and the store name are staff-editable
+   (a malicious editor injects, the owner executes) — neutralize the prefix
+   with a leading apostrophe (Excel keeps the text after it verbatim). */
 function csvCell(v: string | number): string {
   const s = String(v);
-  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  const safe = /^[=+\-@]/.test(s) ? `'${s}` : s;
+  return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 
 /** The export body — revenue-per-day rows + top-products rows, plus the
