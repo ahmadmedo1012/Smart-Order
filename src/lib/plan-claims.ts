@@ -26,8 +26,17 @@
 
 /** Known-bad legacy feature bullets → their truthful replacements. */
 const LEGACY_CLAIMS: Record<string, string> = {
-  // the only verified over-promise so far — see the block comment above
+  // the only verified over-promises so far — see the block comments above
   "إشعارات واتساب فورية": "رسائل واتساب للطلبات والتأكيدات",
+  /* W6-B7 (W6-B4's flagged residual): Premium promised «تقارير أداء
+     أسبوعية» — scheduled weekly reports. Reality (code-traced after
+     W6-B4 shipped the surface): reports ARE real and owner-reachable,
+     but ON-DEMAND (/dashboard/reports — 30/90-day windows, best
+     sellers, CSV), never scheduled/emailed weekly, and not
+     Premium-exclusive (any plan with orders.read). The truthful bullet
+     says on-demand; the entitlement breadth is a separate plan
+     question left to the pricing owner. */
+  "تقارير أداء أسبوعية": "تقارير أداء عند الطلب",
 };
 
 /** Heal one feature bullet at read time; everything else passes through

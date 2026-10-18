@@ -312,6 +312,7 @@ model Order {
   internalNote      String?
   idempotencyKey    String?
   source            String   @default("STOREFRONT") // STOREFRONT | WHATSAPP | SMARTBOT
+  customerConfirmedAt DateTime? // W6-B7 (COD loop): customer's one-tap "I still want it" stamp — NOT a payment state, never a status transition
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

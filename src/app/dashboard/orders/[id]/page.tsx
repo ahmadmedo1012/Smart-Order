@@ -9,6 +9,7 @@ import { useBusiness } from "@/components/dashboard/shell";
 import {
   OrderStatusBadge,
   PaymentStatusBadge,
+  CustomerConfirmedBadge,
 } from "@/components/shared/status-badges";
 import { ErrorState } from "@/components/shared/states";
 import { Button } from "@/components/ui/button";
@@ -81,6 +82,10 @@ interface OrderDetail {
   paymentMethodName: string | null;
   paymentType: string | null;
   paymentStatus: PaymentStatus;
+  /* W6-B7: the customer's one-tap «أؤكد طلبي» stamp from the public
+     tracking page (null = not confirmed) — rendered as the «مؤكد من
+     العميل» mint flag + the confirmation time line. */
+  customerConfirmedAt: string | null;
   customerName: string;
   customerPhone: string;
   city: string | null;
@@ -318,10 +323,27 @@ export default function OrderDetailPage() {
             </h1>
             <OrderStatusBadge status={order.status} />
             <PaymentStatusBadge status={order.paymentStatus} />
+            {/* W6-B7: the COD-confirmation flag — the customer's own tap,
+                never an operator action (the history row says who). */}
+            {order.customerConfirmedAt && (
+              <CustomerConfirmedBadge confirmedAt={order.customerConfirmedAt} />
+            )}
           </div>
           <p className="mt-1.5 text-sm text-muted-foreground flex items-center gap-1.5 font-mono tabular-nums">
             <Clock className="size-3.5" aria-hidden="true" />
             {formatArabicDateTime(order.createdAt)}
+            {/* W6-B7: the confirmation stamp rides the same mono fact
+                voice as the order's own clock — a real timestamp from the
+                server, never fabricated. */}
+            {order.customerConfirmedAt && (
+              <span className="flex items-center gap-1.5">
+                <span aria-hidden="true">·</span>
+                <CheckCircle2 className="size-3.5 text-(--c-mint-deep)" aria-hidden="true" />
+                <span className="text-(--c-mint-deep)">
+                  مؤكد من العميل — {formatArabicDateTime(order.customerConfirmedAt)}
+                </span>
+              </span>
+            )}
           </p>
         </div>
 

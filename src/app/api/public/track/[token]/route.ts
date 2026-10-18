@@ -22,6 +22,11 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ token: str
         deliveryFee: true,
         paymentStatus: true,
         paymentMethodName: true,
+        /* W6-B7: the customer-confirmation stamp ships to the tracking
+           page so the success state («تم تأكيد طلبك ✓») is durable —
+           SSR + poll both carry it; a null stamp is the honest "not
+           confirmed yet" (the button renders exactly then). */
+        customerConfirmedAt: true,
         customerName: true,
         city: true,
         area: true,
@@ -56,6 +61,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ token: str
         deliveryFee: order.deliveryFee,
         paymentStatus: order.paymentStatus,
         paymentMethod: order.paymentMethodName,
+        customerConfirmedAt: order.customerConfirmedAt ? order.customerConfirmedAt.toISOString() : null,
         customerName: order.customerName,
         city: order.city,
         area: order.area,

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { OnboardingSkeleton } from "@/components/dashboard/skeletons";
+import { StoreQRCard } from "@/components/dashboard/store-qr";
 import { formatLyd } from "@/lib/money";
 import { toast } from "sonner";
 import {
@@ -508,6 +509,23 @@ export default function OnboardingPage() {
           <p className="mt-2 text-xs text-muted-foreground" dir="ltr">
             /store/{slug}
           </p>
+        )}
+        {/* W6-B7 (W6-A4 gap #2): the published store gets its QR right at
+            the wizard's finish line — the owner leaves onboarding with the
+            print-ready counter asset in hand, not just a URL to paste
+            somewhere. Only when published (an unpublished QR opens the
+            honest «المتجر غير متاح» page — no point printing it). */}
+        {published && slug && (
+          <div className="mt-4">
+            <StoreQRCard
+              storeUrl={
+                typeof window !== "undefined"
+                  ? `${window.location.origin}/store/${slug}`
+                  : `/store/${slug}`
+              }
+              slug={slug}
+            />
+          </div>
         )}
       </Step>
     </div>

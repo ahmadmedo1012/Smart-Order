@@ -8,9 +8,15 @@
 // confirmation). The truthful replacement describes the real capability:
 // «رسائل واتساب للطلبات والتأكيدات».
 //
+// W6-B7 extends the same doctrine to Premium's «تقارير أداء أسبوعية»
+// (W6-B4's flagged residual): reports are real but ON-DEMAND
+// (/dashboard/reports, 30/90-day windows + CSV — any plan with
+// orders.read), never scheduled weekly. Seeds reworded to
+// «تقارير أداء عند الطلب»; the heal map covers rows seeded before it.
+//
 // The three seed twins (api/plans FAMILY_PLANS + scripts/seed-family.js +
-// scripts/e2e-seed.mjs) now carry the reworded bullet; the plans table is
-// seed-on-EMPTY, so rows seeded before the reword (production included)
+// scripts/e2e-seed.mjs) now carry the reworded bullets; the plans table is
+// seed-on-EMPTY, so rows seeded before the rewords (production included)
 // heal at the TWO read seams via healPlanClaim — the P13-2d display-fold
 // doctrine. These pins hold all three of those layers.
 import { test } from "node:test";
@@ -24,16 +30,22 @@ const read = (p: string): string =>
 
 const OLD = "إشعارات واتساب فورية";
 const NEW = "رسائل واتساب للطلبات والتأكيدات";
+const OLD_REPORTS = "تقارير أداء أسبوعية";
+const NEW_REPORTS = "تقارير أداء عند الطلب";
 
 test("behavior: the legacy bullet heals to the truthful claim at read time", () => {
   assert.equal(healPlanClaim(OLD), NEW);
 });
 
+test("behavior (W6-B7): the weekly-reports over-promise heals to the on-demand truth", () => {
+  assert.equal(healPlanClaim(OLD_REPORTS), NEW_REPORTS);
+});
+
 test("behavior: everything else passes through byte-identical — the heal is surgical", () => {
   for (const passthrough of [
     NEW, // already-healed rows are a no-op (idempotent)
+    NEW_REPORTS, // the W6-B7 twin is a no-op too
     "كل ميزات الأساسي",
-    "تقارير أداء أسبوعية",
     "دعم فني عبر واتساب", // a DIFFERENT WhatsApp bullet — untouched
     "3 أقسام",
   ]) {
@@ -41,15 +53,17 @@ test("behavior: everything else passes through byte-identical — the heal is su
   }
 });
 
-test("seeds: the three plan-catalog twins carry the truthful claim (one SSOT, no twin drift)", () => {
+test("seeds: the three plan-catalog twins carry the truthful claims (one SSOT, no twin drift)", () => {
   const seeds = [
     read("../../src/app/api/plans/route.ts"),
     read("../../scripts/seed-family.js"),
     read("../../scripts/e2e-seed.mjs"),
   ];
   for (const src of seeds) {
-    assert.ok(src.includes(NEW), "twin must carry the reworded bullet");
-    assert.ok(!src.includes(OLD), "twin must not carry the legacy over-promise");
+    assert.ok(src.includes(NEW), "twin must carry the reworded WhatsApp bullet");
+    assert.ok(!src.includes(OLD), "twin must not carry the legacy WhatsApp over-promise");
+    assert.ok(src.includes(NEW_REPORTS), "twin must carry the on-demand reports bullet");
+    assert.ok(!src.includes(OLD_REPORTS), "twin must not carry the scheduled-weekly over-promise");
   }
 });
 

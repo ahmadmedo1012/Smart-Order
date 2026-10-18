@@ -282,6 +282,94 @@ async function main() {
   const xTenantOrder = await B.call(`/api/orders/${orderId}`);
   ok("B cannot read A's order", rateLimited || xTenantOrder.status === 404 || xTenantOrder.body?.error?.code === "NOT_FOUND");
 
+  // ---------- 6.5 customer one-tap confirm (W6-B7 — the COD loop) ----------
+  console.log("— تأكيد العميل من رابط التتبع (W6-B7)");
+  /* The raced-twin order from section 6 is the perfect subject: still NEW
+     (never transitioned), owned by business A, and its publicToken came
+     back in both race responses. The DELIVERED `created` order (section 6's
+     transition loop) is the terminal-block subject. */
+  const twinOrder = twinA.body?.data?.order ?? twinB.body?.data?.order;
+  const twinToken = twinOrder?.publicToken;
+  /* (recovery fix) the create response ships {id, orderNumber, publicToken,
+     money} — never `status` — so the NEW-ness is verified through the
+     public track GET (the same surface the customer confirms from). */
+  const twinTrack = await anon.call(`/api/public/track/${twinToken}`);
+  ok(
+    "confirm subject ready: the raced-twin order is NEW with a public token",
+    rateLimited || (!!twinToken && twinTrack.body?.data?.order?.status === "NEW"),
+    JSON.stringify({ status: twinTrack.body?.data?.order?.status, token: !!twinToken }),
+  );
+
+  const cf1 = await anon.call(`/api/public/track/${twinToken}/confirm`, { method: "POST" });
+  ok(
+    "first tap: 200 + confirmedAt + already:false — the stamp is written once, and the order status is UNTOUCHED (not a status transition)",
+    rateLimited || (cf1.status === 200 && cf1.body?.success === true && typeof cf1.body?.data?.confirmedAt === "string" && cf1.body?.data?.already === false),
+    JSON.stringify(cf1.body).slice(0, 120),
+  );
+  ok(
+    "first tap: the response carries ONLY { confirmedAt, already } — no PII, no totals",
+    rateLimited || JSON.stringify(Object.keys(cf1.body?.data ?? {}).sort()) === JSON.stringify(["already", "confirmedAt"]),
+    JSON.stringify(cf1.body?.data ?? {}).slice(0, 120),
+  );
+
+  const cf2 = await anon.call(`/api/public/track/${twinToken}/confirm`, { method: "POST" });
+  ok(
+    "repeat tap: idempotent — the SAME stamp + already:true, never an error a customer could read as failure",
+    rateLimited || (cf2.status === 200 && cf2.body?.data?.already === true && cf2.body?.data?.confirmedAt === cf1.body?.data?.confirmedAt),
+    JSON.stringify(cf2.body).slice(0, 120),
+  );
+
+  const ownerConfirmView = await A.call(`/api/orders/${twinOrder?.id}`);
+  const ownerHist = ownerConfirmView.body?.data?.order?.history || [];
+  ok(
+    "owner sees the stamp AND the customer-authored history row («أكد العميل طلبه من رابط التتبع» by «العميل»)",
+    rateLimited || (!!ownerConfirmView.body?.data?.order?.customerConfirmedAt &&
+      ownerHist.some((h) => h.note === "أكد العميل طلبه من رابط التتبع" && h.changedByName === "العميل")),
+    JSON.stringify(ownerHist.slice(-2)).slice(0, 160),
+  );
+
+  const trackAfterConfirm = await anon.call(`/api/public/track/${twinToken}`);
+  ok(
+    "public track GET ships the stamp (the durable success state survives reload) and the order status is UNTOUCHED (not a status transition)",
+    rateLimited || (typeof cf1.body?.data?.confirmedAt === "string" && trackAfterConfirm.body?.data?.order?.customerConfirmedAt === cf1.body?.data?.confirmedAt && trackAfterConfirm.body?.data?.order?.status === "NEW"),
+    JSON.stringify({ stamp: trackAfterConfirm.body?.data?.order?.customerConfirmedAt ?? null, status: trackAfterConfirm.body?.data?.order?.status }),
+  );
+
+  const cfTerminal = await anon.call(`/api/public/track/${created?.publicToken}/confirm`, { method: "POST" });
+  ok(
+    "terminal order (DELIVERED) refuses the confirm — honest 409 INVALID_STATE, never a fake success",
+    rateLimited || (cfTerminal.status === 409 && cfTerminal.body?.error?.code === "INVALID_STATE" && !cfTerminal.body?.data?.confirmedAt),
+    JSON.stringify(cfTerminal.body).slice(0, 120),
+  );
+
+  const cf404 = await anon.call("/api/public/track/00000000-0000-0000-0000-000000000000/confirm", { method: "POST" });
+  ok(
+    "unknown token → the lookup route's honest 404 copy (no enumeration hints)",
+    rateLimited || (cf404.status === 404 && cf404.body?.error?.code === "NOT_FOUND" && cf404.body?.error?.message === "لا يوجد طلب بهذه البيانات"),
+    JSON.stringify(cf404.body).slice(0, 120),
+  );
+
+  const cf400 = await anon.call("/api/public/track/not-a-token/confirm", { method: "POST" });
+  ok(
+    "malformed token → the cheap 400 shape gate (never reaches the DB)",
+    rateLimited || cf400.status === 400,
+    JSON.stringify(cf400.body).slice(0, 100),
+  );
+
+  /* LAST in the section (it burns the per-IP confirm budget): the same
+     10/10min dbRateLimit budget the lookup route uses. */
+  let cf429 = false;
+  let cfRetryAfter = "";
+  for (let i = 0; i < 8; i++) {
+    const r = await anon.call(`/api/public/track/${twinToken}/confirm`, { method: "POST" });
+    if (r.status === 429) { cf429 = true; cfRetryAfter = String(r.headers?.get?.("retry-after") ?? ""); break; }
+  }
+  if (cf429) {
+    ok("confirm rate limit (429) triggers", true);
+    ok("confirm 429 carries a numeric Retry-After", /^\d+$/.test(cfRetryAfter) && Number(cfRetryAfter) > 0, `retry-after="${cfRetryAfter}"`);
+  }
+  else { skipped++; console.log("  - confirm rate limit not reached (shared IP bucket / window rollover) — skipped"); }
+
   // ---------- 7. validation ----------
   console.log("— التحقق من المدخلات");
   const badPhone = await anon.call("/api/public/orders", { method: "POST", body: JSON.stringify({ ...orderPayload, idempotencyKey: rnd("e2e-bad-"), customerPhone: "12345" }) });

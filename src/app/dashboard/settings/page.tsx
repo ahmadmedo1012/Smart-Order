@@ -20,6 +20,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { FieldError } from "@/components/dashboard/form-field";
 import { RouteNodeDot } from "@/components/dashboard/skeletons";
 import { SettingsSkeleton } from "@/components/dashboard/skeletons";
+import { StoreQRCard } from "@/components/dashboard/store-qr";
 import { compressImage } from "@/lib/compress";
 import { LIBYA_CITIES } from "@/lib/constants";
 import { toast } from "sonner";
@@ -263,6 +264,16 @@ export default function SettingsPage() {
               {settings.isPublished ? "إلغاء النشر" : "نشر المتجر"}
             </Button>
           </div>
+        </div>
+
+        {/* W6-B7 (W6-A4 gap #2): the owner's QR — the counter card the
+            landing's scan-to-order story promises. Generated client-side
+            from the SAME storeUrl computed above (no API, no external
+            generator); the divider keeps it a second route station of the
+            same card. */}
+        <div aria-hidden="true" className="route-divider route-divider-quiet mt-4" />
+        <div className="mt-4">
+          <StoreQRCard storeUrl={storeUrl} slug={settings.slug} />
         </div>
       </div>
 

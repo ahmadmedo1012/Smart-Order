@@ -106,4 +106,36 @@ test.describe("تتبع الطلب", () => {
     );
     expect(overflow).toBeLessThanOrEqual(1);
   });
+
+  /* ── W6-B7: حلقة تأكيد الدفع عند التوصيل (الضغطة الواحدة) ──────────
+     الزبون يرى «أؤكد طلبي» ما دام الطلب قابلًا للتأكيد؛ الضغطة تكتب
+     الختم على الخادم (مرة واحدة) والختم المتين «تم تأكيد طلبك» يبقى
+     بعد إعادة التحميل — الحالة تُبنى من الـSSR لا من حالة المكوّن. */
+  test("تأكيد الطلب بضغطة واحدة → ختم «تم تأكيد طلبك» متين بعد إعادة التحميل (W6-B7)", async ({ page }) => {
+    const order = await createOrderViaApi(page.request);
+    await page.goto(`/track/${order.publicToken}`);
+
+    // the prompt renders exactly for a NEW, unconfirmed order
+    const promptTitle = page.getByRole("heading", { name: "هل ما زلت تريد هذا الطلب؟" });
+    await expect(promptTitle).toBeVisible();
+    const confirmButton = page.getByRole("button", { name: "أؤكد طلبي" });
+    await expect(confirmButton).toBeVisible();
+    // the 44px touch floor (h-11)
+    await expect(confirmButton).toHaveCSS("height", "44px");
+
+    await confirmButton.click();
+
+    // the durable success stamp announces itself (role=status)
+    const stamp = page.getByRole("status").filter({ hasText: "تم تأكيد طلبك" });
+    await expect(stamp).toBeVisible();
+
+    // once-only UI: the prompt (and its button) is gone
+    await expect(promptTitle).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "أؤكد طلبي" })).toHaveCount(0);
+
+    // durable: reload → the stamp renders from SSR, never from client state
+    await page.reload();
+    await expect(page.getByRole("status").filter({ hasText: "تم تأكيد طلبك" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "أؤكد طلبي" })).toHaveCount(0);
+  });
 });

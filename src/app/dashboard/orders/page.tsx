@@ -11,6 +11,7 @@ import {
   OrderStatusBadge,
   PaymentStatusBadge,
 } from "@/components/shared/status-badges";
+import { BadgeCheck } from "lucide-react";
 import { EmptyState, ErrorState } from "@/components/shared/states";
 import {
   ToolbarSkeleton,
@@ -31,6 +32,7 @@ import { UnderlineTabs } from "@/components/dashboard/underline-tabs";
 import { TablePagination } from "@/components/dashboard/table-pagination";
 import { formatLyd } from "@/lib/money";
 import { formatArabicDateTime } from "@/lib/arabic";
+import { playArrivalBeep, readArrivalSoundPref, writeArrivalSoundPref } from "@/lib/arrival-sound";
 import {
   ORDER_STATUSES,
   ORDER_STATUS_AR,
@@ -38,7 +40,7 @@ import {
   type OrderStatus,
   type PaymentStatus,
 } from "@/lib/constants";
-import { ClipboardList, Search, ArrowLeft, RotateCcw, Bell } from "lucide-react";
+import { ClipboardList, Search, ArrowLeft, RotateCcw, Bell, Volume2, VolumeX } from "lucide-react";
 
 interface OrderRow {
   id: string;
@@ -53,6 +55,9 @@ interface OrderRow {
   city: string | null;
   area: string | null;
   createdAt: string;
+  /* W6-B7: the customer's one-tap confirmation stamp — null = not
+     confirmed; a stamp renders the «مؤكد من العميل» flag on the row. */
+  customerConfirmedAt: string | null;
   _count: { items: number };
 }
 
@@ -103,6 +108,26 @@ export default function OrdersPage() {
   const [newCount, setNewCount] = React.useState(0);
   const seenIdsRef = React.useRef<Set<string> | null>(null);
 
+  /* W6-B7 (W6-A4 gap #3 — kitchen-proof notification): the opt-in
+     arrival beep. Default OFF (a page that makes uninvited noise is the
+     classic surprise-audio anti-pattern — the toggle is one tap and
+     persists in localStorage, the theme-toggle's storage idiom). The
+     ref mirrors the state so loadFeed's identity — and therefore the
+     poll effect — never churns when the operator flips the toggle. */
+  const [soundOn, setSoundOn] = React.useState(false);
+  const soundOnRef = React.useRef(false);
+  React.useEffect(() => {
+    const on = readArrivalSoundPref();
+    soundOnRef.current = on;
+    setSoundOn(on);
+  }, []);
+  const toggleSound = () => {
+    const next = !soundOnRef.current;
+    soundOnRef.current = next;
+    writeArrivalSoundPref(next);
+    setSoundOn(next);
+  };
+
   const loadFeed = React.useCallback(() => {
     if (!businessId) return;
     api
@@ -118,6 +143,11 @@ export default function OrdersPage() {
         if (arrivals.length === 0) return;
         for (const o of rows) seen.add(o.id);
         setNewCount((c) => c + arrivals.length);
+        /* W6-B7: the kitchen hears the arrival too — the beep rides the
+           SAME arrival branch (the poll's visibility gating and the
+           merge rules untouched); playArrivalBeep never throws, so a
+           blocked/missing AudioContext can never break the feed. */
+        if (soundOnRef.current) playArrivalBeep();
         const canMerge =
           page === 1 &&
           !debouncedQ.trim() &&
@@ -212,6 +242,30 @@ export default function OrdersPage() {
         divider
         actions={
           <>
+            {/* W6-B7: the arrival-sound toggle — aria-pressed carries the
+                state, the label speaks the effect (never just an icon). */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleSound}
+              aria-pressed={soundOn}
+              aria-label={
+                soundOn
+                  ? "إيقاف صوت الطلبات الجديدة"
+                  : "تشغيل صوت الطلبات الجديدة"
+              }
+              title={
+                soundOn
+                  ? "صوت الطلبات الجديدة: مفعّل"
+                  : "صوت الطلبات الجديدة: متوقف"
+              }
+            >
+              {soundOn ? (
+                <Volume2 className="size-4" aria-hidden="true" />
+              ) : (
+                <VolumeX className="size-4" aria-hidden="true" />
+              )}
+            </Button>
             {newCount > 0 && (
               <Button
                 size="sm"
@@ -425,6 +479,22 @@ export default function OrdersPage() {
                       >
                         {o.orderNumber}
                       </Link>
+                      {/* W6-B7: the confirm flag — compact mint glyph beside
+                          the number (the full badge lives on order detail);
+                          title carries the timestamp, the aria-label speaks
+                          it to screen readers. */}
+                      {o.customerConfirmedAt && (
+                        <span
+                          className="ms-1.5 inline-flex align-middle text-(--c-mint-deep)"
+                          title={`تأكيد العميل: ${formatArabicDateTime(o.customerConfirmedAt)}`}
+                        >
+                          <BadgeCheck
+                            className="size-4"
+                            aria-label="مؤكد من العميل"
+                            role="img"
+                          />
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <div className="truncate max-w-36">{o.customerName}</div>
@@ -487,6 +557,18 @@ export default function OrdersPage() {
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-semibold tabular-nums font-mono">
                       {o.orderNumber}
+                      {o.customerConfirmedAt && (
+                        <span
+                          className="ms-1.5 inline-flex align-middle text-(--c-mint-deep)"
+                          title={`تأكيد العميل: ${formatArabicDateTime(o.customerConfirmedAt)}`}
+                        >
+                          <BadgeCheck
+                            className="size-4"
+                            aria-label="مؤكد من العميل"
+                            role="img"
+                          />
+                        </span>
+                      )}
                     </span>
                     <OrderStatusBadge status={o.status} />
                   </div>

@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
           id: true, orderNumber: true, status: true, fulfillmentType: true,
           total: true, paymentStatus: true, paymentType: true,
           customerName: true, customerPhone: true, city: true, area: true,
-          createdAt: true, _count: { select: { items: true } },
+          createdAt: true, customerConfirmedAt: true, _count: { select: { items: true } },
         },
       }),
       db.order.count({ where }),

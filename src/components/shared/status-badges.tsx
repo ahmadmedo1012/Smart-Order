@@ -6,6 +6,7 @@ import {
   type PaymentStatus,
 } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
+import { BadgeCheck } from "lucide-react";
 
 /**
  * STATUS STAMPS (r152, Phase 5 Route & Node): the order/payment states
@@ -70,6 +71,39 @@ export function PaymentStatusBadge({ status, className }: { status: PaymentStatu
       )}
     >
       {PAYMENT_STATUS_AR[status]}
+    </Badge>
+  );
+}
+
+/* W6-B7 (the COD-confirmation loop): the customer's one-tap confirmation
+ * stamp, owner-facing. Mint family (the "good news" family — same ground
+ * as PAID) + the BadgeCheck glyph. The exact timestamp is the CALLER's
+ * to render (see the prop note below). */
+export function CustomerConfirmedBadge({
+  confirmedAt,
+  title,
+  className,
+}: {
+  /* No date formatting HERE (r137 law: the display helpers are
+     client-only and this shared module renders from server pages too
+     — the landing's RSC imports it). Callers that own a timestamp
+     render it themselves (orders/[id] header line) or pass a
+     preformatted `title`. */
+  confirmedAt?: string | null;
+  title?: string;
+  className?: string;
+}) {
+  return (
+    <Badge
+      title={title ?? (confirmedAt ? "مؤكد من العميل" : undefined)}
+      className={cn(
+        "h-auto gap-1.5 px-2.5 py-1 text-[11px] font-semibold shadow-sm transition-transform duration-(--t-fast) ease-smooth hover:-translate-y-px",
+        "border-(--c-mint-ink)/35 bg-(--c-mint-bg) text-(--c-mint-deep)",
+        className
+      )}
+    >
+      <BadgeCheck className="size-3.5" aria-hidden="true" />
+      مؤكد من العميل
     </Badge>
   );
 }

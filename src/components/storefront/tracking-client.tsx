@@ -21,6 +21,7 @@ import { ORDER_STATUS_CHIP } from "@/components/shared/status-badges";
 import {
   ClipboardList,
   Check,
+  ClipboardCheck,
   Truck,
   Store,
   Phone,
@@ -55,6 +56,18 @@ interface TrackedOrder {
   statusHistory?: Array<{ toStatus: string; createdAt: string }>;
   items: Array<{ productName: string; variantName: string | null; quantity: number; lineTotal: number; options: string[] }>;
   business: { name: string; slug: string; phone: string | null; whatsappNumber: string | null; logoUrl: string | null };
+}
+
+/* W6-B7 (the COD-confirmation loop): the customer's one-tap «أؤكد طلبي»
+ * state — the stamp itself lives on the server (Order.customerConfirmedAt),
+ * so the success state is durable across reloads: SSR seeds it, the 15s
+ * poll refreshes it, and the POST writes it. Terminal orders never show
+ * the prompt (delivered needs no confirmation; cancelled/rejected are
+ * explained by their own card). */
+interface ConfirmState {
+  confirmedAt: string | null;
+  busy: boolean;
+  error: string | null;
 }
 
 const FLOW_AR: Record<string, { label: string; icon: React.ElementType }> = {
@@ -153,6 +166,8 @@ export function TrackingClient({
   order,
   placed = false,
   deliveredAt = null,
+  confirmToken = "",
+  customerConfirmedAt = null,
 }: {
   order: TrackedOrder;
   placed?: boolean;
@@ -161,6 +176,12 @@ export function TrackingClient({
      order was delivered after this SSR snapshot — the stamp then renders
      without the date line, never a fabricated one). */
   deliveredAt?: string | null;
+  /* W6-B7: the unguessable public token (the page's own credential) —
+     the confirm POST is scoped to exactly this order. */
+  confirmToken?: string;
+  /* W6-B7: the server's customer-confirmation stamp (ISO) — null = the
+     prompt renders; a stamp = the durable success state renders. */
+  customerConfirmedAt?: string | null;
 }) {
   // light polling for live updates — status AND paymentStatus (F13: the
   // receipt's "الدفع" line used to stay on its SSR snapshot forever)
@@ -175,6 +196,13 @@ export function TrackingClient({
      visibility-gated cadence itself is untouched (below); this only
      feeds the quiet «آخر تحديث معروف» hint + retry affordance. */
   const [syncFailed, setSyncFailed] = React.useState(false);
+
+  /* W6-B7: the COD-confirmation state (see ConfirmState above). */
+  const [confirm, setConfirm] = React.useState<ConfirmState>({
+    confirmedAt: customerConfirmedAt,
+    busy: false,
+    error: null,
+  });
 
   /* P16-4c telemetry: the order-age chip and the P18-W2-d station
      stamps are the clock-derived text of the page — they render after
@@ -213,6 +241,13 @@ export function TrackingClient({
         setStatus(body.data.order.status);
         setPaymentStatus(body.data.order.paymentStatus);
         if (Array.isArray(body.data.order.history)) setStatusHistory(body.data.order.history);
+        /* W6-B7: the stamp rides the same poll — a confirmation made in
+           another tab (or pre-SSR) lands here within the 15s cycle. The
+           field is append-only server-side, so the guard is honesty, not
+           a race hack. */
+        if (typeof body.data.order.customerConfirmedAt === "string") {
+          setConfirm((c) => ({ ...c, confirmedAt: body.data.order.customerConfirmedAt }));
+        }
         setSyncFailed(false);
       }
     } catch {
@@ -221,6 +256,37 @@ export function TrackingClient({
       setSyncFailed(true);
     }
   }, []);
+
+  /* W6-B7: the one-tap COD confirmation — POSTs the token-scoped confirm
+     endpoint (no body: the token IS the credential). Terminal/already
+     states never reach this handler (the button renders only when
+     confirmable); a server-side terminal answer still lands in the honest
+     inline error, never a silent fake success. */
+  const confirmOrder = React.useCallback(async () => {
+    if (!confirmToken || confirm.busy || confirm.confirmedAt) return;
+    setConfirm((c) => ({ ...c, busy: true, error: null }));
+    try {
+      const res = await fetch(`/api/public/track/${confirmToken}/confirm`, {
+        method: "POST",
+      });
+      const body = await res.json();
+      if (body?.success && typeof body.data?.confirmedAt === "string") {
+        setConfirm({ confirmedAt: body.data.confirmedAt, busy: false, error: null });
+      } else {
+        setConfirm({
+          confirmedAt: null,
+          busy: false,
+          error: body?.error?.message ?? "تعذّر تأكيد الطلب — حاول مرة أخرى",
+        });
+      }
+    } catch {
+      setConfirm({
+        confirmedAt: null,
+        busy: false,
+        error: "تعذّر الاتصال — تحقق من الشبكة وحاول مرة أخرى",
+      });
+    }
+  }, [confirmToken, confirm.busy, confirm.confirmedAt]);
 
   React.useEffect(() => {
     if (["DELIVERED", "CANCELLED", "REJECTED"].includes(status)) return;
@@ -251,6 +317,12 @@ export function TrackingClient({
 
   const isCancelled = status === "CANCELLED" || status === "REJECTED";
   const currentIdx = TRACKING_FLOW.indexOf(status as (typeof TRACKING_FLOW)[number]);
+
+  /* W6-B7: the prompt renders exactly when the machine says the order is
+     confirmable (canCustomerConfirm's client twin: not terminal, not yet
+     stamped) — and never on a cancelled/rejected order (their own card
+     explains the state; a prompt there would read as "confirm anyway"). */
+  const confirmable = !isCancelled && status !== "DELIVERED" && !confirm.confirmedAt;
 
   const flow = order.fulfillmentType === "PICKUP"
     ? TRACKING_FLOW.filter((s) => s !== "OUT_FOR_DELIVERY")
@@ -690,6 +762,79 @@ export function TrackingClient({
             {order.fulfillmentType === "DELIVERY" && order.area ? ` · ${order.city ?? ""} ${order.area}` : ""}
           </div>
         </section>
+
+        {/* ── W6-B7: the COD-confirmation prompt (one tap) ─────────────
+            The MENA COD loop the whole category runs (eGrow-class:
+            WhatsApp one-tap confirm prompts, RTO −30–40%). Rendered only
+            while the order is confirmable — terminal orders and already
+            confirmed ones never see it; the durable success state is the
+            family success stamp (same grammar as the placed banner). */}
+        {confirmable && (
+          <section
+            aria-labelledby="customer-confirm-title"
+            className="rounded-xl border border-border bg-card p-5 lg:p-6"
+          >
+            <div className="flex items-start gap-3">
+              <span
+                className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-(--c-mint-bg) text-(--c-mint-deep)"
+                aria-hidden="true"
+              >
+                <ClipboardCheck className="size-5" aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <h2 id="customer-confirm-title" className="text-sm font-bold">
+                  هل ما زلت تريد هذا الطلب؟
+                </h2>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                  اضغطة واحدة تُطمئن المتجر أنك تريد طلبك — مفيدة خاصة عند الدفع عند
+                  التوصيل. لا يُخصم أي مبلغ الآن.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={confirmOrder}
+              disabled={confirm.busy}
+              className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:opacity-60"
+            >
+              {confirm.busy ? "جارٍ التأكيد…" : "أؤكد طلبي"}
+              <Check className="size-4" aria-hidden="true" />
+            </button>
+            {/* aria-live: the result of the tap must reach screen readers —
+                success swaps the whole card for the stamp below (its own
+                role=status); failures land here. */}
+            {confirm.error && (
+              <p role="alert" className="mt-2 text-xs leading-relaxed text-(--c-rose-deep)">
+                {confirm.error}
+              </p>
+            )}
+          </section>
+        )}
+
+        {/* W6-B7: the durable success state — the server's stamp renders
+            it (SSR on reload + the 15s poll), so «تم تأكيد طلبك» survives
+            refresh/share exactly like the placed banner. */}
+        {confirm.confirmedAt && !isCancelled && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex items-center gap-3 rounded-sm border border-success/30 bg-success/10 p-4"
+          >
+            <span
+              className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-success/20 text-success-ink"
+              aria-hidden="true"
+            >
+              <ClipboardCheck className="size-5" aria-hidden="true" />
+            </span>
+            <div>
+              <div className="text-sm font-bold text-success-ink">تم تأكيد طلبك</div>
+              <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                وصل تأكيدك إلى المتجر
+                {confirm.confirmedAt ? ` — ${formatArabicDateTime(confirm.confirmedAt)}` : ""}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Items — the receipt comes AFTER the route beat (P16-4c) */}
         <div className="rounded-xl border border-border bg-card p-5 lg:p-7">

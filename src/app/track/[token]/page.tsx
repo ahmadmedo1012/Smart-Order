@@ -54,6 +54,7 @@ export default async function TrackPage({
     select: {
       orderNumber: true, status: true, fulfillmentType: true, total: true, subtotal: true,
       deliveryFee: true, paymentStatus: true, paymentMethodName: true, paymentType: true,
+      customerConfirmedAt: true,
       customerName: true, city: true, area: true, createdAt: true,
       items: { select: { productName: true, variantName: true, quantity: true, lineTotal: true, optionsJson: true } },
       /* P18-W2-d (W1-d priority #1 — UC «every leg of the journey»): the
@@ -80,6 +81,11 @@ export default async function TrackPage({
     <TrackingClient
       placed={placed === "1"}
       deliveredAt={deliveredAt}
+      /* W6-B7: the token rides down as a prop so the confirm POST hits
+         the exact token the page rendered (the poll still derives it
+         from the URL — both are the same unguessable credential). */
+      confirmToken={token}
+      customerConfirmedAt={order.customerConfirmedAt ? order.customerConfirmedAt.toISOString() : null}
       order={{
         orderNumber: order.orderNumber,
         status: order.status as OrderStatus,

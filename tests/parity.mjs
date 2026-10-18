@@ -1691,6 +1691,111 @@ for (const [name, okFlag] of W6B4) {
   else failures.push(`w6-b4 reports gate FAILED: ${name}`);
 }
 
+// ── W6-B7: customer one-tap COD confirmation + owner QR + arrival sound
+// + the weekly-reports claim fix ─────────────────────────────────────
+// (audit W6-A4 gaps #2/#3 + W6-A5 priority #3 + W6-B4's flagged claim
+// residual). New: POST /api/public/track/[token]/confirm (token-scoped,
+// once-only CAS on a NEW additive nullable stamp Order.customerConfirmedAt,
+// blocked on terminal orders, dbRateLimit 10/10min/IP, PII-free honest
+// 404) + the «أؤكد طلبي» prompt / durable «تم تأكيد طلبك» stamp on the
+// tracking page + the owner's «مؤكد من العميل» flag (list + detail) +
+// StoreQRCard (the Smart-Menu SelfHostedQR family approach: qrcode npm,
+// dynamic import, PNG data URL) on settings + onboarding + the opt-in
+// WebAudio arrival beep on the orders page's existing arrival branch.
+const CONFIRM_ROUTE_W7 = R('src/app/api/public/track/[token]/confirm/route.ts');
+const TRACK_CLIENT_W7 = R('src/components/storefront/tracking-client.tsx');
+const TRACK_PAGE_W7 = R('src/app/track/[token]/page.tsx');
+const ORDERS_PAGE_W7 = R('src/app/dashboard/orders/page.tsx');
+const ORDERS_DETAIL_W7 = R('src/app/dashboard/orders/[id]/page.tsx');
+const STATUS_BADGES_W7 = R('src/components/shared/status-badges.tsx');
+const STORE_QR_W7 = R('src/components/dashboard/store-qr.tsx');
+const SETTINGS_W7 = R('src/app/dashboard/settings/page.tsx');
+const ONBOARDING_W7 = R('src/app/dashboard/onboarding/page.tsx');
+const ARRIVAL_SOUND_W7 = R('src/lib/arrival-sound.ts');
+const ORDER_MACHINE_W7 = R('src/lib/order-machine.ts');
+const W6B7 = [
+  ['W6-B7 confirm API: the track-lookup rate-limit twin — dbRateLimit 10/10min/IP on the track-confirm key + Retry-After on 429',
+    CONFIRM_ROUTE_W7.includes('dbRateLimit(`track-confirm:${ip}`, 10, 10 * 60 * 1000)') &&
+    CONFIRM_ROUTE_W7.includes('"retry-after": String(rl.retryAfterSec)')],
+  ['W6-B7 confirm API: once-only CAS — updateMany WHERE customerConfirmedAt IS NULL AND status NOT IN terminal, writing ONLY the stamp (never a status/payment word)',
+    /updateMany\(\{[\s\S]*customerConfirmedAt: null[\s\S]*notIn: \["DELIVERED", "CANCELLED", "REJECTED"\]/.test(CONFIRM_ROUTE_W7) &&
+    CONFIRM_ROUTE_W7.includes('data: { customerConfirmedAt: confirmedAt }') &&
+    !CONFIRM_ROUTE_W7.includes('paymentStatus')],
+  ['W6-B7 confirm API: the stamp + the customer-authored history row ride ONE transaction (the payment-confirmations row shape)',
+    CONFIRM_ROUTE_W7.includes('db.$transaction') &&
+    CONFIRM_ROUTE_W7.includes('tx.orderStatusHistory.create') &&
+    CONFIRM_ROUTE_W7.includes('CUSTOMER_CONFIRM_HISTORY_NOTE') &&
+    CONFIRM_ROUTE_W7.includes('changedByName: "العميل"')],
+  ['W6-B7 confirm API: honesty without enumeration or PII — the lookup route\'s 404 copy, the terminal 409, and a response of ONLY { confirmedAt, already }',
+    CONFIRM_ROUTE_W7.includes('fail("لا يوجد طلب بهذه البيانات", 404, "NOT_FOUND")') &&
+    CONFIRM_ROUTE_W7.includes('fail("لا يمكن تأكيد طلب منتهٍ", 409, "INVALID_STATE")') &&
+    CONFIRM_ROUTE_W7.includes('already: false') &&
+    CONFIRM_ROUTE_W7.includes('already: true') &&
+    !CONFIRM_ROUTE_W7.includes('customerName') &&
+    !CONFIRM_ROUTE_W7.includes('readJson')],
+  ['W6-B7 machine: canCustomerConfirm is the terminal mirror (open on live orders, closed on DELIVERED/CANCELLED/REJECTED) + the exact history ink',
+    ORDER_MACHINE_W7.includes('export function canCustomerConfirm(status: OrderStatus): boolean') &&
+    ORDER_MACHINE_W7.includes('return !isTerminal(status);') &&
+    ORDER_MACHINE_W7.includes('export const CUSTOMER_CONFIRM_HISTORY_NOTE = "أكد العميل طلبه من رابط التتبع";')],
+  ['W6-B7 schema: the stamp is additive + nullable in BOTH hand-kept twins (r134 contract — no prisma migrate in this repo by design)',
+    (R('prisma/schema.prisma').match(/customerConfirmedAt DateTime\?/g) || []).length === 1 &&
+    R('prisma/schema.postgres.prisma').includes('customerConfirmedAt DateTime?')],
+  ['W6-B7 track UI: SSR seeds the stamp + the token rides down; the prompt is the canCustomerConfirm client twin (44px h-11 «أؤكد طلبي»)',
+    TRACK_PAGE_W7.includes('customerConfirmedAt={order.customerConfirmedAt') &&
+    TRACK_PAGE_W7.includes('confirmToken={token}') &&
+    TRACK_CLIENT_W7.includes('const confirmable = !isCancelled && status !== "DELIVERED" && !confirm.confirmedAt;') &&
+    TRACK_CLIENT_W7.includes('أؤكد طلبي') &&
+    TRACK_CLIENT_W7.includes('mt-4 flex h-11 w-full')],
+  ['W6-B7 track UI: the durable success stamp — «تم تأكيد طلبك» in the family success grammar, role=status + aria-live, hidden on cancelled orders, refreshed by the 15s poll',
+    TRACK_CLIENT_W7.includes('تم تأكيد طلبك') &&
+    TRACK_CLIENT_W7.includes('{confirm.confirmedAt && !isCancelled && (') &&
+    TRACK_CLIENT_W7.includes('border-success/30 bg-success/10') &&
+    TRACK_CLIENT_W7.includes('typeof body.data.order.customerConfirmedAt === "string"')],
+  ['W6-B7 owner list: rows select the stamp; desktop table + mobile cards carry the mint BadgeCheck flag with a speaking aria-label',
+    R('src/app/api/orders/route.ts').includes('createdAt: true, customerConfirmedAt: true') &&
+    (ORDERS_PAGE_W7.match(/aria-label="مؤكد من العميل"/g) || []).length === 2],
+  ['W6-B7 owner detail: the full mint badge + the mono confirmation-time line (status-badges stays date-format-free — the r137 client-only display law)',
+    STATUS_BADGES_W7.includes('export function CustomerConfirmedBadge') &&
+    !STATUS_BADGES_W7.includes('formatArabicDateTime') &&
+    ORDERS_DETAIL_W7.includes('<CustomerConfirmedBadge') &&
+    ORDERS_DETAIL_W7.includes('مؤكد من العميل — {formatArabicDateTime(order.customerConfirmedAt)}')],
+  ['W6-B7 QR: the Smart-Menu family approach — qrcode npm dependency, DYNAMIC import only (r121-G1: no static value import), self-hosted PNG data URL (no external QR service)',
+    R('package.json').includes('"qrcode":') &&
+    STORE_QR_W7.includes('import type QRCodeLib from "qrcode"') &&
+    STORE_QR_W7.includes('await import("qrcode")') &&
+    !STORE_QR_W7.includes('import QRCodeLib from "qrcode"')],
+  ['W6-B7 QR: r152 navy ink on print-true white, spec quiet zone, 512px print-ready export with the honest product filename',
+    STORE_QR_W7.includes('const QR_DARK = "#1B2A41"') &&
+    STORE_QR_W7.includes('const QR_LIGHT = "#ffffff"') &&
+    STORE_QR_W7.includes('margin: 4') &&
+    STORE_QR_W7.includes('a.download = `smart-order-qr-${slug}.png`')],
+  ['W6-B7 QR surfaces: the settings link-card + the onboarding final step (published-only — an unpublished QR opens the honest unavailable page)',
+    SETTINGS_W7.includes('import { StoreQRCard } from "@/components/dashboard/store-qr"') &&
+    SETTINGS_W7.includes('<StoreQRCard storeUrl={storeUrl} slug={settings.slug} />') &&
+    ONBOARDING_W7.includes('{published && slug && (') &&
+    ONBOARDING_W7.includes('<StoreQRCard')],
+  ['W6-B7 sound: WebAudio-only (no new deps), the two-tone beep rides the EXISTING arrival branch behind a ref (the poll never churns on the toggle)',
+    ARRIVAL_SOUND_W7.includes('playArrivalBeep') &&
+    ARRIVAL_SOUND_W7.includes('createOscillator') &&
+    ORDERS_PAGE_W7.includes('if (soundOnRef.current) playArrivalBeep();') &&
+    !R('package.json').includes('"howler"')],
+  ['W6-B7 sound: the respectful default OFF + the accessible persisted toggle (aria-pressed, speaking labels, localStorage via the helpers)',
+    ORDERS_PAGE_W7.includes('const [soundOn, setSoundOn] = React.useState(false);') &&
+    ORDERS_PAGE_W7.includes('aria-pressed={soundOn}') &&
+    ORDERS_PAGE_W7.includes('"تشغيل صوت الطلبات الجديدة"') &&
+    ARRIVAL_SOUND_W7.includes('ARRIVAL_SOUND_STORAGE_KEY = "smart-order:arrival-sound"')],
+  ['W6-B7 claim: «تقارير أداء أسبوعية» is retired for the on-demand truth in the 3 seed twins AND heals at the read seams (W6-B4\'s flagged residual)',
+    !PLANS_ROUTE_W6.includes('أسبوعية') &&
+    !R('scripts/seed-family.js').includes('أسبوعية') &&
+    !R('scripts/e2e-seed.mjs').includes('أسبوعية') &&
+    PLANS_ROUTE_W6.includes('تقارير أداء عند الطلب') &&
+    R('src/lib/plan-claims.ts').includes('"تقارير أداء أسبوعية": "تقارير أداء عند الطلب"')],
+];
+for (const [name, okFlag] of W6B7) {
+  if (okFlag) passed += 1;
+  else failures.push(`w6-b7 confirm/qr/sound gate FAILED: ${name}`);
+}
+
 // ── report ───────────────────────────────────────────────────────────────────
 
 if (failures.length > 0) {

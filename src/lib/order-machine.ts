@@ -58,3 +58,21 @@ export function isTerminal(status: OrderStatus): boolean {
 export function canMarkPaid(status: OrderStatus): boolean {
   return status !== "CANCELLED" && status !== "REJECTED";
 }
+
+/* W6-B7 (the COD-confirmation loop — W6-A5 market case): the customer's
+ * one-tap «أؤكد طلبي» on /track/[token]. This is deliberately NOT a status
+ * transition and NOT a payment state — it is a separate persisted stamp
+ * (Order.customerConfirmedAt) that says "the customer confirmed they still
+ * want this order" (the MENA COD loop: eGrow-class tools report RTO −30–40%
+ * from exactly this tap). The machine answers only the eligibility
+ * question: terminal orders (DELIVERED/CANCELLED/REJECTED) are closed to
+ * confirmation — a delivered order needs no confirmation, and a
+ * cancelled/rejected one must not read as confirmable. */
+export function canCustomerConfirm(status: OrderStatus): boolean {
+  return !isTerminal(status);
+}
+
+/** The owner-facing history/timeline ink for the customer's confirmation
+ * tap (the OrderStatusHistory row the confirm endpoint writes — same
+ * non-transition row shape the payment confirmations use). */
+export const CUSTOMER_CONFIRM_HISTORY_NOTE = "أكد العميل طلبه من رابط التتبع";
