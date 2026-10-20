@@ -435,10 +435,13 @@ export function DashboardShell({
                   </span>
                   <span
                     className={cn(
-                      "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium",
+                      /* W7-G (fix 6): the publish state speaks the squared
+                         stamp grammar (rounded-sm + 1px family-ink border),
+                         not a rounded-full pill. */
+                      "shrink-0 rounded-sm px-2 py-0.5 text-[11px] font-medium",
                       biz.isPublished
-                        ? "bg-success/10 text-success-ink"
-                        : "bg-muted text-muted-foreground",
+                        ? "border border-(--c-mint-ink)/35 bg-(--c-mint-bg) text-(--c-mint-deep)"
+                        : "border border-(--c-grey-ink)/35 bg-(--c-grey-bg) text-(--c-grey-deep)",
                     )}
                   >
                     {biz.isPublished ? "منشور" : "مسودة"}

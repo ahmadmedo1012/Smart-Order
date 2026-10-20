@@ -40,12 +40,13 @@ export function PlanUsageBadge({
 
   if (!plan) {
     // No plan yet — the family "بدون باقة" state with an upgrade nudge
-    // (solid pastel copper chip — the canonical badge grammar)
+    // (solid pastel copper chip — the canonical badge grammar). W7-G
+    // (fix 6): squared stamp corner + the 1px family-ink border.
     return (
       <a
         href="/pricing"
         className={cn(
-          "inline-flex min-h-11 items-center gap-2 rounded-full bg-(--c-copper-bg) px-3 py-1 text-xs font-semibold text-(--c-copper-deep) transition-[color,background-color,transform] duration-(--t-fast) hover:-translate-y-px",
+          "inline-flex min-h-11 items-center gap-2 rounded-sm border border-(--c-copper-ink)/35 bg-(--c-copper-bg) px-3 py-1 text-xs font-semibold text-(--c-copper-deep) transition-[color,background-color,transform] duration-(--t-fast) hover:-translate-y-px",
           className
         )}
       >
@@ -68,10 +69,12 @@ export function PlanUsageBadge({
     <div className={cn("flex flex-wrap items-center gap-2.5", className)}>
       <span
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold",
+          /* W7-G (fix 6): the plan chip rides the squared stamp grammar —
+             rounded-sm + 1px family-ink border (copper or grey by plan). */
+          "inline-flex items-center gap-1.5 rounded-sm border px-3 py-1 text-xs font-semibold",
           isFree
-            ? "bg-(--c-grey-bg) text-(--c-grey-deep)"
-            : "bg-(--c-copper-bg) text-(--c-copper-deep)"
+            ? "border-(--c-grey-ink)/35 bg-(--c-grey-bg) text-(--c-grey-deep)"
+            : "border-(--c-copper-ink)/35 bg-(--c-copper-bg) text-(--c-copper-deep)"
         )}
       >
         <Sparkles className="size-3.5" aria-hidden="true" />

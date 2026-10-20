@@ -1308,7 +1308,10 @@ const P6_CHROME = [
     (R('src/components/dashboard/table-pagination.tsx').match(/font-mono tabular-nums/g) || []).length >= 2],
   ['table-pagination: squared stamp controls (rounded-sm) + active page = copper family stamp',
     R('src/components/dashboard/table-pagination.tsx').includes('rounded-sm px-2') &&
-    R('src/components/dashboard/table-pagination.tsx').includes('border-(--c-copper-ink)/45 bg-(--c-copper-bg)')],
+    /* W7-G (fix 9): pin re-anchored /45 → /35 — the SSOT stamp alpha
+       (status-badges.tsx ORDER_STATUS_CHIP; every other copper stamp in
+       the chrome already rode /35). Value-only, same law. */
+    R('src/components/dashboard/table-pagination.tsx').includes('border-(--c-copper-ink)/35 bg-(--c-copper-bg)')],
   ['confirm-dialog: header hairline (border-b) on both dialogs + destructive confirm squared to the stamp',
     (R('src/components/dashboard/confirm-dialog.tsx').match(/border-b border-border pb-4/g) || []).length >= 2 &&
     R('src/components/dashboard/confirm-dialog.tsx').includes('rounded-sm border-(--c-rose-ink)/45')],

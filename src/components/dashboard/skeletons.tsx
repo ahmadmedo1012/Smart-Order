@@ -150,7 +150,9 @@ export function TableSkeleton({
             </span>
             <Skeleton className="h-4 w-28 max-w-[40%]" />
             <Skeleton className="h-4 w-14" />
-            <Skeleton className="h-5 w-16 rounded-full" />
+            {/* W7-G (fix 8): the status placeholder mirrors the real
+                rounded-sm stamp, not a pill. */}
+            <Skeleton className="h-5 w-16 rounded-sm" />
             <Skeleton className="h-4 w-16 ms-auto" />
           </div>
         ))}
@@ -185,7 +187,8 @@ export function CardListSkeleton({
           <div className="flex items-center gap-2">
             <RouteNodeDot />
             <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-5 w-16 rounded-full ms-auto" />
+            {/* W7-G (fix 8): stamp corner — twin of the table-row placeholder. */}
+            <Skeleton className="h-5 w-16 rounded-sm ms-auto" />
           </div>
           <div className="flex items-center justify-between gap-2">
             <Skeleton className="h-3.5 w-28 max-w-[55%]" />

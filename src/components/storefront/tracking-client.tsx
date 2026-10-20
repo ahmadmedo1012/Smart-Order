@@ -503,8 +503,10 @@ export function TrackingClient({
                   aria-live="polite"
                   className={cn(
                     /* P10-1b: shadow-sm = --elev-1 — التوأم الليلي للتوهين؛
-                       الحرفية السوداء 6% كانت تختفي على بطاقة الليل. */
-                    "inline-flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm font-semibold shadow-sm",
+                       الحرفية السوداء 6% كانت تختفي على بطاقة الليل.
+                       W7-G (fix 7): the stamp corner (rounded-sm) — size
+                       rung (px-4 py-1.5 text-sm) unchanged. */
+                    "inline-flex items-center gap-1.5 rounded-sm px-4 py-1.5 text-sm font-semibold shadow-sm",
                     ORDER_STATUS_CHIP[status]
                   )}
                 >
@@ -624,7 +626,7 @@ export function TrackingClient({
                               className={cn(
                                 "inline-flex items-center rounded-sm border px-2 py-0.5 text-[11px] font-medium leading-4",
                                 active
-                                  ? "border-(--c-copper-ink)/45 bg-(--c-copper-bg) text-(--c-copper-deep)"
+                                  ? "border-(--c-copper-ink)/35 bg-(--c-copper-bg) text-(--c-copper-deep)"
                                   : done
                                     ? "border-border bg-card text-muted-foreground"
                                     /* P18-W2-d (VLM flag): the pending pill

@@ -96,7 +96,7 @@ export function TablePagination({
               className={cn(
                 stepBtn,
                 p === page
-                  ? "border border-(--c-copper-ink)/45 bg-(--c-copper-bg) text-(--c-copper-deep)"
+                  ? "border border-(--c-copper-ink)/35 bg-(--c-copper-bg) text-(--c-copper-deep)"
                   : "border border-transparent text-muted-foreground hover:border-border hover:bg-muted hover:text-foreground",
               )}
             >

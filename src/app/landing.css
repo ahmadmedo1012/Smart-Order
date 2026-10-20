@@ -2406,7 +2406,9 @@
   display: grid;
   gap: var(--sp-3);
   padding: clamp(var(--sp-5), 3vw, 32px);
-  border-radius: var(--r-2xl);
+  /* W7-G (fix 5): this panel escaped the P12-e radius retirement —
+     the 2px editorial corner its sibling consoles already carry. */
+  border-radius: 2px;
   border: 1px solid var(--ln-line);
   background: var(--ln-glass);
   backdrop-filter: blur(16px);
@@ -3420,8 +3422,12 @@ html.light .landing .ln-h1-line-dim,
   outline: 2px solid var(--ln-lime);
   outline-offset: 2px;
 }
-/* editorial corners for the outline family too */
-.landing .ln-btn-ghost { border-radius: 2px; }
+/* editorial corners for the outline family too — W7-G (fix 4): the
+   gold pill was the last full-radius CTA beside the 2px solid/ghost
+   twins it shares rows with; unified to the same editorial corner
+   (sizes, padding, press tail, sheen untouched — only the corner verb). */
+.landing .ln-btn-ghost,
+.landing .ln-btn-gold { border-radius: 2px; }
 
 /* S5 — the monumental roadmark: huge Kufi figures + mono captions +
    hairline separators (the REAL DB counts only — honesty policy). */
