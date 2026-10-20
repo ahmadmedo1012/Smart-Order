@@ -51,7 +51,7 @@ export default function TermsPage() {
     <div className="min-h-dvh overflow-x-clip bg-background">
       <Header />
       <main className="mx-auto max-w-3xl px-4 pb-20 pt-28 sm:px-6">
-        <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">شروط الاستخدام</h1>
+        <h1 className="font-heading text-3xl font-bold sm:text-4xl">شروط الاستخدام</h1>
         <p className="mt-3 text-sm text-muted-foreground">آخر تحديث: سبتمبر 2026 — منصة سمارت أوردر، من عائلة الربط الذكي</p>
         <div className="mt-10 space-y-8">
           {/* r128-F8 (B23): legal = quiet — mono chapter labels per section,

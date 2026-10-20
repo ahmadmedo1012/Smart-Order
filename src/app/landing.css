@@ -1570,12 +1570,16 @@
 @media (max-height: 560px) and (orientation: landscape) {
   /* content-sized, not viewport-sized: every saved pixel is CTA
      visibility (844×390 budget: chrome 108 + eyebrow + title + lede +
-     CTA + trust pill ≈ 270px — the WHOLE story sits inside the fold) */
-  .landing .ln-keep-hero > .mx-auto { padding-block: 12px; }
+     CTA + trust pill ≈ 270px — the WHOLE story sits inside the fold).
+     W7-G (fix 10): re-targeted at the LIVE .ln-hero-frame — the old
+     > .mx-auto child retired with the P12-b split-hero rewrite, and the
+     dead .ln-keep-phone guard went with it (zero TSX consumers). Title
+     leading 1.12 → 1.15: back above the family Arabic floor (r131-F2). */
+  .landing .ln-hero-frame { padding-block: 12px; }
   .landing .ln-keep-eyebrow { margin-block-end: 10px; }
   .landing .ln-keep-title {
     font-size: clamp(2rem, 9vh, 3.25rem);
-    line-height: 1.12;
+    line-height: 1.15;
     margin-block-end: 14px;
   }
   .landing .ln-keep-sub {
@@ -1586,8 +1590,6 @@
   }
   .landing .ln-keep-actions { margin-block-end: 8px; }
   .landing .ln-keep-pill { font-size: 11.5px; }
-  /* the decorative proof column retires on the short fold */
-  .landing .ln-keep-phone { display: none; }
 }
 
 /* ── 14 · reduced motion — canonical landing.css:1800-1831 ─────────── */
@@ -3430,13 +3432,18 @@ html.light .landing .ln-h1-line-dim,
 .landing .ln-btn-gold { border-radius: 2px; }
 
 /* S5 — the monumental roadmark: huge Kufi figures + mono captions +
-   hairline separators (the REAL DB counts only — honesty policy). */
+   hairline separators (the REAL DB counts only — honesty policy).
+   W7-G (fix 11): CountUp figures ride tabular digits with a per-item
+   min-inline-size floor — no width wiggle while counting. */
 .landing .ln-roadmark-item .ln-roadmark-value {
   font-family: var(--ln-display-ar);
   font-size: clamp(2.6rem, 6vw, 4.6rem);
   font-weight: var(--fw-bold);
   line-height: 1;
   color: var(--ln-cream);
+  font-variant-numeric: tabular-nums;
+  min-inline-size: 4ch;
+  text-align: center;
 }
 .landing .ln-roadmark-label {
   font-family: var(--ln-mono);
@@ -3446,6 +3453,15 @@ html.light .landing .ln-h1-line-dim,
 .landing .ln-roadmark-item + .ln-roadmark-item {
   border-inline-start: 1px solid var(--ln-line);
   padding-inline-start: clamp(var(--sp-6), 5vw, 56px);
+}
+/* W7-G (fix 11): the board wraps to rows in the ~320px pocket — the
+   hairline belongs to the ROW grammar, so a wrapped first-in-row item
+   must not carry a stray edge; the gap separates the rows on its own. */
+@media (max-width: 360px) {
+  .landing .ln-roadmark-item + .ln-roadmark-item {
+    border-inline-start: none;
+    padding-inline-start: 0;
+  }
 }
 
 /* ── P12-c · S5 — bracket-corner cards (the editorial frame language) ─── */
@@ -3554,7 +3570,11 @@ html.light .landing .ln-h1-line-dim,
   border-radius: 2px;
   text-align: center;
 }
-/* the animated route line — dash drift, RM off below */
+/* the animated route line — dash drift, RM off below.
+   W7-G (fix 12): the sign flipped — the path geometry runs physical
+   left→right (viewBox x:100→900) while the RTL story flows right→left;
+   a negative offset marched the dashes left→right, against the reading
+   direction. Positive offset marches them right→left, WITH the journey. */
 .landing .ln-routemap-path {
   stroke: var(--ln-lime-text);
   stroke-width: 2;
@@ -3563,7 +3583,7 @@ html.light .landing .ln-h1-line-dim,
   animation: ln-routemap-dash 1.6s linear infinite;
 }
 @keyframes ln-routemap-dash {
-  to { stroke-dashoffset: -16; }
+  to { stroke-dashoffset: 16; }
 }
 
 /* node dots pulse — a live network, staggered per stop; the ACTIVE dot

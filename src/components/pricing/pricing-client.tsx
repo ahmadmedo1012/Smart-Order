@@ -236,8 +236,10 @@ export function PricingClient({ initialPlans }: { initialPlans: Plan[] | null })
             <AnimatedSparkles className="size-4" />
             باقات تناسب جميع الأحجام
           </div>
-          {/* Family typography §3 — font-heading + tracking-tight + text-balance */}
-          <h1 className="mb-4 font-heading text-3xl font-bold leading-[1.15] tracking-tight text-balance sm:text-4xl md:text-5xl lg:text-6xl">
+          {/* Family typography §3 — font-heading + text-balance (W7-G
+              fix 13: tracking-tight deleted — the r150 Arabic tracking law
+              spares no Arabic run). */}
+          <h1 className="mb-4 font-heading text-3xl font-bold leading-[1.15] text-balance sm:text-4xl md:text-5xl lg:text-6xl">
             اختر باقتك
           </h1>
           <p className="mx-auto max-w-xl text-sm text-muted-foreground sm:text-base">

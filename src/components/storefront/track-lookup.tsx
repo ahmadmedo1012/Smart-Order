@@ -97,8 +97,9 @@ export function TrackLookup() {
           <p className="text-[11px] text-muted-foreground font-mono" dir="ltr">
             SMART ORDER · TRACK
           </p>
-          {/* the CLAIM voice (the tracking-page display register) */}
-          <h1 className="mt-1.5 font-heading text-[26px] font-extrabold leading-tight tracking-tight lg:text-[34px] lg:leading-[1.15]">
+          {/* the CLAIM voice (the tracking-page display register —
+              W7-G fix 13: tracking-tight deleted per the Arabic law) */}
+          <h1 className="mt-1.5 font-heading text-[26px] font-extrabold leading-tight lg:text-[34px] lg:leading-[1.15]">
             تتبع طلبك
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">

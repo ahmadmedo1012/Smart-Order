@@ -481,7 +481,7 @@ export function TrackingClient({
                   the ONE display voice of the page — 26px mobile / 34px
                   lg vs the 20px mono facts h1 = a 1.7× scale separation
                   (UC's display-vs-micro-label law; measured was 1.4×). */}
-              <h2 className="mt-3 font-heading text-[26px] font-extrabold leading-tight tracking-tight lg:text-[34px] lg:leading-[1.15]">
+              <h2 className="mt-3 font-heading text-[26px] font-extrabold leading-tight lg:text-[34px] lg:leading-[1.15]">
                 <span className="text-muted-foreground">طلبك</span>{" "}
                 <span key={status} className="animate-price-swap-in text-foreground">
                   {claim}
