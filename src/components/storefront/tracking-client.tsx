@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { SkipLink } from "@/components/shared/skip-link";
 import { ORDER_STATUS_CHIP } from "@/components/shared/status-badges";
+import { Button } from "@/components/ui/button";
 import {
   ClipboardList,
   Check,
@@ -797,7 +798,12 @@ export function TrackingClient({
               type="button"
               onClick={confirmOrder}
               disabled={confirm.busy}
-              className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:opacity-60"
+              /* W7-G (fix 17): the hand-rolled focus ring (outline-none +
+                 ring-2 + offsets) removed — rides the ONE global
+                 :focus-visible outline. W7-G (fix 18): the confirm CTA
+                 keeps the family Button verb (the contact pair below now
+                 matches its rung). */
+              className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               {confirm.busy ? "جارٍ التأكيد…" : "أؤكد طلبي"}
               <Check className="size-4" aria-hidden="true" />
@@ -880,27 +886,29 @@ export function TrackingClient({
           </div>
         </div>
 
-        {/* Contact */}
+        {/* Contact — W7-G (fix 18): the pair reuses the Button
+            variants (outline + whatsapp): one rounded-md rung + the one
+            family hover/press verb, matching the confirm CTA above. */}
         <div className="flex gap-2">
           {order.business.phone && (
-            <a
-              href={`tel:${order.business.phone}`}
-              className="flex-1 h-11 rounded-lg border border-border bg-card flex items-center justify-center gap-2 text-sm font-semibold hover:bg-muted transition-colors"
-            >
-              <Phone className="size-4" aria-hidden="true" />
-              اتصال بالمتجر
-            </a>
+            <Button asChild variant="outline" className="flex-1">
+              <a href={`tel:${order.business.phone}`}>
+                <Phone className="size-4" aria-hidden="true" />
+                اتصال بالمتجر
+              </a>
+            </Button>
           )}
           {waNumber && (
-            <a
-              href={waLink(waNumber, buildStatusUpdateMessage(order.orderNumber, status, order.business.name))}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="whatsapp-btn flex-1 h-11 rounded-lg flex items-center justify-center gap-2 text-sm font-semibold transition-colors"
-            >
-              <MessageCircle className="size-4" aria-hidden="true" />
-              واتساب المتجر
-            </a>
+            <Button asChild variant="whatsapp" className="flex-1">
+              <a
+                href={waLink(waNumber, buildStatusUpdateMessage(order.orderNumber, status, order.business.name))}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="size-4" aria-hidden="true" />
+                واتساب المتجر
+              </a>
+            </Button>
           )}
         </div>
 

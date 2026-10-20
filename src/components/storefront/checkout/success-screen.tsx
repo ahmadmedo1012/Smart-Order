@@ -44,23 +44,27 @@ export function SuccessScreen({ result, slug }: { result: CheckoutResult; slug: 
             </Link>
           </Button>
           {result.whatsapp && (
-            <a
-              href={`https://wa.me/${result.whatsapp.number}?text=${encodeURIComponent(result.whatsapp.message)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="whatsapp-btn w-full h-12 rounded-lg font-semibold text-sm inline-flex items-center justify-center gap-2 transition-colors" /* r150: whatsapp hand-rolled twin keeps its 48px row with the lg CTA above */
-            >
-              <MessageCircle className="size-5" aria-hidden="true" />
-              إرسال تفاصيل الطلب عبر واتساب
-            </a>
+            /* W7-G (fix 18): the stacked column speaks ONE rung + ONE
+               verb — the hand-rolled rounded-lg twins reuse the Button
+               variants (whatsapp keeps its 48px row via size="lg",
+               matching the lg CTA above). */
+            <Button asChild variant="whatsapp" size="lg" className="w-full">
+              <a
+                href={`https://wa.me/${result.whatsapp.number}?text=${encodeURIComponent(result.whatsapp.message)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="size-5" aria-hidden="true" />
+                إرسال تفاصيل الطلب عبر واتساب
+              </a>
+            </Button>
           )}
-          <Link
-            href={`/store/${slug}`}
-            className="flex w-full h-11 items-center justify-center gap-2 rounded-lg border border-border font-semibold text-sm hover:bg-muted transition-colors"
-          >
-            <PartyPopper className="size-4" aria-hidden="true" />
-            متابعة التصفح
-          </Link>
+          <Button asChild variant="outline" className="w-full">
+            <Link href={`/store/${slug}`}>
+              <PartyPopper className="size-4" aria-hidden="true" />
+              متابعة التصفح
+            </Link>
+          </Button>
         </div>
 
         <p className="mt-6 text-[11px] text-muted-foreground leading-relaxed">

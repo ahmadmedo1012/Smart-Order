@@ -135,7 +135,9 @@ export function StoreQRCard({
         <div
           aria-hidden="true"
           style={{ width: QR_DISPLAY_SIZE, height: QR_DISPLAY_SIZE, maxWidth: "100%" }}
-          className="shrink-0 animate-pulse rounded-lg border border-border bg-muted/50"
+          /* W7-G (fix 15): the placeholder shimmers with the family .skeleton
+             verb — raw animate-pulse is not a family motion. */
+          className="skeleton shrink-0 rounded-lg border border-border"
         />
       )}
       <div className="min-w-0 flex-1">

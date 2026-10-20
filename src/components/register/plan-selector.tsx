@@ -70,7 +70,10 @@ export function PlanSelector({
               className={cn(
                 /* r128-F8 (B20): flat hairline selection card — ladder
                    duration, no gradient wash, neutral hover lift. */
-                "relative flex h-full w-full flex-col rounded-2xl border p-5 text-start transition-[border-color,background-color,box-shadow] duration-(--t-slower) hover:shadow-md hover:border-accent-foreground/30 outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
+                /* W7-G (fix 17): the retired double-ring idiom removed
+                   (outline-none + ring-2) — rides the ONE global
+                   :focus-visible outline (r131 F3 / r151 canon). */
+                "relative flex h-full w-full flex-col rounded-2xl border p-5 text-start transition-[border-color,background-color,box-shadow] duration-(--t-slower) hover:shadow-md hover:border-accent-foreground/30",
                 isSelected
                   ? "border-accent-foreground/40 bg-card shadow-sm ring-2 ring-primary/30"
                   : "border-border/50 bg-card"

@@ -6,6 +6,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { api } from "@/lib/client";
+import { countedArabicPhrase } from "@/lib/arabic-plural";
 import { useCart, useCartHydrated, cartCount, cartEstimatedSubtotal } from "@/hooks/use-cart";
 import { StorefrontSkeleton } from "@/components/storefront/skeletons";
 import { ProductCard } from "@/components/storefront/product-card";
@@ -168,12 +169,23 @@ export function Storefront({
   const chapterTitle = q
     ? "نتائج البحث"
     : (activeCategoryObject?.name ?? "كل المنتجات");
-  const productsCountAr = (n: number): string => {
-    if (n === 1) return "منتج واحد";
-    if (n === 2) return "منتجان";
-    if (n >= 3 && n <= 10) return `${n} منتجات`;
-    return `${n} منتجاً`;
-  };
+  const productsCountAr = (n: number): string =>
+    /* W7-G (fix 16): the lib arabic-plural engine owns the counted
+       grammar now — the hand-rolled ladder duplicated it (and the raw
+       «N عنصر» spots below let the «2 عنصر» bug through). */
+    countedArabicPhrase(n, "منتج", {
+      one: "منتج واحد",
+      two: "منتجان",
+      few: "منتجات",
+      many: "منتجاً",
+    });
+  const itemsCountAr = (n: number): string =>
+    countedArabicPhrase(n, "عنصر", {
+      one: "عنصر واحد",
+      two: "عنصران",
+      few: "عناصر",
+      many: "عنصراً",
+    });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -217,7 +229,7 @@ export function Storefront({
               <SheetTrigger asChild>
                 <button
                   className="relative rounded-md bg-primary text-primary-foreground size-11 flex items-center justify-center font-semibold transition-[color,background-color,transform] duration-(--t-fast) hover:bg-primary/90 active:scale-[0.97] active:duration-(--t-micro)"
-                  aria-label={hydrated ? `عرض السلة (${count} عنصر)` : "عرض السلة"}
+                  aria-label={hydrated ? `عرض السلة (${itemsCountAr(count)})` : "عرض السلة"}
                 >
                   <ShoppingBag className="size-5" aria-hidden="true" />
                   {hydrated && count > 0 && (
@@ -420,7 +432,7 @@ export function Storefront({
             <div className="flex-1 min-w-0">
               {/* P18-W2-d (two-voice): cart count + subtotal are machine
                   facts — mono voice on the mobile money bar. */}
-              <div className="text-xs text-muted-foreground tabular-nums font-mono">{count} عنصر في السلة</div>
+              <div className="text-xs text-muted-foreground tabular-nums font-mono">{itemsCountAr(count)} في السلة</div>
               <div className="font-bold text-sm tabular-nums font-mono">{formatLyd(cartEstimatedSubtotal(items))}</div>
             </div>
             <Button onClick={() => setCartOpen(true)} className="h-11 font-semibold">

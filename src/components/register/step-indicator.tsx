@@ -50,7 +50,9 @@ export function StepIndicator({
               disabled={!clickable}
               onClick={() => clickable && onNavigate?.(s)}
               className={cn(
-                "group flex flex-col items-center gap-1.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+                /* W7-G (fix 17): retired double-ring idiom removed — the
+                   global :focus-visible outline owns the ring. */
+                "group flex flex-col items-center gap-1.5 rounded-full",
                 !clickable && "cursor-default"
               )}
               aria-current={isActive ? "step" : undefined}
