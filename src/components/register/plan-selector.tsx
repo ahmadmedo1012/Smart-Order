@@ -8,6 +8,7 @@ import { Reveal } from "@/components/ui/scroll-reveal";
 import { Sparkles, Star, Crown, Building2, Flame, type LucideIcon } from "lucide-react";
 import type { Plan } from "@/lib/plan-types";
 import { toArabicNumber, foldRestatedLimits } from "@/lib/plan-types";
+import { countedArabicPhrase } from "@/lib/arabic-plural";
 
 /** Plan metadata by name (family PLAN_META pattern — survives reordering).
  *  r128-F8 (B20): icon chips flat — no gradient grounds (§7 discipline). */
@@ -20,8 +21,31 @@ const PLAN_META: Record<string, { icon: LucideIcon; chip: string; recommended?: 
 const DEFAULT_META = PLAN_META.Free;
 
 function itemsPhrase(plan: Plan): string {
-  const products = plan.maxProducts >= 9999 ? "منتجات غير محدودة" : `${plan.maxProducts} منتجاً`;
-  const orders = plan.maxOrders >= 99999 ? "طلبات غير محدودة" : `${plan.maxOrders} طلباً شهرياً`;
+  /* W7-H (repetition sweep): the limits line rides the ONE fleet
+   * counted-noun engine (countedArabicPhrase, CLDR ar states) instead
+   * of the hand-rolled "N منتجاً" flat accusative — byte-identical on
+   * every live value (15/100 products, 100/1.000/10.000 orders →
+   * «منتجاً»/«طلباً» accusative, the 11–99 rule), and any future
+   * 3–10 limit now reads correctly («5 منتجات», «طلبان شهرياً»)
+   * instead of the «2 عنصر» family disease. */
+  const products =
+    plan.maxProducts >= 9999
+      ? "منتجات غير محدودة"
+      : countedArabicPhrase(plan.maxProducts, "منتج", {
+          one: "منتج واحد",
+          two: "منتجان",
+          few: "منتجات",
+          many: "منتجاً",
+        });
+  const orders =
+    plan.maxOrders >= 99999
+      ? "طلبات غير محدودة"
+      : `${countedArabicPhrase(plan.maxOrders, "طلب", {
+          one: "طلب واحد",
+          two: "طلبان",
+          few: "طلبات",
+          many: "طلباً",
+        })} شهرياً`;
   return `${products} · ${orders}`;
 }
 
