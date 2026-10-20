@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart, cartEstimatedSubtotal, cartCount } from "@/hooks/use-cart";
 import { formatLyd } from "@/lib/money";
+import { countedArabicPhrase } from "@/lib/arabic-plural";
 import type { StoreData } from "@/components/storefront/storefront";
 import { Button } from "@/components/ui/button";
 import { SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -50,7 +51,8 @@ export function CartDrawer({
         <ShoppingBag className="size-5 text-accent-foreground" aria-hidden="true" />
         <div className="flex-1">
           <SheetTitle className="font-heading font-bold">سلة الطلب</SheetTitle>
-          <p className="text-[11px] text-muted-foreground tabular-nums">{count} عنصر</p>
+          {/* W7-G: عدّ العناصر يركب محرك الجمع — «عنصران» بدل «2 عنصر» */}
+          <p className="text-[11px] text-muted-foreground">{countedArabicPhrase(count, "عنصر", { one: "عنصر واحد", two: "عنصران", few: "عناصر", many: "عنصراً" })}</p>
         </div>
       </div>
 

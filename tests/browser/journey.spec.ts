@@ -32,7 +32,9 @@ test.describe("رحلة العميل — المتجر ← السلة ← إتم�
     // ── 3) إضافة إلى السلة ──
     await dialog.getByRole("button", { name: /إضافة/ }).click();
     // الشارة على زر السلة تظهر بعد اكتمال ترطيب السلة
-    await expect(page.getByRole("button", { name: /عرض السلة \(1 عنصر\)/ })).toBeVisible();
+    // W7-G: صيغة العدّ ركبت محرك الجمع (countedArabicPhrase) —
+    // «عنصر واحد» بدل «1 عنصر» (قواعد العدد الصحيحة).
+    await expect(page.getByRole("button", { name: /عرض السلة \(عنصر واحد\)/ })).toBeVisible();
 
     // ── 4) درج السلة ──
     await page.getByRole("button", { name: /عرض السلة/ }).first().click();

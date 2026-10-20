@@ -1,4 +1,5 @@
 import { formatLyd } from "@/lib/money";
+import { countedArabicPhrase } from "@/lib/arabic-plural";
 import { useCart } from "@/hooks/use-cart";
 import { StickyNote } from "lucide-react";
 
@@ -11,7 +12,8 @@ export function CartSummarySection({ items }: { items: CartItems }) {
   return (
     <section className="mt-3 rounded-xl border border-border bg-card p-4">
       <h2 className="font-semibold text-sm mb-3">
-        ملخص السلة <span className="text-muted-foreground font-normal font-mono tabular-nums">({items.length} عنصر)</span>
+        {/* W7-G: العدّة القوسية تركب محرك الجمع — «عنصران» بدل «2 عنصر» */}
+        ملخص السلة <span className="text-muted-foreground font-normal">({countedArabicPhrase(items.length, "عنصر", { one: "عنصر واحد", two: "عنصران", few: "عناصر", many: "عنصراً" })})</span>
       </h2>
       <ul className="space-y-2.5">
         {items.map((i) => (
