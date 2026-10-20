@@ -105,6 +105,17 @@ contracts). Rules:
 - **The money path never trusts the client:** the server re-prices every
   order, re-validates zones/options/stock, decrements stock conditionally
   inside the transaction, and is idempotent per cart-session key.
+- **Plan FEATURE gates (W7-D):** sold-but-ungated features are entitlement
+  bugs («a paid feature with no gate is a bug»). The ladder lives in ONE
+  pure source — `lib/plan-entitlements-core.ts` (`PLAN_FEATURES`):
+  reports = بريميوم+ (sortOrder 3), CSV export = احترافي+ (4), enforced
+  server-side at the real seams (`/api/dashboard/reports`,
+  `/api/dashboard/reports/export` — 403 `PLAN_ENTITLEMENT` below tier,
+  before any feature work; tier resolved with the W2-D2 currentPlan
+  semantics in `lib/plan-entitlements.ts`). Pricing-owner revert knobs:
+  the two `minSortOrder` constants (3→1 / 4→1 reopens the features).
+  Overview KPIs (`/api/dashboard/stats`) stay universal — the free
+  tier's basic-stats equivalent; never gate them.
 - Server errors ride the one-seam Arabic `ApiError` (`lib/client.ts`);
   routes answer via `ok()/fail()` (`lib/api.ts`) — thrown `ApiFailError`
   carries fail-shaped responses out of `$transaction`s.

@@ -59,7 +59,15 @@ const FAMILY_PLANS = [
     maxProducts: 9999,
     maxOrders: 99999,
     sortOrder: 4,
-    features: ["كل ميزات بريميوم", "فريق غير محدود", "متاجر متعددة من حساب واحد", "إحصاءات متقدمة", "مدير حساب مخصص"],
+    /* W7-D: Pro's old «advanced analytics» bullet promised a deeper
+     * layer that does not exist — code-traced, the reports surface
+     * (/api/dashboard/reports, now بريميوم+) is the ONLY trend/
+     * best-seller surface and the CSV export is the one real Pro-level
+     * analytics differentiator. The bullet now names what a Pro owner
+     * actually gets above Premium: the gated export route
+     * /api/dashboard/reports/export. Legacy rows heal at read
+     * (lib/plan-claims.ts LEGACY_CLAIMS). */
+    features: ["كل ميزات بريميوم", "فريق غير محدود", "متاجر متعددة من حساب واحد", "تصدير CSV للتقارير", "مدير حساب مخصص"],
   },
 ];
 

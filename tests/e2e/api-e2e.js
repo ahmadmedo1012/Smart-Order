@@ -34,7 +34,15 @@ function makeCtx() {
     });
     absorb(res);
     let body = null;
-    try { body = await res.json(); } catch { /* non-json */ }
+    /* W7-D: the CSV export route answers text/csv — rawText hands the
+       battery the raw bytes decoded via Buffer (Node's toString keeps
+       the leading U+FEFF, unlike res.text() whose TextDecoder silently
+       strips it — the pin must prove the BOM Excel actually receives). */
+    if (opts.rawText) {
+      body = Buffer.from(await res.arrayBuffer()).toString("utf8");
+    } else {
+      try { body = await res.json(); } catch { /* non-json */ }
+    }
     // (r138) headers مع الرد — لفحص Retry-After على 429
     return { status: res.status, body, headers: res.headers };
   };
@@ -513,6 +521,131 @@ async function main() {
     "one application, one real effect: the approved Premium plan opened team seats",
     staffAfterUpgrade.status === 201 && staffAfterUpgrade.body?.success === true,
     JSON.stringify(staffAfterUpgrade.body).slice(0, 100),
+  );
+
+  // ---------- 11. W7-D: the reports/CSV entitlement gates ----------
+  console.log("— بوابات استحقاق التقارير وتصدير CSV (W7-D)");
+  /* The W6-B7 flagged residual, closed: «تقارير أداء عند الطلب» is SOLD
+     on بريميوم — until W7-D any plan with orders.read read it. The
+     ladder now enforced (lib/plan-entitlements-core PLAN_FEATURES):
+     reports = بريميوم+ (sortOrder 3) · CSV export = احترافي+ (4) at the
+     real server seam /api/dashboard/reports/export (the W6-B4
+     client-built artifact had no seam a gate could refuse — the
+     Smart-Menu W7-B family move). At this point in the battery:
+     B = Free (never upgraded) · A = Premium (section 10's single
+     approved payment). Drive the whole ladder, then one more approved
+     Pro payment opens the export. */
+  const reportsPath = (id, days = 30) => `/api/dashboard/reports?businessId=${id}&days=${days}`;
+  const exportPath = (id, days = 30) => `/api/dashboard/reports/export?businessId=${id}&days=${days}`;
+
+  const anonReports = await anon.call(reportsPath(bizBId));
+  ok(
+    "reports gate order: session law still first — anonymous gets the 401, never the tier refusal",
+    anonReports.status === 401 || anonReports.body?.error?.code === "UNAUTHENTICATED",
+    JSON.stringify(anonReports.body).slice(0, 80),
+  );
+
+  const freeReports = await B.call(reportsPath(bizBId));
+  ok(
+    "reports gate: Free is refused below tier (403 PLAN_ENTITLEMENT) — the sold-but-ungated bug is closed",
+    freeReports.status === 403 && freeReports.body?.error?.code === "PLAN_ENTITLEMENT",
+    JSON.stringify(freeReports.body).slice(0, 100),
+  );
+  ok(
+    "reports gate: the Arabic refusal names بريميوم and the upgrade path (family copy, one source)",
+    /بريميوم/.test(freeReports.body?.error?.message ?? "") && /الترقية/.test(freeReports.body?.error?.message ?? ""),
+    (freeReports.body?.error?.message ?? "").slice(0, 90),
+  );
+
+  const freeExport = await B.call(exportPath(bizBId));
+  ok(
+    "export gate: Free is refused below Pro (403 PLAN_ENTITLEMENT) before any aggregation",
+    freeExport.status === 403 && freeExport.body?.error?.code === "PLAN_ENTITLEMENT" && /احترافي/.test(freeExport.body?.error?.message ?? ""),
+    JSON.stringify(freeExport.body).slice(0, 100),
+  );
+
+  const premReports = await A.call(reportsPath(bizAId));
+  ok(
+    "reports gate: the approved Premium payment opens the surface (200 with the real A orders)",
+    premReports.status === 200 && premReports.body?.data?.window?.days === 30 && Array.isArray(premReports.body?.data?.series) && premReports.body?.data?.series.length === 30,
+    JSON.stringify(premReports.body).slice(0, 120),
+  );
+  ok(
+    "reports response: Premium reads the data but the CSV preference flag stays false (the export is Pro+)",
+    premReports.body?.data?.canExportCsv === false,
+    JSON.stringify({ canExportCsv: premReports.body?.data?.canExportCsv }),
+  );
+
+  const premExport = await A.call(exportPath(bizAId));
+  ok(
+    "export gate: Premium is refused below Pro — the flag was the preference, the route is the enforcement",
+    premExport.status === 403 && premExport.body?.error?.code === "PLAN_ENTITLEMENT" && /احترافي/.test(premExport.body?.error?.message ?? ""),
+    JSON.stringify(premExport.body).slice(0, 100),
+  );
+
+  /* RBAC semantics: the entitlement rides the BUSINESS's tier (the
+     W2-D2 count-gate law) — a STAFF member with orders.read of a
+     Premium business reads its reports; permission decides WHO, the
+     tier WHAT. */
+  const staffEmail = rnd("staffgate_") + "@test.ly";
+  const staffAdd = await A.call("/api/staff", {
+    method: "POST",
+    body: JSON.stringify({ businessId: bizAId, name: "موظف التقارير", email: staffEmail, password: "Test#2026Pass", role: "STAFF" }),
+  });
+  ok("staff setup: the second Premium seat opens for the RBAC probe", staffAdd.status === 201, JSON.stringify(staffAdd.body).slice(0, 100));
+
+  const S = makeCtx();
+  const staffLogin = await S.call("/api/auth/login", { method: "POST", body: JSON.stringify({ email: staffEmail, password: "Test#2026Pass" }) });
+  ok("staff session opens", staffLogin.body?.success === true, JSON.stringify(staffLogin.body).slice(0, 80));
+
+  const staffReports = await S.call(reportsPath(bizAId));
+  ok(
+    "staff semantics: STAFF with orders.read reads a Premium business's reports (entitlement rides the business, not the member)",
+    staffReports.status === 200 && staffReports.body?.data?.series?.length === 30,
+    JSON.stringify(staffReports.body).slice(0, 100),
+  );
+
+  /* The ladder's top: one more single-approved Pro payment upgrades A
+     and the export seam opens — the reworded Pro bullet «تصدير CSV
+     للتقارير» is now enforced truth. */
+  const proPlan = (plansRes.body?.data || []).find((p) => p.name === "Pro");
+  ok("Pro plan row available from the self-seeded catalog", !!proPlan, JSON.stringify(plansRes.body).slice(0, 80));
+
+  const proSub = await A.call("/api/subscriptions", {
+    method: "POST",
+    body: JSON.stringify({ planId: proPlan?.id, provider: "libyana", amount: proPlan?.price, phone: "0912345678", businessId: bizAId }),
+  });
+  const proPaymentId = proSub.body?.data?.id;
+  ok("merchant files the Pro upgrade payment (PENDING)", !!proPaymentId && proSub.body?.data?.status === "PENDING", JSON.stringify(proSub.body).slice(0, 100));
+
+  const proApprove = await adm1.call(`/api/subscriptions/${proPaymentId}/review`, { method: "POST", body: JSON.stringify({ action: "APPROVE" }) });
+  ok("single review approves the Pro upgrade (no race this time — one request)", proApprove.status === 200 && proApprove.body?.data?.status === "APPROVED", JSON.stringify(proApprove.body).slice(0, 100));
+
+  const proExport = await A.call(exportPath(bizAId), { rawText: true });
+  ok(
+    "export gate: the approved Pro payment opens the real server export (200 text/csv)",
+    proExport.status === 200 && (proExport.headers?.get?.("content-type") ?? "").includes("text/csv"),
+    JSON.stringify({ status: proExport.status, ct: proExport.headers?.get?.("content-type") }),
+  );
+  ok(
+    "export body: UTF-8 BOM + the honest W6-B4 header + the window line (Excel-safe Arabic, same numbers as the screen)",
+    typeof proExport.body === "string" &&
+      proExport.body.startsWith("\uFEFFسمارت أوردر — تقرير الأداء") &&
+      proExport.body.includes("النافذة,آخر 30 يوماً") &&
+      proExport.body.includes("بلا الملغي والمرفوض"),
+    String(proExport.body).slice(0, 120),
+  );
+  ok(
+    "export filename: the honest product-slug-window-stamp contract in Content-Disposition",
+    /^attachment; filename="smart-order-report-[^"]+-30d-\d{8}\.csv"$/.test(proExport.headers?.get?.("content-disposition") ?? ""),
+    proExport.headers?.get?.("content-disposition") ?? "",
+  );
+
+  const proReports = await A.call(reportsPath(bizAId, 90));
+  ok(
+    "reports response after Pro: the CSV preference flag flips true (and the 90-day window still answers)",
+    proReports.status === 200 && proReports.body?.data?.window?.days === 90 && proReports.body?.data?.series?.length === 90 && proReports.body?.data?.canExportCsv === true,
+    JSON.stringify(proReports.body).slice(0, 120),
   );
 
   console.log(`\nالنتيجة: ${pass} ناجح · ${fail} فاشل · ${skipped} متجاهل\n`);

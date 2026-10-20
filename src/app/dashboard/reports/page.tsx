@@ -3,7 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { m } from "motion/react";
-import { api } from "@/lib/client";
+import { toast } from "sonner";
+import { api, ApiError } from "@/lib/client";
 import { useBusiness } from "@/components/dashboard/shell";
 import { EmptyState, ErrorState } from "@/components/shared/states";
 import { Button } from "@/components/ui/button";
@@ -14,9 +15,13 @@ import {
 } from "@/components/dashboard/skeletons";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatLyd, formatLydAmount } from "@/lib/money";
-import { tripoliDateParts } from "@/lib/arabic";
+import { formatLyd } from "@/lib/money";
 import { FULFILLMENT_AR } from "@/lib/constants";
+import {
+  PLAN_FEATURES,
+  planFeatureLockLabel,
+} from "@/lib/plan-entitlements-core";
+import { type ReportsData, reportCsvFileName } from "@/lib/report-csv";
 import { cn } from "@/lib/utils";
 import {
   ClipboardList,
@@ -26,119 +31,128 @@ import {
   Package,
   Download,
   ExternalLink,
+  Lock,
 } from "lucide-react";
 
 type WindowDays = 30 | 90;
 
-interface ReportsData {
-  window: { days: WindowDays; fromDay: string; toDay: string };
-  totals: {
-    orders: number;
-    revenue: number;
-    avgOrder: number;
-    delivery: { orders: number; revenue: number };
-    pickup: { orders: number; revenue: number };
-  };
-  series: Array<{ day: string; date: string; revenue: number; orders: number }>;
-  topProducts: Array<{
-    productName: string;
-    units: number;
-    revenue: number;
-    orderCount: number;
-  }>;
+/* The API response: the shared W6-B4 shape + the W7-D server-truth
+   preference for the CSV lock (احترافي+) — the flag derives from the
+   same plan-row read that ENFORCES the reports gate; the export route
+   re-decides from its own read, so the flag can never be the
+   enforcement. */
+interface ReportsResponse extends ReportsData {
+  canExportCsv: boolean;
 }
 
-/* CSV cell escaping — quote only when the value can break the row
-   (comma / quote / newline); inner quotes double. */
-/* W6-B8 (independent review): CSV formula-injection guard — the same law
-   Smart-Menu's orders export shipped this wave (f835be98): a cell starting
-   with = + - @ executes as a formula when the owner opens the export in
-   Excel/LibreOffice. Product names and the store name are staff-editable
-   (a malicious editor injects, the owner executes) — neutralize the prefix
-   with a leading apostrophe (Excel keeps the text after it verbatim). */
-function csvCell(v: string | number): string {
-  const s = String(v);
-  const safe = /^[=+\-@]/.test(s) ? `'${s}` : s;
-  return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
-}
-
-/** The export body — revenue-per-day rows + top-products rows, plus the
- *  honest header (store / window / the exclusion rule). Money rides
- *  formatLydAmount (raw 3-decimal) so Excel parses it as a number. */
-function buildCsv(d: ReportsData, businessName: string): string {
-  const rows: string[] = [];
-  rows.push("سمارت أوردر — تقرير الأداء");
-  rows.push(`المتجر,${csvCell(businessName)}`);
-  rows.push(
-    `النافذة,آخر ${d.window.days} يوماً (من ${d.window.fromDay} إلى ${d.window.toDay})`,
-  );
-  rows.push(`الطلبات,${d.totals.orders} (بلا الملغي والمرفوض)`);
-  rows.push(`الإيراد (د.ل),${formatLydAmount(d.totals.revenue)}`);
-  rows.push(`متوسط قيمة الطلب (د.ل),${formatLydAmount(d.totals.avgOrder)}`);
-  rows.push(
-    `توصيل,${d.totals.delivery.orders} طلب · ${formatLydAmount(d.totals.delivery.revenue)} د.ل`,
-  );
-  rows.push(
-    `استلام من الفرع,${d.totals.pickup.orders} طلب · ${formatLydAmount(d.totals.pickup.revenue)} د.ل`,
-  );
-  rows.push("");
-  rows.push("الإيراد اليومي");
-  rows.push("اليوم,عدد الطلبات,الإيراد (د.ل)");
-  for (const s of d.series) {
-    rows.push(`${s.date},${s.orders},${formatLydAmount(s.revenue)}`);
-  }
-  rows.push("");
-  rows.push("أفضل المنتجات");
-  rows.push("الترتيب,المنتج,الوحدات,عدد الطلبات,الإيراد (د.ل)");
-  d.topProducts.forEach((p, i) => {
-    rows.push(
-      `${i + 1},${csvCell(p.productName)},${p.units},${p.orderCount},${formatLydAmount(p.revenue)}`,
-    );
-  });
-  return rows.join("\r\n");
-}
+/* W7-D: the export is now a SERVER route gated at احترافي+
+   (/api/dashboard/reports/export — the Smart-Menu W7-B family move: a
+   client-built artifact has no seam a gate can refuse). The button
+   fetches that route and hands the blob to the browser; the W6-B4
+   filename contract (product + slug + window + Tripoli stamp) is the
+   same one-source helper the route's Content-Disposition uses. */
+const EXPORT_ROUTE = "/api/dashboard/reports/export";
 
 export default function ReportsPage() {
   const { businessId, business } = useBusiness();
-  const [data, setData] = React.useState<ReportsData | null>(null);
+  const [data, setData] = React.useState<ReportsResponse | null>(null);
   const [error, setError] = React.useState(false);
+  /* W7-D: below-بريميوم businesses get the family's 403 PLAN_ENTITLEMENT —
+     an entitlement refusal is a LOCKED state with an upgrade path, never
+     a dead error/retry surface. */
+  const [locked, setLocked] = React.useState(false);
+  const [exporting, setExporting] = React.useState(false);
   const [days, setDays] = React.useState<WindowDays>(30);
 
   const load = React.useCallback(() => {
     if (!businessId) return;
     setError(false);
+    setLocked(false);
     api
-      .get<ReportsData>(
+      .get<ReportsResponse>(
         `/api/dashboard/reports?businessId=${businessId}&days=${days}`,
       )
       .then((r) => setData(r.data))
-      .catch(() => setError(true));
+      .catch((e) => {
+        if (e instanceof ApiError && e.code === "PLAN_ENTITLEMENT") {
+          setLocked(true);
+        } else {
+          setError(true);
+        }
+      });
   }, [businessId, days]);
 
   React.useEffect(load, [load]);
 
-  /* W6-B4: client-side export from the ALREADY fetched, server-aggregated
-     data (no second fetch, no server CSV surface to own). UTF-8 BOM keeps
-     Excel reading the Arabic headers correctly. Filename is honest:
-     product + store + window + Tripoli date. */
+  /* W7-D: the one-tap export artifact is a SERVER download (Pro+ gated
+     at the route); the client fetches it so a refusal surfaces as the
+     family's Arabic toast instead of raw JSON navigation, then hands the
+     blob the W6-B4 filename. */
   const exportCsv = React.useCallback(() => {
-    if (!data || !business) return;
-    const { y, m, d: dd } = tripoliDateParts();
-    const stamp = `${y}${String(m).padStart(2, "0")}${String(dd).padStart(2, "0")}`;
-    const blob = new Blob([`\uFEFF${buildCsv(data, business.name)}`], {
-      type: "text/csv;charset=utf-8",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `smart-order-report-${business.slug}-${data.window.days}d-${stamp}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }, [data, business]);
+    if (!businessId || !business || exporting) return;
+    setExporting(true);
+    fetch(`${EXPORT_ROUTE}?businessId=${businessId}&days=${days}`, {
+      cache: "no-store",
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          /* The server refused (below احترافي, or session/permission) —
+             surface its own Arabic copy from the envelope. */
+          let msg = "تعذّر تصدير التقرير، حاول مرة أخرى";
+          try {
+            const j = (await res.json()) as {
+              error?: { message?: string };
+            } | null;
+            if (j?.error?.message) msg = j.error.message;
+          } catch {
+            /* non-JSON refusal keeps the honest default */
+          }
+          toast.error(msg);
+          return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = reportCsvFileName(business.slug, days);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      })
+      .catch(() => toast.error("تعذّر تصدير التقرير، حاول مرة أخرى"))
+      .finally(() => setExporting(false));
+  }, [businessId, business, days, exporting]);
 
   if (error) return <ErrorState retry={load} />;
+
+  /* W7-D — the locked state: below بريميوم the server's 403 lands here —
+     honest, labeled, with the family's upgrade CTA to the pricing page
+     (never a dead spinner or a fake retry). The title reads the tier
+     constant (PLAN_FEATURES) so the copy can never drift from the gate. */
+  if (locked) {
+    const minPlan = PLAN_FEATURES.reports.minPlanNameAr;
+    return (
+      <div className="space-y-5">
+        <PageHeader
+          title="التقارير"
+          subtitle="أداء متجرك عبر الزمن — أفضل منتجاتك، إيرادك اليومي، ومزيج التوصيل"
+        />
+        <EmptyState
+          icon={Lock}
+          title={`التقارير متوفرة في خطة «${minPlan}» فأعلى`}
+          description={
+            "تقارير الأداء عند الطلب — أفضل منتجاتك، الإيراد اليومي، ومزيج التوصيل على مدى 30 أو 90 يوماً — جزء من خطة «بريميوم» والخطط الأعلى."
+          }
+          action={
+            <Button asChild size="sm">
+              <Link href="/pricing">عرض الباقات والترقية</Link>
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
 
   const windowSwitch = (
     /* The pricing page's monthly/yearly capsule idiom, dashboard-grade:
@@ -280,10 +294,43 @@ export default function ReportsPage() {
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {windowSwitch}
-            <Button variant="outline" onClick={exportCsv}>
-              <Download className="size-4" aria-hidden="true" />
-              تصدير CSV
-            </Button>
+            {/* W7-D: the CSV artifact rides its Pro+ gate. Entitled → the
+                server download; below tier → disabled + explanation + the
+                upgrade link (the family's locked-button grammar — the
+                button is the dead surface, the words beside it are the
+                path). */}
+            {data.canExportCsv ? (
+              <Button
+                variant="outline"
+                onClick={exportCsv}
+                disabled={exporting}
+              >
+                <Download className="size-4" aria-hidden="true" />
+                {exporting ? "جارٍ التصدير…" : "تصدير CSV"}
+              </Button>
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled
+                  title={planFeatureLockLabel("csvExport")}
+                >
+                  <Download className="size-4" aria-hidden="true" />
+                  تصدير CSV
+                  <Lock className="size-3.5" aria-hidden="true" />
+                </Button>
+                <span className="max-w-[34ch] text-[11px] leading-relaxed text-muted-foreground">
+                  {planFeatureLockLabel("csvExport")} —{" "}
+                  <Link
+                    href="/pricing"
+                    className="font-medium text-accent-foreground underline-offset-4 hover:underline"
+                  >
+                    عرض الباقات
+                  </Link>
+                </span>
+              </>
+            )}
           </div>
         }
       />

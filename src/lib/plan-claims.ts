@@ -32,11 +32,20 @@ const LEGACY_CLAIMS: Record<string, string> = {
      أسبوعية» — scheduled weekly reports. Reality (code-traced after
      W6-B4 shipped the surface): reports ARE real and owner-reachable,
      but ON-DEMAND (/dashboard/reports — 30/90-day windows, best
-     sellers, CSV), never scheduled/emailed weekly, and not
-     Premium-exclusive (any plan with orders.read). The truthful bullet
-     says on-demand; the entitlement breadth is a separate plan
-     question left to the pricing owner. */
+     sellers, CSV), never scheduled/emailed weekly. The truthful bullet
+     says on-demand. W7-D CLOSED the entitlement breadth this flagged:
+     the surface is now genuinely بريميوم+ (lib/plan-entitlements-core
+     PLAN_FEATURES.reports) — the claim and the gate finally agree. */
   "تقارير أداء أسبوعية": "تقارير أداء عند الطلب",
+  /* W7-D: Pro promised «إحصاءات متقدمة» — a deeper analytics layer.
+     Reality (code-traced this wave): the reports surface is the ONLY
+     trend/best-seller surface (now بريميوم+), and the one real
+     Pro-level analytics differentiator is the CSV export artifact
+     (/api/dashboard/reports/export, gated احترافي+). The seeds now
+     sell «تصدير CSV للتقارير»; this entry heals the rows seeded with
+     the over-promising bullet (production included — same seed-on-EMPTY
+     doctrine as above). */
+  "إحصاءات متقدمة": "تصدير CSV للتقارير",
 };
 
 /** Heal one feature bullet at read time; everything else passes through

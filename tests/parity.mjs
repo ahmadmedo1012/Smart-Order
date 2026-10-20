@@ -1613,6 +1613,15 @@ for (const [name, okFlag] of P14_D) {
 // WhatsApp-claim reword (3 seed twins + the P13-2d-style read-seam heal).
 const REPORTS_ROUTE = R('src/app/api/dashboard/reports/route.ts');
 const REPORTS_PAGE = R('src/app/dashboard/reports/page.tsx');
+/* W7-D: the W6-B4 aggregation moved verbatim to lib/reports-queries.ts so
+   the gated export route serves the SAME numbers — the pins that held
+   the route's internals now hold the seam that owns them (the contracts
+   are unchanged; the home file moved). */
+const REPORTS_QUERIES = R('src/lib/reports-queries.ts');
+const REPORTS_EXPORT_ROUTE = R('src/app/api/dashboard/reports/export/route.ts');
+const PLAN_ENTITLEMENTS_CORE = R('src/lib/plan-entitlements-core.ts');
+const PLAN_ENTITLEMENTS = R('src/lib/plan-entitlements.ts');
+const REPORTS_CSV_LIB = R('src/lib/report-csv.ts');
 const SHELL_W6 = R('src/components/dashboard/shell.tsx');
 const SEED_ROUTE_W6 = R('src/app/api/seed/route.ts');
 const PLANS_ROUTE_W6 = R('src/app/api/plans/route.ts');
@@ -1627,24 +1636,24 @@ const W6B4 = [
     /v === 30 \|\| v === 90/.test(REPORTS_ROUTE) &&
     REPORTS_ROUTE.includes('.default(30)')],
   ['W6-B4 reports API: the family exclusion accounting on EVERY aggregate (NOT IN CANCELLED/REJECTED — the plan-gate month-count rule), and the server returns RAW numbers (no د.ل formatting server-side)',
-    (REPORTS_ROUTE.match(/NOT IN \('CANCELLED', 'REJECTED'\)/g) || []).length >= 2 &&
-    REPORTS_ROUTE.includes('status: { notIn: ["CANCELLED", "REJECTED"] }') &&
-    !REPORTS_ROUTE.includes('د.ل')],
+    (REPORTS_QUERIES.match(/NOT IN \('CANCELLED', 'REJECTED'\)/g) || []).length >= 2 &&
+    REPORTS_QUERIES.includes('status: { notIn: ["CANCELLED", "REJECTED"] }') &&
+    !REPORTS_QUERIES.includes('د.ل')],
   ['W6-B4 reports API: day bucketing is the stats route\'s dialect-discriminated twin (file: check, SQLite strftime unixepoch +7200, PG to_char interval \'2 hours\', tripoliDateParts keys — never local getters)',
-    REPORTS_ROUTE.includes('process.env.DATABASE_URL?.startsWith("file:")') &&
-    REPORTS_ROUTE.includes("strftime('%Y-%m-%d', \"createdAt\"/1000 + 7200, 'unixepoch')") &&
-    REPORTS_ROUTE.includes("to_char(\"createdAt\" + interval '2 hours', 'YYYY-MM-DD')") &&
-    /tripoliDateParts\(/.test(REPORTS_ROUTE)],
+    REPORTS_QUERIES.includes('process.env.DATABASE_URL?.startsWith("file:")') &&
+    REPORTS_QUERIES.includes("strftime('%Y-%m-%d', \"createdAt\"/1000 + 7200, 'unixepoch')") &&
+    REPORTS_QUERIES.includes("to_char(\"createdAt\" + interval '2 hours', 'YYYY-MM-DD')") &&
+    /tripoliDateParts\(/.test(REPORTS_QUERIES)],
   ['W6-B4 reports API: top products are SERVER-side OrderItem aggregates (raw groupBy over the snapshots: SUM quantity + SUM lineTotal + DISTINCT orders), never client money',
-    REPORTS_ROUTE.includes('SUM(oi."quantity")') &&
-    REPORTS_ROUTE.includes('SUM(oi."lineTotal")') &&
-    REPORTS_ROUTE.includes('FROM "OrderItem" oi') &&
-    REPORTS_ROUTE.includes('JOIN "Order" o ON o."id" = oi."orderId"') &&
-    REPORTS_ROUTE.includes('LIMIT 10')],
+    REPORTS_QUERIES.includes('SUM(oi."quantity")') &&
+    REPORTS_QUERIES.includes('SUM(oi."lineTotal")') &&
+    REPORTS_QUERIES.includes('FROM "OrderItem" oi') &&
+    REPORTS_QUERIES.includes('JOIN "Order" o ON o."id" = oi."orderId"') &&
+    REPORTS_QUERIES.includes('LIMIT 10')],
   ['W6-B4 reports API: zero-filled oldest→newest series; totals ride the same rows (one accounting, one rule)',
-    REPORTS_ROUTE.includes('bucket?.revenue ?? 0') &&
-    /series\.reduce\(\(s, d\) => s \+ d\.revenue, 0\)/.test(REPORTS_ROUTE) &&
-    REPORTS_ROUTE.includes('Math.round(revenue / orders)')],
+    REPORTS_QUERIES.includes('bucket?.revenue ?? 0') &&
+    /series\.reduce\(\(s, d\) => s \+ d\.revenue, 0\)/.test(REPORTS_QUERIES) &&
+    REPORTS_QUERIES.includes('Math.round(revenue / orders)')],
   ['W6-B4 reports page: the honest state family (ErrorState retry / «لا توجد طلبات بعد» empty / shape-matched skeleton) + money formatted client-side via formatLyd',
     REPORTS_PAGE.includes('<ErrorState retry={load} />') &&
     REPORTS_PAGE.includes('title="لا توجد طلبات بعد"') &&
@@ -1654,10 +1663,12 @@ const W6B4 = [
     REPORTS_PAGE.includes('role="img"') &&
     REPORTS_PAGE.includes('<table className="sr-only">') &&
     REPORTS_PAGE.includes('title={`${d.date}: إيراد ${formatLyd(d.revenue)} — ${d.orders} طلب`}')],
-  ['W6-B4 reports page: CSV export is client-side from the fetched server data, UTF-8-BOM (Excel-safe Arabic), honest filename (product-store-window-date)',
-    REPORTS_PAGE.includes('\\uFEFF') &&
-    REPORTS_PAGE.includes('text/csv;charset=utf-8') &&
-    /a\.download = `smart-order-report-\$\{business\.slug\}-\$\{data\.window\.days\}d-/.test(REPORTS_PAGE)],
+  ['W6-B4/W7-D reports CSV: the export is a REAL server seam — the gated route (/api/dashboard/reports/export) carries the UTF-8 BOM, the honest product-slug-window-stamp filename, and the page hands the server blob that same one-source filename',
+    REPORTS_EXPORT_ROUTE.includes('\\uFEFF') &&
+    REPORTS_EXPORT_ROUTE.includes('text/csv;charset=utf-8') &&
+    REPORTS_EXPORT_ROUTE.includes('reportCsvFileName') &&
+    REPORTS_CSV_LIB.includes('export function reportCsvFileName') &&
+    REPORTS_PAGE.includes('a.download = reportCsvFileName(business.slug, days);')],
   ['W6-B4 reports page: 44px controls with their own focus rings (window pills aria-pressed min-h-11; export rides the default Button rung)',
     REPORTS_PAGE.includes('aria-pressed={days === w}') &&
     REPORTS_PAGE.includes('min-h-11') &&
@@ -1794,6 +1805,89 @@ const W6B7 = [
 for (const [name, okFlag] of W6B7) {
   if (okFlag) passed += 1;
   else failures.push(`w6-b7 confirm/qr/sound gate FAILED: ${name}`);
+}
+
+// ── W7-D: the reports/CSV entitlement gates — the W6-B7 residual CLOSED ──
+// (the flagged plan question: reports were sold on بريميوم but readable
+// by any plan with orders.read; the CSV export rode free inside the
+// client with no seam a gate could refuse). The family law applied
+// (SmartBot P21-W3-B #5: «a paid feature with no gate is a bug»):
+//   · lib/plan-entitlements-core.ts — the pure ladder + ONE denial copy
+//     per feature (the Smart-Menu W7-B twin): reports بريميوم+ (sortOrder
+//     3) · csvExport احترافي+ (4); fail-closed on unknown tiers;
+//   · lib/plan-entitlements.ts — the W2-D2 currentPlan semantics as the
+//     feature-gates' single plan-read point (lapsed paid → Free row,
+//     null planId → Free row, never-seeded → Free literal tail);
+//   · /api/dashboard/reports gated BELOW the aggregation (403
+//     PLAN_ENTITLEMENT, the tier read the only cost);
+//   · /api/dashboard/reports/export — the export moved from a client
+//     Blob to a REAL server seam so the Pro+ gate is enforceable (the
+//     Smart-Menu W6-A3#5→W7-B family move), body builder + W6-B8 formula
+//     guard extracted to lib/report-csv.ts, one source for the filename;
+//   · the page: 403 → the locked state (Lock EmptyState + /pricing CTA),
+//     CSV below Pro → disabled + explanation + upgrade link — the flag
+//     (canExportCsv riding the reports response) is preference, the
+//     route is the enforcement;
+//   · Pro's phantom «إحصاءات متقدمة» bullet reworded in the 3 seed twins
+//     to «تصدير CSV للتقارير» + LEGACY_CLAIMS heal (production rows);
+//   · the dashboard overview KPIs stay UNIVERSAL (the free tier's
+//     basic-stats equivalent) — the stats route gains no gate;
+//   · the demo store stays Free on purpose: its locked reports page is
+//     the honest demo of the upgrade path, never a hidden lock.
+const PLANS_SEED_FAMILY = R('scripts/seed-family.js');
+const PLANS_SEED_E2E = R('scripts/e2e-seed.mjs');
+const STATS_ROUTE_W7D = R('src/app/api/dashboard/stats/route.ts');
+const W7D = [
+  ['W7-D ladder: the entitlement source is pure + single — reports بريميوم+ (3), csvExport احترافي+ (4), fail-closed on unknown tiers, one family denial copy per feature',
+    PLAN_ENTITLEMENTS_CORE.includes('reports: { minSortOrder: 3, minPlanNameAr: "بريميوم"') &&
+    PLAN_ENTITLEMENTS_CORE.includes('csvExport: { minSortOrder: 4, minPlanNameAr: "احترافي"') &&
+    PLAN_ENTITLEMENTS_CORE.includes('return (plan?.sortOrder ?? 0) >= PLAN_FEATURES[feature].minSortOrder;') &&
+    PLAN_ENTITLEMENTS_CORE.includes('هذه الميزة متوفرة في خطة «${minPlanNameAr}» فأعلى. قم بالترقية للمتابعة.')],
+  ['W7-D tier read: the single plan-read point for feature gates is the W2-D2 currentPlan semantics — lapsed paid degrades to the Free row, null planId resolves to the Free row, a never-seeded table fails CLOSED (Free literal tail)',
+    PLAN_ENTITLEMENTS.includes('export async function resolveBusinessPlanTier') &&
+    PLAN_ENTITLEMENTS.includes('const expired = !!biz?.subscriptionEnds && biz.subscriptionEnds.getTime() <= Date.now();') &&
+    PLAN_ENTITLEMENTS.includes('if (biz?.plan && !expired) return biz.plan;') &&
+    PLAN_ENTITLEMENTS.includes('return free ?? { name: "Free", nameAr: "مجاني", sortOrder: 1 };')],
+  ['W7-D reports gate: the Premium+ refusal fires BELOW tier BEFORE the aggregation (only auth + the tier read precede it) and answers the family copy as 403 PLAN_ENTITLEMENT',
+    REPORTS_ROUTE.includes('assertPlanFeature(tier, "reports");') &&
+    REPORTS_ROUTE.indexOf('assertPlanFeature(tier, "reports");') < REPORTS_ROUTE.indexOf('await getReportData(') &&
+    PLAN_ENTITLEMENTS.includes('throw new ApiFailError(planFeatureDeniedCopy(feature), 403, "PLAN_ENTITLEMENT");')],
+  ['W7-D export gate: the CSV artifact is a REAL server seam — same auth ladder, the Pro+ refusal BEFORE the aggregation, W6-B8 formula guard + W6-B4 body via the shared lib, BOM + honest filename + no-store',
+    REPORTS_EXPORT_ROUTE.includes('requirePermission(member, "orders.read")') &&
+    REPORTS_EXPORT_ROUTE.includes('assertPlanFeature(tier, "csvExport");') &&
+    REPORTS_EXPORT_ROUTE.indexOf('assertPlanFeature(tier, "csvExport");') < REPORTS_EXPORT_ROUTE.indexOf('getReportData(') &&
+    REPORTS_EXPORT_ROUTE.includes('"cache-control": "no-store"') &&
+    REPORTS_CSV_LIB.includes('const safe = /^[=+\\-@]/.test(s)') &&
+    REPORTS_CSV_LIB.includes('export function buildReportCsv')],
+  ['W7-D export body = screen numbers: the export route and the reports route share ONE aggregation (lib/reports-queries) — the file can never disagree with the screen',
+    REPORTS_ROUTE.includes('import { getReportData, type ReportsWindowDays } from "@/lib/reports-queries";') &&
+    REPORTS_EXPORT_ROUTE.includes('import { getReportData, type ReportsWindowDays } from "@/lib/reports-queries";')],
+  ['W7-D preference vs enforcement: the CSV flag rides the same tier read that enforces the reports gate (never a second source), and the page treats a 403 as a LOCKED state — Lock EmptyState + the /pricing CTA, never a dead error/retry',
+    REPORTS_ROUTE.includes('canExportCsv: planAllowsFeature(tier, "csvExport"),') &&
+    REPORTS_PAGE.includes('e.code === "PLAN_ENTITLEMENT"') &&
+    REPORTS_PAGE.includes('icon={Lock}') &&
+    REPORTS_PAGE.includes('<Link href="/pricing">عرض الباقات والترقية</Link>')],
+  ['W7-D CSV lock grammar: below Pro the button is disabled + explained + upgrade-linked (the family disabled/explanation/link trio — never a dead spinner)',
+    REPORTS_PAGE.includes('planFeatureLockLabel("csvExport")') &&
+    REPORTS_PAGE.includes('<Button\n                  type="button"\n                  variant="outline"\n                  disabled') &&
+    REPORTS_PAGE.includes('عرض الباقات')],
+  ['W7-D claim: Pro\'s phantom «إحصاءات متقدمة» is retired for the enforced truth «تصدير CSV للتقارير» in the 3 seed twins AND heals at both read seams (P13-2d doctrine)',
+    !PLANS_ROUTE_W6.includes('إحصاءات متقدمة') &&
+    !PLANS_SEED_FAMILY.includes('إحصاءات متقدمة') &&
+    !PLANS_SEED_E2E.includes('إحصاءات متقدمة') &&
+    PLANS_ROUTE_W6.includes('تصدير CSV للتقارير') &&
+    PLANS_SEED_FAMILY.includes('تصدير CSV للتقارير') &&
+    PLANS_SEED_E2E.includes('تصدير CSV للتقارير') &&
+    R('src/lib/plan-claims.ts').includes('"إحصاءات متقدمة": "تصدير CSV للتقارير"')],
+  ['W7-D universality: the dashboard overview KPIs stay ungated (the free tier\'s basic-stats equivalent) — no entitlement gate may ride the stats route',
+    !STATS_ROUTE_W7D.includes('assertPlanFeature') &&
+    !STATS_ROUTE_W7D.includes('plan-entitlements')],
+  ['W7-D demo coherence: the demo store stays on the Free plan on purpose — its locked reports page is the honest labeled demo of the upgrade path (never a hidden lock)',
+    PLANS_SEED_E2E.includes('planId: free?.id')],
+];
+for (const [name, okFlag] of W7D) {
+  if (okFlag) passed += 1;
+  else failures.push(`w7-d entitlement-gate parity FAILED: ${name}`);
 }
 
 // ── report ───────────────────────────────────────────────────────────────────

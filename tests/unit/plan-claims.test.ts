@@ -10,9 +10,17 @@
 //
 // W6-B7 extends the same doctrine to Premium's «تقارير أداء أسبوعية»
 // (W6-B4's flagged residual): reports are real but ON-DEMAND
-// (/dashboard/reports, 30/90-day windows + CSV — any plan with
-// orders.read), never scheduled weekly. Seeds reworded to
-// «تقارير أداء عند الطلب»; the heal map covers rows seeded before it.
+// (/dashboard/reports, 30/90-day windows + CSV), never scheduled weekly.
+// Seeds reworded to «تقارير أداء عند الطلب»; the heal map covers rows
+// seeded before it.
+//
+// W7-D CLOSES the flagged entitlement breadth: the reports surface is
+// now genuinely بريميوم+ (lib/plan-entitlements-core) and the one-tap
+// CSV export is احترافي+ (/api/dashboard/reports/export). Pro's old
+// «إحصاءات متقدمة» bullet promised a deeper analytics layer that never
+// existed — the seeds now sell «تصدير CSV للتقارير» (the export IS the
+// only real Pro-level analytics differentiator), and this heal map
+// covers rows seeded with the old bullet (production included).
 //
 // The three seed twins (api/plans FAMILY_PLANS + scripts/seed-family.js +
 // scripts/e2e-seed.mjs) now carry the reworded bullets; the plans table is
@@ -32,6 +40,8 @@ const OLD = "إشعارات واتساب فورية";
 const NEW = "رسائل واتساب للطلبات والتأكيدات";
 const OLD_REPORTS = "تقارير أداء أسبوعية";
 const NEW_REPORTS = "تقارير أداء عند الطلب";
+const OLD_ADVANCED = "إحصاءات متقدمة";
+const NEW_ADVANCED = "تصدير CSV للتقارير";
 
 test("behavior: the legacy bullet heals to the truthful claim at read time", () => {
   assert.equal(healPlanClaim(OLD), NEW);
@@ -41,10 +51,15 @@ test("behavior (W6-B7): the weekly-reports over-promise heals to the on-demand t
   assert.equal(healPlanClaim(OLD_REPORTS), NEW_REPORTS);
 });
 
+test("behavior (W7-D): Pro's phantom advanced-analytics bullet heals to the honest CSV-export claim", () => {
+  assert.equal(healPlanClaim(OLD_ADVANCED), NEW_ADVANCED);
+});
+
 test("behavior: everything else passes through byte-identical — the heal is surgical", () => {
   for (const passthrough of [
     NEW, // already-healed rows are a no-op (idempotent)
     NEW_REPORTS, // the W6-B7 twin is a no-op too
+    NEW_ADVANCED, // the W7-D twin is a no-op too
     "كل ميزات الأساسي",
     "دعم فني عبر واتساب", // a DIFFERENT WhatsApp bullet — untouched
     "3 أقسام",
@@ -64,6 +79,8 @@ test("seeds: the three plan-catalog twins carry the truthful claims (one SSOT, n
     assert.ok(!src.includes(OLD), "twin must not carry the legacy WhatsApp over-promise");
     assert.ok(src.includes(NEW_REPORTS), "twin must carry the on-demand reports bullet");
     assert.ok(!src.includes(OLD_REPORTS), "twin must not carry the scheduled-weekly over-promise");
+    assert.ok(src.includes(NEW_ADVANCED), "twin must carry the honest Pro CSV-export bullet");
+    assert.ok(!src.includes(OLD_ADVANCED), "twin must not carry the phantom advanced-analytics bullet");
   }
 });
 

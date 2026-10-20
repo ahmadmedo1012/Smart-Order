@@ -97,7 +97,7 @@ const PLANS = [
       "كل ميزات بريميوم",
       "فريق غير محدود",
       "متاجر متعددة من حساب واحد",
-      "إحصاءات متقدمة",
+      "تصدير CSV للتقارير", // W7-D: the honest Pro bullet — the CSV export is the only real Pro-level analytics differentiator (reports itself is بريميوم+)
       "مدير حساب مخصص",
     ],
   },
