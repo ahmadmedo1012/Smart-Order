@@ -112,3 +112,30 @@ Cart and confirmation are **not separate routes** by design: the cart is a drawe
 3. «التسجيل أقل من دقيقتين» remains unverifiable-by-reading (marketing puffery).
 4. «للأبد» (free plan) is a business commitment, not a code-verifiable fact.
 5. error/global-error boundaries not live-triggered (would require fault injection).
+
+---
+
+## 9) W7-F audit addendum (2026-10-20, `main @ cc30df2`)
+
+Back-fill audit of this matrix's open items, re-verified by code-read at HEAD
+(19 commits after the 42e1d2c snapshot):
+
+- **Counts drifted (expected — this matrix is a dated snapshot):** HEAD has
+  **24 page routes** (10 public + 14 dashboard) and **37 API route files**.
+  Added since 42e1d2c: `/track` public lookup (W2-D1) · `/dashboard/reports`
+  (W6-B4, gated بريميوم+ since W7-D) · `/api/public/track` (W2-D1) ·
+  `/api/public/track/[token]/confirm` (W6-B7) · `/api/dashboard/reports`
+  (W6-B4) · `/api/dashboard/reports/export` (W7-D server seam).
+  (The header count "34 API route files" was 33 by `git ls-tree` at 42e1d2c —
+  recorded as-is; the canonical count at HEAD is the one above.)
+- **§4 claims re-verified at HEAD — still hold:** the «6 طرق دفع» roadmark
+  still derives from `PAYMENT_TYPES.length` (`hero-section.tsx:52`); the
+  trust pill still renders only when the real DB count is > 0
+  (`showTrustBadge`, `hero-section.tsx:34`).
+- **§8 gaps — dispositions unchanged:** «أقل من دقيقتين» (still in
+  `LandingFaq.tsx:12` + `StorefrontSection.tsx:16`) and «للأبد» remain
+  documented marketing/commitment wording; the error-boundary live-trigger
+  gap remains (the browser battery pins the boundaries' existence and retry
+  copy, not fault injection). The W2-D3 wave additionally truthtened the
+  limit-FAQ answer the matrix quoted in §4 — live copy at
+  `LandingFaq.tsx:32` now states the enforced stop-at-the-cap behavior.

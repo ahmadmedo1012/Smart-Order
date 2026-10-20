@@ -10,11 +10,14 @@
 > الخامسة (r152 «النهار التشغيلي — الطريق والعقدة») — أي أن البكسلات لا
 > تزال تحمل عالم ما قبل الانقلاب (كان مدارك night/gold). التعليقات
 > المحدّثة أدناه تصف المنتج الحالي، لا البكسلات القديمة؛ تجديد الالتقاط
-> (Playwright) معلّق لمهمة لاحقة في المرحلة 6.
+> (Playwright) معلّق لمهمة لاحقة — والبكسلات اليوم تتأخر أيضًا عن صوت
+> مسار المال التشغيلي (P21-D) وعن صفحة التقارير ودرزتها (W6-B4/W7-D).
 > Versioned assets (r132 W3-6): heroes are 1440×900 crops of the r130 landing
 > captures; app shots were taken from a locally-seeded demo store. HONEST NOTE:
-> the pixels predate the Phase 5 identity flip — re-capture is PENDING (a later
-> agent with Playwright); the updated captions describe the current product.
+> the pixels predate the Phase 5 identity flip — re-capture remains PENDING
+> (Playwright); the pixels now also predate the P21-D money-path display
+> voice and the reports surface (W6-B4, gated بريميوم+ in W7-D); the updated
+> captions describe the current product.
 > All exported as JPG under 300KB each, paths relative to the repo root.
 
 | الملف | المقاس | الحجم | التعليق |

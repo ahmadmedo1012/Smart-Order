@@ -9,7 +9,7 @@
 > **Production:** <https://order.smart-link.ly> · Next.js 16 · PostgreSQL (Neon) · Vercel
 
 [![CI](https://github.com/ahmadmedo1012/Smart-Order/actions/workflows/ci.yml/badge.svg)](https://github.com/ahmadmedo1012/Smart-Order/actions/workflows/ci.yml)
-[![Live](https://img.shields.io/badge/live-order.smart--link.ly-E9B44C)](https://order.smart-link.ly)
+[![Live](https://img.shields.io/badge/live-order.smart--link.ly-D14900)](https://order.smart-link.ly)
 [![License](https://img.shields.io/badge/license-proprietary-%23B57438)](./LICENSE)
 
 ---
@@ -18,8 +18,10 @@
 
 | Light ☀️ | Dark 🌙 |
 |:---:|:---:|
-| [![Landing page in light mode — headline "متجر رقمي لمتجرك — الطلبات تصلك في لوحة واحدة" with the orders phone mockup](docs/screenshots/hero-light.jpg)](docs/screenshots/hero-light.jpg) | [![Landing page in dark mode — the same hero band in the Madarek night/gold identity](docs/screenshots/hero-dark.jpg)](docs/screenshots/hero-dark.jpg) |
+| [![Landing page in light mode — headline "متجر رقمي لمتجرك — الطلبات تصلك في لوحة واحدة" with the orders phone mockup (pre-flip capture — refresh pending)](docs/screenshots/hero-light.jpg)](docs/screenshots/hero-light.jpg) | [![Landing page in dark mode — the same hero band (pre-flip capture; the current dark mode is «Night Dispatch»: deep navy + luminous orange — refresh pending)](docs/screenshots/hero-dark.jpg)](docs/screenshots/hero-dark.jpg) |
 
+> ⚠️ The shots below were captured before the Phase-5 identity flip — a Playwright re-capture is pending a later task; the current brand is «Operational Daylight — Route & Node».
+>
 > More shots (storefront, checkout, dashboard) in the *Screenshots* section below — full captions and dimensions in [`docs/screenshots/README.md`](docs/screenshots/README.md).
 
 ---
@@ -33,7 +35,7 @@
 - **Audited order engine** — validated state machine (NEW → CONFIRMED → PREPARING → READY → OUT_FOR_DELIVERY → DELIVERED / CANCELLED / REJECTED), public order numbers (`SO-20260917-0042`), a full audit history, and an unguessable public tracking page (`/track/[token]`).
 - **Libyan-native payments** — Cash / COD / Madar / Libyana transfers, with manual store-side confirmation (no fake gateway success).
 - **WhatsApp-first** — structured order messages via `wa.me` deep links for customers and businesses.
-- **Owner dashboard** — today's stats, actionable alerts, orders with filters/search, and management for products, categories, customers, delivery, payments, and staff — fully Arabic RTL on the Madarek design system.
+- **Owner dashboard** — today's stats, actionable alerts, orders with filters/search, and management for products, categories, customers, delivery, payments, staff, and on-demand performance reports — fully Arabic RTL on the Route & Node identity (operational daylight: paper, navy ink, delivery orange, with the optional «Night Dispatch» dark mode).
 
 ---
 
@@ -44,7 +46,7 @@
 - 🚚 **Delivery zones** — per-zone fees + minimum order, enforced server-side at checkout (nothing from the client is trusted).
 - 💳 **Libya-native payments** — Cash / COD / Madar / Libyana transfers / manual confirmation — provider-agnostic architecture.
 - 💬 **WhatsApp-first** — structured order messages via `wa.me` deep links for customers and businesses.
-- 📊 **Dashboard** — today's stats, actionable alerts, orders with filters/search, products/categories/customers/delivery/payments/staff management.
+- 📊 **Dashboard** — today's stats, actionable alerts, orders with filters/search, products/categories/customers/delivery/payments/staff management, plus on-demand performance reports (Premium+).
 - 🔐 **Multi-tenant SaaS** — strict tenant isolation, role-based access (OWNER / ADMIN / STAFF), server-enforced permissions.
 
 ---
@@ -52,11 +54,11 @@
 ## 🧰 Tech Stack
 
 - **Next.js 16** (App Router) + React 19 + TypeScript
-- **Tailwind CSS 4** + shadcn/ui (Radix) — Madarek design system: night/gold dark + cream/copper light, both themes.
+- **Tailwind CSS 4** + shadcn/ui (Radix) — the Route & Node identity: light-first default (paper `#F7F7F4`, navy ink `#1B2A41`, delivery orange `#D14900`) + the «Night Dispatch» dark override (`#0D1626`/`#FF7A38`).
 - **Prisma ORM** — SQLite for local dev, PostgreSQL (Neon) in production.
 - **Custom session auth** — PBKDF2-SHA512 (600k iterations), hashed session tokens, httpOnly cookies.
 - **Money** — integer millimes everywhere (1 LYD = 1000 dirham), zero floating-point math.
-- **Self-hosted fonts** — IBM Plex Sans Arabic subsets (400–700, arabic + latin) under OFL — literal Madarek parity, no external requests.
+- **Self-hosted fonts** — Tajawal (400–800, arabic + latin) for text, Barlow Semi Condensed (600/700) for latin display, IBM Plex Mono for operational codes/numerals — under SIL OFL, no external requests.
 
 ---
 
@@ -84,6 +86,24 @@ bun run dev                   # http://localhost:3000
 bun run build                 # production build
 ```
 
+### 🧪 Browser battery (Playwright)
+
+```bash
+bun run build                    # once — the battery serves the production build
+bun run test:e2e:browser         # self webServer: db push ← seed ← next start on 3115
+```
+
+A dedicated scratch SQLite (`prisma/db/e2e.db`) is created and seeded with the
+demo store `/store/demo-store` (6 products, 2 zones, 3 payment methods — the
+same data as `/api/seed`) plus the OWNER merchant `owner@demo.smart-order.ly`
+(password `E2e-Oasis-2026`, overridable via
+`E2E_MERCHANT_EMAIL`/`E2E_MERCHANT_PASSWORD`) — dev data is never touched.
+Port 3115 on purpose (never collides with 3000 or the sibling agents');
+override with `E2E_PORT`. Coverage: the customer journey from store to
+tracking link, the six-station road with its destination terminus, merchant
+login with a real NEW→CONFIRMED transition, and a11y basics (focus-visible
+ring, 390px with zero horizontal overflow).
+
 ### Environment variables
 
 The canonical source is [`.env.example`](.env.example) — the table shows the required set:
@@ -106,9 +126,10 @@ The canonical source is [`.env.example`](.env.example) — the table shows the r
 | `bun run start` | Run the production build locally |
 | `bun run start:selfhost` | Run the standalone bundle (`NODE_ENV=production`) |
 | `bun run lint` | ESLint |
-| `bun run test:parity` | Madarek parity tests (colors / radius / motion / z / elevations + consumption gates) |
-| `bun run test:unit` | Dependency-free node:test unit suite for the Libyan money/phone seams (Eastern digits, ٫/، separators, +218/00218 prefixes, the 99 LYD wallet cap) + client-only date-display guard |
+| `bun run test:parity` | Design parity tests (the Route & Node daylight contract: colors / radius / motion / z / elevations + consumption gates) |
+| `bun run test:unit` | Dependency-free node:test unit suite for the Libyan money/phone seams (Eastern digits, ٫/، separators, +218/00218 prefixes, the wider phone contract: mobile `09` at 9–10 digits + landline `0[1-9]` at 10, the 99 LYD wallet cap, Tripoli day boundaries) + client-only date-display guard |
 | `bun run test:e2e` | API E2E suite: auth, tenant isolation, order lifecycle, money re-pricing, rate limits — runs against any base URL |
+| `bun run test:e2e:browser` | Playwright/Chromium browser battery (2 workers, ar-LY): the full customer journey → tracking → merchant dashboard with a real status transition — boots its own server on a dedicated scratch SQLite (`db/e2e.db`, never touches dev data) via the seed + demo merchant, on port 3115. Requires a prior `bun run build` |
 | `bun run db:push` | Push the Prisma schema to the database (`--accept-data-loss`) |
 | `bun run db:generate` | Generate the Prisma client |
 
@@ -120,7 +141,7 @@ The canonical source is [`.env.example`](.env.example) — the table shows the r
 
 ```bash
 bun run dev                                  # start the dev server
-bun run test:parity                          # Madarek parity
+bun run test:parity                          # Design parity
 node tests/e2e/api-e2e.js https://order.smart-link.ly   # E2E against any deployment
 ```
 
@@ -152,8 +173,10 @@ src/
     page.tsx                  # SaaS landing (hero + sections + pricing + FAQ)
     login/ register/          # auth (multi-step register wizard)
     dashboard/                # business app: overview, orders, products, categories,
-                              #   customers, delivery, payments, staff, settings, onboarding
+                              #   customers, delivery, payments, staff, settings,
+                              #   onboarding, reports
     store/[slug]/             # public storefront + checkout
+    track/                    # public order lookup (order number + phone)
     track/[token]/            # public order tracking
     api/                      # REST endpoints (auth, business CRUD, public order path, media)
   components/  dashboard/ storefront/ shared/ ui/
@@ -178,13 +201,13 @@ tests/         unit/ (node:test) + parity.mjs + e2e/api-e2e.js
 
 ---
 
-## 🛰️ Part of the Madarek Ecosystem — جزء من منظومة مدارك
+## 🛰️ Part of the Smart Ecosystem — جزء من منظومة سمارت
 
-> One design system across all projects · the Madarek identity: night/gold `#070B16`/`#E9B44C` dark — cream/copper `#FBFAF9`/`#B57438` light — IBM Plex Sans Arabic
+> Since Phase 5 the family identities split: every product carries its own visual contract — Smart Order carries «Operational Daylight: Route & Node» (paper `#F7F7F4` / navy ink `#1B2A41` / delivery orange `#D14900`; Tajawal + Barlow Semi Condensed + IBM Plex Mono). Madarek remains the family's historical design-system reference — not a live identity in this repo.
 
 | Project | Role | GitHub | Live |
 |---|---|---|---|
-| 🎓 **Madarek / مدارك** | Smart-learning platform for University of Zawia — the design-system reference | [github.com/ahmadmedo1012/madarek](https://github.com/ahmadmedo1012/madarek) | [madarek.onrender.com](https://madarek.onrender.com) |
+| 🎓 **Madarek / مدارك** | Smart-learning platform for University of Zawia — the historical design-system reference | [github.com/ahmadmedo1012/madarek](https://github.com/ahmadmedo1012/madarek) | [madarek.onrender.com](https://madarek.onrender.com) |
 | 🔗 **Smart-Link / سمارت لينك** | Digital umbrella for Libyan businesses | [github.com/ahmadmedo1012/Smart-Link](https://github.com/ahmadmedo1012/Smart-Link) | [smart-link.ly](https://smart-link.ly) |
 | 🍽️ **Smart Menu / سمارت منيو** | Digital menu & WhatsApp ordering for restaurants | [github.com/ahmadmedo1012/Smart-Menu](https://github.com/ahmadmedo1012/Smart-Menu) | [menu.smart-link.ly](https://menu.smart-link.ly) |
 | 🤖 **SmartBot / سمارت بوت** | Messenger bot & automation for Facebook pages | [github.com/ahmadmedo1012/SmartBot](https://github.com/ahmadmedo1012/SmartBot) | [bot.smart-link.ly](https://bot.smart-link.ly) |
@@ -195,4 +218,4 @@ tests/         unit/ (node:test) + parity.mjs + e2e/api-e2e.js
 Proprietary software — all rights reserved © 2026 Ahmad Medo (`ahmadmedo1012`). The full legal text is in [`LICENSE`](LICENSE).
 
 ### Fonts
-The primary typeface **IBM Plex Sans Arabic** (400–700, arabic + latin subsets) alongside IBM Plex Mono — self-hosted with zero external requests, both under the **SIL Open Font License 1.1**.
+The self-hosted typefaces: **Tajawal** (400–800, arabic + latin) + **Barlow Semi Condensed** (600/700, latin) + **IBM Plex Mono** — zero external requests, all under the **SIL Open Font License 1.1**.
