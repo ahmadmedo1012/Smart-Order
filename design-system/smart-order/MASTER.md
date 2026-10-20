@@ -123,7 +123,11 @@ breaks joined script; mono tracking survives only on pure-Latin runs);
 
 **Fonts are self-hosted** (`public/fonts`, loaded via `fonts.css` BEFORE
 the sheet; `--font-cairo` is the documented legacy shim NAME for
-"IBM Plex Sans Arabic"). No Google Fonts imports, no new families.
+"IBM Plex Sans Arabic"). No Google Fonts imports, no new families —
+except the landing display pair (W7-G doc-truth): `Archivo` + `Noto Kufi
+Arabic` ride `next/font/google` in `layout.tsx`, which self-hosts the pair
+at BUILD time (zero runtime Google fetch). That pair is the one
+sanctioned exception; no other families.
 
 ---
 

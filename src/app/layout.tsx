@@ -106,10 +106,15 @@ export default function RootLayout({
             NIGHT theme is the default (the United-Carriers deep-space hero
             owns the arrival); the daylight `.light` class is applied ONLY
             when explicitly stored. Mirrors the provider
-            (next-themes defaultTheme="dark") — one resolution path. */}
+            (next-themes defaultTheme="dark") — one resolution path.
+            W7-G (fix 20): the boot also writes the theme-color meta
+            content (same pattern as the class boot) — the viewport pair is
+            prefers-color-scheme-bound, so OS-light visitors booted the
+            dark app under a pale browser bar until hydration. ThemeColorSync
+            keeps them honest afterwards. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('smart-order-theme');if(t==='light'){document.documentElement.classList.add('light')}else{document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('smart-order-theme');if(t==='light'){document.documentElement.classList.add('light')}else{document.documentElement.classList.add('dark')}var c=t==='light'?'#F7F7F4':'#0D1626';var ms=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<ms.length;i++){ms[i].setAttribute('content',c)}}catch(e){document.documentElement.classList.add('dark')}})();`,
           }}
         />
         {/* r152: preload the two FIRST-PAINT arabic subsets (Tajawal 400 +
