@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { formatLyd } from "@/lib/money";
 import { formatArabicDateTime, formatStationStampAr, timeAgoAr } from "@/lib/arabic";
+import { countedArabicPhrase } from "@/lib/arabic-plural";
 import { toE164 } from "@/lib/phone";
 import { waLink, buildStatusUpdateMessage } from "@/lib/whatsapp";
 import {
@@ -106,47 +107,61 @@ function statusClaim(status: OrderStatus, fulfillment: "DELIVERY" | "PICKUP"): s
   }
 }
 
-/* P16-4c: telemetry-chip formatters — counted Arabic plurals in the
- * lib/arabic sincePhrase shapes (1 = واحد/واحدة, 2 = dual, 3-10 =
- * plural, 11+ = singular accusative), local to the chip contexts. */
+/* P16-4c: telemetry-chip formatters. W7-H (repetition sweep): the
+ * three LOCAL hand-rolled counted-noun ladders (صنف/محطة + the
+ * دقيقة/ساعة/يوم duration family — the «N عنصر» disease's last
+ * survivors) now ride the ONE fleet engine, lib/arabic-plural
+ * countedArabicPhrase (CLDR ar states — same shapes the W7-G wave
+ * gave the storefront/cart/checkout). Outputs are byte-identical on
+ * every reachable value (counts are ≥1; durations floor ≥1); the
+ * function NAMES stay because the parity suite pins the call sites
+ * (parity.mjs itemsCountAr(order.items.length) / elapsedAr(). */
 function itemsCountAr(n: number): string {
-  if (n === 1) return "صنف واحد";
-  if (n === 2) return "صنفان";
-  if (n >= 3 && n <= 10) return `${n} أصناف`;
-  return `${n} صنفاً`;
+  return countedArabicPhrase(n, "صنف", {
+    one: "صنف واحد",
+    two: "صنفان",
+    few: "أصناف",
+    many: "صنفاً",
+  });
 }
 
-/* P21-D (UC numbered-fact register): the route eyebrow's station count —
- * counted Arabic plurals for محطة, same grammar family as itemsCountAr.
+/* P21-D (UC numbered-fact register): the route eyebrow's station count.
  * The value is REAL: flow.length stations (PICKUP filters one out). */
 function stationsCountAr(n: number): string {
-  if (n === 1) return "محطة واحدة";
-  if (n === 2) return "محطتان";
-  if (n >= 3 && n <= 10) return `${n} محطات`;
-  return `${n} محطة`;
+  return countedArabicPhrase(n, "محطة", {
+    one: "محطة واحدة",
+    two: "محطتان",
+    few: "محطات",
+    many: "محطة",
+  });
 }
 
 function elapsedAr(ms: number): string {
   const min = Math.floor(ms / 60_000);
   if (min < 1) return "أقل من دقيقة";
   if (min < 60) {
-    if (min === 1) return "دقيقة واحدة";
-    if (min === 2) return "دقيقتين";
-    if (min <= 10) return `${min} دقائق`;
-    return `${min} دقيقة`;
+    return countedArabicPhrase(min, "دقيقة", {
+      one: "دقيقة واحدة",
+      two: "دقيقتين",
+      few: "دقائق",
+      many: "دقيقة",
+    });
   }
   const hr = Math.floor(min / 60);
   if (hr < 24) {
-    if (hr === 1) return "ساعة واحدة";
-    if (hr === 2) return "ساعتين";
-    if (hr <= 10) return `${hr} ساعات`;
-    return `${hr} ساعة`;
+    return countedArabicPhrase(hr, "ساعة", {
+      one: "ساعة واحدة",
+      two: "ساعتين",
+      few: "ساعات",
+      many: "ساعة",
+    });
   }
-  const day = Math.floor(hr / 24);
-  if (day === 1) return "يوم واحد";
-  if (day === 2) return "يومين";
-  if (day <= 10) return `${day} أيام`;
-  return `${day} يوماً`;
+  return countedArabicPhrase(Math.floor(hr / 24), "يوم", {
+    one: "يوم واحد",
+    two: "يومين",
+    few: "أيام",
+    many: "يوماً",
+  });
 }
 
 /* P16-4c: the route-object geometry — deterministic (SSR-stable, zero
