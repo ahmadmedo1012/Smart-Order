@@ -18,9 +18,9 @@
 
 | Light ☀️ | Dark 🌙 |
 |:---:|:---:|
-| [![Landing page in light mode — headline "متجر رقمي لمتجرك — الطلبات تصلك في لوحة واحدة" with the orders phone mockup (pre-flip capture — refresh pending)](docs/screenshots/hero-light.jpg)](docs/screenshots/hero-light.jpg) | [![Landing page in dark mode — the same hero band (pre-flip capture; the current dark mode is «Night Dispatch»: deep navy + luminous orange — refresh pending)](docs/screenshots/hero-dark.jpg)](docs/screenshots/hero-dark.jpg) |
+| [![Landing page in light mode (operational daylight) — the headline «الطريق مفتوح: متجرك يستقبِل ويوصّل» over the dotted-route globe with orange city arcs bleeding off the top-right corner, the «ابدأ مجاناً» and «اطلب من متجر تجريبي» CTAs, and the live-figures board across the bottom of the frame](docs/screenshots/hero-light.jpg)](docs/screenshots/hero-light.jpg) | [![Landing page in the «Night Dispatch» dark mode — the same frame: the dotted globe and its luminous orange route arcs over a deep-night ground, with both CTAs and the live-figures board under the headline](docs/screenshots/hero-dark.jpg)](docs/screenshots/hero-dark.jpg) |
 
-> ⚠️ The shots below were captured before the Phase-5 identity flip — a Playwright re-capture is pending a later task; the current brand is «Operational Daylight — Route & Node».
+> Both shots are taken from the current production build of the Route & Node identity — re-captured in wave W7-I-C, and every figure on screen is real data from the seeded local database.
 >
 > More shots (storefront, checkout, dashboard) in the *Screenshots* section below — full captions and dimensions in [`docs/screenshots/README.md`](docs/screenshots/README.md).
 
@@ -191,11 +191,11 @@ tests/         unit/ (node:test) + parity.mjs + e2e/api-e2e.js
 
 | Public storefront "مخبز الواحة" (demo) | Checkout |
 |:---:|:---:|
-| [![Public storefront — search, category filters, and a product grid with images and prices](docs/screenshots/storefront.jpg)](docs/screenshots/storefront.jpg) | [![Checkout page — delivery zones, local payment methods, and the cart summary](docs/screenshots/checkout.jpg)](docs/screenshots/checkout.jpg) |
+| [![Public storefront of the «مخبز الواحة» demo bakery — instant search, category filter chips, and a product grid with real photos and LYD prices](docs/screenshots/storefront.jpg)](docs/screenshots/storefront.jpg) | [![Checkout page «طلبك على بعد خطوة من الإرسال» — delivery zones with fees and minimums, the three Libyan payment methods, and the cart summary](docs/screenshots/checkout.jpg)](docs/screenshots/checkout.jpg) |
 
 | Owner dashboard |
 |:---:|
-| [![Owner dashboard — today's stats, alerts, recent orders with status badges, and the sales chart](docs/screenshots/dashboard.jpg)](docs/screenshots/dashboard.jpg) |
+| [![Owner dashboard «عمليات اليوم» — two actionable alerts, today's KPIs (8 orders · 101 د.ل revenue · 50.500 د.ل average), the last-7-days revenue chart, and the latest orders with SO- numbers and square status stamps](docs/screenshots/dashboard.jpg)](docs/screenshots/dashboard.jpg) |
 
 > Full captions and dimensions in [`docs/screenshots/README.md`](docs/screenshots/README.md).
 
