@@ -261,9 +261,13 @@
     background var(--ln-t-base) var(--ln-ease-soft),
     border-color var(--ln-t-base) var(--ln-ease-soft);
 }
-/* spec §4.2.1: solid ink-2 @ 92% + hairline — no glass blur anywhere */
+/* spec §4.2.1: solid ink-2 @ 92% + hairline — no glass blur anywhere.
+   W7-G (fix 1): the value was the stale pre-r152 night literal — navy
+   glass under the navy nav links ≈1.05:1 in the daylight stage. Re-pointed
+   to the daylight ink-2 #F2F1EC at the same 92% (the mirror of the night
+   twin at the §16 scrolled rail). */
 .landing .landing-header.scrolled {
-  background: rgb(28 32 50 / 0.92);
+  background: rgb(242 241 236 / 0.92);
   border-block-end-color: var(--ln-line);
 }
 
@@ -1693,11 +1697,14 @@
 .landing .ln-keep-word { color: var(--ln-lime); }
 /* the sub rides cream-dim on the ink stage (was text-muted-foreground) */
 .landing .ln-keep-sub { color: var(--ln-cream-dim); }
-/* trust pill — hairline lime edge over a quiet ink-2 fill */
+/* trust pill — hairline lime edge over quiet paper glass.
+   W7-G (fix 2): was the stale night recipe (dark glass + cream-dim)
+   ≈1.9:1 in the daylight stage. Now the paper-glass family at the night
+   twin's 55% recipe (§16 trust-pill twin) with full-ink text. */
 .landing .ln-keep-pill {
   border: 1px solid rgb(209 73 0 / 0.28);
-  background: rgb(28 32 50 / 0.55);
-  color: var(--ln-cream-dim);
+  background: rgb(247 247 244 / 0.55);
+  color: var(--ln-cream);
 }
 
 /* r128 F4b — small glue rules for the adapted slots (canonical grammar:

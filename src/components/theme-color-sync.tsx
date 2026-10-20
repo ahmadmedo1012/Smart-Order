@@ -5,10 +5,12 @@ import { useTheme } from "next-themes";
 /* r131 (F1 — A10 F2): the browser/status bar followed the OS theme, not
  * the user's manual toggle — the <meta name="theme-color"> pair in
  * layout.tsx is media=prefers-color-scheme bound, while this app is
- * light-default (r152 Phase 5 daylight flip) with a binary in-app
+ * dark-default (P12-3d — the night-dispatch hero owns the arrival; the
+ * r152 daylight flip was re-flipped, `.light` only when explicitly
+ * stored) with a binary in-app
  * switch (no system option since the r130 enableSystem removal). A
- * first-visit user on an OS-dark device gets a daylight page under a
- * black browser bar (and the installed WebAPK status bar drifted the
+ * first-visit user on an OS-light device gets the night page under a
+ * pale browser bar (and the installed WebAPK status bar drifted the
  * same way).
  *
  * Ported from smart-link (src/components/theme-color-sync.tsx,

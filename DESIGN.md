@@ -16,9 +16,13 @@ courier vests, and shipping stamps. Phase 5 deliberately breaks the family
 Madarek night monoculture: this product's contract is its own (Smart-Link
 keeps the family night; Smart-Menu goes warm culinary; SmartBot goes petrol).
 
-- **LIGHT-first.** `:root` is the light theme (`color-scheme: light`);
-  `.dark` («إرساليات الليل» — night dispatch) is the explicit opt-in
-  (next-themes `defaultTheme="light"` + the pre-paint boot script).
+- **DARK-default.** `:root` carries the light `color-scheme`, but the app
+  boots the NIGHT dispatch stage («إرساليات الليل») — next-themes
+  `defaultTheme="dark"` + the pre-paint boot script paint `.dark` unless
+  `light` is explicitly stored (OS preference ignored — one resolution
+  path: boot script == provider). The daylight `.light` operations stage
+  is the opt-in via the toggle. (W7-G doc-truth: the earlier
+  "LIGHT-first" claim predated the P12-3d re-flip; code is the truth.)
 - Ground paper `#F7F7F4` · raised white `#FFFFFF` · soft `#EFEFEA` ·
   hairline `#E2E2DC` · ink NAVY `#1B2A41` · secondary `#4E5A6E` (6.4:1) ·
   muted `#6E7684`.
@@ -152,9 +156,18 @@ opacity (pointer-events none). Sticky footer: `min-h-dvh flex-col` +
 Persuade surfaces (landing, auth) may carry the full orange identity
 (gradients, glow, showcase). Operate surfaces (dashboard) get a thin header
 accent AT MOST — never port marketing ambience into CRUD density. The
-landing is a FIXED daylight world — no theme toggle on it (the toggle
-appears on store/dashboard/auth surfaces only). Product surfaces
-(store/checkout/dashboard/tracking) are full dual-lightness.
+landing is full dual-lightness WITH its own rail toggle (LandingHeader —
+the family ThemeToggle; W7-G doc-truth: the "fixed daylight, no toggle"
+claim was stale). Product surfaces (store/checkout/dashboard/tracking)
+are full dual-lightness.
+
+**Documented ambience exception (I-12 carve-out):** the dashboard's DARK
+sidebar carries a deliberate night-shell paint — the سماء aurora gradient
+(gold + indigo + sky ladder) with a constellation dot layer
+(`shell.tsx`: dark-only, paint-only, ≤0.22α, never competing with labels);
+the light sidebar stays the flat `--sidebar` cream. The ONE sanctioned
+marketing-ambience exception inside an operate surface — keep it
+dark-scoped and paint-only.
 
 ## SEO/metadata conventions
 
