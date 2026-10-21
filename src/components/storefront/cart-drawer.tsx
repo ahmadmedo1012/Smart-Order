@@ -103,7 +103,15 @@ export function CartDrawer({
                     )}
                   </div>
                   <div className="text-end shrink-0">
-                    <div className="text-sm font-bold tabular-nums">{formatLyd(item.unitPrice * item.quantity)}</div>
+                    {/* W21-E (two-voice): the line total rides the mono fact
+                        voice (the checkout summary + the order-detail
+                        receipt already speak it) and the line gains the
+                        unit × qty breakdown — the order-detail receipt
+                        line's twin (mono, tabular, muted secondary). */}
+                    <div className="text-sm font-bold font-mono tabular-nums">{formatLyd(item.unitPrice * item.quantity)}</div>
+                    <div className="text-[11px] font-mono tabular-nums text-muted-foreground">
+                      {formatLyd(item.unitPrice)} × {item.quantity}
+                    </div>
                   </div>
                 </div>
                 {/* r131-F1b (A7 #4 / A11 SO-9): qty steppers + trash ride the
@@ -139,27 +147,33 @@ export function CartDrawer({
               </div>
             ))}
 
-            {/* note editor per item (compact) */}
-            {items.some((i) => !i.note) && (
-              <details className="text-xs text-muted-foreground">
-                <summary className="inline-flex min-h-11 cursor-pointer select-none items-center hover:text-foreground">إضافة ملاحظة لأحد العناصر</summary>
-                <div className="mt-2 space-y-1.5">
-                  {items.filter((i) => !i.note).map((i) => (
-                    <input
-                      key={i.key}
-                      /* r140 (P3-7): الplaceholder وحده ليس تسمية (WCAG
-                         3.3.2) — يختفي عند الكتابة ولا يوصل لقارئ الشاشة
-                         إلا عرضًا؛ aria-label يسمّي الحقل بعنصره. */
-                      aria-label={`ملاحظة: ${i.productName}`}
-                      placeholder={`ملاحظة: ${i.productName}`}
-                      maxLength={200}
-                      onBlur={(e) => updateNote(i.key, e.target.value.trim())}
-                      className="w-full h-11 rounded-md border border-input bg-background px-4 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"
-                    />
-                  ))}
-                </div>
-              </details>
-            )}
+            {/* note editor per item (compact) — W21-E: the editor lists
+                EVERY item now, pre-filled (defaultValue) with the saved
+                note. Before, it gated on `items.some((i) => !i.note)` and
+                rendered display-only chips for noted items, so a typo'd
+                note was unfixable short of removing/re-adding the item.
+                Uncontrolled inputs keep their text on the store update and
+                save on blur through the same updateNote path (the item
+                card's StickyNote chip re-renders live). */}
+            <details className="text-xs text-muted-foreground">
+              <summary className="inline-flex min-h-11 cursor-pointer select-none items-center hover:text-foreground">ملاحظات العناصر</summary>
+              <div className="mt-2 space-y-1.5">
+                {items.map((i) => (
+                  <input
+                    key={i.key}
+                    /* r140 (P3-7): الplaceholder وحده ليس تسمية (WCAG
+                       3.3.2) — يختفي عند الكتابة ولا يوصل لقارئ الشاشة
+                       إلا عرضًا؛ aria-label يسمّي الحقل بعنصره. */
+                    aria-label={`ملاحظة: ${i.productName}`}
+                    placeholder={`ملاحظة: ${i.productName}`}
+                    defaultValue={i.note}
+                    maxLength={200}
+                    onBlur={(e) => updateNote(i.key, e.target.value.trim())}
+                    className="w-full h-11 rounded-md border border-input bg-background px-4 text-base transition-[color,box-shadow,border-color] duration-(--t-fast) outline-none placeholder:text-placeholder-text focus-visible:border-primary focus-visible:shadow-(--state-input-focus-halo)"
+                  />
+                ))}
+              </div>
+            </details>
           </div>
 
           {/* Summary + checkout */}
