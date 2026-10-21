@@ -8,9 +8,6 @@
 > The earlier generated draft (orange #EA580C + trust-blue #2563EB +
 > "vibrant & block-based") was a contradiction of the shipped product and
 > is retired.
->
-> **When building a page:** check `design-system/smart-order/pages/*.md`
-> first; if a page file exists it overrides this master file.
 
 ---
 
