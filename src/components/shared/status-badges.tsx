@@ -20,6 +20,16 @@ import { BadgeCheck } from "lucide-react";
  * rides the elevation ladder (shadow-sm = --elev-1) for the same reason:
  * the raw 6%-black literal it replaced had no night twin and vanished on
  * the night-dispatch card (P10-1b).
+ *
+ * W21-E (false-affordance kill): the hover -translate-y-px transition-lift
+ * retired from all three stamps. Audit of every render site: 8 are
+ * display-only (landing dashboard mock ×2, orders desktop table ×2,
+ * order-detail header ×4) where a lifting badge reads as a pressable
+ * control that isn't there; the 4 link-nested sites (dashboard recent-
+ * orders feed ×2, orders mobile card ×1, customer history ×1) ride the
+ * clickable ancestor's OWN hover affordance (row/card bg wash) — the
+ * badge-level lift added a second, badge-shaped affordance that never
+ * existed. Stamps state facts; they never move.
  */
 export const ORDER_STATUS_CHIP: Record<OrderStatus, string> = {
   NEW: "border-(--c-copper-ink)/35 bg-(--c-copper-bg) text-(--c-copper-deep)",
@@ -44,7 +54,7 @@ export function OrderStatusBadge({
   return (
     <Badge
       className={cn(
-        "h-auto gap-1.5 px-2.5 py-1 text-[11px] font-semibold shadow-sm transition-transform duration-(--t-fast) ease-smooth hover:-translate-y-px",
+        "h-auto gap-1.5 px-2.5 py-1 text-[11px] font-semibold shadow-sm",
         ORDER_STATUS_CHIP[status],
         className
       )}
@@ -65,7 +75,7 @@ export function PaymentStatusBadge({ status, className }: { status: PaymentStatu
   return (
     <Badge
       className={cn(
-        "h-auto px-2.5 py-1 text-[11px] font-semibold shadow-sm transition-transform duration-(--t-fast) ease-smooth hover:-translate-y-px",
+        "h-auto px-2.5 py-1 text-[11px] font-semibold shadow-sm",
         PAYMENT_CHIP[status],
         className
       )}
@@ -97,7 +107,7 @@ export function CustomerConfirmedBadge({
     <Badge
       title={title ?? (confirmedAt ? "مؤكد من العميل" : undefined)}
       className={cn(
-        "h-auto gap-1.5 px-2.5 py-1 text-[11px] font-semibold shadow-sm transition-transform duration-(--t-fast) ease-smooth hover:-translate-y-px",
+        "h-auto gap-1.5 px-2.5 py-1 text-[11px] font-semibold shadow-sm",
         "border-(--c-mint-ink)/35 bg-(--c-mint-bg) text-(--c-mint-deep)",
         className
       )}
