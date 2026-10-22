@@ -28,9 +28,74 @@ import { FieldError } from "@/components/dashboard/form-field";
  * empty state stays HONEST: a miss renders exactly «لا يوجد طلب بهذه
  * البيانات» + the real recovery copy — never a demo order, never a
  * fake timeline.
+ *
+ * W21-E: the door remembers its own successes — the last five FOUND
+ * lookups ride back as a quiet «طلبات تابعتها» row (localStorage on
+ * the customer's device only, mount-gated so SSR paints none — the
+ * clock-text hydration law; the phone chip MASKS the number for
+ * shoulder-surfers). A chip replays the exact payload that worked; a
+ * stale one meets the same honest miss as a manual lookup.
  */
 
 const ORDER_NUMBER_RE = /^SO-\d{4}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])-\d{4,6}$/;
+
+/* W21-E: «طلبات تابعتها» — the last five lookups that FOUND an order,
+ * remembered on the customer's own device (same storage family as the
+ * cart store's "smart-order-cart"). The RAW phone is what gets re-sent
+ * (byte-identical replay of the payload that worked); the chip masks it
+ * for display. Storage reads are defensive: anything unparsable or
+ * foreign shapes up as "no recents", never as a crash. */
+const RECENTS_STORAGE_KEY = "smart-order-track-recents";
+const RECENTS_CAP = 5;
+
+interface TrackRecent {
+  orderNumber: string;
+  phone: string;
+}
+
+function readRecents(): TrackRecent[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(RECENTS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (e): e is TrackRecent =>
+          !!e &&
+          typeof e === "object" &&
+          typeof (e as TrackRecent).orderNumber === "string" &&
+          typeof (e as TrackRecent).phone === "string",
+      )
+      .slice(0, RECENTS_CAP);
+  } catch {
+    return [];
+  }
+}
+
+function rememberRecent(entry: TrackRecent): void {
+  try {
+    const next = [
+      entry,
+      ...readRecents().filter(
+        (r) => !(r.orderNumber === entry.orderNumber && r.phone === entry.phone),
+      ),
+    ].slice(0, RECENTS_CAP);
+    window.localStorage.setItem(RECENTS_STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    /* private mode / storage quota — the lookup itself already
+       succeeded; remembering is best-effort, never blocking. */
+  }
+}
+
+/** Display-only mask: keep the operator prefix (091x) + the last two
+ * digits, mask the middle run — enough to tell two orders apart, not
+ * enough to read over a shoulder. */
+function maskPhone(phone: string): string {
+  if (phone.length <= 6) return phone;
+  return `${phone.slice(0, 4)}${"•".repeat(phone.length - 6)}${phone.slice(-2)}`;
+}
 
 export function TrackLookup() {
   const router = useRouter();
@@ -42,6 +107,14 @@ export function TrackLookup() {
   const [miss, setMiss] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
   const missRef = React.useRef<HTMLDivElement>(null);
+  /* W21-E: recents ride the mount-gated idiom — SSR + first paint show
+     none, the effect fills them after mount (zero hydration drift, the
+     same law as clock text). */
+  const [recents, setRecents] = React.useState<TrackRecent[]>([]);
+
+  React.useEffect(() => {
+    setRecents(readRecents());
+  }, []);
 
   function validate(): boolean {
     const errs: { orderNumber?: string; phone?: string } = {};
@@ -54,16 +127,18 @@ export function TrackLookup() {
     return Object.keys(errs).length === 0;
   }
 
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  /* The one POST both doors share — the form submit and a recents chip
+     replay the exact payload that worked. On hit, the token route owns
+     everything; on miss, the honest stamp (role=alert) speaks. */
+  async function lookup(num: string, tel: string) {
     setMiss(null);
-    if (!validate()) return;
     setSubmitting(true);
     try {
       const r = await api.post<{ token: string }>("/api/public/track", {
-        orderNumber: orderNumber.trim().toUpperCase(),
-        phone: phone.trim(),
+        orderNumber: num,
+        phone: tel,
       });
+      rememberRecent({ orderNumber: num, phone: tel });
       /* found → the token route owns everything from here (order data,
          station road, polls). replace(): the lookup form never enters
          Back history between the customer and their order. */
@@ -75,6 +150,22 @@ export function TrackLookup() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setMiss(null);
+    if (!validate()) return;
+    await lookup(orderNumber.trim().toUpperCase(), phone.trim());
+  }
+
+  function clearRecents() {
+    try {
+      window.localStorage.removeItem(RECENTS_STORAGE_KEY);
+    } catch {
+      /* noop — an unwritable store reads as empty next mount anyway */
+    }
+    setRecents([]);
   }
 
   return (
@@ -203,6 +294,46 @@ export function TrackLookup() {
             </div>
           )}
         </section>
+
+        {/* W21-E: «طلبات تابعتها» — the last five FOUND lookups, this
+            device's localStorage only. Chips replay the exact payload
+            that worked; a stale chip meets the same honest miss block
+            above (never a fabricated order). Order number + masked
+            phone = mono facts (dir=ltr); the row rides the quiet stamp
+            grammar (rounded-sm, muted ground) + the 44px touch floor. */}
+        {recents.length > 0 && (
+          <section className="rounded-xl border border-border bg-card p-5 lg:p-7">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs font-medium text-muted-foreground">طلبات تابعتها</h2>
+              <button
+                type="button"
+                onClick={clearRecents}
+                className="inline-flex min-h-11 items-center text-xs text-muted-foreground transition-colors duration-(--t-fast) hover:text-foreground"
+              >
+                مسح الكل
+              </button>
+            </div>
+            <div className="mt-1 flex flex-wrap gap-2">
+              {recents.map((r) => (
+                <button
+                  key={`${r.orderNumber}|${r.phone}`}
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => lookup(r.orderNumber, r.phone)}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-border bg-muted/40 px-3 py-2 text-xs transition-colors duration-(--t-fast) hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <span dir="ltr" className="font-mono tabular-nums font-semibold">
+                    {r.orderNumber}
+                  </span>
+                  <span aria-hidden="true" className="text-muted-foreground">·</span>
+                  <span dir="ltr" className="font-mono tabular-nums text-muted-foreground">
+                    {maskPhone(r.phone)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <p className="px-1 text-xs leading-relaxed text-muted-foreground">
           وصلتك رسالة واتساب برابط التتبّع؟ افتح الرابط نفسه مباشرة — لا
