@@ -2112,47 +2112,52 @@
   flex-wrap: wrap;
   gap: var(--sp-3);
 }
+/* W21 Wave 6 — the balanced TRIPTYCH: the phone owns the center column,
+   the QR plate and the customer cart own their own side columns. The
+   old absolute-positioned plates floated OVER the screen (obscuring the
+   products they were selling) — the grid placement makes overlap
+   structurally impossible at every breakpoint. */
 .landing .ln-store-scene {
-  position: relative;
   display: grid;
-  place-items: center;
-  max-inline-size: 560px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: clamp(20px, 3.4vw, 44px);
+  max-inline-size: 1040px;
   margin-inline: auto;
   padding-block: var(--sp-6);
 }
 .landing .ln-store-phone {
   position: relative;
   z-index: 1;
-  inline-size: min(300px, 78vw);
+  grid-area: 1 / 2;
+  inline-size: min(352px, 86vw);
 }
+/* the QR plate — beside the phone, toward the reading start, lifted to
+   the upper third (scan → the store opens: the reading order) */
 .landing .ln-store-qr {
-  position: absolute;
-  inset-block-start: 4%;
-  inset-inline-start: 0;
-  inline-size: min(150px, 36vw);
-  z-index: 2;
+  grid-area: 1 / 1;
+  justify-self: end;
+  align-self: start;
+  margin-block-start: clamp(14px, 5vh, 56px);
+  inline-size: min(196px, 100%);
 }
+/* the cart card — beside the phone on the far side, settled to the
+   lower third (the order being built as you scroll on) */
 .landing .ln-store-cart {
-  position: absolute;
-  inset-block-end: 6%;
-  inset-inline-end: 0;
-  inline-size: min(230px, 52vw);
-  z-index: 2;
-}
-.landing .ln-store-wa {
-  position: absolute;
-  inset-block-end: 0;
-  inset-inline-start: 4%;
-  z-index: 3;
+  grid-area: 1 / 3;
+  justify-self: start;
+  align-self: end;
+  margin-block-end: clamp(14px, 5vh, 56px);
+  inline-size: min(268px, 100%);
 }
 .landing .ln-store-qr-frame {
-  inline-size: 84px;
-  block-size: 84px;
+  inline-size: 104px;
+  block-size: 104px;
   margin-inline: auto;
   color: var(--ln-ink);
   background: var(--ln-cream);
-  border-radius: var(--r-lg);
-  padding: 8px;
+  border-radius: 2px;
+  padding: 10px;
 }
 
 /* ── 15f · لوحة التاجر — the live state-machine console ────────────── */
@@ -2561,15 +2566,50 @@
   .landing .ln-stations-grid { grid-template-columns: 1fr; }
   .landing .ln-dash-grid { grid-template-columns: 1fr; }
   .landing .ln-pay-facts { grid-template-columns: 1fr; }
-  .landing .ln-store-qr { inline-size: 120px; }
-  .landing .ln-store-cart { inline-size: 200px; }
+  /* W21 Wave 6 — the triptych folds: the phone spans the full row, the
+     QR plate and the cart card pair up beneath it (hugging the center),
+     each still in its own cell — no overlap by construction. */
+  .landing .ln-store-scene {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    row-gap: var(--sp-6);
+    justify-items: center;
+  }
+  .landing .ln-store-phone { grid-area: 1 / 1 / 2 / -1; }
+  .landing .ln-store-qr {
+    grid-area: 2 / 1;
+    justify-self: end;
+    align-self: auto;
+    margin-block-start: 0;
+  }
+  .landing .ln-store-cart {
+    grid-area: 2 / 2;
+    justify-self: start;
+    align-self: auto;
+    margin-block-end: 0;
+  }
 }
 @media (max-width: 640px) {
   .landing .ln-station-node { min-block-size: 48px; padding: 8px 11px; }
   .landing .ln-station-sign { inline-size: 32px; block-size: 32px; }
   .landing .ln-stations-panel-inner { padding: var(--sp-4); }
-  .landing .ln-store-cart { inline-size: 46vw; inset-block-end: 0; }
-  .landing .ln-store-qr { inset-block-start: 0; }
+  /* W21 Wave 6 — the single-column road at 390: phone, QR plate, cart
+     card stack in the flow (auto placement), centered, zero overlap. */
+  .landing .ln-store-scene {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--sp-5);
+    justify-items: center;
+  }
+  .landing .ln-store-phone { grid-area: auto; }
+  .landing .ln-store-qr {
+    grid-area: auto;
+    justify-self: center;
+    inline-size: min(232px, 100%);
+  }
+  .landing .ln-store-cart {
+    grid-area: auto;
+    justify-self: center;
+    inline-size: min(320px, 100%);
+  }
   .landing .ln-dash-roles { padding: var(--sp-4); }
   .landing .ln-roadmark-inner { gap: var(--sp-4); }
   /* r143: أدلة المتجر تُكتب سطرًا لا عمودًا — على 390/360 كان inline-flex
@@ -2844,6 +2884,13 @@ html.dark .landing .ln-dash-roles { background: rgba(21, 34, 56, 0.78); }
   --globe-dot: #1B2A41;                 /* navy ink dots on paper */
   --globe-arc: #C24E00;                 /* deep route orange on paper */
   --globe-glow: rgba(62, 92, 118, 0.16); /* steel breath under the globe */
+  /* P21-W6: the canvas name-chip font (hover/selection labels) — the
+     self-hosted Tajawal body voice (public/fonts), sized for the chip */
+  --globe-chip-font: 600 12px Tajawal, "Noto Kufi Arabic", sans-serif;
+  /* P21-W6: ink ON the selected chip fill — paper-white on the deep day
+     orange #C24E00 (4.79:1 AA); the night twin flips to deep-space ink
+     on #FF6B00 (7.05:1) below. */
+  --ln-on-lime: #FFFFFF;
   /* small-text orange tier: dark #FF6B00 is 3.9:1 (large/decorative only
      per spec) — 12px mono labels climb to this rung in both stages.
      P18-W2-d (W1-d #6, VLM-flagged eyebrow contrast): the LIGHT tier
@@ -2860,6 +2907,7 @@ html.dark .landing {
   --globe-dot: #FFFFFF;                 /* white dots on #05070D */
   --globe-arc: #FF6B00;                 /* the reference route orange */
   --globe-glow: rgba(41, 98, 255, 0.16); /* #2962FF low-alpha under-globe glow */
+  --ln-on-lime: #05070D;                /* deep-space ink on #FF6B00 — 7.05:1 */
   --ln-lime-text: #FF8A50;              /* 7.7:1 small-text tier on #05070D */
 }
 
@@ -2882,10 +2930,17 @@ html.dark .landing {
   max-inline-size: 1280px;
   margin-inline: auto;
   padding: clamp(7rem, 16vh, 10rem) var(--page-gutter-mobile) clamp(2.5rem, 6vh, 4rem);
+  /* P21-W6 (2-b-part2): the frame is a LAYOUT wrapper, never a pointer
+     surface — at z2 over the z1 globe stage its empty upper-right region
+     was eating every real mouse event aimed at the canvas (drag/click/
+     hover only survived on the thin bleed strips). The frame passes
+     clicks through; only the copy block below is a real surface. */
+  pointer-events: none;
 }
 .landing .ln-hero-copy {
   inline-size: min(100%, 58%);  /* the 60/40 split (copy ~60 / globe ~40) */
   margin-inline-start: auto;    /* RTL: pushes the block to the physical LEFT */
+  pointer-events: auto;         /* …but the copy IS a surface (links, text) */
 }
 @media (min-width: 1024px) {
   .landing .ln-hero-frame { padding-inline: var(--page-gutter); }
@@ -2906,13 +2961,18 @@ html.dark .landing {
 }
 .landing .ln-globe-stage .ln-globe-canvas { pointer-events: auto; }
 @media (max-width: 1023px) {
-  /* 390px: the globe becomes a centered backdrop behind the lockup */
+  /* 390px: the globe becomes a centered backdrop behind the lockup —
+     P21-W6: its bottom edge now DISSOLVES into the page (mask fade)
+     instead of an abrupt rectangular canvas boundary, and the explorer
+     interaction is carried honestly by the dock (chips + panel). */
   .landing .ln-globe-stage {
     top: 5%;
     right: 50%;
     transform: translateX(50%);
     inline-size: min(92vw, 430px);
     opacity: 0.55;
+    -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
   }
 }
 .landing .ln-globe-canvas {
@@ -2923,6 +2983,183 @@ html.dark .landing {
   cursor: grab;
 }
 .landing .ln-globe-canvas.is-dragging { cursor: grabbing; }
+
+/* ── P21-W6 (2-b-part2) · the globe EXPLORER chrome ─────────────────────
+   The globe stops being fake-interactive: hover/click the markers OR
+   use the accessible chip dock. Everything below rides the stage-flip
+   tokens, so the dark twin comes free. */
+
+/* the drag affordance — a quiet glass pill floating just off the
+   globe's lower-left arc (physical: outside the sphere, inside the
+   glow halo — a map-legend note, never over the city cluster which
+   lives upper-center). Retires after the first real interaction
+   (data-seen); pointer-events none always (the stage owns that).
+   Desktop only — at ≤1023px the globe is a backdrop and the dock
+   carries the affordance. */
+.landing .ln-globe-hint {
+  position: absolute;
+  left: 3%;
+  bottom: 4%;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: var(--ln-glass);
+  border: 1px solid var(--ln-line);
+  color: var(--ln-cream-dim);
+  font-size: 11px;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  opacity: 1;
+  transition: opacity 0.5s var(--ln-ease, ease-out);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.landing .ln-globe-hint[data-seen] { opacity: 0; }
+@media (max-width: 1023px) {
+  .landing .ln-globe-hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing .ln-globe-hint { transition: none; }
+}
+
+/* the explorer dock — city chips (the accessible list) + the routes
+   panel. Rides the hero flow between the copy frame and the roadmark
+   board; RTL flex-start hugs the PHYSICAL RIGHT edge = directly under
+   the globe's lower arc (the visual link: globe above, its index
+   below). Same slot at every breakpoint — at 390 the chips + panel
+   ARE the interaction. */
+.landing .ln-globe-dock {
+  position: relative;          /* z above the stage bleed where they meet */
+  z-index: 2;
+  inline-size: 100%;
+  max-inline-size: var(--marketing-max-w);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter-mobile);
+  padding-block-end: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;     /* RTL column cross-start = the right edge */
+  gap: var(--sp-3);
+}
+@media (min-width: 1024px) {
+  .landing .ln-globe-dock { padding-inline: var(--page-gutter); }
+}
+
+.landing .ln-globe-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 8px;
+  max-inline-size: 100%;
+}
+
+/* the city chip — a real button, 44px touch floor, the same selected
+   state as the canvas marker (orange fill = the selected ring family) */
+.landing .ln-globe-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 44px;
+  padding: 5px 15px;
+  border-radius: 2px;
+  background: var(--ln-glass);
+  border: 1px solid color-mix(in srgb, var(--ln-cream) 26%, transparent);
+  color: var(--ln-cream);
+  font-size: 13px;
+  font-weight: var(--fw-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background var(--ln-t-fast) var(--ln-ease),
+    border-color var(--ln-t-fast) var(--ln-ease),
+    color var(--ln-t-fast) var(--ln-ease);
+}
+.landing .ln-globe-chip:hover {
+  border-color: color-mix(in srgb, var(--ln-cream) 52%, transparent);
+  background: var(--ln-glass-strong);
+}
+.landing .ln-globe-chip:focus-visible {
+  outline: 2px solid var(--ln-lime);
+  outline-offset: 2px;
+}
+.landing .ln-globe-chip[aria-pressed="true"] {
+  background: var(--ln-lime);
+  border-color: var(--ln-lime);
+  color: var(--ln-on-lime);
+}
+.landing .ln-globe-chip-dot {
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: 50%;
+  background: var(--ln-lime-text);
+  flex-shrink: 0;
+  transition: background var(--ln-t-fast) var(--ln-ease);
+}
+.landing .ln-globe-chip[aria-pressed="true"] .ln-globe-chip-dot {
+  background: var(--ln-on-lime);
+}
+
+/* the routes panel — the fixed info slot: city name + region + its
+   direct lines (idle state teaches the interaction). Glass plate so it
+   reads as a HUD where it meets the globe's arc at desktop. */
+.landing .ln-globe-panel {
+  inline-size: min(100%, 480px);
+  min-block-size: 88px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 18px;
+  border-radius: 2px;
+  background: var(--ln-glass-strong);
+  border: 1px solid var(--ln-line);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 1px 0 rgb(27 42 65 / 0.05);
+}
+html.dark .landing .ln-globe-panel { box-shadow: 0 1px 0 rgb(0 0 0 / 0.35); }
+.landing .ln-globe-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+}
+.landing .ln-globe-panel-name {
+  font-family: var(--ln-display-ar);
+  font-size: 17px;
+  font-weight: var(--fw-bold);
+  color: var(--ln-cream);
+  line-height: 1.3;
+}
+.landing .ln-globe-panel-region {
+  font-family: var(--ln-mono);
+  font-size: 11px;
+  color: var(--ln-lime-text);
+  direction: rtl;             /* Arabic region names in the mono chain */
+}
+.landing .ln-globe-panel-routes {
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--ln-cream-dim);
+}
+.landing .ln-globe-panel-cityname {
+  color: var(--ln-cream);
+  font-weight: var(--fw-semibold);
+}
+.landing .ln-globe-panel-idle {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.landing .ln-globe-panel-idle-line {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--ln-cream-dim);
+}
 
 /* S3 — deep-atmosphere backdrop: layered radial glows (the #2962FF
    under-globe breath rides the canvas glow too) over the dot grid. */

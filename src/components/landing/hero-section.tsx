@@ -66,14 +66,13 @@ export function HeroSection({
         <HeroDepthLayer />
       </div>
 
-      {/* S1 — the dotted globe, bleeding off the top-right frame edge.
-          Client-only canvas island (GlobeMount → dynamic ssr:false);
-          pure decoration for AT (role=img inside), drag for everyone. */}
-      <div className="ln-globe-stage" aria-hidden="true">
-        <GlobeMount />
-      </div>
-
-      {/* 60/40 split — copy LOWER-LEFT (globe owns the top-right) */}
+      {/* S1 — the dotted globe EXPLORER (P21-W6 2-b-part2). GlobeMount
+          is the ONE client island for the whole explorer: the absolute
+          top-right canvas bleed (drag/hover/click markers — geometry
+          unchanged from P12) + the accessible city dock (chips + routes
+          panel) which rides the hero flow BETWEEN this copy frame and
+          the roadmark board. The h1 stays server-rendered here — LCP
+          doctrine r92/r142 holds. */}
       <div className="ln-hero-frame">
         <div className="ln-hero-copy">
           <div className="ln-keep-eyebrow animate-fade-in" style={{ animationDelay: "0.1s" }}>
@@ -127,6 +126,12 @@ export function HeroSection({
           )}
         </div>
       </div>
+
+      {/* the globe explorer mounts AFTER the copy frame: the stage is
+          absolutely positioned (paints top-right, z1 — DOM order is
+          irrelevant to it), while the dock lands in the flow here,
+          directly under the copy / beside the globe's lower arc. */}
+      <GlobeMount />
 
       {/* the roadmark board — the live figures, monumental editorial scale
           (mono captions, huge Kufi figures; honesty policy: real counts) */}

@@ -1,27 +1,33 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { GLOBE_CITIES, GLOBE_ROUTES, type GlobeCity } from './globe-data';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   P12-2d — GlobeScene: the dotted-globe signature scene.
+   P21-W6 (2-b-part2) — GlobeScene: the dotted-globe EXPLORER.
    ─────────────────────────────────────────────────────────────────────
-   A plain 2D canvas with 3D math (ZERO new dependencies — the P12 spec
-   locks the landing to a no-dep globe): continents are a hand-authored
-   simplified landmass polygon set (lat/lon), sampled at runtime into
-   ~1200 dots; rotation is Y-axis (drag + inertia + slow idle drift);
-   projection carries a slight perspective (f≈4.2); backside dots dim to
-   ~18% alpha. Orange (#FF6B00 dark / #C24E00 light via CSS vars) route
-   arcs connect 7 REAL Libyan cities (طرابلس/الزاوية/مصراتة/سرت/بنغازي/
-   درنة/سبها) — hub-and-spoke from Tripoli + one southern cross-link;
-   arcs are quadratic 3D lifts with an animated dash offset, nodes
-   pulse, each node wears a black mono label chip (white text).
-   Theme: reads --globe-* vars off the canvas cascade + a
-   MutationObserver on <html> class (next-themes toggles .dark) — no
-   JS theme state, the CSS owns both stages.
-   Discipline: DPR capped at 2, ResizeObserver re-fit, rAF paused when
-   offscreen/hidden, prefers-reduced-motion → static poster frame
-   (arcs drawn full, no dash animation) but drag still repaints
-   (user-initiated). The canvas is decorative — aria role=img.
+   The P12-2d engine survives intact (2D canvas + 3D math, ZERO new
+   dependencies): hand-authored landmass polygons sampled into ~1200
+   dots, Y-axis drag rotation with inertia + slow idle drift, slight
+   perspective (f≈4.2), backside dimming, CSS-var theming, rAF paused
+   offscreen, prefers-reduced-motion poster regime.
+
+   What this wave adds — the globe becomes HONEST about its markers:
+   · HOVER a city node → the node swells + wears a ring + its name chip
+     appears (collision-aware placement: the chip never covers another
+     node point and never overlaps the other visible chip; the sticky-
+     note wall of 7 permanent labels is gone — quiet dots otherwise).
+   · CLICK/TAP a node (effective hit area ≥44×44px — 22px radius,
+     nearest-wins for the real coastal clustering) → SELECTED: scale +
+     double ring + orange-edged chip, and the city's arcs light up
+     while the rest recede. Clicking empty ocean deselects.
+   · The idle drift PAUSES while a node is hovered (the marker must not
+     slide out from under the cursor); a real drag (>3px) or a click
+     reports onFirstInteract so the mount can retire the drag hint.
+   · Drag stays horizontal-only (touch-action: pan-y keeps the page
+     scrollable over the canvas — never trap the scroll).
+   The keyboard path is the chip dock (GlobeMount) — the canvas stays
+   role=img decoration with an honest description.
    shortcut: landmasses are stylized polygons, not survey data — swap
    for a bundled land-mask PNG if geographic fidelity is ever required.
    ═══════════════════════════════════════════════════════════════════════ */
@@ -98,28 +104,18 @@ function buildDots(): Dot[] {
 }
 const DOTS: Dot[] = buildDots();
 
-/* ── the Libyan route network — REAL cities, no freight claims ────────── */
-type Node = { name: string; lat: number; lon: number; v: [number, number, number] };
-const mkNode = (name: string, lat: number, lon: number): Node => {
+/* ── the Libyan route network — globe-data is the one source ──────────── */
+type Node = { city: GlobeCity; v: [number, number, number] };
+const mkNode = (city: GlobeCity): Node => {
   const D2R = Math.PI / 180;
-  const cl = Math.cos(lat * D2R);
-  return { name, lat, lon, v: [cl * Math.sin(lon * D2R), Math.sin(lat * D2R), cl * Math.cos(lon * D2R)] };
+  const cl = Math.cos(city.lat * D2R);
+  return {
+    city,
+    v: [cl * Math.sin(city.lon * D2R), Math.sin(city.lat * D2R), cl * Math.cos(city.lon * D2R)],
+  };
 };
-const TRIPOLI = mkNode('طرابلس', 32.88, 13.19);
-const NODES: Node[] = [
-  TRIPOLI,
-  mkNode('الزاوية', 32.75, 12.72),
-  mkNode('مصراتة', 32.38, 15.09),
-  mkNode('سرت', 31.2, 16.55),
-  mkNode('بنغازي', 32.12, 20.07),
-  mkNode('درنة', 32.77, 22.64),
-  mkNode('سبها', 27.04, 14.43),
-];
-/* hub-and-spoke from Tripoli + one southern cross-link (بنغازي↔سبها) */
-const ARCS: [Node, Node][] = [
-  [TRIPOLI, NODES[1]!], [TRIPOLI, NODES[2]!], [TRIPOLI, NODES[3]!],
-  [TRIPOLI, NODES[4]!], [TRIPOLI, NODES[6]!], [NODES[4]!, NODES[6]!],
-];
+const NODES: Node[] = GLOBE_CITIES.map(mkNode);
+const nodeById = new Map(NODES.map((n, i) => [n.city.id, i]));
 
 /* slerp + altitude lift → the 3D quadratic arc samples */
 function arcPoints(a: [number, number, number], b: [number, number, number], lift: number, n: number) {
@@ -141,16 +137,46 @@ function arcPoints(a: [number, number, number], b: [number, number, number], lif
   }
   return pts;
 }
-const ARC_PTS = ARCS.map(([a, b], i) => arcPoints(a.v, b.v, 0.1 + (i % 3) * 0.05, 26));
+type Route = { a: Node; b: Node; pts: [number, number, number][] };
+const ROUTES: Route[] = GLOBE_ROUTES.map(([aId, bId], i) => {
+  const a = NODES[nodeById.get(aId) ?? 0]!;
+  const b = NODES[nodeById.get(bId) ?? 0]!;
+  return { a, b, pts: arcPoints(a.v, b.v, 0.1 + (i % 3) * 0.05, 26) };
+});
 
 /* ── the component ─────────────────────────────────────────────────────── */
 const TILT = 0.26; // north tips slightly toward the viewer (Libya reads high)
 const PERSP = 4.2; // focal length in globe radii — slight perspective
 const AUTO_V = -0.0011; // rad/frame @60fps — slow idle drift (Europe/Africa → Pacific)
 const DRAG_K = 0.0055; // rad per CSS px of horizontal drag
+const HIT_R = 22; // CSS px — the ≥44×44px effective marker hit area
+const DRAG_MIN = 3; // CSS px of travel before a gesture counts as a drag
 
-export default function GlobeScene() {
+export type GlobeSceneProps = {
+  /** the selected city id (chip- or canvas-driven) — drives the marker
+   * state + the arc emphasis; null = nothing selected. */
+  selectedId: string | null;
+  /** click/tap on a marker (its id) or on empty ocean (null). */
+  onSelect: (id: string | null) => void;
+  /** fired once-ish: the first REAL interaction (drag gesture or click). */
+  onFirstInteract: () => void;
+};
+
+export default function GlobeScene({ selectedId, onSelect, onFirstInteract }: GlobeSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  /* the draw loop reads the live selection + callbacks from refs — prop
+     changes never re-mount the canvas (the rotation state would reset).
+     The refs are written in effects (never during render). */
+  const selectedRef = useRef<string | null>(selectedId);
+  const selectCb = useRef(onSelect);
+  const firstInteractCb = useRef(onFirstInteract);
+  useEffect(() => {
+    selectedRef.current = selectedId;
+  }, [selectedId]);
+  useEffect(() => {
+    selectCb.current = onSelect;
+    firstInteractCb.current = onFirstInteract;
+  }, [onSelect, onFirstInteract]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -158,12 +184,8 @@ export default function GlobeScene() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    /* P13-2d (T4): reduced-motion is re-read LIVE now — was a one-shot
-       const at mount, so flipping the OS/system setting mid-session left
-       the canvas on the wrong regime (loop kept running for RM users,
-       poster frozen for everyone else until reload). The change listener
-       routes back through setRunning, which owns the poster/loop toggle
-       and repaints the static frame when RM turns on. */
+    /* P13-2d (T4): reduced-motion is re-read LIVE — the change listener
+       routes back through setRunning, which owns the poster/loop toggle. */
     const reducedMq = window.matchMedia('(prefers-reduced-motion: reduce)');
     let reduced = reducedMq.matches;
     const onReducedChange = () => {
@@ -185,7 +207,13 @@ export default function GlobeScene() {
     let dotColor = '#FFFFFF';
     let arcColor = '#FF6B00';
     let glowColor = 'rgba(41, 98, 255, 0.16)';
-    let chipFont = '600 10px IBM Plex Mono, Tajawal, sans-serif';
+    let chipFont = '600 12px Tajawal, "Noto Kufi Arabic", sans-serif';
+
+    /* the interaction state (hover + hit cache) */
+    let hovered = -1; // NODES index or -1
+    let pointer = { x: 0, y: 0, inside: false };
+    type NodePt = { px: number; py: number; z: number; s: number };
+    let nodePts: NodePt[] = [];
 
     const readTheme = () => {
       const cs = getComputedStyle(canvas);
@@ -221,6 +249,77 @@ export default function GlobeScene() {
       return [CX + x1 * R, CY - y2 * s * R, z2, s];
     };
 
+    /* ── collision-aware label placement ────────────────────────────────
+       The chip (w×h at x,y) must: stay in bounds, never cover another
+       node point (6px margin — a label sitting on a stranger dot reads
+       as a lie), and never overlap the other visible chip. Candidates
+       in preference order: outward-from-center side (labels land over
+       ocean/sky, not the globe face), above, inward side, below. If
+       every candidate collides (the real coastal cluster is tight), the
+       outward side is nudged vertically in 16px steps until clear. */
+    type Rect = { x: number; y: number; w: number; h: number };
+    const placeLabel = (idx: number, w: number, h: number, placed: Rect[]): Rect => {
+      const p = nodePts[idx]!;
+      const gap = 10;
+      const outwardRight = p.px >= CX;
+      const side = (right: boolean): Rect =>
+        right ? { x: p.px + gap, y: p.py - h / 2, w, h } : { x: p.px - gap - w, y: p.py - h / 2, w, h };
+      const cands: Rect[] = [
+        side(outwardRight),
+        { x: p.px - w / 2, y: p.py - gap - h, w, h },
+        side(!outwardRight),
+        { x: p.px - w / 2, y: p.py + gap, w, h },
+      ];
+      const inBounds = (r: Rect) => r.x >= 2 && r.y >= 2 && r.x + r.w <= W - 2 && r.y + r.h <= H - 2;
+      const hitsNode = (r: Rect) =>
+        nodePts.some((q, qi) => {
+          if (qi === idx) return false;
+          /* back-side nodes are invisible — a chip over them is fine */
+          if (q.z < 0.08) return false;
+          return q.px > r.x - 6 && q.px < r.x + r.w + 6 && q.py > r.y - 6 && q.py < r.y + r.h + 6;
+        });
+      const hitsChip = (r: Rect) =>
+        placed.some((a) => !(r.x > a.x + a.w || r.x + r.w < a.x || r.y > a.y + a.h || r.y + r.h < a.y));
+      for (const r of cands) {
+        if (inBounds(r) && !hitsNode(r) && !hitsChip(r)) return r;
+      }
+      /* fallback — the outward side, clamped in-bounds, nudged clear of
+         the other chip (chips may end up near a stranger dot, but two
+         READABLE chips never stack; that is the hard requirement). */
+      let r = side(outwardRight);
+      for (let t = 0; t < 6 && hitsChip(r); t++) {
+        r = { ...r, y: r.y + (t % 2 === 0 ? 1 : -1) * 16 * (Math.floor(t / 2) + 1) };
+      }
+      return {
+        x: Math.min(Math.max(2, r.x), Math.max(2, W - w - 2)),
+        y: Math.min(Math.max(2, r.y), Math.max(2, H - h - 2)),
+        w,
+        h,
+      };
+    };
+
+    const drawChip = (idx: number, isSelected: boolean, placed: Rect[]) => {
+      const p = nodePts[idx]!;
+      const name = NODES[idx]!.city.name;
+      ctx.font = chipFont;
+      ctx.textBaseline = 'middle';
+      const tw = ctx.measureText(name).width;
+      const r = placeLabel(idx, tw + 14, 20, placed);
+      placed.push(r);
+      ctx.globalAlpha = p.z < 0.08 ? 0.45 : 0.92;
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      if (isSelected) {
+        ctx.strokeStyle = arcColor;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1);
+      }
+      ctx.globalAlpha = p.z < 0.08 ? 0.55 : 1;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText(name, r.x + 7, r.y + r.h / 2 + 0.5);
+      ctx.globalAlpha = 1;
+    };
+
     const draw = () => {
       ctx.clearRect(0, 0, W, H);
 
@@ -247,70 +346,139 @@ export default function GlobeScene() {
       }
       ctx.globalAlpha = 1;
 
-      /* route arcs — quadratic 3D lifts, animated dash, depth-dimmed */
-      const pulses: { node: Node; px: number; py: number; s: number; i: number }[] = [];
-      ARC_PTS.forEach((pts, ai) => {
+      /* node screen positions — cached for hit-testing + labels */
+      nodePts = NODES.map((n) => {
+        const [px, py, z, s] = project(n.v[0]!, n.v[1]!, n.v[2]!);
+        return { px, py, z, s };
+      });
+
+      /* route arcs — quadratic 3D lifts, animated dash, depth-dimmed.
+         A selected city throws its own arcs to full emphasis (alpha .95,
+         1.8px) while the rest recede — the explorer read. */
+      const sel = selectedRef.current;
+      const selIdx = sel != null ? (nodeById.get(sel) ?? -1) : -1;
+      ROUTES.forEach((route, ai) => {
+        const owns =
+          selIdx >= 0 && (route.a === NODES[selIdx] || route.b === NODES[selIdx]);
         ctx.strokeStyle = arcColor;
-        ctx.lineWidth = 1.4;
+        ctx.lineWidth = owns ? 1.8 : 1.4;
         if (!reduced) {
           ctx.setLineDash([4, 7]);
           ctx.lineDashOffset = -dashPhase - ai * 5;
         }
         ctx.lineJoin = 'round';
         ctx.beginPath();
-        for (let i = 0; i < pts.length; i++) {
-          const p = pts[i]!;
+        for (let i = 0; i < route.pts.length; i++) {
+          const p = route.pts[i]!;
           const [px, py, z] = project(p[0]!, p[1]!, p[2]!);
           if (i === 0) ctx.moveTo(px, py);
           else ctx.lineTo(px, py);
-          /* segment visibility is approximated per-vertex: whole arc keeps
-             one alpha but backside arcs drop to the dim tier (the dotted-
-             globe idiom — arcs read as front-layer routes) */
-          ctx.globalAlpha = z < 0 ? 0.2 : 0.55 + 0.45 * z;
+          const base = z < 0 ? 0.2 : 0.55 + 0.45 * z;
+          ctx.globalAlpha = owns ? Math.max(0.28, base) * (selIdx >= 0 ? 1.55 : 1) : selIdx >= 0 ? base * 0.38 : base;
         }
         ctx.stroke();
         ctx.globalAlpha = 1;
         ctx.setLineDash([]);
       });
 
-      /* nodes + label chips — front hemisphere only */
-      NODES.forEach((node, i) => {
-        const [px, py, z, s] = project(node.v[0], node.v[1], node.v[2]);
-        if (z < 0.08) return;
-        pulses.push({ node, px, py, s, i });
-      });
-      ctx.font = chipFont;
-      ctx.textBaseline = 'middle';
-      for (const p of pulses) {
-        const pulse = reduced ? 1 : 1 + 0.22 * Math.sin(clock / 900 + p.i * 1.7);
-        const r0 = Math.max(2.4, R * 0.011) * p.s;
-        ctx.globalAlpha = 0.55;
+      /* nodes — quiet by default (small pulse), swelled + ringed when
+         hovered, double-ringed + bright when selected. The selected and
+         hovered nodes draw even on the backside (dimmed) — a chip pick
+         must never point at nothing. */
+      const placedChips: Rect[] = [];
+      /* draw the selected chip first (persistent), hovered avoids it */
+      const hoverIdx = hovered;
+      const chipOrder = [selIdx, hoverIdx].filter((i, k, arr) => i >= 0 && arr.indexOf(i) === k);
+      for (const idx of chipOrder) {
+        const isSel = idx === selIdx;
+        const p = nodePts[idx]!;
+        const front = p.z >= 0.08;
+        const base = Math.max(2.4, R * 0.011) * p.s;
+        const dim = front ? 1 : 0.4;
+        if (isSel) {
+          /* selection: scale + double ring + solid core */
+          ctx.globalAlpha = 0.32 * dim;
+          ctx.strokeStyle = arcColor;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(p.px, p.py, base * 3.4 + 3, 0, 6.2832);
+          ctx.stroke();
+          ctx.globalAlpha = 0.95 * dim;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.arc(p.px, p.py, base * 2.2 + 3, 0, 6.2832);
+          ctx.stroke();
+          ctx.globalAlpha = dim;
+          ctx.fillStyle = arcColor;
+          ctx.beginPath();
+          ctx.arc(p.px, p.py, base * 1.6, 0, 6.2832);
+          ctx.fill();
+        } else {
+          /* hover: swell + single ring */
+          ctx.globalAlpha = 0.85 * dim;
+          ctx.strokeStyle = arcColor;
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.arc(p.px, p.py, base * 2.2 + 3, 0, 6.2832);
+          ctx.stroke();
+          ctx.globalAlpha = dim;
+          ctx.fillStyle = arcColor;
+          ctx.beginPath();
+          ctx.arc(p.px, p.py, base * 1.35, 0, 6.2832);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+      /* the quiet nodes (pulse when live; still when a selection focuses) */
+      ctx.fillStyle = arcColor;
+      for (let i = 0; i < NODES.length; i++) {
+        if (i === selIdx || i === hoverIdx) continue;
+        const p = nodePts[i]!;
+        if (p.z < 0.08) continue;
+        const pulse = reduced || selIdx >= 0 ? 1 : 1 + 0.22 * Math.sin(clock / 900 + i * 1.7);
+        const base = Math.max(2.4, R * 0.011) * p.s;
+        ctx.globalAlpha = selIdx >= 0 ? 0.5 : 0.9;
+        ctx.beginPath();
+        ctx.arc(p.px, p.py, base * pulse, 0, 6.2832);
+        ctx.fill();
+        ctx.globalAlpha = selIdx >= 0 ? 0.25 : 0.55;
         ctx.strokeStyle = arcColor;
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.arc(p.px, p.py, r0 * pulse + 2.5, 0, 6.2832);
+        ctx.arc(p.px, p.py, base * pulse + 2.5, 0, 6.2832);
         ctx.stroke();
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = arcColor;
-        ctx.beginPath();
-        ctx.arc(p.px, p.py, r0, 0, 6.2832);
-        ctx.fill();
-
-        /* the black mono label chip — outward side, clamped to canvas */
-        const tw = ctx.measureText(p.node.name).width;
-        const cw = tw + 10;
-        const ch = 15;
-        const right = p.px > CX ? p.px + 8 : p.px - cw - 8;
-        const rx = Math.min(Math.max(2, right), Math.max(2, W - cw - 2));
-        const ry = Math.min(Math.max(2, p.py - ch - 3), Math.max(2, H - ch - 2));
-        ctx.globalAlpha = 0.88;
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(rx, ry, cw, ch);
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillText(p.node.name, rx + 5, ry + ch / 2 + 0.5);
       }
       ctx.globalAlpha = 1;
+
+      /* the visible chips — selected (orange-edged) then hovered */
+      for (const idx of chipOrder) drawChip(idx, idx === selIdx, placedChips);
+      ctx.globalAlpha = 1;
+    };
+
+    /* nearest front-side node within HIT_R of (x, y) — the ≥44×44
+       effective hit area, nearest-wins over the real coastal cluster */
+    const hitTest = (x: number, y: number): number => {
+      let best = -1;
+      let bestD = HIT_R * HIT_R;
+      for (let i = 0; i < nodePts.length; i++) {
+        const p = nodePts[i]!;
+        if (p.z < 0.05) continue; // a marker on the far side is not a target
+        const d = (p.px - x) * (p.px - x) + (p.py - y) * (p.py - y);
+        if (d < bestD) {
+          bestD = d;
+          best = i;
+        }
+      }
+      return best;
+    };
+
+    const applyHover = (x: number, y: number) => {
+      const hit = hitTest(x, y);
+      if (hit !== hovered) {
+        hovered = hit;
+        canvas.style.cursor = hit >= 0 ? 'pointer' : 'grab';
+        if (!running) draw(); // poster regime repaints on user-driven state
+      }
     };
 
     let lastNow = 0;
@@ -326,12 +494,16 @@ export default function GlobeScene() {
           if (Math.abs(vel) > 0.00004) {
             rotY += vel * (dt / 16);
             vel *= Math.pow(0.94, dt / 16);
-          } else if (now - lastInteract > 2400) {
+          } else if (now - lastInteract > 2400 && hovered < 0) {
+            /* idle drift — paused while a marker is hovered: the label
+               must not slide out from under the cursor */
             rotY += AUTO_V * (dt / 16);
           }
         }
       }
       draw();
+      /* drift may move markers under a resting cursor — re-hit-test */
+      if (pointer.inside && !dragging) applyHover(pointer.x, pointer.y);
       raf = requestAnimationFrame(tick);
     };
 
@@ -353,9 +525,14 @@ export default function GlobeScene() {
       }
     };
 
-    /* pointer drag — horizontal rotation with inertia */
+    /* pointer drag — horizontal rotation with inertia; a press that
+       never travels 3px is a CLICK (marker select / ocean deselect). */
+    let downX = 0, downY = 0, traveled = 0;
     const onDown = (e: PointerEvent) => {
       dragging = true;
+      traveled = 0;
+      downX = e.clientX;
+      downY = e.clientY;
       vel = 0;
       lastX = e.clientX;
       lastInteract = performance.now();
@@ -363,11 +540,20 @@ export default function GlobeScene() {
       canvas.classList.add('is-dragging');
     };
     const onMove = (e: PointerEvent) => {
-      if (!dragging) return;
+      const rect = canvas.getBoundingClientRect();
+      pointer = { x: e.clientX - rect.left, y: e.clientY - rect.top, inside: true };
+      if (!dragging) {
+        applyHover(pointer.x, pointer.y);
+        return;
+      }
       const dx = e.clientX - lastX;
       lastX = e.clientX;
-      rotY += dx * DRAG_K;
-      vel = vel * 0.65 + dx * DRAG_K * 0.35;
+      traveled = Math.max(traveled, Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY));
+      if (traveled >= DRAG_MIN) {
+        firstInteractCb.current(); // a REAL gesture — retire the hint
+        rotY += dx * DRAG_K;
+        vel = vel * 0.65 + dx * DRAG_K * 0.35;
+      }
       lastInteract = performance.now();
       if (reduced) draw(); // user-initiated repaint, no loop
     };
@@ -377,6 +563,22 @@ export default function GlobeScene() {
       lastInteract = performance.now();
       try { canvas.releasePointerCapture(e.pointerId); } catch { /* already released */ }
       canvas.classList.remove('is-dragging');
+      if (traveled < DRAG_MIN) {
+        /* a click/tap — marker select or ocean deselect (22px radius) */
+        const rect = canvas.getBoundingClientRect();
+        const hit = hitTest(e.clientX - rect.left, e.clientY - rect.top);
+        firstInteractCb.current();
+        selectCb.current(hit >= 0 ? NODES[hit]!.city.id : null);
+        if (reduced) draw();
+      }
+    };
+    const onLeave = () => {
+      pointer = { ...pointer, inside: false };
+      if (hovered >= 0) {
+        hovered = -1;
+        canvas.style.cursor = 'grab';
+        if (!running) draw();
+      }
     };
 
     const io = new IntersectionObserver((entries) => {
@@ -404,10 +606,19 @@ export default function GlobeScene() {
     canvas.addEventListener('pointermove', onMove);
     canvas.addEventListener('pointerup', onUp);
     canvas.addEventListener('pointercancel', onUp);
+    canvas.addEventListener('pointerleave', onLeave);
 
     readTheme();
     fit();
     setRunning(true);
+
+    /* the label chips set their font from CSS — the first poster frame
+       may paint before the webfonts arrive; re-draw once they do. */
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(() => {
+        if (!running) draw();
+      }).catch(() => { /* font promise rejection — the fallback is fine */ });
+    }
 
     return () => {
       io.disconnect();
@@ -419,6 +630,7 @@ export default function GlobeScene() {
       canvas.removeEventListener('pointermove', onMove);
       canvas.removeEventListener('pointerup', onUp);
       canvas.removeEventListener('pointercancel', onUp);
+      canvas.removeEventListener('pointerleave', onLeave);
       if (raf) cancelAnimationFrame(raf);
     };
   }, []);
@@ -428,7 +640,7 @@ export default function GlobeScene() {
       ref={canvasRef}
       className="ln-globe-canvas"
       role="img"
-      aria-label="كرة أرضية منقّطة تُظهر شبكة طلبات سمارت أوردر بين المدن الليبية: طرابلس، الزاوية، مصراتة، سرت، بنغازي، درنة، سبها — بخطوط برتقالية متحركة. اسحب أفقياً لتدوير الكرة."
+      aria-label={`كرة أرضية منقّطة تُظهر شبكة طلبات سمارت أوردر بين سبع مدن ليبية — طرابلس، الزاوية، مصراتة، سرت، بنغازي، درنة، سبها — بخطوط برتقالية. اسحب أفقياً لتدوير الكرة، والمس نقطة مدينة لاختيارها؛ قائمة المدن أسفل الكرة تعرضها جميعاً كأزرار.`}
     />
   );
 }
