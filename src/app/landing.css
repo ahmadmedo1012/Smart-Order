@@ -2768,14 +2768,20 @@ html.dark .landing .ln-btn-gold:hover {
     0 0 0 1px rgba(2, 6, 14, 0.36);
 }
 
-/* the ghost pill — hairline + hover tint + hover hairline (pale family) */
+/* the ghost pill — hairline + hover tint + hover hairline (pale family).
+   P23-D: the resting hairline climbs 0.30 → 0.50 (hover 0.48 → 0.65) —
+   the fresh audit read the old border as failing the non-text contrast
+   floor, and it measured right: blended over #05070D the 0.30 alpha
+   lands ≈2.0:1, below WCAG 1.4.11's 3:1 for UI components. At 0.50 the
+   blended hairline (≈rgb(95 100 111)) clears 3:1; the pill reads
+   clickable at rest, not like a disabled field. */
 html.dark .landing .ln-btn-ghost {
-  border: 1px solid rgb(185 194 210 / 0.30);
+  border: 1px solid rgb(185 194 210 / 0.50);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.30);
 }
 html.dark .landing .ln-btn-ghost:hover {
   background: rgb(185 194 210 / 0.08);
-  border-color: rgb(185 194 210 / 0.48);
+  border-color: rgb(185 194 210 / 0.65);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
@@ -2884,6 +2890,13 @@ html.dark .landing .ln-dash-roles { background: rgba(21, 34, 56, 0.78); }
   --globe-dot: #1B2A41;                 /* navy ink dots on paper */
   --globe-arc: #C24E00;                 /* deep route orange on paper */
   --globe-glow: rgba(62, 92, 118, 0.16); /* steel breath under the globe */
+  /* P23-D — the layered atmosphere's two new coats: the WIDE HALO
+     (sphere-centered bloom that lifts the globe off its ground) and
+     the LIMB RING (the lit-edge read, brighter toward the upper-left
+     light). Steel/navy families — the same air the hero sky breathes
+     (.ln-keep-sky radials), never a new hue. */
+  --globe-halo: rgba(62, 92, 118, 0.10);
+  --globe-rim: rgba(27, 42, 65, 0.16);
   /* P21-W6: the canvas name-chip font (hover/selection labels) — the
      self-hosted Tajawal body voice (public/fonts), sized for the chip */
   --globe-chip-font: 600 12px Tajawal, "Noto Kufi Arabic", sans-serif;
@@ -2906,7 +2919,14 @@ html.dark .landing .ln-dash-roles { background: rgba(21, 34, 56, 0.78); }
 html.dark .landing {
   --globe-dot: #FFFFFF;                 /* white dots on #05070D */
   --globe-arc: #FF6B00;                 /* the reference route orange */
-  --globe-glow: rgba(41, 98, 255, 0.16); /* #2962FF low-alpha under-globe glow */
+  /* P23-D: the saturated #2962FF under-glow (a lone blue island in the
+     deep-space + route-orange palette) retunes to the steel breath the
+     night sky already owns (.ln-keep-sky rgb(143 187 242 / 0.08)) — the
+     globe's ground light joins the page's air instead of introducing
+     an unrelated hue. */
+  --globe-glow: rgba(143, 187, 242, 0.14);
+  --globe-halo: rgba(143, 187, 242, 0.10);
+  --globe-rim: rgba(197, 222, 250, 0.16);
   --ln-on-lime: #05070D;                /* deep-space ink on #FF6B00 — 7.05:1 */
   --ln-lime-text: #FF8A50;              /* 7.7:1 small-text tier on #05070D */
 }

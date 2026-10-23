@@ -44,7 +44,16 @@ const nextConfig: NextConfig = {
         key: "Content-Security-Policy",
         value: [
           "default-src 'self'",
-          "script-src 'self' 'unsafe-inline'",
+          /* P23-D: dev-only 'unsafe-eval'. React 19's development build
+           * needs eval() (owner-stack reconstruction); without it the
+           * strict script-src above ABORTS hydration in `next dev` — the
+           * landing served on 127.0.0.1 rendered as dead SSR HTML (no
+           * globe canvas, no chip interactions). React never evals in
+           * production, so the production policy is byte-identical to
+           * the smart-link r5 mirror. */
+          ...(process.env.NODE_ENV === "development"
+            ? ["script-src 'self' 'unsafe-inline' 'unsafe-eval'"]
+            : ["script-src 'self' 'unsafe-inline'"]),
           "style-src 'self' 'unsafe-inline'",
           "img-src 'self' data:",
           "font-src 'self' data:",

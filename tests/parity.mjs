@@ -697,8 +697,8 @@ const LANDING_DARK_LAYER = [
     /html\.dark \.landing \.ln-dash-roles \{ background: rgba\(21, 34, 56, 0\.78\); \}/.test(landingRaw)],
   ['dark selection twin: luminous steel + night ink (the daylight violet-deep + ink pair breaks dark-on-dark)',
     /html\.dark \.landing ::selection \{ background: #8FBBF2; color: #0D1626; \}/.test(landingRaw)],
-  ['dark ghost-pill twin: pale hairline rgb(185 194 210 / 0.30) — the navy 0.34 hairline vanishes on navy',
-    /html\.dark \.landing \.ln-btn-ghost \{[^}]*border: 1px solid rgb\(185 194 210 \/ 0\.30\);/.test(landingRaw)],
+  ['dark ghost-pill twin: pale hairline rgb(185 194 210 / 0.50) — the navy 0.34 hairline vanishes on navy; P23-D: 0.30 → 0.50 (hover 0.48 → 0.65) — the resting hairline measured ≈2.0:1 blended on #05070D (below WCAG 1.4.11 3:1 for UI components); 0.50 blends ≈rgb(95 100 111) and clears the floor, honestly re-pinned',
+    /html\.dark \.landing \.ln-btn-ghost \{[^}]*border: 1px solid rgb\(185 194 210 \/ 0\.50\);/.test(landingRaw)],
   ['dark accent washes ride the LUMINOOUS orange (rgba(255, 122, 56, ·) — the daylight 209,73,0 tints dim to mud on navy)',
     /html\.dark \.landing \.ln-station-node\.is-active \{ background: rgba\(255, 122, 56, 0\.08\); \}/.test(landingRaw) &&
     /html\.dark \.landing \.ln-dash-action:hover \{ background: rgba\(255, 122, 56, 0\.12\); \}/.test(landingRaw) &&

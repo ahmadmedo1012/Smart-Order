@@ -207,6 +207,10 @@ export default function GlobeScene({ selectedId, onSelect, onFirstInteract }: Gl
     let dotColor = '#FFFFFF';
     let arcColor = '#FF6B00';
     let glowColor = 'rgba(41, 98, 255, 0.16)';
+    /* P23-D — the layered atmosphere's two new coats (CSS-var owned,
+       steel family at night / navy-steel on paper — see landing.css) */
+    let haloColor = 'rgba(143, 187, 242, 0.10)';
+    let rimColor = 'rgba(197, 222, 250, 0.16)';
     let chipFont = '600 12px Tajawal, "Noto Kufi Arabic", sans-serif';
 
     /* the interaction state (hover + hit cache) */
@@ -220,8 +224,25 @@ export default function GlobeScene({ selectedId, onSelect, onFirstInteract }: Gl
       dotColor = cs.getPropertyValue('--globe-dot').trim() || dotColor;
       arcColor = cs.getPropertyValue('--globe-arc').trim() || arcColor;
       glowColor = cs.getPropertyValue('--globe-glow').trim() || glowColor;
+      haloColor = cs.getPropertyValue('--globe-halo').trim() || haloColor;
+      rimColor = cs.getPropertyValue('--globe-rim').trim() || rimColor;
       const f = cs.getPropertyValue('--globe-chip-font').trim();
       if (f) chipFont = f;
+    };
+
+    /* P23-D — recolor-with-alpha helper: accepts '#rrggbb' or
+       'rgba(r,g,b,a)' and returns the same color at a NEW alpha (the
+       bloom/rim/halo coats derive their fade stops without hand-coded
+       color pairs — the CSS var stays the single source of truth). */
+    const withAlphaRgba = (color: string, a: number): string => {
+      const hex = color.match(/^#([0-9a-f]{6})$/i);
+      if (hex) {
+        const n = parseInt(hex[1]!, 16);
+        return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+      }
+      const m = color.match(/^rgba?\(\s*([\d.]+)\s*[, ]\s*([\d.]+)\s*[, ]\s*([\d.]+)/i);
+      if (m) return `rgba(${Math.round(+m[1])}, ${Math.round(+m[2])}, ${Math.round(+m[3])}, ${a})`;
+      return color;
     };
 
     const fit = () => {
@@ -323,7 +344,43 @@ export default function GlobeScene({ selectedId, onSelect, onFirstInteract }: Gl
     const draw = () => {
       ctx.clearRect(0, 0, W, H);
 
-      /* the atmospheric glow beneath the globe (CSS-var owned) */
+      /* P23-D — THE LAYERED ATMOSPHERE (the fresh audit read the globe
+         as "pasted on top — no volumetric glow, no rim light": a flat
+         dotted circle over a void). Three coats, all CSS-var owned:
+         1. the WIDE HALO — a soft sphere-centered bloom (steel at
+            night / navy-steel on paper) that lifts the sphere off the
+            deep ground — the sphere now sits IN light, not on black;
+         2. the LIMB RING — an offset-center radial band hugging the
+            limb, brighter toward the light (upper-left, matching the
+            hero sky radial at 30% 44%) and falling to nothing around
+            the dark limb — the read of a lit sphere EDGE, never a
+            cut-out circle. evenodd annulus fill (R*0.88 → R*1.015);
+         3. the UNDER-GLOW — the original bottom-weighted ground
+            breath, kept (the sphere still grounds at its base). */
+      const halo = ctx.createRadialGradient(CX, CY, R * 0.5, CX, CY, R * 1.48);
+      halo.addColorStop(0, haloColor);
+      halo.addColorStop(0.62, withAlphaRgba(haloColor, 0.45));
+      halo.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = halo;
+      ctx.fillRect(0, 0, W, H);
+
+      /* the limb ring — light source sits upper-left inside the sphere
+         (0.28R/0.30R off center); the near limb lands ≈0.72R from it,
+         the far limb ≈1.42R — the band sweeps bright→dim around */
+      const LX = CX - R * 0.28;
+      const LY = CY - R * 0.3;
+      const rim = ctx.createRadialGradient(LX, LY, R * 0.3, LX, LY, R * 1.6);
+      rim.addColorStop(0, 'rgba(0,0,0,0)');
+      rim.addColorStop(0.45, rimColor);
+      rim.addColorStop(0.86, withAlphaRgba(rimColor, 0.28));
+      rim.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = rim;
+      ctx.beginPath();
+      ctx.arc(CX, CY, R * 1.015, 0, 6.2832);
+      ctx.arc(CX, CY, R * 0.88, 0, 6.2832, true);
+      ctx.fill('evenodd');
+
+      /* the under-glow beneath the globe (CSS-var owned) */
       const g = ctx.createRadialGradient(CX, CY + R * 0.75, R * 0.1, CX, CY + R * 0.75, R * 1.6);
       g.addColorStop(0, glowColor);
       g.addColorStop(1, 'rgba(0,0,0,0)');
@@ -361,7 +418,11 @@ export default function GlobeScene({ selectedId, onSelect, onFirstInteract }: Gl
         const owns =
           selIdx >= 0 && (route.a === NODES[selIdx] || route.b === NODES[selIdx]);
         ctx.strokeStyle = arcColor;
-        ctx.lineWidth = owns ? 1.8 : 1.4;
+        /* P23-D: 1.4 → 1.6 — the audit read the resting routes as
+           invisible threads; one hairline rung up keeps the explorer
+           hierarchy (selected 1.8 stays dominant) while the network
+           reads at a glance */
+        ctx.lineWidth = owns ? 1.8 : 1.6;
         if (!reduced) {
           ctx.setLineDash([4, 7]);
           ctx.lineDashOffset = -dashPhase - ai * 5;
@@ -373,7 +434,7 @@ export default function GlobeScene({ selectedId, onSelect, onFirstInteract }: Gl
           const [px, py, z] = project(p[0]!, p[1]!, p[2]!);
           if (i === 0) ctx.moveTo(px, py);
           else ctx.lineTo(px, py);
-          const base = z < 0 ? 0.2 : 0.55 + 0.45 * z;
+          const base = z < 0 ? 0.2 : Math.max(0.5, 0.55 + 0.45 * z);
           ctx.globalAlpha = owns ? Math.max(0.28, base) * (selIdx >= 0 ? 1.55 : 1) : selIdx >= 0 ? base * 0.38 : base;
         }
         ctx.stroke();
@@ -429,15 +490,32 @@ export default function GlobeScene({ selectedId, onSelect, onFirstInteract }: Gl
         }
         ctx.globalAlpha = 1;
       }
-      /* the quiet nodes (pulse when live; still when a selection focuses) */
-      ctx.fillStyle = arcColor;
+      /* the quiet nodes (pulse when live; still when a selection
+         focuses). P23-D — the flat "pasted dot" dies: each resting
+         node now reads as EMITTED LIGHT — a soft radial bloom (the
+         route orange breathing out to ~4.5× the core) under the
+         bright core + the existing hairline ring. Layered light, not
+         a vector circle. */
       for (let i = 0; i < NODES.length; i++) {
         if (i === selIdx || i === hoverIdx) continue;
         const p = nodePts[i]!;
         if (p.z < 0.08) continue;
         const pulse = reduced || selIdx >= 0 ? 1 : 1 + 0.22 * Math.sin(clock / 900 + i * 1.7);
         const base = Math.max(2.4, R * 0.011) * p.s;
+        /* the bloom — a gradient, not a bigger solid dot */
+        const bloomR = base * 4.5 * pulse;
+        const bloom = ctx.createRadialGradient(p.px, p.py, 0, p.px, p.py, bloomR);
+        bloom.addColorStop(0, withAlphaRgba(arcColor, 0.34));
+        bloom.addColorStop(0.5, withAlphaRgba(arcColor, 0.13));
+        bloom.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.globalAlpha = selIdx >= 0 ? 0.4 : 0.85;
+        ctx.fillStyle = bloom;
+        ctx.beginPath();
+        ctx.arc(p.px, p.py, bloomR, 0, 6.2832);
+        ctx.fill();
+        /* the bright core */
         ctx.globalAlpha = selIdx >= 0 ? 0.5 : 0.9;
+        ctx.fillStyle = arcColor;
         ctx.beginPath();
         ctx.arc(p.px, p.py, base * pulse, 0, 6.2832);
         ctx.fill();
