@@ -129,10 +129,14 @@ export function LandingHeader() {
       {/* Header — the .scrolled state class is toggled imperatively */}
       <header className="landing-header" ref={headerRef}>
         <div className="landing-nav">
-          {/* P26-D (WCAG 2.5.3 Label-in-Name): the visible lockup is
-              "Smart Order" + tagline — the accessible name must contain
-              them (the old Arabic transliteration dropped both). */}
-          <Link href="/" className="landing-brand" aria-label="Smart Order — منصّة الطلبات الرقمية — الرئيسية">
+          {/* P26-D follow-up (Label-in-Name root cause): the aria-label
+              is GONE — name-from-content, the Smart-Link main-nav.tsx:184
+              law. Any explicit label must repeat the full visible lockup
+              (the aria-hidden S counts as visible text for WCAG 2.5.3 and
+              glues: "SSmart Order"), which the old transliterated label
+              dropped entirely. Name-from-content is compliant by
+              construction and self-maintaining; «/» reads from context. */}
+          <Link href="/" className="landing-brand">
             <span className="landing-brand-mark" aria-hidden="true">S</span>
             <span className="landing-brand-text">
               <span className="landing-brand-name">Smart Order</span>
