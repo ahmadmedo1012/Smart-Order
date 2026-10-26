@@ -53,7 +53,8 @@ export function LandingFooter() {
       <div className="marketing-container">
         <div className="landing-footer-grid">
           <div className="landing-footer-about">
-            <Link href="/" className="landing-brand" aria-label="سمارت أوردر — الرئيسية">
+            {/* P26-D: same Label-in-Name fix as the header brand. */}
+            <Link href="/" className="landing-brand" aria-label="Smart Order — منصّة الطلبات الرقمية — الرئيسية">
               <span className="landing-brand-mark" aria-hidden="true">S</span>
               <span className="landing-brand-text">
                 <span className="landing-brand-name">Smart Order</span>

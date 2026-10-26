@@ -129,7 +129,10 @@ export function LandingHeader() {
       {/* Header — the .scrolled state class is toggled imperatively */}
       <header className="landing-header" ref={headerRef}>
         <div className="landing-nav">
-          <Link href="/" className="landing-brand" aria-label="سمارت أوردر — الرئيسية">
+          {/* P26-D (WCAG 2.5.3 Label-in-Name): the visible lockup is
+              "Smart Order" + tagline — the accessible name must contain
+              them (the old Arabic transliteration dropped both). */}
+          <Link href="/" className="landing-brand" aria-label="Smart Order — منصّة الطلبات الرقمية — الرئيسية">
             <span className="landing-brand-mark" aria-hidden="true">S</span>
             <span className="landing-brand-text">
               <span className="landing-brand-name">Smart Order</span>
