@@ -79,15 +79,17 @@ const PLANS = [
   },
 ];
 
+/* P29-C2 (demo imagery — twin of api/seed): real menu photography for the
+   flagship demo store (public/demo/*); letter-monogram fallback stays for
+   real merchants' photo-less products. */
 const DEMO_PRODUCTS = [
-  { name: "بيتزا مارغريتا", cat: "بيتزا", price: 45000, desc: "صوص طماطم، موزاريلا، ريحان طازج", featured: true },
-  { name: "بيتزا خضراء", cat: "بيتزا", price: 45000, desc: "خضار الموسم مع الجبنة", featured: false },
-  { name: "برجر دجاج كبير", cat: "برجر", price: 23500, desc: "صدر دجاج مقرمش مع صوص خاص", featured: false },
-  { name: "برجر لحم كلاسيك", cat: "برجر", price: 28000, desc: "لحم طازج على الفحم", featured: true },
-  { name: "عصير برتقال طازج", cat: "مشروبات", price: 9000, desc: "برتقال طبيعي 100٪", featured: false },
-  { name: "شاي أخضر بالنعنع", cat: "مشروبات", price: 5000, desc: "شاي بالنعنع الطازج", featured: false },
+  { name: "بيتزا مارغريتا", cat: "بيتزا", price: 45000, desc: "صوص طماطم، موزاريلا، ريحان طازج", featured: true, img: "/demo/margherita.jpg" },
+  { name: "بيتزا خضراء", cat: "بيتزا", price: 45000, desc: "خضار الموسم مع الجبنة", featured: false, img: "/demo/green-pizza.jpg" },
+  { name: "برجر دجاج كبير", cat: "برجر", price: 23500, desc: "صدر دجاج مقرمش مع صوص خاص", featured: false, img: "/demo/chicken-burger.jpg" },
+  { name: "برجر لحم كلاسيك", cat: "برجر", price: 28000, desc: "لحم طازج على الفحم", featured: true, img: "/demo/beef-burger.jpg" },
+  { name: "عصير برتقال طازج", cat: "مشروبات", price: 9000, desc: "برتقال طبيعي 100٪", featured: false, img: "/demo/orange-juice.jpg" },
+  { name: "شاي أخضر بالنعنع", cat: "مشروبات", price: 5000, desc: "شاي بالنعنع الطازج", featured: false, img: "/demo/mint-tea.jpg" },
 ];
-
 async function main() {
   // ── Plans ──
   for (const plan of PLANS) {
@@ -144,25 +146,37 @@ async function main() {
     console.log("demo-store exists");
   }
 
-  // Products
-  const productCount = await db.product.count({ where: { businessId: demo.id, isArchived: false } });
-  if (productCount === 0) {
+  // Products — P29-C2: idempotent by name (create missing, refresh the
+  // curated photo on existing — the count===0 gate could never upgrade an
+  // already-seeded demo store).
+  {
+    const existing = await db.product.findMany({ where: { businessId: demo.id, isArchived: false } });
+    let createdCount = 0;
+    let refreshed = 0;
     for (const p of DEMO_PRODUCTS) {
-      const category = demo.categories.find((c) => c.name === p.cat);
-      await db.product.create({
-        data: {
-          businessId: demo.id,
-          categoryId: category?.id,
-          name: p.name,
-          description: p.desc,
-          price: p.price,
-          isAvailable: true,
-          isFeatured: p.featured,
-          sortOrder: 0,
-        },
-      });
+      const match = existing.find((e) => e.name === p.name);
+      if (!match) {
+        const category = demo.categories.find((c) => c.name === p.cat);
+        await db.product.create({
+          data: {
+            businessId: demo.id,
+            categoryId: category?.id,
+            name: p.name,
+            description: p.desc,
+            price: p.price,
+            isAvailable: true,
+            isFeatured: p.featured,
+            sortOrder: 0,
+            imageUrl: p.img,
+          },
+        });
+        createdCount++;
+      } else if (match.imageUrl !== p.img) {
+        await db.product.update({ where: { id: match.id }, data: { imageUrl: p.img } });
+        refreshed++;
+      }
     }
-    console.log(`seeded ${DEMO_PRODUCTS.length} demo products`);
+    console.log(`demo products: ${createdCount} created, ${refreshed} photo-refreshed`);
   }
 
   // Payment methods

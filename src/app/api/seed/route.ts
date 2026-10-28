@@ -12,13 +12,20 @@ export const runtime = "nodejs";
  * twin): the public demo store + the plans catalog. Authorised by either
  * a platform-admin session or the SEED_SECRET env value.
  */
+/**
+ * P29-C2 (demo imagery): the flagship demo store the landing CTA points
+ * to now carries real menu photography (public/demo/*, deterministic
+ * repo-served assets) — the letter-monogram fallback stays for real
+ * merchants' photo-less products, but the showcase demonstrates the full
+ * photo experience the product sells.
+ */
 const DEMO_PRODUCTS = [
-  { name: "بيتزا مارغريتا", cat: "بيتزا", price: 45000, desc: "صوص طماطم، موزاريلا، ريحان طازج", featured: true },
-  { name: "بيتزا خضراء", cat: "بيتزا", price: 45000, desc: "خضار الموسم مع الجبنة", featured: false },
-  { name: "برجر دجاج كبير", cat: "برجر", price: 23500, desc: "صدر دجاج مقرمش مع صوص خاص", featured: false },
-  { name: "برجر لحم كلاسيك", cat: "برجر", price: 28000, desc: "لحم طازج على الفحم", featured: true },
-  { name: "عصير برتقال طازج", cat: "مشروبات", price: 9000, desc: "برتقال طبيعي 100%", featured: false },
-  { name: "شاي أخضر بالنعنع", cat: "مشروبات", price: 5000, desc: "شاي بالنعنع الطازج", featured: false },
+  { name: "بيتزا مارغريتا", cat: "بيتزا", price: 45000, desc: "صوص طماطم، موزاريلا، ريحان طازج", featured: true, img: "/demo/margherita.jpg" },
+  { name: "بيتزا خضراء", cat: "بيتزا", price: 45000, desc: "خضار الموسم مع الجبنة", featured: false, img: "/demo/green-pizza.jpg" },
+  { name: "برجر دجاج كبير", cat: "برجر", price: 23500, desc: "صدر دجاج مقرمش مع صوص خاص", featured: false, img: "/demo/chicken-burger.jpg" },
+  { name: "برجر لحم كلاسيك", cat: "برجر", price: 28000, desc: "لحم طازج على الفحم", featured: true, img: "/demo/beef-burger.jpg" },
+  { name: "عصير برتقال طازج", cat: "مشروبات", price: 9000, desc: "برتقال طبيعي 100%", featured: false, img: "/demo/orange-juice.jpg" },
+  { name: "شاي أخضر بالنعنع", cat: "مشروبات", price: 5000, desc: "شاي بالنعنع الطازج", featured: false, img: "/demo/mint-tea.jpg" },
 ];
 
 export async function POST(req: NextRequest) {
@@ -80,9 +87,15 @@ export async function POST(req: NextRequest) {
       created.store = true;
     }
 
-    const productCount = await db.product.count({ where: { businessId: demo.id, isArchived: false } });
-    if (productCount === 0) {
-      for (const p of DEMO_PRODUCTS) {
+    /* P29-C2: idempotent by product name — create the missing, refresh the
+       curated photo on the existing (the previous count===0 gate meant a
+       re-seed could never upgrade an already-seeded demo store). */
+    const existingProducts = await db.product.findMany({
+      where: { businessId: demo.id, isArchived: false },
+    });
+    for (const p of DEMO_PRODUCTS) {
+      const match = existingProducts.find((e) => e.name === p.name);
+      if (!match) {
         const category = demo.categories.find((c) => c.name === p.cat);
         await db.product.create({
           data: {
@@ -93,10 +106,14 @@ export async function POST(req: NextRequest) {
             price: p.price,
             isAvailable: true,
             isFeatured: p.featured,
+            imageUrl: p.img,
           },
         });
+        created.products += 1;
+      } else if (match.imageUrl !== p.img) {
+        await db.product.update({ where: { id: match.id }, data: { imageUrl: p.img } });
+        created.products += 1;
       }
-      created.products = DEMO_PRODUCTS.length;
     }
 
     if (demo.paymentMethods.length === 0) {
