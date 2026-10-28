@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
+import { notQaFixtureBusiness } from "@/lib/qa-fixtures";
 
 export const dynamic = "force-dynamic";
 
@@ -18,8 +19,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // (wasted entry + signal noise). Sign-up stays reachable via the nav.
 
   try {
+    /* P30-B (§4 sitemap gate — the Smart-Menu r96/P29-D1 doctrine): the
+     * e2e battery's QA-fixture businesses («مخبز الاختبار أ» + its
+     * suffixed re-runs) must never ride the production sitemap. Their
+     * storefront routes stay reachable (exclusion = no crawl budget,
+     * never a broken link) — they just stop presenting as real stores.
+     * Found live in production: 7 fixture stores in the sitemap. */
     const businesses = await db.business.findMany({
-      where: { isPublished: true, isActive: true },
+      where: { isPublished: true, isActive: true, ...notQaFixtureBusiness },
       select: { slug: true, updatedAt: true },
       take: 500,
     });

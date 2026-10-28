@@ -1,13 +1,35 @@
 /**
  * Smart Order — E2E API test suite
- * Runs against any deployment (local dev or production URL).
+ * Runs against a LOCAL test server (localhost by default).
  * Usage: node tests/e2e/api-e2e.js [baseUrl]
  *   default baseUrl: http://localhost:3000
  *
  * Covers: health, auth, tenant isolation (CRITICAL), rate limits,
- * order lifecycle, idempotency, validation, money re-pricing.
+ * order lifecycle, idempotency, validation, money re-pricing,
+ * public-surface fixture hygiene (P30-B: sitemap + counters gates).
  */
 const BASE = process.argv[2] || "http://localhost:3000";
+
+/* P30-B (§4 root seam — the residue can never be created again): this
+ * battery registers QA-fixture businesses («مخبز الاختبار أ»…) through
+ * the PUBLIC register API and PUBLISHES one of them. At some era a run
+ * was pointed at production and its fixtures stayed — 7 published
+ * «مخبز الاختبار» stores were found in the production sitemap and the
+ * landing counters this wave. The battery now refuses any non-local
+ * target unless a deliberate isolated-staging run opts in
+ * (E2E_ALLOW_REMOTE=1 — never production). */
+{
+  let host = "";
+  try { host = new URL(BASE).hostname.replace(/^\[|\]$/g, ""); } catch { host = ""; }
+  const isLocal =
+    ["localhost", "127.0.0.1", "::1"].includes(host) ||
+    host.endsWith(".local") || host.endsWith(".test") || host.endsWith(".example");
+  if (!isLocal && process.env.E2E_ALLOW_REMOTE !== "1") {
+    console.error(`\n✗ رفضنا الهدف ${BASE} — هذه البطارية تنشئ بيانات اختبار (مخبز الاختبار أ…) وتنشرها، فلا تُشغَّل إلا على خادم محلي معزول.`);
+    console.error(`  للتجاوز المقصود ضد بيئة تجريبية معزولة فقط: E2E_ALLOW_REMOTE=1`);
+    process.exit(1);
+  }
+}
 let pass = 0, fail = 0, skipped = 0;
 
 const ok = (name, cond, detail = "") => {
@@ -646,6 +668,28 @@ async function main() {
     "reports response after Pro: the CSV preference flag flips true (and the 90-day window still answers)",
     proReports.status === 200 && proReports.body?.data?.window?.days === 90 && proReports.body?.data?.series?.length === 90 && proReports.body?.data?.canExportCsv === true,
     JSON.stringify(proReports.body).slice(0, 120),
+  );
+
+  // ---------- 12. public surfaces ignore QA fixtures (P30-B) ----------
+  console.log("— الأسطح العامة تتجاهل بيانات الاختبار (P30-B)");
+  const bizASlug = regA?.body?.data?.business?.slug;
+  ok("battery captured the fixture store's slug (the register response contract)", !!bizASlug, JSON.stringify(regA?.body?.data?.business ?? {}).slice(0, 80));
+  const sm = await makeCtx().call("/sitemap.xml", { rawText: true });
+  ok(
+    "sitemap sanity: the static routes still ride it",
+    typeof sm.body === "string" && sm.body.includes("/pricing") && sm.body.includes("/terms"),
+    `status ${sm.status}`,
+  );
+  ok(
+    "sitemap excludes the published QA-fixture store (the live production defect: 7 fixture stores rode it)",
+    typeof sm.body === "string" && !sm.body.includes(`/store/${bizASlug}`),
+    `fixture slug: ${bizASlug}`,
+  );
+  const fixturePage = bizASlug ? await makeCtx().call(`/store/${bizASlug}`, { rawText: true }) : { status: 0 };
+  ok(
+    "fixture storefront stays reachable (exclusion = no crawl budget, never a broken link)",
+    fixturePage.status === 200,
+    `status ${fixturePage.status}`,
   );
 
   console.log(`\nالنتيجة: ${pass} ناجح · ${fail} فاشل · ${skipped} متجاهل\n`);

@@ -109,6 +109,12 @@ jobs:
       # مطابق للافتراضي التطويري في .env.example — ملف SQLite محلي،
       # بلا خادم قاعدة بيانات خارجي (حيلة W3-B2 في r130 للإقلاع).
       DATABASE_URL: "file:./db/smart-order.db"
+      # P30-B: البطارية تفحص الـ sitemap — NEXT_PUBLIC_SITE_URL يُخبز في
+      # وقت البناء (Next يثبّت NEXT_PUBLIC_* في الحزمة)، فبدونه يكون الـ
+      # sitemap فارغًا وفحص تسريب بيانات الاختبار يمرّ بلا معنى. الآن
+      # الفحص حقيقي: البطارية تنشئ متجر اختبار منشورًا وتطالب بأن يبقى
+      # خارج الـ sitemap بينما /pricing و/terms يظلان داخله.
+      NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
     steps:
       - name: Checkout
         uses: actions/checkout@v7

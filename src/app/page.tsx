@@ -1,7 +1,7 @@
 import "./landing.css";
 import { SkipLink } from "@/components/shared/skip-link";
-import { db } from "@/lib/db";
 import { SITE_URL } from "@/app/layout";
+import { getLandingStats } from "@/lib/landing-stats";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroSection } from "@/components/landing/hero-section";
 import { OrderJourneySection } from "@/components/landing/OrderJourneySection";
@@ -43,19 +43,6 @@ const landingJsonLd = {
     },
   ],
 };
-
-/** Live, honest counts (family honesty policy: no invented numbers). */
-async function getLandingStats(): Promise<{ totalStores: number; totalOrders: number }> {
-  try {
-    const [totalStores, totalOrders] = await Promise.all([
-      db.business.count({ where: { isActive: true, isPublished: true } }),
-      db.order.count(),
-    ]);
-    return { totalStores, totalOrders };
-  } catch {
-    return { totalStores: 0, totalOrders: 0 };
-  }
-}
 
 /* ═══════════════════════════════════════════════════════════════════════
    r142 «الخط» — the page IS the road.
