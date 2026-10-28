@@ -8,7 +8,22 @@
  * visual carrier of those two numbers; pre-fold rows heal at display time
  * via lib/plan-types.ts foldRestatedLimits.
  *
- * Usage: node scripts/seed-family.js
+ * P29-C3 (deploy-time seed — the blind-spot class retire): the Vercel
+ * buildCommand runs this AFTER `prisma generate` so the deployed code and
+ * the demo data can never drift apart again. The P29-C2 photo refresh
+ * shipped in code but production kept `imageUrl: null` for three days
+ * because the prescribed manual `POST /api/seed?secret=…` needed a secret
+ * nobody ran — "deployed code" must imply "current demo data" structurally.
+ *
+ * Exit semantics (both intentional):
+ *   - Invoked WITHOUT SEED_STRICT: a failure prints a loud [SEED] banner and
+ *     exits 0 — a cold/missing DB must never block a deploy (same philosophy
+ *     as vercel-db-sync.mjs: a shipped app beats a frozen one).
+ *   - Invoked with SEED_STRICT=1 (local/QA): the historical exit 1 on error
+ *     is preserved — direct invocations stay loud.
+ *
+ * Usage: node scripts/seed-family.js          (deploy/non-blocking)
+ *        SEED_STRICT=1 node scripts/seed-family.js   (local, strict)
  */
 const { PrismaClient } = require("@prisma/client");
 const db = new PrismaClient();
@@ -205,8 +220,21 @@ async function main() {
 }
 
 main()
+  .then(() => {
+    console.log("[SEED] ✓ family seed complete (plans + demo-store, idempotent)");
+  })
   .catch((e) => {
+    console.error("[SEED] ─────────────────────────────────────────────────────");
+    console.error("[SEED] ⚠ family seed did NOT complete:");
     console.error(e);
-    process.exit(1);
+    if (process.env.SEED_STRICT === "1") {
+      console.error("[SEED] (SEED_STRICT — strict invocation, exiting 1)");
+      process.exit(1);
+    }
+    console.error("[SEED] Non-strict invocation (deploy chain): the deploy");
+    console.error("[SEED] PROCEEDS — the app does not need demo data to build.");
+    console.error("[SEED] Fix DATABASE_URL reachability to restore seed-on-deploy.");
+    console.error("[SEED] ─────────────────────────────────────────────────────");
+    process.exit(0);
   })
   .finally(() => db.$disconnect());
