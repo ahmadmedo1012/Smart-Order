@@ -32,6 +32,17 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SCHEMA = join(ROOT, 'prisma/schema.postgres.prisma');
 
+/* P30-A (§6 preview isolation): schema pushes from Vercel preview builds
+ * are structurally prevented — an unmerged branch must never push schema
+ * changes to a shared/production database (the same env var a preview
+ * build sees unless deliberately scoped). Opt-in for a genuinely
+ * dedicated preview database: DB_ALLOW_PREVIEW=1. Local/CI invocations
+ * (no VERCEL_ENV) stay ungated — identical behavior to pre-P30. */
+if (process.env.VERCEL_ENV === 'preview' && process.env.DB_ALLOW_PREVIEW !== '1') {
+  console.log('[DB-SYNC] SKIPPED — Vercel preview build (schema mutations are production-only by default; set DB_ALLOW_PREVIEW=1 for a dedicated preview database).');
+  process.exit(0);
+}
+
 const TRANSIENT = /P1001|P1002|P1003|P1004|P1008|ECONNREFUSED|ECONNRESET|ECONNABORTED|ETIMEDOUT|ENOTFOUND|EAI_AGAIN|Can't reach database server|server closed the connection unexpectedly|SSL connection has been closed unexpectedly/i;
 const MAX_ATTEMPTS = 3;
 const BACKOFF_MS = [0, 10_000, 20_000];

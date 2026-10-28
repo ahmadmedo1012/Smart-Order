@@ -28,6 +28,25 @@
 const { PrismaClient } = require("@prisma/client");
 const db = new PrismaClient();
 
+/* P30-A (§6 preview isolation): a Vercel preview build must never mutate
+ * the database it is pointed at (preview env vars are shared with
+ * production unless deliberately scoped — the guard is structural, not
+ * config-dependent). Opt-in for a genuinely dedicated preview database:
+ * SEED_ALLOW_PREVIEW=1. Local/CI invocations (no VERCEL_ENV) stay ungated
+ * — identical behavior to pre-P30. */
+if (process.env.VERCEL_ENV === "preview" && process.env.SEED_ALLOW_PREVIEW !== "1") {
+  console.log("[SEED] SKIPPED — Vercel preview build (demo data is production-only by default; set SEED_ALLOW_PREVIEW=1 for a dedicated preview database)");
+  process.exit(0);
+}
+
+/* P30-A (§6 ownership): the demo slug is only ever mutated when the row
+ * found there carries the demo identity. A merchant row at «demo-store»
+ * (possible only from a pre-RESERVED registration) makes every demo
+ * mutation skip loudly instead of touching merchant records — the seed
+ * never "refreshes" photos or tops up payment methods on a store it
+ * does not own. */
+const DEMO_STORE_NAME = "مخبز الواحة — تجريبي";
+
 const PLANS = [
   {
     name: "Free",
@@ -137,7 +156,7 @@ async function main() {
     demo = await db.business.create({
       data: {
         slug: "demo-store",
-        name: "مخبز الواحة — تجريبي",
+        name: DEMO_STORE_NAME,
         description: "متجر تجريبي يعرض تجربة التسوق الكاملة في سمارت أوردر",
         city: "طرابلس",
         phone: "0910000000",
@@ -157,6 +176,16 @@ async function main() {
       include: { categories: true, paymentMethods: true, deliveryZones: true },
     });
     console.log("created demo-store");
+  } else if (demo.name !== DEMO_STORE_NAME) {
+    console.error("[SEED] ─────────────────────────────────────────────────────");
+    console.error("[SEED] ⚠ slug «demo-store» is occupied by a NON-DEMO business:");
+    console.error(`[SEED]   «${demo.name}» — every demo mutation is SKIPPED.`);
+    console.error("[SEED]   The family seed never touches merchant records.");
+    console.error("[SEED]   (The plans catalog above is still seeded — code-owned.)");
+    console.error("[SEED]   If unexpected, investigate the business row before");
+    console.error("[SEED]   the next deploy.");
+    console.error("[SEED] ─────────────────────────────────────────────────────");
+    return { demoSkipped: true };
   } else {
     console.log("demo-store exists");
   }
@@ -220,8 +249,12 @@ async function main() {
 }
 
 main()
-  .then(() => {
-    console.log("[SEED] ✓ family seed complete (plans + demo-store, idempotent)");
+  .then((result) => {
+    if (result && result.demoSkipped) {
+      console.log("[SEED] ▲ family seed finished — plans seeded; demo section SKIPPED (slug «demo-store» is not the demo — see banner above)");
+    } else {
+      console.log("[SEED] ✓ family seed complete (plans + demo-store, idempotent)");
+    }
   })
   .catch((e) => {
     console.error("[SEED] ─────────────────────────────────────────────────────");

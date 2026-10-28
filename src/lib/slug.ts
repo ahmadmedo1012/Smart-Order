@@ -10,6 +10,11 @@ const ARABIC_TO_SLUG: Record<string, string> = {
 const RESERVED = new Set([
   "api", "dashboard", "login", "register", "store", "track", "admin", "settings",
   "public", "assets", "fonts", "uploads", "vercel-admin", "terms", "privacy", "about",
+  // P30-A (§6 isolation): the flagship demo slug is seed-owned (the deploy
+  // seed + /api/seed mutate that row) — a merchant registering «Demo Store»
+  // must never land on it. The mutation seams verify ownership too, but the
+  // registration seam is closed at the source.
+  "demo-store",
 ]);
 
 function slugifyArabic(input: string): string {

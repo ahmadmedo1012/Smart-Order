@@ -28,6 +28,13 @@ const DEMO_PRODUCTS = [
   { name: "شاي أخضر بالنعنع", cat: "مشروبات", price: 5000, desc: "شاي بالنعنع الطازج", featured: false, img: "/demo/mint-tea.jpg" },
 ];
 
+/* P30-A (§6 ownership): the demo slug is only ever mutated when the row
+ * found there carries the demo identity — a merchant row at «demo-store»
+ * (possible only from a pre-RESERVED registration) makes the route
+ * refuse with 409 instead of touching merchant records. Twin of the
+ * guard in scripts/seed-family.js. */
+const DEMO_STORE_NAME = "مخبز الواحة — تجريبي";
+
 export async function POST(req: NextRequest) {
   try {
     /* r140 (P3-8): حد معدل قبل أي بحث جلسة/قاعدة — المسار الوحيد من
@@ -65,7 +72,7 @@ export async function POST(req: NextRequest) {
       demo = await db.business.create({
         data: {
           slug: "demo-store",
-          name: "مخبز الواحة — تجريبي",
+          name: DEMO_STORE_NAME,
           description: "متجر تجريبي يعرض تجربة التسوق الكاملة في سمارت أوردر",
           city: "طرابلس",
           phone: "0910000000",
@@ -85,6 +92,14 @@ export async function POST(req: NextRequest) {
         include: { categories: true, paymentMethods: true, deliveryZones: true },
       });
       created.store = true;
+    } else if (demo.name !== DEMO_STORE_NAME) {
+      /* P30-A (§6 ownership): slug occupied by a NON-demo business —
+       * refuse without touching anything (merchant records are never
+       * mutated by the family seed; the twin script skips loudly). */
+      return fail(
+        `slug «demo-store» مشغول بمتجر غير تجريبي («${demo.name}») — لم تُعدَّل أي بيانات`,
+        409
+      );
     }
 
     /* P29-C2: idempotent by product name — create the missing, refresh the
