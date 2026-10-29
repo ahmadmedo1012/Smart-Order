@@ -218,7 +218,13 @@ export function LandingHeader() {
 
           <div className="landing-header-cta">
             <Link href="/login" className="ln-btn-ghost">تسجيل الدخول</Link>
-            <Link href="/register" className="ln-btn-gold">
+            {/* P31-D (CTA de-competition): the register affordance rode
+                the filled gold pill — a SECOND primary fighting the
+                hero's own ابدأ مجاناً in the first viewport. Same href,
+                same label, now the quiet .ln-btn-text rung (accent ink
+                + arrow + underline on hover): exactly ONE filled
+                primary per viewport, the hero keeps it. */}
+            <Link href="/register" className="ln-btn-text">
               أنشئ متجرك
               <ArrowLeft size={14} aria-hidden="true" />
             </Link>

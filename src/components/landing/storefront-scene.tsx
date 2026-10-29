@@ -79,32 +79,33 @@ function StorefrontMiniUI() {
         </span>
         <div className="min-w-0 flex-1">
           <div className="truncate text-[15px] font-bold leading-tight text-foreground">مخبز الواحة</div>
-          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1 text-[12px] text-muted-foreground">
             <MapPin className="size-3 shrink-0" aria-hidden="true" />
             <span className="truncate">طرابلس</span>
           </div>
         </div>
-        <span className="shrink-0 rounded-sm border border-(--c-mint-ink)/35 bg-(--c-mint-bg) px-1.5 py-0.5 text-[10px] font-bold text-(--c-mint-deep)">
+        <span className="shrink-0 rounded-sm border border-(--c-mint-ink)/35 bg-(--c-mint-bg) px-1.5 py-0.5 text-[12px] font-bold text-(--c-mint-deep)">
           مفتوح
         </span>
         <span className="relative flex size-10 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
           <ShoppingBag className="size-4.5" aria-hidden="true" />
-          <span className="absolute -top-1 -end-1 flex size-4.5 items-center justify-center rounded-full bg-saffron text-[10px] font-bold tabular-nums text-espresso">
+          <span className="absolute -top-1 -end-1 flex size-5 items-center justify-center rounded-full bg-saffron text-[12px] font-bold tabular-nums text-espresso">
             {count}
           </span>
         </span>
       </div>
 
       {/* Category strip — idle round pills, the active one squared
-          (franked stamp — the filter-pills grammar). */}
+          (franked stamp — the filter-pills grammar). P31-D: the mock
+          rides the 12px legibility floor (was 11px). */}
       <div className="flex gap-1.5 overflow-hidden border-b border-border/40 px-3 py-2">
         {DEMO_CATEGORIES.map((c, i) => (
           <span
             key={c}
             className={
               i === 0
-                ? "rounded-sm border border-(--c-copper-ink)/35 bg-(--c-copper-bg) px-2.5 py-1 text-[11px] font-bold text-(--c-copper-deep)"
-                : "rounded-full border border-border/60 px-2.5 py-1 text-[11px] text-muted-foreground"
+                ? "rounded-sm border border-(--c-copper-ink)/35 bg-(--c-copper-bg) px-2.5 py-1 text-[12px] font-bold text-(--c-copper-deep)"
+                : "rounded-full border border-border/60 px-2.5 py-1 text-[12px] text-muted-foreground"
             }
           >
             {c}
@@ -115,7 +116,7 @@ function StorefrontMiniUI() {
       {/* Chapter label + the live mono count chip (the storefront h2 row). */}
       <div className="flex items-center justify-between gap-2 px-3 pb-1 pt-2.5">
         <span className="text-[12px] font-bold text-foreground">كل المنتجات</span>
-        <span className="rounded-sm border border-border/60 bg-muted/60 px-1.5 py-0.5 font-mono text-[10px] font-medium tabular-nums text-muted-foreground">
+        <span className="rounded-sm border border-border/60 bg-muted/60 px-1.5 py-0.5 font-mono text-[12px] font-medium tabular-nums text-muted-foreground">
           {countedArabicPhrase(DEMO_STORE_PRODUCT_COUNT, "منتج", {
             one: "منتج واحد",
             two: "منتجان",
@@ -133,16 +134,16 @@ function StorefrontMiniUI() {
             <span className="relative block size-13 shrink-0 overflow-hidden rounded-lg">
               <DemoProductArt kind={p.art} className="size-full" />
               {p.featured && (
-                <span className="absolute top-1 start-1 rounded-full bg-saffron/95 px-1.5 py-px text-[8px] font-bold text-espresso">
+                <span className="absolute top-1 start-1 rounded-full bg-saffron/95 px-1.5 py-px text-[12px] font-bold text-espresso">
                   مميز
                 </span>
               )}
             </span>
             <div className="min-w-0 flex-1">
               <div className="truncate text-[13px] font-bold leading-snug text-foreground">{p.name}</div>
-              <div className="truncate text-[10.5px] leading-snug text-muted-foreground">{p.desc}</div>
+              <div className="truncate text-[12px] leading-snug text-muted-foreground">{p.desc}</div>
               <span
-                className="mt-1 inline-flex items-center rounded-sm border border-border/70 bg-muted/50 px-1.5 py-0.5 font-mono text-[11.5px] font-bold tabular-nums text-foreground"
+                className="mt-1 inline-flex items-center rounded-sm border border-border/70 bg-muted/50 px-1.5 py-0.5 font-mono text-[12px] font-bold tabular-nums text-foreground"
                 dir="ltr"
               >
                 {formatLyd(p.price)}
@@ -162,7 +163,7 @@ function StorefrontMiniUI() {
       <div className="border-t border-border/60 bg-card px-3 py-2.5">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <div className="text-[10px] text-muted-foreground">
+            <div className="text-[12px] text-muted-foreground">
               سلة الزبون ·{" "}
               {countedArabicPhrase(count, "عنصر", {
                 one: "عنصر واحد",
@@ -175,7 +176,7 @@ function StorefrontMiniUI() {
               {formatLyd(subtotal)}
             </div>
           </div>
-          <span className="whatsapp-btn flex shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-2 text-[11.5px] font-bold">
+          <span className="whatsapp-btn flex shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-2 text-[12px] font-bold">
             <MessageCircle className="size-4" aria-hidden="true" />
             إرسال الطلب
           </span>
@@ -231,7 +232,11 @@ export function StorefrontScene() {
 
       {/* the QR plate — scan → store. Its own grid column beside the
           phone (P12-2d-2 flat editorial plate), pointing at the REAL
-          demo-store URL the section CTA opens. */}
+          demo-store URL the section CTA opens. P31-D: the plate is
+          GROUNDED — the animate-float-slow bobbing wrapper is gone
+          (floating debris), and landing.css draws the scan route (a
+          dashed hairline + node dot bridging the gap to the phone) +
+          the soft ground-plane shadow under both side plates. */}
       <m.div
         initial={{ opacity: 0, y: 14 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -239,18 +244,16 @@ export function StorefrontScene() {
         transition={{ delay: 0.15, ...springDefault }}
         className="ln-store-qr"
       >
-        <div className="animate-float-slow">
-          <div className="ln-plate flex flex-col items-center gap-3 p-4">
-            <div className="ln-store-qr-frame" aria-hidden="true">
-              <QrPlate />
-            </div>
-            <div className="text-center">
-              <p className="text-[13px] font-bold text-foreground">امسح واطلب</p>
-              <p className="ln-mono mt-1.5 text-[10px] leading-relaxed" dir="ltr">
-                <span className="block">order.smart-link.ly</span>
-                <span className="block">/store/demo-store</span>
-              </p>
-            </div>
+        <div className="ln-plate flex flex-col items-center gap-3 p-4">
+          <div className="ln-store-qr-frame" aria-hidden="true">
+            <QrPlate />
+          </div>
+          <div className="text-center">
+            <p className="text-[13px] font-bold text-foreground">امسح واطلب</p>
+            <p className="ln-mono mt-1.5 text-[12px] leading-relaxed" dir="ltr">
+              <span className="block">order.smart-link.ly</span>
+              <span className="block">/store/demo-store</span>
+            </p>
           </div>
         </div>
       </m.div>
@@ -258,7 +261,9 @@ export function StorefrontScene() {
       {/* the customer cart — a detached card in its own column (never
           over the phone): the same demo order chapter 03 consoles, with
           the receipt grammar (items → dashed route divider → fee →
-          total) and the real local payment methods. */}
+          total) and the real local payment methods. P31-D: the bobbing
+          wrapper retired with the QR's — both side plates sit on the
+          composition's shared ground plane (landing.css). */}
       <m.div
         initial={{ opacity: 0, y: 14 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -266,78 +271,76 @@ export function StorefrontScene() {
         transition={{ delay: 0.3, ...springDefault }}
         className="ln-store-cart"
       >
-        <div className="animate-float-slow [animation-delay:1.6s]">
-          <div className="ln-plate p-4">
-            <div className="flex items-center gap-2.5">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-foreground/10">
-                <ShoppingBag className="size-4 text-accent-foreground" aria-hidden="true" />
-              </span>
-              <div className="text-start">
-                <p className="text-[13px] font-bold leading-tight text-foreground">سلة الزبون</p>
-                <p className="mt-0.5 text-[10.5px] text-muted-foreground">بُنيت من المتجر مباشرة</p>
-              </div>
+        <div className="ln-plate p-4">
+          <div className="flex items-center gap-2.5">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-foreground/10">
+              <ShoppingBag className="size-4 text-accent-foreground" aria-hidden="true" />
+            </span>
+            <div className="text-start">
+              <p className="text-[13px] font-bold leading-tight text-foreground">سلة الزبون</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">بُنيت من المتجر مباشرة</p>
             </div>
+          </div>
 
-            <ul className="mt-3 space-y-1.5">
-              {CART_ITEMS.map((it) => (
-                <li
-                  key={it.name}
-                  className="flex items-center justify-between gap-2 rounded-lg border border-border/40 bg-background/70 px-2.5 py-1.5"
+          <ul className="mt-3 space-y-1.5">
+            {CART_ITEMS.map((it) => (
+              <li
+                key={it.name}
+                className="flex items-center justify-between gap-2 rounded-lg border border-border/40 bg-background/70 px-2.5 py-1.5"
+              >
+                <span className="truncate text-[12px] font-bold text-foreground">
+                  {it.name} ×{it.qty}
+                </span>
+                <span
+                  className="shrink-0 font-mono text-[12px] font-bold tabular-nums text-accent-foreground"
+                  dir="ltr"
                 >
-                  <span className="truncate text-[11.5px] font-bold text-foreground">
-                    {it.name} ×{it.qty}
-                  </span>
-                  <span
-                    className="shrink-0 font-mono text-[11.5px] font-bold tabular-nums text-accent-foreground"
-                    dir="ltr"
-                  >
-                    {formatLyd(it.qty * it.unitPrice)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            {/* receipt tail — the dashed route divider, then fee + total */}
-            <div className="mt-2.5 space-y-1 border-t border-dashed border-border/70 pt-2.5">
-              <div className="flex items-center justify-between px-0.5">
-                <span className="text-[11px] text-muted-foreground">التوصيل · {DELIVERY.zone}</span>
-                <span className="font-mono text-[11px] font-medium tabular-nums text-muted-foreground" dir="ltr">
-                  {formatLyd(DELIVERY.fee)}
+                  {formatLyd(it.qty * it.unitPrice)}
                 </span>
-              </div>
-              <div className="flex items-center justify-between px-0.5">
-                <span className="text-[12px] font-bold text-foreground">الإجمالي</span>
-                <span className="font-mono text-[13px] font-bold tabular-nums text-foreground" dir="ltr">
-                  {formatLyd(total)}
-                </span>
-              </div>
-            </div>
+              </li>
+            ))}
+          </ul>
 
-            {/* the real local payment methods, as the storefront offers them */}
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              <span className="flex items-center gap-1 rounded-full bg-success/15 px-2 py-1 text-[10px] font-bold text-success-ink">
-                <Banknote className="size-3" aria-hidden="true" />
-                الدفع عند التوصيل
-              </span>
-              <span className="flex items-center gap-1 rounded-full bg-info/15 px-2 py-1 text-[10px] font-bold text-info-ink">
-                <Smartphone className="size-3" aria-hidden="true" />
-                مدار
-              </span>
-              <span className="flex items-center gap-1 rounded-full bg-info/15 px-2 py-1 text-[10px] font-bold text-info-ink">
-                <Smartphone className="size-3" aria-hidden="true" />
-                ليبيانا
+          {/* receipt tail — the dashed route divider, then fee + total */}
+          <div className="mt-2.5 space-y-1 border-t border-dashed border-border/70 pt-2.5">
+            <div className="flex items-center justify-between px-0.5">
+              <span className="text-[12px] text-muted-foreground">التوصيل · {DELIVERY.zone}</span>
+              <span className="font-mono text-[12px] font-medium tabular-nums text-muted-foreground" dir="ltr">
+                {formatLyd(DELIVERY.fee)}
               </span>
             </div>
+            <div className="flex items-center justify-between px-0.5">
+              <span className="text-[12px] font-bold text-foreground">الإجمالي</span>
+              <span className="font-mono text-[13px] font-bold tabular-nums text-foreground" dir="ltr">
+                {formatLyd(total)}
+              </span>
+            </div>
+          </div>
 
-            {/* the WhatsApp intake — the order reaching the merchant
+          {/* the real local payment methods, as the storefront offers them */}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            <span className="flex items-center gap-1 rounded-full bg-success/15 px-2 py-1 text-[12px] font-bold text-success-ink">
+              <Banknote className="size-3" aria-hidden="true" />
+              الدفع عند التوصيل
+            </span>
+            <span className="flex items-center gap-1 rounded-full bg-info/15 px-2 py-1 text-[12px] font-bold text-info-ink">
+              <Smartphone className="size-3" aria-hidden="true" />
+              مدار
+            </span>
+            <span className="flex items-center gap-1 rounded-full bg-info/15 px-2 py-1 text-[12px] font-bold text-info-ink">
+              <Smartphone className="size-3" aria-hidden="true" />
+              ليبيانا
+            </span>
+          </div>
+
+          {/* the WhatsApp intake — the order reaching the merchant
                 (was a floating chip; now the cart's own footer line). */}
-            <div className="mt-3 flex items-center gap-2 border-t border-border/50 pt-2.5">
-              <span className="relative flex size-6 shrink-0 items-center justify-center rounded-full bg-whatsapp/15">
-                <MessageCircle className="size-3.5 text-whatsapp" aria-hidden="true" />
-                <span className="absolute -top-0.5 -end-0.5 size-2 rounded-full bg-whatsapp ring-2 ring-(--ln-ink-2)" />
-              </span>
-              <span className="text-[11px] font-bold text-foreground">الطلب يصل التاجر فوراً</span>
-            </div>
+          <div className="mt-3 flex items-center gap-2 border-t border-border/50 pt-2.5">
+            <span className="relative flex size-6 shrink-0 items-center justify-center rounded-full bg-whatsapp/15">
+              <MessageCircle className="size-3.5 text-whatsapp" aria-hidden="true" />
+              <span className="absolute -top-0.5 -end-0.5 size-2 rounded-full bg-whatsapp ring-2 ring-(--ln-ink-2)" />
+            </span>
+            <span className="text-[12px] font-bold text-foreground">الطلب يصل التاجر فوراً</span>
           </div>
         </div>
       </m.div>

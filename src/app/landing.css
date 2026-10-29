@@ -347,16 +347,20 @@
 .landing .landing-megamenu-item-desc { display: block; color: var(--ln-cream-dim); font-size: 12px; margin-block-start: 2px; }
 
 .landing .landing-header-cta { display: flex; align-items: center; gap: var(--sp-2); }
-/* r149 (C2): the header pair takes the 44 rung of the fleet ladder —
-   the ghost compensates its 1px border (7.6 vs 8.6); min-block-size
-   guarantees both land on exactly 44 border-box. */
-.landing .landing-header-cta .ln-btn-gold { padding-block: 8.6px; min-block-size: 44px; }
+/* P31-D (CTA de-competition): the header's register pill used to be the
+   SECOND filled button in the hero viewport, fighting the hero's own
+   ابدأ مجاناً for the eye. The register affordance now rides the quiet
+   .ln-btn-text rung (same href, same label — the hero solid keeps the
+   ONE primary slot); the login ghost keeps its pill. r149's 44px pair
+   rung survives via the text rung's own min-block-size floor. */
 .landing .landing-header-cta .ln-btn-ghost { padding-block: 7.6px; min-block-size: 44px; }
 
 /* ── 4 · buttons — one pill system (landing.css:371-467) ───────────── */
-/* r131-F2: .ln-btn-text dropped from the groups below — 0 TSX consumers
-   (rg-verified). It stays ONLY in the two :active press groups that the
-   parity suite pins verbatim (§4 press tail + §14 RM form). */
+/* r131-F2: .ln-btn-text had 0 TSX consumers then (rg-verified); it
+   stayed only in the two :active press groups the parity suite pins
+   verbatim (§4 press tail + §14 RM form). P31-D revives the rung with
+   a real consumer — the header's register affordance (see below) — so
+   the base style ships here; the pinned groups ride unchanged. */
 .landing .ln-btn-gold,
 .landing .ln-btn-ghost {
   display: inline-flex;
@@ -465,6 +469,39 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
 }
 .landing .ln-btn-ghost.xl { padding: 10.8px 32px; font-size: 16px; min-block-size: 52px; }
+
+/* the quiet text-link rung (P31-D revival) — the tertiary CTA slot:
+   conversion-accent ink (the small-text orange tier, 5.6:1 day / 7.7:1
+   night) + the arrow, underline on hover, 44px touch floor, and the
+   pinned press tail / RM tint groups above ride it verbatim. */
+.landing .ln-btn-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  min-block-size: 44px;
+  background: transparent;
+  border: 0;
+  border-radius: 2px;
+  color: var(--ln-lime-text);
+  font-size: 14px;
+  font-weight: var(--fw-bold);
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--ln-t-fast) var(--ln-ease);
+}
+.landing .ln-btn-text:hover {
+  color: var(--ln-lime-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 5px;
+}
+.landing .ln-btn-text:focus-visible {
+  outline: 2px solid var(--ln-lime);
+  outline-offset: 2px;
+}
 
 /* ── 5 · chapter scaffolding — let every scene breathe ─────────────── */
 .landing .ln-chapter {
@@ -1515,6 +1552,15 @@
    visible under reduced motion */
 .landing .landing-progress { opacity: 1 !important; }
 
+/* P31-D — the revived .ln-btn-text under RM: the pinned §14 press tint
+   above paints its background lime-deep; the text rung answers with its
+   on-lime ink so the pressed link stays readable (day #FFF on #B23E00
+   5.1:1, night #05070D on #FF8A50 7+:1). Same specificity, later in the
+   cascade — wins only where §14 applies. */
+@media (prefers-reduced-motion: reduce) {
+  .landing .ln-btn-text:active { color: var(--ln-on-lime); }
+}
+
 /* ── 15 · P4 tail — card hover elevation (canonical P4-18) ──────────
    Lift + subtle shadow on hover signals interactivity without violating
    the flat-ground rule (hairlines stay). The press tail (P4-01) and
@@ -2158,6 +2204,53 @@
   background: var(--ln-cream);
   border-radius: 2px;
   padding: 10px;
+}
+
+/* P31-D — the triptych's ground truth: the QR plate stops floating.
+   (a) THE SCAN ROUTE — a dashed hairline + its node dot bridge the
+       column gap from the plate to the phone (the scan's path, the
+       page's road grammar), so the plate reads as part of ONE
+       composition with the store it opens. The route rides the QR
+       column's inline-end edge and spans exactly the grid's column-gap
+       (the same clamp), at the QR frame's optical center (plate p-4 +
+       half the 104px frame). Desktop triptych only — ≤920px the plates
+       pair up under the phone and the route retires.
+   (b) THE GROUND PLANE — a soft low-opacity shadow under both side
+       plates (the phone already drops one): they sit on the same
+       surface instead of hovering. The animate-float-slow bobbing
+       wrappers retired in the TSX — attached cards, never debris. */
+.landing .ln-store-qr { position: relative; }
+@media (min-width: 921px) {
+  .landing .ln-store-qr::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 68px;
+    inset-inline-end: calc(-1 * clamp(20px, 3.4vw, 44px));
+    inline-size: clamp(20px, 3.4vw, 44px);
+    border-block-start: 1px dashed var(--ln-lime-text);
+  }
+  .landing .ln-store-qr::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 64.5px;   /* 68 − half the 7px node */
+    inset-inline-end: -7px;      /* the route's origin: the plate's edge */
+    inline-size: 7px;
+    block-size: 7px;
+    border-radius: 50%;
+    background: var(--ln-lime-text);
+  }
+}
+.landing .ln-store-qr .ln-plate,
+.landing .ln-store-cart .ln-plate {
+  box-shadow:
+    0 1px 0 rgb(27 42 65 / 0.05),
+    0 22px 34px -20px rgb(27 42 65 / 0.30);
+}
+html.dark .landing .ln-store-qr .ln-plate,
+html.dark .landing .ln-store-cart .ln-plate {
+  box-shadow:
+    0 1px 0 rgb(0 0 0 / 0.35),
+    0 26px 40px -20px rgb(0 0 0 / 0.60);
 }
 
 /* ── 15f · لوحة التاجر — the live state-machine console ────────────── */
@@ -2969,17 +3062,72 @@ html.dark .landing {
   .landing .ln-hero-copy { inline-size: 100%; }
 }
 
-/* the globe stage — bleeds off the TOP-RIGHT frame edge (physical). */
+/* the globe stage — the deliberate top-right bleed, DISSOLVED (P31-D).
+   The P21 framing kept a raw viewport chop at the top + right edges and
+   a dead ~17px gap to the copy block (the audit read: "a bolted-on
+   watermark"). The P31 reframe makes the sphere BELONG to the hero:
+   · THE COPY-BOUNDARY SWEEP — the 58vw sphere and the -7vw right offset
+     are both viewport-proportional, so the sphere's lower-left limb
+     crosses the copy column's edge at every width ≥1024 (61px at 1024,
+     76px at 1440, 69px at 1920 — measured against the 58% copy column
+     of the frame). But RTL lines flush RIGHT: the eyebrow, the h1's dim
+     line, the punchline AND the sub-copy all BEGIN at that same edge —
+     and the limb-dot fringe is near-solid canvas α≈.28 there, so a HARD
+     limb behind that text breaks AA (the eyebrow's 12px mono orange
+     blends to ≈3.2:1 day / ≈3.5:1 night vs 4.5 needed; the h1's dim line
+     ≈2.8:1 / ≈2.4:1 vs 3.0). The left band therefore DISSOLVES: the
+     canvas mask below holds ≤0.13 opacity through the whole text band
+     (the copy column's edge falls at local x 10.2-14.5% at every width
+     ≥1024; the 0.13 floor runs to 16%), dropping the fringe to ≈.036
+     behind the text — the eyebrow keeps ≥5:1 in BOTH stages, the dim
+     line ≥3.4:1, the sub-copy ≥6:1, the cream punchline ≥10:1. The
+     dissolve IS the intersection: the sphere's solid body materializes
+     out of the copy column's boundary (full opacity from local x=26%),
+     melting into the hero's air — never chopped, never a watermark.
+   · DISSOLVE, never chop — the stage masks its top band (the sphere
+     melts into the sky before the section's overflow-clip edge at
+     local y≈12%, well inside the 15% transparent rung) and its bottom
+     cap (it melts into the dock instead of poking past the section on
+     short-ultrawide viewports); the canvas masks BOTH horizontal bands
+     (right: it melts before the viewport edge at local x≈88%, inside
+     the 16% transparent rung; left: the AA sweep above). The cluster
+     (Libya + its arcs) lives at ~48%/37% of the stage — deep inside
+     the opaque core at every size. */
 .landing .ln-globe-stage {
   position: absolute;
   z-index: 1;
-  top: -16%;
-  right: -14%;
-  inline-size: min(58vw, 860px);
+  top: clamp(-240px, -7vw, -64px);
+  right: -7vw;
+  inline-size: min(58vw, 2200px);
   aspect-ratio: 1;
   pointer-events: none;      /* the wrapper never blocks the page */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 90%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 90%, transparent 100%);
 }
 .landing .ln-globe-stage .ln-globe-canvas { pointer-events: auto; }
+/* the explorer wrapper — display:contents keeps the layout byte-identical
+   (the absolute stage positions against the hero section exactly as it
+   did as a direct child) while giving the overview-return contract a
+   DOM root to test click-outside against (GlobeMount ref). */
+.landing .ln-globe-explorer { display: contents; }
+@media (min-width: 1024px) {
+  /* the HORIZONTAL dissolves ride the canvas: parent + child masks
+     multiply without mask-composite (engine-portable); mobile keeps the
+     canvas whole — its centered backdrop never bleeds.
+     · RIGHT — the sphere melts before the viewport edge: the -7vw
+       overshoot is 12.07% of the 58vw stage, so the viewport edge
+       always falls at local x≈88%, inside the transparent rung (the
+       sphere's right limb at local ≈96% dissolves with it).
+     · LEFT — the AA sweep (see the stage comment above): one 5-stop
+       gradient holds the mask at ≤0.13 through the copy-text band
+       (local x≤16%) and recovers to full opacity by local x=26%, so
+       the sphere materializes out of the copy column's edge instead
+       of stamping a dotted fringe under the right-flush Arabic. */
+  .landing .ln-globe-canvas {
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.13) 16%, black 26%, black 70%, transparent 84%);
+    mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.13) 16%, black 26%, black 70%, transparent 84%);
+  }
+}
 @media (max-width: 1023px) {
   /* 390px: the globe becomes a centered backdrop behind the lockup —
      P21-W6: its bottom edge now DISSOLVES into the page (mask fade)
@@ -3007,43 +3155,13 @@ html.dark .landing {
 /* ── P21-W6 (2-b-part2) · the globe EXPLORER chrome ─────────────────────
    The globe stops being fake-interactive: hover/click the markers OR
    use the accessible chip dock. Everything below rides the stage-flip
-   tokens, so the dark twin comes free. */
+   tokens, so the dark twin comes free.
 
-/* the drag affordance — a quiet glass pill floating just off the
-   globe's lower-left arc (physical: outside the sphere, inside the
-   glow halo — a map-legend note, never over the city cluster which
-   lives upper-center). Retires after the first real interaction
-   (data-seen); pointer-events none always (the stage owns that).
-   Desktop only — at ≤1023px the globe is a backdrop and the dock
-   carries the affordance. */
-.landing .ln-globe-hint {
-  position: absolute;
-  left: 3%;
-  bottom: 4%;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 13px;
-  border-radius: 999px;
-  background: var(--ln-glass);
-  border: 1px solid var(--ln-line);
-  color: var(--ln-cream-dim);
-  font-size: 11px;
-  white-space: nowrap;
-  user-select: none;
-  -webkit-user-select: none;
-  opacity: 1;
-  transition: opacity 0.5s var(--ln-ease, ease-out);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-.landing .ln-globe-hint[data-seen] { opacity: 0; }
-@media (max-width: 1023px) {
-  .landing .ln-globe-hint { display: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .landing .ln-globe-hint { transition: none; }
-}
+   P31-D: the «اسحب للتدوير» glass hint chip RETIRED — a floating pill
+   over the glow halo read as bolted-on chrome (the same debris family
+   the storefront audit flagged). The drag affordance now lives where
+   the interaction is taught: the dock panel's idle line says it in
+   words (اسحب الكرة…), and the canvas keeps its grab cursor. */
 
 /* the explorer dock — city chips (the accessible list) + the routes
    panel. Rides the hero flow between the copy frame and the roadmark
@@ -3076,17 +3194,25 @@ html.dark .landing {
   max-inline-size: 100%;
 }
 
-/* the city chip — a real button, 44px touch floor, the same selected
-   state as the canvas marker (orange fill = the selected ring family) */
+/* the city chip — a real button, 44px touch floor. P31-D — the idle vs
+   franked states now speak the repo's own stamp grammar (DESIGN.md:
+   "a round pill reads as idle; a squared stamp reads as franked/
+   selected") so the difference is SHAPE + FILL + BORDER + WEIGHT, never
+   hue-only: idle = the recessed round pill (glass, hairline, cream
+   ink 13.7:1 day / 11:1 night), franked = the squared 2px stamp on the
+   solid route orange with the on-lime ink edge (day #FFF on #C24E00
+   4.79:1, night #05070D on #FF6B00 7.05:1 — small-text AA both
+   stages). The keyboard ring rides the lime outline at 2px offset —
+   outside the fill it lands on the page ground (3.0:1+ both stages). */
 .landing .ln-globe-chip {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   min-block-size: 44px;
   padding: 5px 15px;
-  border-radius: 2px;
+  border-radius: var(--ln-radius-pill);
   background: var(--ln-glass);
-  border: 1px solid color-mix(in srgb, var(--ln-cream) 26%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ln-cream) 34%, transparent);
   color: var(--ln-cream);
   font-size: 13px;
   font-weight: var(--fw-semibold);
@@ -3096,10 +3222,11 @@ html.dark .landing {
   transition:
     background var(--ln-t-fast) var(--ln-ease),
     border-color var(--ln-t-fast) var(--ln-ease),
-    color var(--ln-t-fast) var(--ln-ease);
+    color var(--ln-t-fast) var(--ln-ease),
+    border-radius var(--ln-t-fast) var(--ln-ease);
 }
 .landing .ln-globe-chip:hover {
-  border-color: color-mix(in srgb, var(--ln-cream) 52%, transparent);
+  border-color: color-mix(in srgb, var(--ln-cream) 56%, transparent);
   background: var(--ln-glass-strong);
 }
 .landing .ln-globe-chip:focus-visible {
@@ -3108,8 +3235,10 @@ html.dark .landing {
 }
 .landing .ln-globe-chip[aria-pressed="true"] {
   background: var(--ln-lime);
-  border-color: var(--ln-lime);
+  border: 1px solid var(--ln-on-lime);
   color: var(--ln-on-lime);
+  border-radius: 2px;
+  font-weight: var(--fw-bold);
 }
 .landing .ln-globe-chip-dot {
   inline-size: 6px;
@@ -3157,7 +3286,10 @@ html.dark .landing .ln-globe-panel { box-shadow: 0 1px 0 rgb(0 0 0 / 0.35); }
 }
 .landing .ln-globe-panel-region {
   font-family: var(--ln-mono);
-  font-size: 11px;
+  /* P31-D: 11 → 12px — the region/route count line is live UI text in
+     the hero, not a monumental caption; it rides the same 12px floor as
+     the .ln-mono base. */
+  font-size: 12px;
   color: var(--ln-lime-text);
   direction: rtl;             /* Arabic region names in the mono chain */
 }

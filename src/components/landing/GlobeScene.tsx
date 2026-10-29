@@ -22,12 +22,22 @@ import { GLOBE_CITIES, GLOBE_ROUTES, type GlobeCity } from './globe-data';
      double ring + orange-edged chip, and the city's arcs light up
      while the rest recede. Clicking empty ocean deselects.
    · The idle drift PAUSES while a node is hovered (the marker must not
-     slide out from under the cursor); a real drag (>3px) or a click
-     reports onFirstInteract so the mount can retire the drag hint.
+     slide out from under the cursor).
    · Drag stays horizontal-only (touch-action: pan-y keeps the page
      scrollable over the canvas — never trap the scroll).
    The keyboard path is the chip dock (GlobeMount) — the canvas stays
    role=img decoration with an honest description.
+
+   P31-D — the FOCAL LAW (the VLM audit read the network as "orange
+   nodes with no focal point"): the tripoli hub (derived from
+   globe-data's hub flag — never hardcoded) is the network's center —
+   its node burns brightest + wears a persistent halo ring at rest,
+   its five spokes rest bright while the two cross-links rest at half,
+   and exactly ONE route carries the marching-dash pulse at a time
+   (idle only — a selection IS the focus and stands calm; under
+   prefers-reduced-motion every arc rests at its final solid state).
+   The floating «اسحب للتدوير» hint chip retired with the mount — the
+   dock panel's idle line teaches the drag in words.
    shortcut: landmasses are stylized polygons, not survey data — swap
    for a bundled land-mask PNG if geographic fidelity is ever required.
    ═══════════════════════════════════════════════════════════════════════ */
@@ -116,6 +126,18 @@ const mkNode = (city: GlobeCity): Node => {
 };
 const NODES: Node[] = GLOBE_CITIES.map(mkNode);
 const nodeById = new Map(NODES.map((n, i) => [n.city.id, i]));
+/* P31-D — the hub index, derived from the data's own hub flag: the
+   network's center is wherever globe-data says it is (tripoli today);
+   if the data ever crowns another city, the focal law follows it.
+   (The `as readonly GlobeCity[]` read is type-level only — the const
+   union doesn't carry `hub` on every member, the runtime data does.) */
+const HUB_IDX = (() => {
+  const hub = (GLOBE_CITIES as readonly GlobeCity[]).find((c) => c.hub);
+  return hub ? (nodeById.get(hub.id) ?? -1) : -1;
+})();
+/** P31-D — one marching-dash pulse at a time: each hub-then-cross
+ * route holds the live slot for LIVE_ROUTE_MS while the network idles. */
+const LIVE_ROUTE_MS = 2800;
 
 /* slerp + altitude lift → the 3D quadratic arc samples */
 function arcPoints(a: [number, number, number], b: [number, number, number], lift: number, n: number) {
@@ -158,25 +180,21 @@ export type GlobeSceneProps = {
   selectedId: string | null;
   /** click/tap on a marker (its id) or on empty ocean (null). */
   onSelect: (id: string | null) => void;
-  /** fired once-ish: the first REAL interaction (drag gesture or click). */
-  onFirstInteract: () => void;
 };
 
-export default function GlobeScene({ selectedId, onSelect, onFirstInteract }: GlobeSceneProps) {
+export default function GlobeScene({ selectedId, onSelect }: GlobeSceneProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   /* the draw loop reads the live selection + callbacks from refs — prop
      changes never re-mount the canvas (the rotation state would reset).
      The refs are written in effects (never during render). */
   const selectedRef = useRef<string | null>(selectedId);
   const selectCb = useRef(onSelect);
-  const firstInteractCb = useRef(onFirstInteract);
   useEffect(() => {
     selectedRef.current = selectedId;
   }, [selectedId]);
   useEffect(() => {
     selectCb.current = onSelect;
-    firstInteractCb.current = onFirstInteract;
-  }, [onSelect, onFirstInteract]);
+  }, [onSelect]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -409,33 +427,45 @@ export default function GlobeScene({ selectedId, onSelect, onFirstInteract }: Gl
         return { px, py, z, s };
       });
 
-      /* route arcs — quadratic 3D lifts, animated dash, depth-dimmed.
-         A selected city throws its own arcs to full emphasis (alpha .95,
-         1.8px) while the rest recede — the explorer read. */
+      /* route arcs — quadratic 3D lifts, role-weighted (the P31-D focal
+         law). The hub's spokes rest BRIGHT (the network's center reads
+         first), the cross-links rest at half, and exactly ONE route
+         carries the marching-dash pulse at a time — idle only, never
+         under prefers-reduced-motion (every arc rests at its final
+         solid state there), and a selection replaces the pulse with
+         its own calm full-strength crown. Single-stroke alpha rides
+         the arc's dimmer endpoint: when a route's cities rotate to the
+         backside the whole arc dims with them. */
       const sel = selectedRef.current;
       const selIdx = sel != null ? (nodeById.get(sel) ?? -1) : -1;
+      const liveIdx = !reduced && selIdx < 0 ? Math.floor(clock / LIVE_ROUTE_MS) % ROUTES.length : -1;
       ROUTES.forEach((route, ai) => {
         const owns =
           selIdx >= 0 && (route.a === NODES[selIdx] || route.b === NODES[selIdx]);
+        const hubOwns =
+          HUB_IDX >= 0 && (route.a === NODES[HUB_IDX] || route.b === NODES[HUB_IDX]);
+        const live = ai === liveIdx;
+        const depth = Math.min(
+          project(route.a.v[0]!, route.a.v[1]!, route.a.v[2]!)[2],
+          project(route.b.v[0]!, route.b.v[1]!, route.b.v[2]!)[2],
+        ) < 0.05 ? 0.3 : 1;
         ctx.strokeStyle = arcColor;
-        /* P23-D: 1.4 → 1.6 — the audit read the resting routes as
-           invisible threads; one hairline rung up keeps the explorer
-           hierarchy (selected 1.8 stays dominant) while the network
-           reads at a glance */
-        ctx.lineWidth = owns ? 1.8 : 1.6;
-        if (!reduced) {
+        ctx.lineWidth = owns ? 1.8 : live ? 1.9 : hubOwns ? 1.7 : 1.4;
+        if (live) {
           ctx.setLineDash([4, 7]);
-          ctx.lineDashOffset = -dashPhase - ai * 5;
+          ctx.lineDashOffset = -dashPhase;
         }
         ctx.lineJoin = 'round';
+        ctx.globalAlpha = Math.min(
+          1,
+          (owns ? 0.95 * 1.55 : live ? 0.9 * 1.15 : hubOwns ? 0.88 : 0.48) * depth,
+        );
         ctx.beginPath();
         for (let i = 0; i < route.pts.length; i++) {
           const p = route.pts[i]!;
-          const [px, py, z] = project(p[0]!, p[1]!, p[2]!);
+          const [px, py] = project(p[0]!, p[1]!, p[2]!);
           if (i === 0) ctx.moveTo(px, py);
           else ctx.lineTo(px, py);
-          const base = z < 0 ? 0.2 : Math.max(0.5, 0.55 + 0.45 * z);
-          ctx.globalAlpha = owns ? Math.max(0.28, base) * (selIdx >= 0 ? 1.55 : 1) : selIdx >= 0 ? base * 0.38 : base;
         }
         ctx.stroke();
         ctx.globalAlpha = 1;
@@ -495,31 +525,50 @@ export default function GlobeScene({ selectedId, onSelect, onFirstInteract }: Gl
          node now reads as EMITTED LIGHT — a soft radial bloom (the
          route orange breathing out to ~4.5× the core) under the
          bright core + the existing hairline ring. Layered light, not
-         a vector circle. */
+         a vector circle.
+         P31-D — the focal weights: the hub (globe-data's flag) burns
+         at full strength with a bigger core, a denser bloom and a
+         persistent halo ring (the fixed star the network hangs from);
+         the spokes rest at a quieter ember; while a city is selected
+         everything dims so the selection takes the crown — the hub
+         keeps a whisper more than the rest. */
       for (let i = 0; i < NODES.length; i++) {
         if (i === selIdx || i === hoverIdx) continue;
         const p = nodePts[i]!;
         if (p.z < 0.08) continue;
-        const pulse = reduced || selIdx >= 0 ? 1 : 1 + 0.22 * Math.sin(clock / 900 + i * 1.7);
-        const base = Math.max(2.4, R * 0.011) * p.s;
+        const isHub = i === HUB_IDX;
+        const pulse = reduced || selIdx >= 0
+          ? 1
+          : 1 + (isHub ? 0.22 : 0.13) * Math.sin(clock / 900 + i * 1.7);
+        const base = Math.max(2.4, R * 0.011) * p.s * (isHub ? 1.3 : 1);
+        const w = selIdx >= 0 ? (isHub ? 0.62 : 0.45) : isHub ? 1 : 0.72;
         /* the bloom — a gradient, not a bigger solid dot */
         const bloomR = base * 4.5 * pulse;
         const bloom = ctx.createRadialGradient(p.px, p.py, 0, p.px, p.py, bloomR);
-        bloom.addColorStop(0, withAlphaRgba(arcColor, 0.34));
+        bloom.addColorStop(0, withAlphaRgba(arcColor, isHub ? 0.42 : 0.30));
         bloom.addColorStop(0.5, withAlphaRgba(arcColor, 0.13));
         bloom.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.globalAlpha = selIdx >= 0 ? 0.4 : 0.85;
+        ctx.globalAlpha = w * 0.85;
         ctx.fillStyle = bloom;
         ctx.beginPath();
         ctx.arc(p.px, p.py, bloomR, 0, 6.2832);
         ctx.fill();
+        /* the hub's persistent halo ring — the center marker at rest */
+        if (isHub) {
+          ctx.globalAlpha = w * 0.4;
+          ctx.strokeStyle = arcColor;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(p.px, p.py, base * 2.6 + 3, 0, 6.2832);
+          ctx.stroke();
+        }
         /* the bright core */
-        ctx.globalAlpha = selIdx >= 0 ? 0.5 : 0.9;
+        ctx.globalAlpha = Math.min(1, w * 0.9);
         ctx.fillStyle = arcColor;
         ctx.beginPath();
         ctx.arc(p.px, p.py, base * pulse, 0, 6.2832);
         ctx.fill();
-        ctx.globalAlpha = selIdx >= 0 ? 0.25 : 0.55;
+        ctx.globalAlpha = w * (isHub ? 0.7 : 0.55);
         ctx.strokeStyle = arcColor;
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -628,7 +677,6 @@ export default function GlobeScene({ selectedId, onSelect, onFirstInteract }: Gl
       lastX = e.clientX;
       traveled = Math.max(traveled, Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY));
       if (traveled >= DRAG_MIN) {
-        firstInteractCb.current(); // a REAL gesture — retire the hint
         rotY += dx * DRAG_K;
         vel = vel * 0.65 + dx * DRAG_K * 0.35;
       }
@@ -645,7 +693,6 @@ export default function GlobeScene({ selectedId, onSelect, onFirstInteract }: Gl
         /* a click/tap — marker select or ocean deselect (22px radius) */
         const rect = canvas.getBoundingClientRect();
         const hit = hitTest(e.clientX - rect.left, e.clientY - rect.top);
-        firstInteractCb.current();
         selectCb.current(hit >= 0 ? NODES[hit]!.city.id : null);
         if (reduced) draw();
       }
