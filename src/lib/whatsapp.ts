@@ -1,9 +1,12 @@
 // WhatsApp message builders — structured Arabic order messages via wa.me deep links.
 // First-class channel for Libyan commerce; no Business API dependency (link-based, real).
 
-import { formatLyd } from "@/lib/money";
-import { formatPhoneDisplay } from "@/lib/phone";
-import { FULFILLMENT_AR, PAYMENT_TYPE_AR, type OrderStatus } from "@/lib/constants";
+/* Relative .ts specifiers (identical resolution through Next/webpack —
+   this form ALSO loads under plain Node, so the zero-dependency
+   node:test unit layer can pin the message builders directly). */
+import { formatLyd } from "./money.ts";
+import { formatPhoneDisplay } from "./phone.ts";
+import { FULFILLMENT_AR, PAYMENT_TYPE_AR, type OrderStatus } from "./constants.ts";
 
 interface OrderMessageData {
   orderNumber: string;
