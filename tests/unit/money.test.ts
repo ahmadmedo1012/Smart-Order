@@ -52,8 +52,25 @@ test("parseLyd: string input truncates beyond 3 decimals (no rounding)", () => {
 
 test("parseLyd: number input rounds through the float safely", () => {
   assert.equal(parseLyd(12.5), 12500);
-  assert.equal(parseLyd(0.29), 290); // 0.29 × 1000 = 289.999… in IEEE-754
+  assert.equal(parseLyd(0.29), 290);
   assert.equal(parseLyd(99.999), 99999);
+  // The rounding seam is now PINNED with values that actually
+  // discriminate: 0.29 × 1000 = 290.00000000000006 on V8 (the old
+  // inline comment claimed 289.999… — wrong, floor survives it),
+  // while 1.005 × 1000 = 1004.9999999999999 lands BELOW. A truncating
+  // swap (Math.floor / |0 / toFixed-then-parse) breaks 48 of the
+  // millimes-exact inputs in [1.000, 5.000] — the undercharge class.
+  assert.equal(parseLyd(1.005), 1005);
+  assert.equal(parseLyd(1.001), 1001);
+  assert.equal(parseLyd(1.003), 1003);
+  // The engine-agnostic belt: EVERY millimes-exact float must
+  // round-trip through the number path (the float error is ~1e-13,
+  // far inside the 0.5 rounding window — true on every JS engine;
+  // where the epsilon lands below is engine-specific, so the sweep
+  // catches any truncation wherever it fires).
+  for (let millimes = 1; millimes <= 5000; millimes++) {
+    assert.equal(parseLyd(millimes / 1000), millimes);
+  }
   assert.throws(() => parseLyd(Number.NaN));
   assert.throws(() => parseLyd(Number.POSITIVE_INFINITY));
 });
