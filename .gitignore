@@ -57,4 +57,8 @@ tests-results/
 playwright-report/
 download/
 package-lock.json
+# P32: mobile/ يُديره npm بملف قفله الخاص (يبنيه GitHub Actions حصرًا —
+# كشف Vercel يقرأ جذر المستودع حيث يظل bun.lock سائدًا؛ جرّبنا ذلك عبر
+# فرع المعاينة قبل الدمج). الاستثناء لهذا الملف وحده.
+!mobile/package-lock.json
 test-results/
