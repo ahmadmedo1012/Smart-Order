@@ -20,10 +20,13 @@ name: CI
 #      (r130): prisma db push على المخطط التطويري ثم next start —
 #      السجل ذاتي التزويد (تسجيل أعمال + كتالوج + طلب) فلا حاجة لـ seed.
 on:
+  # r191 (widening): every push on ANY branch + every PR — not just main.
+  # The repo is public (free Actions minutes); the per-ref concurrency
+  # group already collapses rapid pushes. A regression on any branch is
+  # caught at the push itself, before a PR is opened. All three jobs
+  # (quality lint+parity+build, E2E API, browser battery) run unchanged.
   push:
-    branches: [main]
   pull_request:
-    branches: [main]
 
 # least privilege — الوظيفة قراءة وتشغيل اختبارات فقط
 permissions:
