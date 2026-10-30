@@ -1,0 +1,64 @@
+{
+  "expo": {
+    "name": "Smart Order",
+    "slug": "smart-order",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "description": "متجر الطلبات الرقمي — تصفّح قائمة مطعمك، اطلب بتوصيل أو استلام، وتتبّع طلبك لحظة بلحظة.",
+    "icon": "./assets/images/icon.png",
+    "scheme": "smartorder",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F7F7F4",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ly.smartlink.smartorder",
+      "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true
+      }
+    },
+    "android": {
+      "package": "ly.smartlink.smartorder",
+      "adaptiveIcon": {
+        "backgroundColor": "#F7F7F4",
+        "foregroundImage": "./assets/images/adaptive-icon.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "order.smart-link.ly"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F7F7F4",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 160
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "apiUrl": "https://order.smart-link.ly",
+      "router": {}
+    }
+  }
+}

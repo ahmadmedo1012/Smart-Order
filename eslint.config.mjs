@@ -75,7 +75,10 @@ const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
   ignores: [
     "node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts",
     "examples/**", "skills/**", "refs/**", "tool-results/**", "mini-services/**",
-    ".zscripts/**", "download/**", "upload/**", "public/**"
+    ".zscripts/**", "download/**", "upload/**", "public/**",
+    // P32: تطبيق الموبايل له سلسلة أدوات Expo خاصة (بوابة mobile
+    // المستقلة في CI) — lint الويب لا يعبر الحدود.
+    "mobile/**"
   ]
 }];
 
