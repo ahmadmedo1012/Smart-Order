@@ -6,7 +6,7 @@
  * والاختيار يُثبَّت في AsyncStorage ويقود إلى صندوق الطلبات.
  */
 import React from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { fonts, type ThemeColors } from '@/constants/theme'
@@ -58,9 +58,21 @@ export default function MerchantBusinessScreen() {
           <View style={s.card}>
             <Text style={s.emptyTitle}>لا يوجد متجر مرتبط بحسابك</Text>
             <Text style={s.emptyHint}>
-              أنشئ متجرك من موقع Smart Order ثم ادخل من هنا لإدارته، أو تواصل مع مالك متجرك
-              ليضيفك كموظف
+              إنشاء الحساب والمتجر يتم من موقع Smart Order (تسجيل واحد ينشئ الحساب
+              والمتجر وطرق الدفع الأساسية معًا) — أكمله هناك ثم ادخل من هنا
+              لإدارة متجرك، أو تواصل مع مالك متجرك ليضيفك كموظف
             </Text>
+            {/* P38 (C3): التسجيل والحضور ذو منبع واحد على الويب (POST
+                /api/auth/register ينشئ المستخدم+المتجر+طرق الدفع ذرّيًا)
+                — لا يوجد عقد تسجيل موازٍ للموبايل، والتعليمة تمنع نسخة
+                توصيل ثانية غير متوافقة: اليدُ الآمنة المباشرة هي فتح
+                مسار الويب الرسمي. */}
+            <Button
+              label="إنشاء متجرك على الموقع"
+              onPress={() => {
+                void Linking.openURL('https://order.smart-link.ly/register')
+              }}
+            />
             <Button
               label="تسجيل الخروج"
               variant="outline"

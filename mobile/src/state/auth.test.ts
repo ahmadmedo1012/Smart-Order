@@ -18,6 +18,8 @@
  *   login/logout/selectBusiness/إلخ — السلوك التعاقدي القائم يُصان.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { useAuthStore } from './auth'
+import type { AuthUser, Membership } from '@/types/merchant'
 
 /* ── الحالة المشتركة (vi.hoisted: المصنع يُرفَع فوق كل تعريف) ──────── */
 
@@ -88,10 +90,7 @@ vi.mock('@/lib/query-client', () => ({
   queryClient: { removeQueries: (...args: unknown[]) => removeQueries(...args) },
 }))
 
-/* ── الوحدة قيد الاختبار ───────────────────────────────────────────── */
-
-import { useAuthStore } from './auth'
-import type { AuthUser, Membership } from '@/types/merchant'
+/* ── الوحدة قيد الاختبار (مستوردة أعلى — vi.mock مرفوعة فوقها آليًا) ── */
 
 const user: AuthUser = {
   id: 'u1',

@@ -12,6 +12,7 @@
  */
 import React, { useMemo, useState } from 'react'
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -23,6 +24,9 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
+import { Image } from 'expo-image'
+import * as ImagePicker from 'expo-image-picker'
+import * as ImageManipulator from 'expo-image-manipulator'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fonts, type ThemeColors } from '@/constants/theme'
 import { useTheme } from '@/theme/ThemeProvider'
@@ -33,6 +37,7 @@ import {
   fetchCategories,
   fetchProductDetail,
   updateProduct,
+  uploadProductImage,
   type ProductInput,
 } from '@/services/merchant'
 import { apiErrorMessage } from '@/lib/api-error'
@@ -47,6 +52,38 @@ let draftSeq = 0
 function draftKey(): string {
   draftSeq += 1
   return `d${draftSeq}`
+}
+
+/** P38 (C3 — صور المنتجات): سلّم ضغط الويب نفسه (src/lib/compress.ts):
+ * حد أبعاد 1200، جودة 0.82، وسقف 480KB — الجودة تنزل درجات حتى يدخل
+ * الحجم تحت السقف (الخادم يرفض >500KB). تُرجع dataURL جاهزًا لعقد
+ * POST /api/media (نفس عقد الويب حرفيًا). */
+const COMPRESS_MAX_DIM = 1200
+const COMPRESS_START_QUALITY = 0.82
+const COMPRESS_MAX_BYTES = 480 * 1024
+
+async function compressToDataUrl(uri: string, width: number, height: number): Promise<string> {
+  const scale = Math.min(1, COMPRESS_MAX_DIM / Math.max(width, height, 1))
+  const actions: ImageManipulator.Action[] =
+    scale < 1 ? [{ resize: { width: Math.round(width * scale), height: Math.round(height * scale) } }] : []
+  let quality = COMPRESS_START_QUALITY
+  // سلّم الجودة: 0.82 → 0.72 → … حتى 0.4 — كل درجة أرخص من إعادة فتح
+  // المنتقي، والحد الأدنى يحافظ على قابلية استخدام الصورة.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const result = await ImageManipulator.manipulateAsync(uri, actions, {
+      format: ImageManipulator.SaveFormat.JPEG,
+      compress: quality,
+      base64: true,
+    })
+    if (!result.base64) throw new Error('تعذر معالجة الصورة')
+    const bytes = Math.floor((result.base64.length * 3) / 4)
+    if (bytes <= COMPRESS_MAX_BYTES || actions.length === 0) {
+      return `data:image/jpeg;base64,${result.base64}`
+    }
+    quality -= 0.1
+    if (quality < 0.4) quality = 0.4
+  }
+  throw new Error('حجم الصورة كبير جداً — جرّب صورة أصغر')
 }
 
 interface VariantDraft {
@@ -145,6 +182,10 @@ function ProductForm({
   const [categoryId, setCategoryId] = useState<string | null>(product?.categoryId ?? null)
   const [isAvailable, setIsAvailable] = useState(product?.isAvailable ?? true)
   const [isFeatured, setIsFeatured] = useState(product?.isFeatured ?? false)
+  /* P38 (C3): صورة المنتج — عقد الويب نفسه (POST /api/media بعد ضغط
+   * ≤480KB)؛ القيمة رابط التخزين النهائي مثل الويب حرفيًا. */
+  const [imageUrl, setImageUrl] = useState(product?.imageUrl ?? '')
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [variants, setVariants] = useState<VariantDraft[]>(() =>
     (product?.variants ?? []).map((v) => ({ key: draftKey(), name: v.name, priceDelta: formatMillimesAmount(v.priceDelta) })),
   )
@@ -187,7 +228,38 @@ function ProductForm({
     },
   })
 
-  const busy = saveMutation.isPending || archiveMutation.isPending
+  const busy = saveMutation.isPending || archiveMutation.isPending || uploadingImage
+
+  /** P38 (C3): اختيار صورة → ضغط (سلّم الويب) → رفع عبر /api/media →
+   * رابط نهائي يُحفظ مع المنتج. الأذونات تُطلب لحظتها (شرح القيمة قبل
+   * الطلب)، والفشل يظهر برسالة الخادم كما هي (حد الرفعات/الحجم). */
+  async function pickProductImage() {
+    if (readOnly || uploadingImage || busy) return
+    try {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
+      if (!perm.granted) {
+        Alert.alert('الوصول للصور', 'الإذن مطلوب لاختيار صورة المنتج — فعّله من إعدادات التطبيق')
+        return
+      }
+      const picked = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsMultipleSelection: false,
+        quality: 1,
+      })
+      if (picked.canceled) return
+      const asset = picked.assets[0]
+      if (!asset) return
+      setUploadingImage(true)
+      const dataUrl = await compressToDataUrl(asset.uri, asset.width ?? 1200, asset.height ?? 1200)
+      const res = await uploadProductImage(businessId, dataUrl)
+      setImageUrl(res.url)
+      showToast('تم رفع الصورة')
+    } catch (err) {
+      Alert.alert('تعذّر رفع الصورة', apiErrorMessage(err, 'تعذّر رفع الصورة — حاول مجددًا'))
+    } finally {
+      setUploadingImage(false)
+    }
+  }
 
   /** تحقق محلي — نفس قيود zod في الخادم، أول خطأ لكل حقل. */
   function validate(): Record<string, string> {
@@ -224,6 +296,7 @@ function ProductForm({
       name: name.trim(),
       description: description.trim(),
       categoryId,
+      imageUrl: imageUrl.trim() || undefined,
       price: price.trim(),
       isAvailable,
       isFeatured,
@@ -302,6 +375,59 @@ function ProductForm({
               multiline
               style={s.textarea}
             />
+            {/* P38 (C3): صورة المنتج — المنتقي + المعاينة + الإزالة؛ نفس
+                عقد الويب (الصورة تُرفع أولاً إلى /api/media ويُحفظ رابطها). */}
+            <View style={s.imageWrap}>
+              <Text style={s.catLabel}>صورة المنتج (اختياري)</Text>
+              {imageUrl ? (
+                <View style={s.imageRow}>
+                  <Image
+                    source={{ uri: imageUrl }}
+                    style={s.imagePreview}
+                    contentFit="cover"
+                    transition={120}
+                    accessibilityLabel="معاينة صورة المنتج"
+                  />
+                  {!readOnly ? (
+                    <View style={s.imageActions}>
+                      <Button label="تغيير" variant="outline" onPress={pickProductImage} disabled={uploadingImage} />
+                      <Button
+                        label="إزالة"
+                        variant="outline"
+                        onPress={() => {
+                          setImageUrl('')
+                        }}
+                        disabled={uploadingImage}
+                      />
+                    </View>
+                  ) : null}
+                </View>
+              ) : !readOnly ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="إضافة صورة للمنتج"
+                  onPress={pickProductImage}
+                  disabled={uploadingImage}
+                  style={({ pressed }) => [s.imagePicker, pressed && { opacity: 0.7 }]}
+                >
+                  {uploadingImage ? (
+                    <ActivityIndicator size="small" color={t.primary} />
+                  ) : (
+                    <PlusIcon size={18} color={t.primary} />
+                  )}
+                  <Text style={s.imagePickerText}>
+                    {uploadingImage ? 'جارٍ الضغط والرفع…' : 'إضافة صورة'}
+                  </Text>
+                </Pressable>
+              ) : null}
+              {imageUrl && uploadingImage ? (
+                <View style={s.imageUploadingRow}>
+                  <ActivityIndicator size="small" color={t.primary} />
+                  <Text style={s.imagePickerText}>جارٍ الضغط والرفع…</Text>
+                </View>
+              ) : null}
+              <Text style={s.imageHint}>تُضغط تلقائياً (حد 480KB) — تظهر في المتجر والتطبيق معًا</Text>
+            </View>
             <View style={s.catWrap}>
               <Text style={s.catLabel}>القسم</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.catChips}>
@@ -615,6 +741,41 @@ const makeStyles = (t: ThemeColors) => StyleSheet.create({
     lineHeight: 18,
   },
   catWrap: { gap: 8 },
+  /* P38 (C3): صورة المنتج — معاينة 96px مربعة + صف الإجراءات. */
+  imageWrap: { gap: 8, paddingBottom: 4 },
+  imageRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  imagePreview: {
+    width: 96,
+    height: 96,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: t.border,
+    backgroundColor: t.surface,
+  },
+  imageActions: { flexDirection: 'row', gap: 8, flex: 1, flexWrap: 'wrap' },
+  imagePicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: `${t.primary}40`,
+    backgroundColor: t.card,
+    paddingVertical: 14,
+  },
+  imagePickerText: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: t.primary,
+  },
+  imageUploadingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  imageHint: {
+    fontFamily: fonts.regular,
+    fontSize: 11.5,
+    color: t.mutedFg,
+    lineHeight: 17,
+  },
   catLabel: {
     fontFamily: fonts.medium,
     fontSize: 13,

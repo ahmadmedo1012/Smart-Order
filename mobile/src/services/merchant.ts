@@ -252,6 +252,8 @@ export interface ProductInput {
   name: string
   description?: string
   categoryId?: string | null
+  /** رابط صورة المنتج (POST /api/media يرفعها — عقد الويب نفسه). */
+  imageUrl?: string
   /** سلسلة عشرية «12.500» — الخادم يحوّلها مليمًا صحيحًا. */
   price: string
   isAvailable: boolean
@@ -264,6 +266,18 @@ export interface ProductInput {
     minSelect?: number
     options: { name: string; priceDelta: string }[]
   }[]
+}
+
+/** POST /api/media {businessId, data: dataUrl} — عقد رفع الويب نفسه
+ * (products.manage؛ ضغط ≤500KB + فحص السحر بايت خادميًا؛ 30 رفعة/10 د). */
+export function uploadProductImage(
+  businessId: string,
+  dataUrl: string,
+): Promise<{ url: string }> {
+  return request<{ url: string }>('/api/media', {
+    method: 'POST',
+    body: { businessId, data: dataUrl },
+  })
 }
 
 /** POST /api/products — إنشاء (products.manage؛ حد الخطة 409). */
@@ -517,6 +531,28 @@ export function createStaff(
   return request<{ staff: StaffMember }>('/api/staff', {
     method: 'POST',
     body: { businessId, ...input },
+  })
+}
+
+/** PATCH /api/staff/[id] {businessId, role} — تغيير دور عضو (المالك
+ * محصّن خادميًا 403؛ الدور OWNER غير قابل للتعيين من هنا). */
+export function updateStaffRole(
+  id: string,
+  businessId: string,
+  role: 'ADMIN' | 'STAFF',
+): Promise<{ staff: StaffMember }> {
+  return request<{ staff: StaffMember }>(`/api/staff/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    body: { businessId, role },
+  })
+}
+
+/** DELETE /api/staff/[id]?businessId — إزالة عضو من الفريق (المالك
+ * محصّن 403؛ الحساب يفقد عضويته فورًا). */
+export function removeStaff(id: string, businessId: string): Promise<{ removed: boolean }> {
+  const qs = new URLSearchParams({ businessId })
+  return request<{ removed: boolean }>(`/api/staff/${encodeURIComponent(id)}?${qs.toString()}`, {
+    method: 'DELETE',
   })
 }
 

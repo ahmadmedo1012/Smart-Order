@@ -29,6 +29,7 @@ const FILTERS: { value: OrderStatus | 'ALL'; label: string }[] = [
   { value: 'READY', label: 'جاهزة' },
   { value: 'OUT_FOR_DELIVERY', label: 'في الطريق' },
   { value: 'DELIVERED', label: 'مكتملة' },
+  { value: 'REJECTED', label: 'مرفوضة' },
   { value: 'CANCELLED', label: 'ملغاة' },
 ]
 
