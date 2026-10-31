@@ -5,7 +5,7 @@
  * مع إبطال أي جهاز (DELETE /sessions/[id] — «هذا الجهاز» يخرج عبر
  * تسجيل الخروج نفسه)، وتسجيل الخروج.
  */
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
@@ -14,6 +14,7 @@ import { fonts, type ThemeColors } from '@/constants/theme'
 import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { fetchSessions, revokeSession, ApiError, NetworkError } from '@/services/merchant'
+import { disableOrderNotifications, enableOrderNotifications, pushPermissionGranted } from '@/lib/push-notifications'
 import { formatArabicDateTime } from '@/lib/datetime'
 import { ROLE_AR, type DeviceSession } from '@/types/merchant'
 import { Hairline, Toggle } from '@/components/ui'
@@ -41,6 +42,44 @@ export default function MerchantMoreScreen() {
   const logout = useAuthStore((s) => s.logout)
 
   const queryClient = useQueryClient()
+
+  /* P38 (F): إشعارات الطلبات الجديدة — القيمة تُشرح قبل أي طلب إذن
+     (النص تحت المفتاح)، والإذن يُطلب لحظة التفعيل فقط. الحالة تبدأ
+     غير معروفة حتى يقرأ الإذن الفعلي (لا نكذب على المستخدم). */
+  const [pushOn, setPushOn] = useState<boolean | null>(null)
+  const [pushBusy, setPushBusy] = useState(false)
+  const [pushToken, setPushToken] = useState<string | null>(null)
+  useEffect(() => {
+    void pushPermissionGranted().then(setPushOn)
+  }, [])
+  const togglePush = async (on: boolean) => {
+    if (pushBusy) return
+    setPushBusy(true)
+    try {
+      if (on) {
+        const token = await enableOrderNotifications()
+        if (!token) {
+          setPushOn(false)
+          Alert.alert(
+            'إذن الإشعارات',
+            'الأذونات مرفوضة من إعدادات النظام — فعّل الإشعارات لتطبيق Smart Order ثم أعد المحاولة',
+          )
+          return
+        }
+        setPushToken(token)
+        setPushOn(true)
+      } else {
+        if (pushToken) await disableOrderNotifications(pushToken).catch(() => undefined)
+        setPushOn(false)
+      }
+    } catch (err) {
+      const msg = err instanceof ApiError ? err.message : err instanceof NetworkError ? 'تعذر الاتصال بالخادم — تحقق من الإنترنت' : 'تعذّر تسجيل الإشعارات — حاول مجددًا'
+      Alert.alert('الإشعارات', msg)
+    } finally {
+      setPushBusy(false)
+    }
+  }
+
   const sessionsQuery = useQuery({
     queryKey: ['merchant', 'sessions'],
     queryFn: fetchSessions,
@@ -161,6 +200,16 @@ export default function MerchantMoreScreen() {
           />
           <Text style={s.themeHint}>
             {name === 'dark' ? 'غرفة العمليات الليلية — أرض كحلية وبرتقالي مضيء' : 'ضوء النهار — ورق فاتح وبرتقالي التوصيل'}
+          </Text>
+        </View>
+
+        {/* الإشعارات (P38 Phase F) — شرح القيمة قبل الإذن؛ الإذن يُطلب
+            من المفتاح نفسه لا عند الإقلاع. */}
+        <View style={s.card}>
+          <Text style={s.cardTitle}>الإشعارات</Text>
+          <Toggle label="تنبيهات الطلبات الجديدة" value={pushOn === true} disabled={pushBusy} onValueChange={(on) => { void togglePush(on) }} />
+          <Text style={s.themeHint}>
+            تنبيه على هذا الجهاز لحظة وصول طلب جديد إلى متجرك — يظهر رقم الطلب فقط بلا أي بيانات عميل
           </Text>
         </View>
 

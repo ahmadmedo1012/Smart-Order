@@ -17,6 +17,7 @@ import { MAX_ORDER_ITEMS, MAX_ORDER_QUANTITY } from "@/lib/constants";
 import { buildOrderMessage } from "@/lib/whatsapp";
 import { tripoliDayStart, tripoliDateParts, tripoliMonthStart } from "@/lib/arabic";
 import { isUniqueViolationOn } from "@/lib/prisma-errors";
+import { notifyBusinessOrderEvent } from "@/lib/push";
 import { Prisma } from "@prisma/client";
 
 export const runtime = "nodejs";
@@ -530,6 +531,18 @@ export async function POST(req: NextRequest) {
       paymentName: paymentMethod?.name ?? null,
       paymentType: paymentMethod?.type ?? null,
       customerNote: input.customerNote || null,
+    });
+
+    // P38 (Phase F): new-order push to the business's order-visible
+    // members — fire-and-forget AFTER the 201 payload is settled: a push
+    // failure (no FCM/APNs credentials yet, dead tokens, transport) can
+    // never break or delay order creation (the fail-safe law in lib/push).
+    notifyBusinessOrderEvent({
+      kind: "order-created",
+      orderNumber: order.orderNumber,
+      businessId: business.id,
+      businessName: business.name,
+      total,
     });
 
     return ok(

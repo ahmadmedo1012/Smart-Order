@@ -60,6 +60,7 @@ model User {
 
   sessions             Session[]
   mobileSessions       MobileSession[]
+  pushTokens           PushToken[]
   memberships          BusinessMember[]
   subscriptionPayments SubscriptionPayment[] @relation("PaymentReviewer")
 }
@@ -158,6 +159,28 @@ model MobileSession {
   lastUsedAt DateTime  @default(now())
   expiresAt  DateTime
   createdAt  DateTime  @default(now())
+  revokedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/* P38 (Phase F): expo push tokens for merchant/staff devices — the
+ * opt-in notification registry. Registered only after the value
+ * explanation + OS permission grant (mobile settings toggle);
+ * server-originated events only (new order → business staff with
+ * orders.read). Delivery additionally requires FCM v1 (Android) and
+ * APNs (iOS) credentials configured on the EAS project — the
+ * documented external blocker; the registry + pipeline are
+ * credential-independent and fully testable. */
+model PushToken {
+  id         String    @id @default(cuid())
+  userId     String
+  token      String    @unique
+  platform   String    @default("unknown") // ios | android | unknown
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
   revokedAt  DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

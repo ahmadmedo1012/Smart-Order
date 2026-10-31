@@ -64,6 +64,18 @@ async function purgeToken(): Promise<void> {
   await clearMerchantToken()
 }
 
+/* ── نقال عام (P38 Phase F — تسجيل الأجهزة/الإشعارات) ── */
+
+/** POST عام موثّق (Bearer) — لمسارات الجهاز مثل تسجيل توكن الإشعار. */
+export function post<T>(path: string, body?: unknown): Promise<T> {
+  return request<T>(path, { method: "POST", body })
+}
+
+/** DELETE عام موثّق (Bearer) — مثل إبطال توكن الإشعار. */
+export function del<T>(path: string, body?: unknown): Promise<T> {
+  return request<T>(path, { method: "DELETE", body })
+}
+
 /* ── إشعار موت الجلسة (يسجّله state/auth.ts — يمنع الاستيراد الدائري) ── */
 
 type UnauthorizedHandler = () => void
