@@ -177,22 +177,3 @@ export const radius = {
   xl: 20,
   pill: 999,
 } as const
-
-/* ── جسر انتقالي (يُزال بنهاية المسح): `t` و`statusFamily` كانا
- * ثابتين وحيدتين؛ صارا كائنين حيّين يحلّان على الوضع النشط كي
- * تبقى الشاشات غير المهاجرة بعد صحيحة الإقلاع الداكن. الشاشات
- * المهاجرة تستهلك useTheme() حصرًا. ── */
-let _activeName: ThemeName = 'dark'
-
-/** يضبط الوضع الحيّ (يستدعيه ThemeProvider) — قيمة الجسر الانتقالي. */
-export function setActiveTheme(name: ThemeName): void {
-  _activeName = name
-}
-
-export const t: ThemeColors = new Proxy({} as ThemeColors, {
-  get: (_target, key: string | symbol) => (_activeName === 'light' ? daylight : night)[key as keyof ThemeColors],
-})
-
-export const statusFamily: Record<string, StatusFamily> = new Proxy({} as Record<string, StatusFamily>, {
-  get: (_target, key: string | symbol) => statusFamilies[_activeName][key as string],
-})

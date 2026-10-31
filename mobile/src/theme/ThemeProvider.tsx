@@ -23,7 +23,6 @@ import {
   daylight,
   night,
   statusFamilies,
-  setActiveTheme,
   type StatusFamily,
   type ThemeColors,
   type ThemeName,
@@ -60,12 +59,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setName(next)
     AsyncStorage.setItem(THEME_STORAGE_KEY, next).catch(() => undefined)
   }, [])
-
-  // الجسر الحيّ للوضع (توافق الوحدات غير المهاجرة بعد) — يُضبط قبل
-  // أول رسم وقبل كل تبديل.
-  useEffect(() => {
-    setActiveTheme(name)
-  }, [name])
 
   const value = useMemo<ThemeContextValue>(
     () => ({
