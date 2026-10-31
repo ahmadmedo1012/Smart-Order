@@ -62,7 +62,15 @@
     },
     "extra": {
       "apiUrl": "https://order.smart-link.ly",
-      "router": {}
-    }
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "99080633-26a8-4c35-8a96-f37f5d576f00"
+      }
+    },
+    "owner": "rh2011"
   }
 }
