@@ -19,19 +19,28 @@ export async function generateMetadata({
   params: Promise<{ token: string }>;
 }): Promise<Metadata> {
   const { token } = await params;
+  /* P40 (P2-9): every branch speaks the robots.txt policy itself —
+   * noindex,follow + SELF-canonical. The token page previously said
+   * noindex,nofollow with NO canonical, so it inherited the root
+   * layout's canonical "/" (a per-order utility URL canonicalized to
+   * the homepage). follow:true aligns it with /track, /login and
+   * /register: these are doors, not content — never indexed, but links
+   * on them stay crawlable. */
+  const selfCanonical = { alternates: { canonical: `/track/${token}` } };
   if (!/^[0-9a-f-]{16,64}$/i.test(token)) {
-    return { title: "الطلب غير متاح", robots: { index: false, follow: false } };
+    return { title: "الطلب غير متاح", robots: { index: false, follow: true }, ...selfCanonical };
   }
   const order = await db.order.findUnique({
     where: { publicToken: token },
     select: { orderNumber: true },
   });
   if (!order) {
-    return { title: "الطلب غير متاح", robots: { index: false, follow: false } };
+    return { title: "الطلب غير متاح", robots: { index: false, follow: true }, ...selfCanonical };
   }
   return {
     title: `تتبع الطلب ${order.orderNumber}`,
-    robots: { index: false, follow: false },
+    robots: { index: false, follow: true },
+    ...selfCanonical,
   };
 }
 
