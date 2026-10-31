@@ -23,6 +23,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import { t } from '@/constants/theme'
 import { queryClient } from '@/lib/query-client'
 import { ensureRTL } from '@/lib/ensure-rtl'
+import { useAuthStore } from '@/state/auth'
 import { LoadingState } from '@/components/state-views'
 
 // عربي أولًا — قبل أي رسم.
@@ -49,6 +50,12 @@ function AppShell() {
     return () => {
       alive = false
     }
+  }, [])
+
+  // P36: استرجاع جلسة التاجر عند الإقلاع (GET /me) — بلا توكن محفوظ
+  // لا يحدث أي نداء شبكي، فتبقى رحلة الزائر كما هي تمامًا.
+  useEffect(() => {
+    void useAuthStore.getState().restore()
   }, [])
 
   useEffect(() => {

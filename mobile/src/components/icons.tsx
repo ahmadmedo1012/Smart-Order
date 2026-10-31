@@ -100,3 +100,79 @@ export function ClockIcon({ size = 24, color = 'currentColor' }: IconProps) {
     </Svg>
   )
 }
+
+/* ── أيقونات لوحة التاجر (P36) — نفس الوزن 1.75 ─────────────────── */
+
+/** أعمدة بيانية (lucide bar-chart-3) — لوحة القيادة وبطاقة الدخول. */
+export function ChartIcon({ size = 24, color = 'currentColor' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M3 3v18h18" />
+      <Path d="M18 17V9" />
+      <Path d="M13 17V5" />
+      <Path d="M8 17v-3" />
+    </Svg>
+  )
+}
+
+/** فاتورة طلب (lucide receipt) — صندوق الطلبات. */
+export function ReceiptIcon({ size = 24, color = 'currentColor' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z" />
+      <Path d="M8 7h8" />
+      <Path d="M8 11h8" />
+      <Path d="M8 15h5" />
+    </Svg>
+  )
+}
+
+/** مستخدم (lucide user) — تبويب المزيد. */
+export function UserIcon({ size = 24, color = 'currentColor' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <Circle cx={12} cy={8} r={5} />
+      <Path d="M20 21a8 8 0 0 0-16 0" />
+    </Svg>
+  )
+}
+
+/** دبوس موقع (lucide map-pin) — بيانات التوصيل. */
+export function MapPinIcon({ size = 24, color = 'currentColor' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <Circle cx={12} cy={10} r={3} />
+    </Svg>
+  )
+}
+
+/** هاتف (lucide phone) — بيانات العميل. */
+export function PhoneIcon({ size = 24, color = 'currentColor' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z" />
+    </Svg>
+  )
+}
+
+/** جهاز جوال (lucide smartphone) — قائمة الأجهزة. */
+export function SmartphoneIcon({ size = 24, color = 'currentColor' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <Rect x={5} y={2} width={14} height={20} rx={2} />
+      <Path d="M12 18h.01" />
+    </Svg>
+  )
+}
+
+/** خروج (lucide log-out) — تسجيل الخروج. */
+export function LogOutIcon({ size = 24, color = 'currentColor' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <Path d="m16 17 5-5-5-5" />
+      <Path d="M21 12H9" />
+    </Svg>
+  )
+}

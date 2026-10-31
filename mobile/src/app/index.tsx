@@ -22,7 +22,7 @@ import { queryClient } from '@/lib/query-client'
 import { t } from '@/constants/theme'
 import { fetchStorefront, ApiError, NetworkError } from '@/services/storefront'
 import { readRecents, type RecentStore } from '@/state/recents'
-import { SearchIcon, StoreIcon, TruckIcon } from '@/components/icons'
+import { SearchIcon, StoreIcon, TruckIcon, ChartIcon } from '@/components/icons'
 import { Button, Hairline } from '@/components/ui'
 import { WEB_BASE_URL } from '@/constants/config'
 
@@ -176,6 +176,23 @@ export default function LookupScreen() {
           </View>
         </View>
 
+        {/* بوابة التاجر (P36) — اختيارية بحتة: رحلة الزائر لا تعرفها */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="فتح لوحة التاجر"
+          onPress={() => router.push('/merchant/login')}
+          style={({ pressed }) => [s.merchantCard, pressed && { opacity: 0.85 }]}
+        >
+          <View style={s.merchantWell}>
+            <ChartIcon size={24} color={t.primary} />
+          </View>
+          <View style={s.merchantText}>
+            <Text style={s.merchantTitle}>لوحة التاجر</Text>
+            <Text style={s.merchantHint}>سجّل الدخول لإدارة طلبات متجرك ولوحة القيادة</Text>
+          </View>
+          <Text style={s.chevron}>‹</Text>
+        </Pressable>
+
         {/* وصلة الويب */}
         <Pressable
           accessibilityRole="link"
@@ -306,6 +323,36 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingVertical: 14,
+  },
+  merchantCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: t.card,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: t.border,
+    padding: 14,
+  },
+  merchantWell: {
+    width: 46,
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: t.goldSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  merchantText: { flex: 1, gap: 2 },
+  merchantTitle: {
+    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontSize: 15,
+    color: t.foreground,
+  },
+  merchantHint: {
+    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontSize: 12.5,
+    color: t.mutedFg,
+    lineHeight: 19,
   },
   webText: {
     fontFamily: 'IBMPlexSansArabic_500Medium',
