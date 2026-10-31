@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "ly.smartlink.smartorder",
+      "sha256_cert_fingerprints": [
+        "8E:C7:C9:2F:0A:B3:E8:AB:BF:A3:32:FA:48:2D:CF:69:C3:8A:1D:76:8F:14:44:A1:01:7B:84:05:A3:D4:58:E5"
+      ]
+    }
+  }
+]
