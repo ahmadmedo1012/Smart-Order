@@ -8,7 +8,7 @@
  * monoculture is broken deliberately: Smart-Link keeps the family night,
  * Smart-Menu goes warm culinary light, SmartBot goes petrol dark, and
  * THIS product re-anchors to a LIGHT-FIRST daylight operations world —
- * paper #F7F7F4, navy ink #1B2A41, DELIVERY ORANGE #D14900, steel info
+ * paper #F7F7F4, navy ink #1B2A41, DELIVERY ORANGE #CD4900, steel info
  * #3E5C76, Tajawal + Barlow Semi Condensed + IBM Plex Mono, and the
  * dashed route-line/node motif. The dark theme survives as the explicit
  * "night dispatch" override (.dark). Token NAMES are unchanged (150+
@@ -229,7 +229,7 @@ const GROUNDS_DARK = {
   '--border': '#24344F', // night hairline
 };
 const ACCENT_LIGHT = {
-  '--primary': '#D14900', // DELIVERY ORANGE (white on it 4.5:1)
+  '--primary': '#CD4900', // DELIVERY ORANGE (white on it 4.62:1 — P40 P3-10b: was #D14900 at a fragile 4.50:1)
   '--primary-foreground': '#FFFFFF',
   '--accent-foreground': '#8A3400', // orange-deep text accent (7.5:1 on paper)
   '--accent-soft': '#FCE3D6', // chains --c-copper-bg
@@ -267,7 +267,7 @@ const FAMILIES_LIGHT = {
   rose: ['#FBE3E6', '#C4384A', '#8C2733'],
   sand: ['#F1EEE1', '#A08A5B', '#55471F'],
   grey: ['#ECEDE7', '#6E7684', '#2F3745'],
-  copper: ['#FCE3D6', '#D14900', '#8A3400'],
+  copper: ['#FCE3D6', '#CD4900', '#8A3400'],
 };
 const FAMILIES_DARK = {
   peach: ['#32201A', '#F2A07F', '#FCD9C4'],
@@ -1265,8 +1265,8 @@ const R152_LAYER = [
       .every((f) => existsSync(new URL(`../public/fonts/${f}`, import.meta.url)))],
   ['viewport themeColor pair rides the daylight contract (light #F7F7F4 / dark #0D1626)',
     rawLayout.includes('color: "#F7F7F4"') && rawLayout.includes('color: "#0D1626"')],
-  ['manifest: theme_color #D14900 (delivery orange) + background_color #F7F7F4 (paper)',
-    rawManifest.includes('"theme_color": "#D14900"') && rawManifest.includes('"background_color": "#F7F7F4"')],
+  ['manifest: theme_color #CD4900 (delivery orange — P40 P3-10b lockstep) + background_color #F7F7F4 (paper)',
+    rawManifest.includes('"theme_color": "#CD4900"') && rawManifest.includes('"background_color": "#F7F7F4"')],
   ['primary button carries the delivery-orange press register (active:bg-(--accent-pressed))',
     rawButton2.includes('active:bg-(--accent-pressed)')],
   ['ROUTE & NODE motif primitives are defined (route-divider + route-spine-segment)',

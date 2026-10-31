@@ -26,10 +26,15 @@ keeps the family night; Smart-Menu goes warm culinary; SmartBot goes petrol).
 - Ground paper `#F7F7F4` · raised white `#FFFFFF` · soft `#EFEFEA` ·
   hairline `#E2E2DC` · ink NAVY `#1B2A41` · secondary `#4E5A6E` (6.4:1) ·
   muted `#6E7684`.
-- Primary **DELIVERY ORANGE** `#D14900` (white on it 4.5:1 ✓ · hover
+- Primary **DELIVERY ORANGE** `#CD4900` (white on it 4.62:1 ✓ — P40
+  P3-10b nudged from `#D14900`, whose 4.50:1 passed AA by 0.003; hover
   `#B23E00` · pressed `#8F3A00` · as TEXT `--accent-ink` `#8A3400`, 7.5:1
   on paper). Info STEEL `#3E5C76` · success `#1E7A46` · warning amber ·
   destructive rose. Orange = the courier vest; navy = the dispatch ink.
+  The ONE value lives in every light-theme carrier (`--primary`/
+  `--orange`/`--c-flame`/`--c-copper-ink`/`--sidebar-primary` + the alpha
+  washes + `global-error.tsx` inline + manifest `theme_color`); the
+  night-dispatch `#FF7A38` pair (dark ink on fill, 6.9:1) is untouched.
 - Night dispatch: ground `#0D1626`, surface `#152238`, surface-2 `#1B2A41`,
   paper ink `#F1F0EA`, LUMINOUS orange `#FF7A38` with dark on-orange ink
   `#241307` (6.9:1) · accent-as-text `#FFA170` (9:1) · hover `#FF8A50` ·
@@ -172,11 +177,20 @@ dark-scoped and paint-only.
 ## SEO/metadata conventions
 
 Title template `%s | سمارت أوردر`. Open Graph cards point at
-`/og-default.png` (1200×630 — pre-flip raster, regen pending).
-`manifest.json`: `theme_color #D14900`, `background_color #F7F7F4`; viewport
-`themeColor` dual `#F7F7F4`/`#0D1626`. NOTE: `NEXT_PUBLIC_SITE_URL` must be
-a REAL url or unset — an empty string crashes `new URL()` in `layout.tsx`
-metadata (dev 500s the whole site).
+`/og-default.png` (1200×630 — pre-flip raster, regen pending); a
+photo-less store falls back to it (P40 P3-11) instead of shipping an
+image-less OG card. `manifest.json`: `theme_color #CD4900`,
+`background_color #F7F7F4`; viewport `themeColor` dual `#F7F7F4`/
+`#0D1626`. NOTE: `NEXT_PUBLIC_SITE_URL` must be a REAL url or unset —
+an empty string crashes `new URL()` in `layout.tsx` metadata (dev 500s
+the whole site).
+
+**Utility/auth pages are doors, not content (P40 P2-9):** `/track`,
+`/track/[token]`, `/login`, `/register` carry their OWN metadata —
+`noindex,follow` + SELF-canonical — speaking the robots.txt policy
+(robots.txt Disallows all four). Marketing routes (landing/pricing/
+terms/privacy) and store pages keep the root canonical contract
+(`/` inheritance / self-canonical per store).
 
 ## Anti-patterns (do not resurrect)
 

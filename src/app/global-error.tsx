@@ -44,7 +44,7 @@ export default function GlobalError({
               borderRadius: 16,
               margin: "0 auto 24px",
               /* delivery-orange wash — the daylight accent at 12% */
-              background: "rgba(209, 73, 0, 0.12)",
+              background: "rgba(205, 73, 0, 0.12)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -97,9 +97,11 @@ export default function GlobalError({
                 borderRadius: 10,
                 border: "none",
                 /* r152 daylight CTA — delivery orange fill + white ink
-                   (#FFFFFF on #D14900 ≈ 4.5:1); 44/13/600/r10 inline
-                   (no CSS bundle on this boundary — values only). */
-                background: "#D14900",
+                   (#FFFFFF on #CD4900 ≈ 4.6:1 — P40 P3-10b lockstep with
+                   globals.css --primary; was #D14900 at a fragile 4.50:1);
+                   44/13/600/r10 inline (no CSS bundle on this boundary —
+                   values only). */
+                background: "#CD4900",
                 color: "#FFFFFF",
                 fontWeight: 600,
                 fontSize: 13,

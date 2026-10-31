@@ -24,7 +24,7 @@
  * petrol-circuit dark; Smart Order goes CRISP DAYLIGHT):
  *   · LIGHT (default, :root) — daylight paper ground #F7F7F4, raised
  *     white #FFFFFF, soft #EFEFEA, hairline #E2E2DC, ink NAVY #1B2A41,
- *     secondary #4E5A6E, muted #6E7684, primary DELIVERY ORANGE #D14900
+ *     secondary #4E5A6E, muted #6E7684, primary DELIVERY ORANGE #CD4900
  *     (white on it 4.5:1 ✓ · hover #B23E00 · pressed #8F3A00 · deep
  *     text accent #8A3400, 7.5:1 on paper), info STEEL #3E5C76, success
  *     #1E7A46, warning amber, destructive rose. Orange = the courier
@@ -348,13 +348,13 @@
   --muted-foreground: #4E5A6E; /* secondary steel-navy: 6.4:1 on paper */
   --placeholder-text: #6E7684; /* muted: 4.6:1 on white cards */
 
-  /* ── Brand solid — DELIVERY ORANGE #D14900; text on orange = white
-       (4.5:1 ✓). Hover #B23E00, pressed #8F3A00, deep text #8A3400. ── */
-  --primary: #D14900;
+  /* ── Brand solid — DELIVERY ORANGE #CD4900; text on orange = white
+       (4.6:1 ✓ — P40 P3-10b: was #D14900 at a fragile 4.50:1). Hover #B23E00, pressed #8F3A00, deep text #8A3400. ── */
+  --primary: #CD4900;
   --primary-foreground: #FFFFFF;
   --secondary: #EFEFEA;
   --secondary-foreground: #1B2A41;
-  --accent: rgb(209 73 0 / 0.12); /* 12% orange wash (hover tints) */
+  --accent: rgb(205 73 0 / 0.12); /* 12% orange wash (hover tints) */
   --accent-foreground: var(--c-copper-deep); /* orange-deep as text — 7.5:1 on paper (chains the copper family) */
   --accent-soft: var(--c-copper-bg); /* soft orange chip ground (chains the copper family) */
   --accent-hover: #B23E00;
@@ -366,12 +366,12 @@
   --ring: #8A3400;
 
   /* ── Accent metal ramp (daylight) — the delivery-orange CTA family:
-       flame = base #D14900, ember = hover/strong #B23E00,
+       flame = base #CD4900, ember = hover/strong #B23E00,
        saffron = the ramp mid #E06B1B, espresso = on-accent dark ink
        #241307. Legacy names kept (150+ consumers). ── */
-  --orange: #D14900;
+  --orange: #CD4900;
   --orange-foreground: #FFFFFF;
-  --c-flame: #D14900;
+  --c-flame: #CD4900;
   --c-ember: #B23E00;
   --c-saffron: #E06B1B;
   --c-saffron-ink: #8A3400;
@@ -418,7 +418,7 @@
   --c-rose-bg: #FBE3E6;      --c-rose-ink: #C4384A;      --c-rose-deep: #8C2733;
   --c-sand-bg: #F1EEE1;      --c-sand-ink: #A08A5B;      --c-sand-deep: #55471F;
   --c-grey-bg: #ECEDE7;      --c-grey-ink: #6E7684;      --c-grey-deep: #2F3745;
-  --c-copper-bg: #FCE3D6;    --c-copper-ink: #D14900;    --c-copper-deep: #8A3400;
+  --c-copper-bg: #FCE3D6;    --c-copper-ink: #CD4900;    --c-copper-deep: #8A3400;
   /* brand companions — chained per-theme (the var() substitutes at
      declaration scope). */
   --brand-purple: var(--c-lavender-ink); /* = #7C63DB daylight */
@@ -441,9 +441,9 @@
   /* ── Sidebar — daylight paper: orange wash active state ── */
   --sidebar: #F2F2EE;
   --sidebar-foreground: #1B2A41;
-  --sidebar-primary: #D14900;
+  --sidebar-primary: #CD4900;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: rgb(209 73 0 / 0.10); /* orange wash active */
+  --sidebar-accent: rgb(205 73 0 / 0.10); /* orange wash active */
   --sidebar-accent-foreground: #8A3400;
   --sidebar-border: #E2E2DC;
   --sidebar-ring: #8A3400;
@@ -487,12 +487,12 @@
   --grid-square: rgba(27, 42, 65, 0.08);
 
   /* ── Accent gradients — delivery orange at the wash alphas ── */
-  --gradient-orange: linear-gradient(135deg, rgb(209 73 0 / 0.10), rgb(209 73 0 / 0.05));
+  --gradient-orange: linear-gradient(135deg, rgb(205 73 0 / 0.10), rgb(205 73 0 / 0.05));
   --gradient-shine: linear-gradient(90deg, transparent 0%, oklch(0 0 0 / 0.04) 50%, transparent 100%);
 
   /* ── Page glow — orange hero washes (daylight operations room) ── */
-  --menu-glow: radial-gradient(ellipse_at_50%_0%, rgb(209 73 0 / 0.07), transparent 70%);
-  --menu-glow-strong: radial-gradient(ellipse 80% 50% at 50% -10%, rgb(209 73 0 / 0.13), transparent 70%);
+  --menu-glow: radial-gradient(ellipse_at_50%_0%, rgb(205 73 0 / 0.07), transparent 70%);
+  --menu-glow-strong: radial-gradient(ellipse 80% 50% at 50% -10%, rgb(205 73 0 / 0.13), transparent 70%);
 
   /* ── Image placeholder shimmer (daylight) ── */
   --image-shimmer: rgba(27, 42, 65, 0.08);
@@ -1521,7 +1521,7 @@
     --muted-foreground: #4E5A6E;
     --secondary: #EFEFEA;
     --secondary-foreground: #1B2A41;
-    --primary: #D14900;
+    --primary: #CD4900;
     --primary-foreground: #FFFFFF;
     --accent-foreground: #8A3400;
     --accent-soft: #FCE3D6;
@@ -1540,7 +1540,7 @@
     --c-rose-bg: #FBE3E6;      --c-rose-ink: #C4384A;      --c-rose-deep: #8C2733;
     --c-sand-bg: #F1EEE1;      --c-sand-ink: #A08A5B;      --c-sand-deep: #55471F;
     --c-grey-bg: #ECEDE7;      --c-grey-ink: #6E7684;      --c-grey-deep: #2F3745;
-    --c-copper-bg: #FCE3D6;    --c-copper-ink: #D14900;    --c-copper-deep: #8A3400;
+    --c-copper-bg: #FCE3D6;    --c-copper-ink: #CD4900;    --c-copper-deep: #8A3400;
   }
   body {
     background: #FFFFFF !important;
