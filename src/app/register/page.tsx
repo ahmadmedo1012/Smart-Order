@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PaymentDialog } from "@/components/payment/payment-dialog";
 import { StepIndicator, type WizardStep } from "@/components/register/step-indicator";
 import { PlanSelector } from "@/components/register/plan-selector";
+import { SkipLink } from "@/components/shared/skip-link";
 import { FieldError } from "@/components/dashboard/form-field";
 import { EmptyState, ErrorState } from "@/components/shared/states";
 import { api, ApiError } from "@/lib/client";
@@ -212,6 +213,10 @@ function RegisterWizard() {
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-x-clip bg-background">
+      {/* P40 (P3-20): the skip link — parity with the rest of the fleet
+          (storefront/track/checkout/dashboard all carry it); first
+          focusable element, target = the <main> below. */}
+      <SkipLink />
       {/* r128-F8 (B19): flame radial corners retired (§7 no-glow) — the calm
           grain veil keeps the auth atmosphere. */}
       <div className="grain-overlay" aria-hidden="true" />
@@ -234,7 +239,9 @@ function RegisterWizard() {
       {/* Top accent bar (r128-F8/B19: de-gradient — flat token fill) */}
       <div className="fixed inset-x-0 top-0 z-10 h-1 bg-orange" />
 
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center px-4 pb-16 pt-24 sm:px-6">
+      {/* r133 (A11 S2, P40 P3-20): id="main" + tabIndex={-1} — the skip-link
+          target (Safari/Firefox move keyboard focus into <main> on skip). */}
+      <main id="main" tabIndex={-1} className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center px-4 pb-16 pt-24 focus:outline-none sm:px-6">
         {/* Logo + title */}
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="flex h-10 w-10 items-center justify-center">

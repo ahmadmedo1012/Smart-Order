@@ -1114,11 +1114,13 @@ const R133_LAYER = [
     R('src/components/landing/MagneticGoldLink.tsx').includes('import Link from "next/link"')],
   ['D sonner error toasts: assertive role=alert wrapper (every raw toast.error inherits)',
     R('src/components/ui/sonner.tsx').includes('<span role="alert">')],
-  ['D skip targets: tabIndex={-1} mains (storefront + checkout + tracking + dashboard shell)',
+  ['D skip targets: tabIndex={-1} mains (storefront + checkout + tracking + dashboard shell + register wizard, P40 P3-20)',
     R('src/components/storefront/storefront.tsx').includes('<main id="main" tabIndex={-1}') &&
     R('src/components/storefront/checkout-client.tsx').includes('<main id="main" tabIndex={-1}') &&
     R133_SRC.trackClient.includes('<main id="main" tabIndex={-1}') &&
-    R133_SRC.shell.includes('tabIndex={-1}')],
+    R133_SRC.shell.includes('tabIndex={-1}') &&
+    R('src/app/register/page.tsx').includes('<main id="main" tabIndex={-1}') &&
+    R('src/app/register/page.tsx').includes('<SkipLink />')],
   ['D product-dialog options: aria-pressed chips (fake radio/checkbox roles gone)',
     R('src/components/storefront/product-dialog.tsx').includes('aria-pressed={isSelected}') &&
     !R('src/components/storefront/product-dialog.tsx').includes('role={g.maxSelect > 1 ? "checkbox" : "radio"}')],
@@ -1137,6 +1139,13 @@ const R133_LAYER = [
   ['E og:locale = ar_AR ×2 (root layout + store generateMetadata)',
     R('src/app/layout.tsx').includes('locale: "ar_AR"') &&
     R('src/app/store/[slug]/page.tsx').includes('locale: "ar_AR"')],
+  ['P40 P3-11: store og:image never empty — a photo-less store (no cover/logo) falls back to og-default.png 1200×630 (twitter rides the same images)',
+    R('src/app/store/[slug]/page.tsx').includes('og-default.png') &&
+    R('src/app/store/[slug]/page.tsx').includes('images: ogImages') &&
+    R('src/app/store/[slug]/page.tsx').includes('twitter: { card: "summary_large_image", title, description, images: ogImages }')],
+  ['P40 P3-12: ONE <main> landmark in store SSR — the route-level skeleton yields (a div, never a main; the real storefront main is the single landmark)',
+    !R('src/components/storefront/skeletons.tsx').includes('<main') &&
+    R('src/components/storefront/storefront.tsx').includes('<main id="main" tabIndex={-1}')],
   ['E autofill/caret port (madarek base.css browser surfaces, globals.css)',
     R('src/app/globals.css').includes('caret-color: var(--primary);') &&
     R('src/app/globals.css').includes('-webkit-box-shadow: 0 0 0 1000px var(--background) inset')],

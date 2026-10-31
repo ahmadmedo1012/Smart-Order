@@ -136,7 +136,22 @@ export async function generateMetadata({
     const description =
       business.description ??
       `اطلب من ${business.name}${business.city ? ` في ${business.city}` : ""} — تصفح المنتجات واطلب توصيلاً أو استلاماً عبر سمارت أوردر`;
-    const ogImage = absoluteUrl(business.coverUrl ?? business.logoUrl);
+    /* P40 (P3-11): a photo-less store (both live stores carry no
+     * cover/logo) rendered an OG card with NO image. The repo's
+     * og-default.png (the root layout's OG pair, 1200×630) is the
+     * fallback; a real cover/logo keeps absolute-URL precedence and
+     * its own shape. */
+    const ownImage = absoluteUrl(business.coverUrl ?? business.logoUrl);
+    const ogImages = ownImage
+      ? [{ url: ownImage }]
+      : [
+          {
+            url: `${SITE_URL}/og-default.png`,
+            width: 1200,
+            height: 630,
+            alt: `${business.name} — سمارت أوردر`,
+          },
+        ];
     /* P35 (storefront robots — the third fixture gate): a published QA-fixture
      * storefront (e2e residue) stays reachable but its metadata says
      * noindex,follow — the sitemap/counters gates only stop OUR surfaces; a
@@ -155,9 +170,9 @@ export async function generateMetadata({
         type: "website",
         /* r133 (R11 / A12 S13): ar_AR — Facebook scrapers drop ar_LY. */
         locale: "ar_AR",
-        images: ogImage ? [{ url: ogImage }] : undefined,
+        images: ogImages,
       },
-      twitter: { card: "summary_large_image", title, description },
+      twitter: { card: "summary_large_image", title, description, images: ogImages },
     };
   } catch {
     // DB/metadata failure must not 500 the document — fallback metadata only

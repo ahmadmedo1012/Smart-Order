@@ -34,7 +34,13 @@ export function StorefrontSkeleton() {
           </div>
         </div>
       </div>
-      <main className="mx-auto max-w-4xl px-4 py-5">
+      {/* P40 (P3-12): a plain div, NOT a main landmark — this skeleton is
+          also the route-level loading fallback (store/[slug]/loading.tsx),
+          so streaming SSR emits it ALONGSIDE the page's real storefront
+          main (storefront.tsx, id="main") until the swap lands; two main
+          landmarks sat in the raw pre-hydration HTML. The skeleton keeps
+          its geometry and yields the ONE landmark to the real storefront. */}
+      <div className="mx-auto max-w-4xl px-4 py-5">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="overflow-hidden rounded-xl border border-border">
@@ -46,7 +52,7 @@ export function StorefrontSkeleton() {
             </div>
           ))}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
