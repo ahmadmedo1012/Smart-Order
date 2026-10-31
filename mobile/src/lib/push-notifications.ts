@@ -17,6 +17,14 @@
 import { Platform } from 'react-native'
 import Constants from 'expo-constants'
 import * as Notifications from 'expo-notifications'
+// القيم المطلوبة كأسماء مباشرة (المودول الرئيسي يعيد تصديرها كقيم) —
+// الوصول عبر فضاء الأسماء يربك محلل استيراد eslint (import/namespace)
+// ولا حاجة له أصلاً.
+import {
+  AndroidImportance,
+  AndroidNotificationVisibility,
+  IosAuthorizationStatus,
+} from 'expo-notifications'
 import { post, del } from '@/services/merchant'
 
 /** معرّف قناة أندرويد — كل إشعارات الطلبات عبر قناة واحدة قابلة للضبط
@@ -37,7 +45,7 @@ Notifications.setNotificationHandler({
 /** هل إذن النظام ممنوح؟ (بلا طلب — للعرض الصادق في الواجهة) */
 export async function pushPermissionGranted(): Promise<boolean> {
   const cur = await Notifications.getPermissionsAsync()
-  return cur.granted || cur.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
+  return cur.granted || cur.ios?.status === IosAuthorizationStatus.PROVISIONAL
 }
 
 /** طلب الإذن — يُستدعى فقط من زر التفعيل بعد شرح القيمة. */
@@ -46,17 +54,17 @@ async function requestPermission(): Promise<boolean> {
   if (cur.granted) return true
   if (!cur.canAskAgain) return false
   const next = await Notifications.requestPermissionsAsync()
-  return next.granted || next.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
+  return next.granted || next.ios?.status === IosAuthorizationStatus.PROVISIONAL
 }
 
 async function ensureAndroidChannel(): Promise<void> {
   if (Platform.OS !== 'android') return
   await Notifications.setNotificationChannelAsync(ORDERS_CHANNEL_ID, {
     name: 'الطلبات الجديدة',
-    importance: Notifications.AndroidImportance.HIGH,
+    importance: AndroidImportance.HIGH,
     sound: 'default',
     vibrationPattern: [0, 250, 250, 250],
-    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PRIVATE,
+    lockscreenVisibility: AndroidNotificationVisibility.PRIVATE,
   })
 }
 
