@@ -9,13 +9,17 @@ import React from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { t, statusFamily } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { ROLE_AR } from '@/types/merchant'
 import { StoreIcon, LogOutIcon } from '@/components/icons'
 import { Button, Hairline } from '@/components/ui'
 
 function PublishStamp({ published }: { published: boolean }) {
+  const { t, statusFamily } = useTheme()
+  const s = makeStyles(t)
+
   const fam = published ? statusFamily.mint : statusFamily.grey
   return (
     <View style={[s.stamp, { backgroundColor: fam.bg, borderColor: `${fam.ink}59` }]}>
@@ -25,6 +29,9 @@ function PublishStamp({ published }: { published: boolean }) {
 }
 
 export default function MerchantBusinessScreen() {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const memberships = useAuthStore((s) => s.memberships)
   const selectedBusinessId = useAuthStore((s) => s.selectedBusinessId)
   const selectBusiness = useAuthStore((s) => s.selectBusiness)
@@ -110,17 +117,17 @@ export default function MerchantBusinessScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 14, paddingBottom: 32 },
   hero: { alignItems: 'center', paddingTop: 24, paddingBottom: 8, gap: 8 },
   heroTitle: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 24,
     color: t.foreground,
   },
   heroSub: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 14,
     color: t.mutedFg,
     textAlign: 'center',
@@ -136,13 +143,13 @@ const s = StyleSheet.create({
     gap: 4,
   },
   emptyTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
     textAlign: 'center',
   },
   emptyHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
     textAlign: 'center',
@@ -166,12 +173,12 @@ const s = StyleSheet.create({
   },
   bizText: { flex: 1, gap: 3 },
   bizName: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   bizSlug: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },
@@ -184,7 +191,7 @@ const s = StyleSheet.create({
     marginTop: 2,
   },
   stampText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 11,
     lineHeight: 16,
   },
@@ -197,7 +204,7 @@ const s = StyleSheet.create({
     paddingVertical: 14,
   },
   logoutText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13,
     color: t.mutedFg,
   },

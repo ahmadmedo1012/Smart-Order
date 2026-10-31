@@ -15,7 +15,8 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
-import { t, statusFamily } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { fetchMobileReports } from '@/services/merchant'
 import { apiErrorMessage } from '@/lib/api-error'
@@ -114,6 +115,9 @@ const QUICK_RANGES: { label: string; days: number }[] = [
 ]
 
 function KpiCard({ label, value }: { label: string; value: string }) {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   return (
     <View style={s.kpi}>
       <Text style={s.kpiValue}>{value}</Text>
@@ -123,6 +127,9 @@ function KpiCard({ label, value }: { label: string; value: string }) {
 }
 
 export default function ManageReportsScreen() {
+  const { t, statusFamily } = useTheme()
+  const s = makeStyles(t)
+
   const businessId = useAuthStore((s) => s.selectedBusinessId)
   const membership = useAuthStore((s) => s.memberships.find((m) => m.businessId === s.selectedBusinessId))
   const canRead = useMemo(() => (membership?.permissions ?? []).includes('orders.read'), [membership])
@@ -393,6 +400,9 @@ function MiniCalendar({
   onShiftMonth: (dir: -1 | 1) => void
   onPickDay: (key: string) => void
 }) {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   // أول يوم في الشهر: السبت = بداية الأسبوع (getUTCDay: الأحد=0).
   const firstWeekday = (new Date(Date.UTC(viewYear, viewMonth, 1)).getUTCDay() + 1) % 7
   const daysInMonth = new Date(Date.UTC(viewYear, viewMonth + 1, 0)).getUTCDate()
@@ -474,23 +484,23 @@ function MiniCalendar({
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 12, paddingBottom: 32 },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingVertical: 4 },
   backText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 14,
     color: t.primary,
   },
   backChevron: { color: t.primary, fontSize: 20, lineHeight: 24 },
   title: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 24,
     color: t.foreground,
   },
   sub: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
     lineHeight: 19,
@@ -505,7 +515,7 @@ const s = StyleSheet.create({
     gap: 12,
   },
   cardTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
@@ -524,12 +534,12 @@ const s = StyleSheet.create({
   },
   dateBoxActive: { borderColor: t.primary },
   dateLabel: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 11.5,
     color: t.mutedFg,
   },
   dateValue: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.foreground,
   },
@@ -543,12 +553,12 @@ const s = StyleSheet.create({
     paddingHorizontal: 14,
   },
   chipText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 12.5,
     color: t.mutedFg,
   },
   windowError: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 12.5,
     color: t.destructive,
     lineHeight: 19,
@@ -565,12 +575,12 @@ const s = StyleSheet.create({
     gap: 4,
   },
   kpiValue: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 17,
     color: t.ring,
   },
   kpiLabel: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     lineHeight: 17,
@@ -582,7 +592,7 @@ const s = StyleSheet.create({
   },
   barLabel: {
     width: 74,
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },
@@ -596,19 +606,19 @@ const s = StyleSheet.create({
   barFill: { height: 10, borderRadius: 5 },
   barCount: {
     minWidth: 30,
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 12.5,
     color: t.foreground,
     textAlign: 'left',
   },
   windowMeta: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 11.5,
     color: t.mutedFg,
     lineHeight: 18,
   },
   hint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
     textAlign: 'center',
@@ -637,13 +647,13 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   calNavGlyph: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 20,
     lineHeight: 24,
     color: t.primary,
   },
   calMonthLabel: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.foreground,
   },
@@ -651,7 +661,7 @@ const s = StyleSheet.create({
   calWeekday: {
     flex: 1,
     textAlign: 'center',
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 10.5,
     color: t.mutedFg,
   },
@@ -663,7 +673,7 @@ const s = StyleSheet.create({
     borderRadius: 999,
   },
   calDayText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13,
     color: t.foreground,
   },

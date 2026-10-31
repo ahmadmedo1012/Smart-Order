@@ -9,12 +9,14 @@
 import React, { useEffect } from 'react'
 import { View } from 'react-native'
 import { Stack, usePathname, router } from 'expo-router'
-import { t } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { LoadingState } from '@/components/state-views'
 import { ToastHost } from '@/components/toast'
 
 export default function MerchantLayout() {
+  const { t } = useTheme()
+
   const pathname = usePathname()
   const status = useAuthStore((s) => s.status)
 

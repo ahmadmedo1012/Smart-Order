@@ -11,7 +11,8 @@ import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
-import { t } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { fetchCategories, fetchProducts } from '@/services/merchant'
 import { formatMillimes } from '@/lib/money-millimes'
@@ -21,6 +22,9 @@ import { EmptyState, ErrorState, LoadingState } from '@/components/state-views'
 const NO_CATEGORY = '__none__'
 
 export default function ManageProductsScreen() {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const [filter, setFilter] = useState<string>('ALL')
   const businessId = useAuthStore((s) => s.selectedBusinessId)
   const membership = useAuthStore((s) => s.memberships.find((m) => m.businessId === s.selectedBusinessId))
@@ -154,24 +158,24 @@ export default function ManageProductsScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   header: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8, gap: 2 },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingVertical: 4 },
   backText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 14,
     color: t.primary,
   },
   backChevron: { color: t.primary, fontSize: 20, lineHeight: 24 },
   titleRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 },
   title: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 24,
     color: t.foreground,
   },
   count: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
   },
@@ -190,17 +194,17 @@ const s = StyleSheet.create({
   cardTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   titleWrap: { flex: 1, gap: 3 },
   name: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   meta: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },
   price: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.ring,
   },

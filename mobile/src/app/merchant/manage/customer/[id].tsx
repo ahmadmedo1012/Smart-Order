@@ -12,7 +12,8 @@ import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View 
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
-import { t } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { fetchCustomerDetail } from '@/services/merchant'
 import { formatNumber } from '@/lib/money'
@@ -24,6 +25,9 @@ import { ErrorState, LoadingState } from '@/components/state-views'
 import { MapPinIcon, PhoneIcon } from '@/components/icons'
 
 function KpiCard({ label, value }: { label: string; value: string }) {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   return (
     <View style={s.kpi}>
       <Text style={s.kpiValue}>{value}</Text>
@@ -33,6 +37,9 @@ function KpiCard({ label, value }: { label: string; value: string }) {
 }
 
 export default function ManageCustomerDetailScreen() {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const params = useLocalSearchParams<{ id: string }>()
   const id = typeof params.id === 'string' ? params.id : ''
   const businessId = useAuthStore((s) => s.selectedBusinessId)
@@ -201,18 +208,18 @@ export default function ManageCustomerDetailScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 12, paddingBottom: 32 },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingVertical: 4 },
   backText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 14,
     color: t.primary,
   },
   backChevron: { color: t.primary, fontSize: 20, lineHeight: 24 },
   title: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 24,
     color: t.foreground,
     paddingBottom: 2,
@@ -226,24 +233,24 @@ const s = StyleSheet.create({
     gap: 10,
   },
   cardTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   profileRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   profileText: { flex: 1, gap: 3 },
   name: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 18,
     color: t.foreground,
   },
   phone: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.mono,
     fontSize: 14,
     color: t.ring,
   },
   meta: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },
@@ -259,18 +266,18 @@ const s = StyleSheet.create({
     minHeight: 42,
   },
   callText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13,
     color: t.primary,
   },
   notesWrap: { gap: 4 },
   notesLabel: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 12.5,
     color: t.mutedFg,
   },
   notesText: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13.5,
     color: t.foreground,
     lineHeight: 21,
@@ -287,12 +294,12 @@ const s = StyleSheet.create({
     gap: 4,
   },
   kpiValue: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 17,
     color: t.ring,
   },
   kpiLabel: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     lineHeight: 17,
@@ -301,12 +308,12 @@ const s = StyleSheet.create({
   addressText: { flex: 1, gap: 3 },
   addressTitleWrap: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   addressTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13.5,
     color: t.foreground,
   },
   addressLine: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
     lineHeight: 19,
@@ -319,29 +326,29 @@ const s = StyleSheet.create({
     gap: 8,
   },
   orderNumber: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.mono,
     fontSize: 14,
     color: t.foreground,
   },
   orderTotal: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13.5,
     color: t.ring,
   },
   orderRowMid: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   orderDate: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 11.5,
     color: t.mutedFg,
   },
   hint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
     textAlign: 'center',
   },
   footHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     textAlign: 'center',

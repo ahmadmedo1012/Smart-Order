@@ -12,7 +12,8 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, Vie
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
-import { t } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { fetchCustomers } from '@/services/merchant'
 import { formatNumber } from '@/lib/money'
@@ -26,6 +27,9 @@ import { SearchIcon, UserIcon } from '@/components/icons'
 const SERVER_CAP = 200
 
 export default function ManageCustomersScreen() {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const businessId = useAuthStore((s) => s.selectedBusinessId)
   const membership = useAuthStore((s) => s.memberships.find((m) => m.businessId === s.selectedBusinessId))
   const canRead = useMemo(() => (membership?.permissions ?? []).includes('customers.read'), [membership])
@@ -173,23 +177,23 @@ export default function ManageCustomersScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 12, paddingBottom: 32 },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingVertical: 4 },
   backText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 14,
     color: t.primary,
   },
   backChevron: { color: t.primary, fontSize: 20, lineHeight: 24 },
   title: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 24,
     color: t.foreground,
   },
   sub: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
     lineHeight: 19,
@@ -209,19 +213,19 @@ const s = StyleSheet.create({
   searchInput: {
     flex: 1,
     color: t.foreground,
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 14.5,
     paddingVertical: 8,
     textAlign: 'right',
   },
   clearBtn: { paddingVertical: 6, paddingHorizontal: 4 },
   clearText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 14,
     color: t.mutedFg,
   },
   searchingHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     textAlign: 'center',
@@ -244,18 +248,18 @@ const s = StyleSheet.create({
   },
   rowText: { flex: 1, gap: 2 },
   rowName: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14.5,
     color: t.foreground,
   },
   rowMeta: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },
   chevron: { color: t.mutedFg, fontSize: 20, lineHeight: 24 },
   footHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     textAlign: 'center',

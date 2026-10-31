@@ -11,7 +11,8 @@ import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } 
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { t } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { createZone, deleteZone, fetchZones, updateZone, type ZoneInput } from '@/services/merchant'
 import { apiErrorMessage } from '@/lib/api-error'
@@ -23,6 +24,9 @@ import { showToast } from '@/components/toast'
 import { PencilIcon, TruckIcon } from '@/components/icons'
 
 export default function ManageZonesScreen() {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const businessId = useAuthStore((s) => s.selectedBusinessId)
   const membership = useAuthStore((s) => s.memberships.find((m) => m.businessId === s.selectedBusinessId))
   const canManage = useMemo(() => (membership?.permissions ?? []).includes('delivery.manage'), [membership])
@@ -188,6 +192,9 @@ export default function ManageZonesScreen() {
 
 /** بطاقة إضافة منطقة — تُفتح بزر وتُغلق بعد الإرسال. */
 function CreateZoneCard({ busy, onSubmit }: { busy: boolean; onSubmit: (input: ZoneInput) => void }) {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [fee, setFee] = useState('')
@@ -293,6 +300,9 @@ function ZoneEditor({
   onSave: (body: ZoneInput) => void
   onDelete: () => void
 }) {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const [name, setName] = useState(zone.name)
   const [fee, setFee] = useState(formatMillimesAmount(zone.fee))
   const [minOrder, setMinOrder] = useState(zone.minOrder > 0 ? formatMillimesAmount(zone.minOrder) : '')
@@ -362,23 +372,23 @@ function ZoneEditor({
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 12, paddingBottom: 32 },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingVertical: 4 },
   backText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 14,
     color: t.primary,
   },
   backChevron: { color: t.primary, fontSize: 20, lineHeight: 24 },
   title: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 24,
     color: t.foreground,
   },
   sub: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
     lineHeight: 19,
@@ -393,7 +403,7 @@ const s = StyleSheet.create({
     gap: 12,
   },
   cardTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
@@ -408,7 +418,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   addZoneText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.primary,
   },
@@ -423,12 +433,12 @@ const s = StyleSheet.create({
   },
   rowText: { flex: 1, gap: 2 },
   rowName: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14.5,
     color: t.foreground,
   },
   rowMeta: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },
@@ -462,7 +472,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   deleteText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13.5,
     color: t.destructive,
   },

@@ -10,7 +10,8 @@ import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
-import { t } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { fetchOrders } from '@/services/merchant'
 import { formatArabicClock, formatArabicDayShort } from '@/lib/datetime'
@@ -32,6 +33,9 @@ const FILTERS: { value: OrderStatus | 'ALL'; label: string }[] = [
 ]
 
 export default function MerchantOrdersScreen() {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const [filter, setFilter] = useState<OrderStatus | 'ALL'>('ALL')
   const businessId = useAuthStore((s) => s.selectedBusinessId)
   const memberships = useAuthStore((s) => s.memberships)
@@ -137,16 +141,16 @@ export default function MerchantOrdersScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   header: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8, gap: 2 },
   title: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 24,
     color: t.foreground,
   },
   sub: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
   },
@@ -162,13 +166,13 @@ const s = StyleSheet.create({
   },
   cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   number: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.mono,
     fontSize: 14,
     color: t.foreground,
     flexShrink: 1,
   },
   customer: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13,
     color: t.mutedFg,
   },
@@ -179,19 +183,19 @@ const s = StyleSheet.create({
     gap: 8,
   },
   meta: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     flexShrink: 1,
   },
   total: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.ring,
   },
   refetchBar: { paddingVertical: 6, alignItems: 'center' },
   refetchText: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },

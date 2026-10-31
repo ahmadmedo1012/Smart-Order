@@ -10,12 +10,13 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { t, statusFamily } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { fetchSessions, revokeSession, ApiError, NetworkError } from '@/services/merchant'
 import { formatArabicDateTime } from '@/lib/datetime'
 import { ROLE_AR, type DeviceSession } from '@/types/merchant'
-import { Hairline } from '@/components/ui'
+import { Hairline, Toggle } from '@/components/ui'
 import { LogOutIcon, SettingsIcon, SmartphoneIcon, StoreIcon } from '@/components/icons'
 
 const PLATFORM_AR: Record<string, string> = {
@@ -30,6 +31,9 @@ function deviceLabel(s: DeviceSession): string {
 }
 
 export default function MerchantMoreScreen() {
+  const { t, statusFamily, name, setTheme } = useTheme()
+  const s = makeStyles(t)
+
   const user = useAuthStore((s) => s.user)
   const memberships = useAuthStore((s) => s.memberships)
   const businessId = useAuthStore((s) => s.selectedBusinessId)
@@ -146,6 +150,20 @@ export default function MerchantMoreScreen() {
           <Text style={s.userEmail}>{user?.email ?? ''}</Text>
         </View>
 
+        {/* المظهر — الوضع الليلي هو الافتراضي (توافق الويب)؛ الاختيار
+            يُحفظ ويبقى عبر إعادة التشغيل، ويسري على التطبيق كله. */}
+        <View style={s.card}>
+          <Text style={s.cardTitle}>المظهر</Text>
+          <Toggle
+            label="الوضع الليلي"
+            value={name === 'dark'}
+            onValueChange={(on) => setTheme(on ? 'dark' : 'light')}
+          />
+          <Text style={s.themeHint}>
+            {name === 'dark' ? 'غرفة العمليات الليلية — أرض كحلية وبرتقالي مضيء' : 'ضوء النهار — ورق فاتح وبرتقالي التوصيل'}
+          </Text>
+        </View>
+
         {/* الإدارة — بوابة شاشات الإدارة (C2-REST)، الصفوف تُبوَّب
             بالصلاحيات داخلها. */}
         <Pressable
@@ -240,12 +258,12 @@ export default function MerchantMoreScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 12, paddingBottom: 32 },
   header: { paddingBottom: 4 },
   title: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 24,
     color: t.foreground,
   },
@@ -258,7 +276,7 @@ const s = StyleSheet.create({
     gap: 12,
   },
   cardTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
@@ -273,12 +291,12 @@ const s = StyleSheet.create({
   },
   bizText: { flex: 1, gap: 3 },
   bizName: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   bizSlug: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },
@@ -291,24 +309,24 @@ const s = StyleSheet.create({
     marginTop: 2,
   },
   stampText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 11,
     lineHeight: 16,
   },
   rowBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 6 },
   rowBtnText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13.5,
     color: t.primary,
   },
   chevron: { color: t.mutedFg, fontSize: 20, lineHeight: 24 },
   userName: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.foreground,
   },
   userEmail: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
   },
@@ -332,12 +350,12 @@ const s = StyleSheet.create({
   },
   manageText: { flex: 1, gap: 2 },
   manageTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14.5,
     color: t.foreground,
   },
   manageHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },
@@ -352,12 +370,12 @@ const s = StyleSheet.create({
   },
   sessionText: { flex: 1, gap: 2 },
   sessionName: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13.5,
     color: t.foreground,
   },
   sessionMeta: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 11.5,
     color: t.mutedFg,
   },
@@ -369,7 +387,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 14,
   },
   revokeText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 12.5,
     color: t.destructive,
   },
@@ -386,19 +404,25 @@ const s = StyleSheet.create({
     minHeight: 52,
   },
   logoutText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.destructive,
   },
+  themeHint: {
+    fontFamily: fonts.regular,
+    fontSize: 11.5,
+    color: t.mutedFg,
+    lineHeight: 17,
+  },
   hint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
     textAlign: 'center',
   },
   inlineErrorWrap: { alignItems: 'center', gap: 8, paddingVertical: 6 },
   inlineError: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.destructive,
     textAlign: 'center',
@@ -411,7 +435,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
   },
   inlineRetryText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 12.5,
     color: t.primary,
   },

@@ -15,7 +15,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as Clipboard from 'expo-clipboard'
-import { t } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { WEB_BASE_URL } from '@/constants/config'
 import { useAuthStore } from '@/state/auth'
 import { fetchBusiness, updateBusiness } from '@/services/merchant'
@@ -62,6 +63,9 @@ function isPublishRefusal(
 }
 
 export default function ManageSettingsScreen() {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const businessId = useAuthStore((s) => s.selectedBusinessId)
   const membership = useAuthStore((s) => s.memberships.find((m) => m.businessId === s.selectedBusinessId))
   const canManage = useMemo(() => (membership?.permissions ?? []).includes('settings.manage'), [membership])
@@ -338,23 +342,23 @@ export default function ManageSettingsScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 12, paddingBottom: 32 },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingVertical: 4 },
   backText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 14,
     color: t.primary,
   },
   backChevron: { color: t.primary, fontSize: 20, lineHeight: 24 },
   title: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 24,
     color: t.foreground,
   },
   sub: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
     lineHeight: 19,
@@ -369,13 +373,13 @@ const s = StyleSheet.create({
     gap: 12,
   },
   cardTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   textarea: { minHeight: 66, textAlignVertical: 'top' },
   hint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     lineHeight: 18,
@@ -387,7 +391,7 @@ const s = StyleSheet.create({
     gap: 10,
   },
   urlRow: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.mono,
     fontSize: 13.5,
     color: t.ring,
     lineHeight: 20,
@@ -408,7 +412,7 @@ const s = StyleSheet.create({
     paddingVertical: 10,
   },
   urlBtnText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13.5,
     color: t.primary,
   },

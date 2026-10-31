@@ -8,11 +8,14 @@
  */
 import React, { useEffect } from 'react'
 import { Tabs, router } from 'expo-router'
-import { t } from '@/constants/theme'
+import { fonts } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { ChartIcon, ReceiptIcon, UserIcon } from '@/components/icons'
 
 export default function MerchantTabsLayout() {
+  const { t } = useTheme()
+
   const status = useAuthStore((s) => s.status)
   const memberships = useAuthStore((s) => s.memberships)
   const selectedBusinessId = useAuthStore((s) => s.selectedBusinessId)
@@ -38,7 +41,7 @@ export default function MerchantTabsLayout() {
           borderTopWidth: 1,
         },
         tabBarLabelStyle: {
-          fontFamily: 'IBMPlexSansArabic_500Medium',
+          fontFamily: fonts.medium,
           fontSize: 11,
         },
         sceneStyle: { backgroundColor: t.background },

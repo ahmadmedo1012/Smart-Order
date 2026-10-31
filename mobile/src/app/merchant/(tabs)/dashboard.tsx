@@ -9,7 +9,8 @@ import React from 'react'
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useQuery } from '@tanstack/react-query'
-import { t } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { fetchDashboardStats } from '@/services/merchant'
 import { formatNumber } from '@/lib/money'
@@ -30,6 +31,9 @@ const STATUS_ORDER: OrderStatus[] = [
 ]
 
 function KpiCard({ label, value }: { label: string; value: string }) {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   return (
     <View style={s.kpi}>
       <Text style={s.kpiValue}>{value}</Text>
@@ -39,6 +43,9 @@ function KpiCard({ label, value }: { label: string; value: string }) {
 }
 
 export default function MerchantDashboardScreen() {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const businessId = useAuthStore((s) => s.selectedBusinessId)
   const memberships = useAuthStore((s) => s.memberships)
   const business = memberships.find((m) => m.businessId === businessId)?.business
@@ -129,17 +136,17 @@ export default function MerchantDashboardScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 12, paddingBottom: 32 },
   header: { paddingBottom: 4, gap: 2 },
   title: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 24,
     color: t.foreground,
   },
   sub: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
   },
@@ -155,12 +162,12 @@ const s = StyleSheet.create({
     gap: 4,
   },
   kpiValue: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 18,
     color: t.ring,
   },
   kpiLabel: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
   },
@@ -173,7 +180,7 @@ const s = StyleSheet.create({
     gap: 10,
   },
   cardTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
@@ -184,17 +191,17 @@ const s = StyleSheet.create({
     gap: 8,
   },
   statusLabel: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
   },
   statusCount: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13,
     color: t.foreground,
   },
   hint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
     textAlign: 'center',

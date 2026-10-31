@@ -13,7 +13,8 @@ import { Alert, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { t, statusFamily } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { fetchOrderDetail, patchOrderStatus, ApiError, NetworkError } from '@/services/merchant'
 import { getAllowedTransitions, type TransitionRule } from '@/lib/order-machine'
@@ -48,6 +49,9 @@ function parseOptions(item: MerchantOrderItem): string[] {
 }
 
 function PaymentStamp({ status }: { status: 'UNPAID' | 'PAID' | 'REFUNDED' }) {
+  const { t, statusFamily } = useTheme()
+  const s = makeStyles(t)
+
   const fam = status === 'PAID' ? statusFamily.mint : status === 'REFUNDED' ? statusFamily.rose : statusFamily.grey
   return (
     <View style={[s.stamp, { backgroundColor: fam.bg, borderColor: `${fam.ink}59` }]}>
@@ -57,6 +61,9 @@ function PaymentStamp({ status }: { status: 'UNPAID' | 'PAID' | 'REFUNDED' }) {
 }
 
 export default function MerchantOrderDetailScreen() {
+  const { t, statusFamily } = useTheme()
+  const s = makeStyles(t)
+
   const params = useLocalSearchParams<{ id: string }>()
   const id = typeof params.id === 'string' ? params.id : ''
   const businessId = useAuthStore((s) => s.selectedBusinessId)
@@ -348,12 +355,12 @@ export default function MerchantOrderDetailScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 12, paddingBottom: 32 },
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingVertical: 4 },
   backText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 14,
     color: t.primary,
   },
@@ -367,50 +374,50 @@ const s = StyleSheet.create({
     gap: 12,
   },
   cardTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   orderNumber: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.mono,
     fontSize: 17,
     color: t.foreground,
     flexShrink: 1,
   },
   heroTime: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
   },
   heroChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   heroChip: { borderRadius: 6, borderWidth: 1, borderColor: t.border, paddingVertical: 3, paddingHorizontal: 8 },
   heroChipText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 11,
     lineHeight: 16,
     color: t.mutedFg,
   },
   stamp: { borderRadius: 6, borderWidth: 1, paddingVertical: 3, paddingHorizontal: 8, alignSelf: 'flex-start' },
-  stampText: { fontFamily: 'IBMPlexSansArabic_600SemiBold', fontSize: 11, lineHeight: 16 },
+  stampText: { fontFamily: fonts.bold, fontSize: 11, lineHeight: 16 },
   totalRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   totalLabel: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
   },
   totalValue: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 18,
     color: t.ring,
   },
   grandLabel: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.foreground,
   },
   grandValue: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 16,
     color: t.ring,
   },
@@ -428,12 +435,12 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   destructiveText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.destructive,
   },
   mutatingHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     textAlign: 'center',
@@ -441,18 +448,18 @@ const s = StyleSheet.create({
   itemRow: { flexDirection: 'row', gap: 10, paddingVertical: 10 },
   itemText: { flex: 1, gap: 3 },
   itemName: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.foreground,
   },
   itemMeta: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     lineHeight: 18,
   },
   itemTotal: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13,
     color: t.ring,
   },
@@ -460,12 +467,12 @@ const s = StyleSheet.create({
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   infoText: { flex: 1, gap: 2 },
   infoValue: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.foreground,
   },
   infoMeta: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
     lineHeight: 19,
@@ -481,12 +488,12 @@ const s = StyleSheet.create({
     paddingHorizontal: 12,
   },
   callText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13,
     color: t.primary,
   },
   note: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
     lineHeight: 19,
@@ -498,18 +505,18 @@ const s = StyleSheet.create({
   timelineDot: { width: 8, height: 8, borderRadius: 4, marginTop: 6 },
   timelineText: { flex: 1, gap: 2, paddingBottom: 10 },
   timelineTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13,
     color: t.foreground,
   },
   timelineNote: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     lineHeight: 18,
   },
   timelineMeta: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 11.5,
     color: t.mutedFg,
   },

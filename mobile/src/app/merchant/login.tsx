@@ -16,13 +16,17 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
-import { t } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { ApiError, NetworkError } from '@/services/merchant'
 import { ChartIcon } from '@/components/icons'
 import { Button, Field } from '@/components/ui'
 
 export default function MerchantLoginScreen() {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const status = useAuthStore((s) => s.status)
   const login = useAuthStore((s) => s.login)
 
@@ -125,7 +129,7 @@ export default function MerchantLoginScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 14, paddingBottom: 32 },
   hero: { alignItems: 'center', paddingTop: 24, paddingBottom: 8, gap: 10 },
@@ -138,12 +142,12 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   heroTitle: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 26,
     color: t.foreground,
   },
   heroSub: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 14,
     color: t.mutedFg,
     textAlign: 'center',
@@ -160,20 +164,20 @@ const s = StyleSheet.create({
   },
   error: {
     color: t.destructive,
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     lineHeight: 20,
     textAlign: 'right',
   },
   hint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     textAlign: 'center',
     lineHeight: 18,
   },
   guestHint: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13,
     color: t.mutedFg,
     textAlign: 'center',
