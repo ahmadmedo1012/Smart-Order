@@ -67,6 +67,17 @@ jobs:
       - name: Install dependencies (frozen)
         run: bun install --frozen-lockfile
 
+      # P37 (family-parity audit gate): كل أشقاء العائلة يحرسون سلسلة
+      # التوريد (SmartBot: osv-scanner · Smart-Menu: dependency-audit ·
+      # Smart-Link: npm audit --omit=dev) — هذا المستودع كان العضو الوحيد
+      # بلا بوابة، و13 ثغرة إنتاجية (9 عالية: postcss/nanoid/source-map-js/
+      # zod/effect/defu/deepmerge-ts/baseline-browser-mapping) تراكمت غير
+      # مكتشفة. الشجرة كاملة الآن صفر ثغرات (overrides موثقة في
+      # package.json) — العتبة high: نفس معيار Smart-Link، والمستوى
+      # المنخفض لا يكسر CI.
+      - name: Dependency audit (الشجرة كاملة، عتبة high)
+        run: bun audit --audit-level=high
+
       - name: Lint (ESLint صفر أخطاء)
         run: npm run lint
 
