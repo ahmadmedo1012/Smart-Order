@@ -35,7 +35,11 @@ function hashPassword(password) {
 /* ── نفس بيانات seed-family.js / api/seed (idempotent by natural keys) ──
    P14 (2-d/3-d): الميزات لم تعد تعيد ذكر الحدود الرقمية (المنتجات/الطلبات
    الشهرية) — خانتا الحد في بطاقة الباقة هما حامل الرقم الوحيد؛ القديم
-   يُطوى عند العرض عبر lib/plan-types.ts foldRestatedLimits. */
+   يُطوى عند العرض عبر lib/plan-types.ts foldRestatedLimits.
+   P40 (P1-3 + P2-1 + SO-2): قدرات كل الباقات انتقلت إلى كتلة «دائماً في
+   كل الباقات» في صفحة الباقات، و«متاجر متعددة من حساب واحد» (غير
+   المنفَّذة) أُحيلت — القديم يُطوى عند العرض عبر lib/plan-claims.ts
+   RETIRED_CLAIMS. */
 
 const PLANS = [
   {
@@ -47,7 +51,6 @@ const PLANS = [
     maxOrders: 100,
     sortOrder: 1,
     features: [
-      "متجر رقمي يعمل فوراً",
       "3 أقسام",
       "منطقة توصيل واحدة",
       "طرق دفع محلية",
@@ -65,8 +68,6 @@ const PLANS = [
       "كل ميزات المجانية",
       "أقسام غير محدودة",
       "مناطق توصيل متعددة",
-      "تتبع مباشر للعميل",
-      "دعم فني عبر واتساب",
     ],
   },
   {
@@ -80,7 +81,6 @@ const PLANS = [
     features: [
       "كل ميزات الأساسي",
       "حسابات فريق (3 أعضاء)",
-      "رسائل واتساب للطلبات والتأكيدات",
       "تقارير أداء عند الطلب",
       "دعم أولوية",
     ],
@@ -96,7 +96,6 @@ const PLANS = [
     features: [
       "كل ميزات بريميوم",
       "فريق غير محدود",
-      "متاجر متعددة من حساب واحد",
       "تصدير CSV للتقارير", // W7-D: the honest Pro bullet — the CSV export is the only real Pro-level analytics differentiator (reports itself is بريميوم+)
       "مدير حساب مخصص",
     ],

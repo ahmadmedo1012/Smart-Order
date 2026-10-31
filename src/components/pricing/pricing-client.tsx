@@ -188,6 +188,23 @@ function PlanCard({ plan, index, yearly }: { plan: Plan; index: number; yearly: 
 /** Yearly billing = 10× monthly (two months free) — family math. */
 const YEARLY_SAVINGS_PCT = Math.round((1 - 10 / 12) * 100);
 
+/* SO-2 (P40, benchmark rank 2): the always-included baseline — every
+ * verified all-plan capability in ONE block above the tier cards, so the
+ * cards carry ONLY true differentiators. Each item is code-verified
+ * ungated: the register flow creates a store on every plan; every order
+ * gets the unguessable publicToken (/track is public); WhatsApp
+ * order/confirmation messages are wa.me deep links with no plan branch
+ * (lib/whatsapp); the Arabic RTL dashboard is the same app; support is
+ * one WhatsApp number (SUPPORT_WHATSAPP) for everyone. The P2-1 mis-sold
+ * bullets land here — truthfully — instead of on tier cards. */
+const ALWAYS_INCLUDED: readonly string[] = [
+  "متجر رقمي يعمل فوراً",
+  "تتبع مباشر للطلبات",
+  "رسائل واتساب للطلبات",
+  "لوحة تحكم عربية",
+  "دعم واتساب",
+];
+
 export function PricingClient({ initialPlans }: { initialPlans: Plan[] | null }) {
   const [plans, setPlans] = useState<Plan[]>(initialPlans ?? []);
   const [loading, setLoading] = useState(initialPlans === null);
@@ -283,6 +300,29 @@ export function PricingClient({ initialPlans }: { initialPlans: Plan[] | null })
 
       <section className="pb-16 sm:pb-24">
         <div className="mx-auto max-w-6xl px-4">
+          {/* SO-2 (P40): «دائماً في كل الباقات» — the all-plan baseline ABOVE
+              the tier cards (family quiet card + mono eyebrow + the same dot
+              marks the card bullets speak); renders in every catalog state
+              because it is plan-independent truth. */}
+          <div className="mx-auto mb-8 w-full max-w-4xl rounded-2xl border border-border/50 bg-card p-4 sm:p-5">
+            <p className="mb-4 text-center font-mono text-xs font-medium tracking-[0.08em] text-accent-foreground">
+              دائماً في كل الباقات
+            </p>
+            <ul
+              className="flex flex-wrap items-center justify-center gap-2"
+              aria-label="ميزات متوفرة في جميع الباقات"
+            >
+              {ALWAYS_INCLUDED.map((item) => (
+                <li
+                  key={item}
+                  className="flex items-center gap-2 rounded-full bg-muted/45 px-3 py-1.5 text-xs text-muted-foreground sm:text-sm"
+                >
+                  <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-accent-foreground/60" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
           {loading ? (
             <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:grid sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
               {[...Array(4)].map((_, i) => (

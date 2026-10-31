@@ -20,6 +20,14 @@ export const runtime = "nodejs";
  * محدودة»…) stay. Rows seeded before this change heal at display time via
  * lib/plan-types.ts foldRestatedLimits.
  */
+/* P40 (P1-3 + P2-1 + SO-2): the all-plan capabilities (متجر رقمي فوري ·
+ * تتبع مباشر · رسائل واتساب · دعم واتساب) moved to the pricing page's
+ * «دائماً في كل الباقات» baseline block — they are NOT tier differentiators
+ * and two of them were mis-sold as exactly that (P2-1). Pro's
+ * «متاجر متعددة من حساب واحد» is unimplemented (P1-3) and its real
+ * differentiators (unlimited team, CSV export) were already on the card.
+ * Rows seeded before this change heal at read (lib/plan-claims.ts
+ * RETIRED_CLAIMS — the display-time fold, never a behavior gate). */
 const FAMILY_PLANS = [
   {
     name: "Free",
@@ -29,7 +37,7 @@ const FAMILY_PLANS = [
     maxProducts: 15,
     maxOrders: 100,
     sortOrder: 1,
-    features: ["متجر رقمي يعمل فوراً", "3 أقسام", "منطقة توصيل واحدة", "طرق دفع محلية"],
+    features: ["3 أقسام", "منطقة توصيل واحدة", "طرق دفع محلية"],
   },
   {
     name: "Basic",
@@ -39,7 +47,7 @@ const FAMILY_PLANS = [
     maxProducts: 100,
     maxOrders: 1000,
     sortOrder: 2,
-    features: ["كل ميزات المجانية", "أقسام غير محدودة", "مناطق توصيل متعددة", "تتبع مباشر للعميل", "دعم فني عبر واتساب"],
+    features: ["كل ميزات المجانية", "أقسام غير محدودة", "مناطق توصيل متعددة"],
   },
   {
     name: "Premium",
@@ -49,7 +57,7 @@ const FAMILY_PLANS = [
     maxProducts: 9999,
     maxOrders: 10000,
     sortOrder: 3,
-    features: ["كل ميزات الأساسي", "حسابات فريق (3 أعضاء)", "رسائل واتساب للطلبات والتأكيدات", "تقارير أداء عند الطلب", "دعم أولوية"],
+    features: ["كل ميزات الأساسي", "حسابات فريق (3 أعضاء)", "تقارير أداء عند الطلب", "دعم أولوية"],
   },
   {
     name: "Pro",
@@ -67,7 +75,7 @@ const FAMILY_PLANS = [
      * actually gets above Premium: the gated export route
      * /api/dashboard/reports/export. Legacy rows heal at read
      * (lib/plan-claims.ts LEGACY_CLAIMS). */
-    features: ["كل ميزات بريميوم", "فريق غير محدود", "متاجر متعددة من حساب واحد", "تصدير CSV للتقارير", "مدير حساب مخصص"],
+    features: ["كل ميزات بريميوم", "فريق غير محدود", "تصدير CSV للتقارير", "مدير حساب مخصص"],
   },
 ];
 
@@ -118,9 +126,17 @@ function safeParseFeatures(raw: string): string[] {
      * heal through it (rationale documented in lib/arabic.ts).
      * W6-B4: the claim heal rides the same seam — rows seeded before the
      * WhatsApp-claim reword keep the old bullet until this fold (lib/
-     * plan-claims.ts, same P13-2d doctrine). */
+     * plan-claims.ts, same P13-2d doctrine).
+     * P40: the heal now also RETIRES bullets (all-plan baseline or
+     * unimplemented — lib/plan-claims.ts RETIRED_CLAIMS) by returning
+     * null; the null-filter drops them here, at read, so live rows can
+     * never display a claim the seeds no longer carry. */
     return Array.isArray(parsed)
-      ? parsed.filter((f) => typeof f === "string").map(westernNumerals).map(healPlanClaim)
+      ? parsed
+          .filter((f) => typeof f === "string")
+          .map(westernNumerals)
+          .map(healPlanClaim)
+          .filter((f): f is string => f !== null)
       : [];
   } catch {
     return [];

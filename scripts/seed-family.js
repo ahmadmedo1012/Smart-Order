@@ -47,6 +47,13 @@ if (process.env.VERCEL_ENV === "preview" && process.env.SEED_ALLOW_PREVIEW !== "
  * does not own. */
 const DEMO_STORE_NAME = "مخبز الواحة — تجريبي";
 
+/* P40 (P1-3 + P2-1 + SO-2): the all-plan capabilities moved to the pricing
+ * page's «دائماً في كل الباقات» baseline block (they are not tier
+ * differentiators — two were mis-sold as exactly that), and Pro's
+ * unimplemented «متاجر متعددة من حساب واحد» retired with no replacement
+ * (its real differentiators — unlimited team, CSV export — were already
+ * on the card). Rows seeded before this change heal at read
+ * (lib/plan-claims.ts RETIRED_CLAIMS). */
 const PLANS = [
   {
     name: "Free",
@@ -57,7 +64,6 @@ const PLANS = [
     maxOrders: 100,
     sortOrder: 1,
     features: [
-      "متجر رقمي يعمل فوراً",
       "3 أقسام",
       "منطقة توصيل واحدة",
       "طرق دفع محلية",
@@ -75,8 +81,6 @@ const PLANS = [
       "كل ميزات المجانية",
       "أقسام غير محدودة",
       "مناطق توصيل متعددة",
-      "تتبع مباشر للعميل",
-      "دعم فني عبر واتساب",
     ],
   },
   {
@@ -90,7 +94,6 @@ const PLANS = [
     features: [
       "كل ميزات الأساسي",
       "حسابات فريق (3 أعضاء)",
-      "رسائل واتساب للطلبات والتأكيدات",
       "تقارير أداء عند الطلب",
       "دعم أولوية",
     ],
@@ -106,7 +109,6 @@ const PLANS = [
     features: [
       "كل ميزات بريميوم",
       "فريق غير محدود",
-      "متاجر متعددة من حساب واحد",
       "تصدير CSV للتقارير", // W7-D: the honest Pro bullet — the CSV export is the only real Pro-level analytics differentiator (reports itself is بريميوم+)
       "مدير حساب مخصص",
     ],

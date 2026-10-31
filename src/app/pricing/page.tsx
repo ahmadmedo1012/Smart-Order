@@ -50,9 +50,17 @@ function safeParse(raw: string): string[] {
      * any /api/plans hit (rationale documented in lib/arabic.ts).
      * W6-B4: the claim heal rides the same seam (lib/plan-claims.ts) so
      * this SSR render and the /api/plans answer can never disagree on
-     * the WhatsApp bullet. */
+     * the WhatsApp bullet.
+     * P40: the heal also RETIRES bullets (all-plan baseline moved to the
+     * «دائماً في كل الباقات» block, or unimplemented — lib/plan-claims.ts
+     * RETIRED_CLAIMS) by returning null; the null-filter keeps this SSR
+     * seam and /api/plans byte-identical on live rows. */
     return Array.isArray(parsed)
-      ? parsed.filter((f) => typeof f === "string").map(westernNumerals).map(healPlanClaim)
+      ? parsed
+          .filter((f) => typeof f === "string")
+          .map(westernNumerals)
+          .map(healPlanClaim)
+          .filter((f): f is string => f !== null)
       : [];
   } catch {
     return [];
