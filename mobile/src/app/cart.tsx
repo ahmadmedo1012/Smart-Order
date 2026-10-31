@@ -3,10 +3,13 @@
  *
  * نفس عقد checkout للويب: بيانات العميل، توصيل (منطقة/عنوان) أو
  * استلام، طريقة دفع من قائمة المتجر، وملاحظة. الإرسال بمفتاح
- * idempotency (UUID لكل محاولة إرسال — النقر المزدوج لا يكرر
- * الطلب أبدًا). الخادم يعيد التسعير دائمًا؛ القيم هنا للعرض فقط.
+ * idempotency ثابت لجلسة السلة (r132-F1a — عقد checkoutKeyRef:
+ * يُسك مرة ويُعاد استخدامه عبر المحاولات؛ المحاولة بعد فشل غامض
+ * تضرب dedup قاعدة البيانات فتسترجع الطلب نفسه بدل تكراره).
+ * الخادم يعيد التسعير دائمًا؛ القيم هنا للعرض فقط.
  */
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
+import * as Clipboard from 'expo-clipboard'
 import { Image } from 'expo-image'
 import { router, useLocalSearchParams } from 'expo-router'
 import {
@@ -26,8 +29,15 @@ import { createOrder, fetchStorefront, ApiError, NetworkError } from '@/services
 import { useCart, zoneById } from '@/state/cart'
 import { belowMinOrder, cartTotals } from '@/state/pricing'
 import { formatLyd } from '@/lib/money'
+import {
+  WALLET_CAP_LYD,
+  isWalletMethod,
+  libyanaUssdCode,
+  madarUssdCode,
+  paymentNumber,
+} from '@/lib/payment'
 import { randomUUID } from '@/lib/uuid'
-import { MinusIcon, PlusIcon } from '@/components/icons'
+import { CoinsIcon, MinusIcon, PlusIcon } from '@/components/icons'
 import { Button, Field, Hairline } from '@/components/ui'
 import { ErrorState, LoadingState } from '@/components/state-views'
 import type { FulfillmentType } from '@/types/storefront'
@@ -49,8 +59,19 @@ export default function CartScreen() {
   const [area, setArea] = useState('')
   const [addressLine, setAddressLine] = useState('')
   const [customerNote, setCustomerNote] = useState('')
+  const [paymentMethodId, setPaymentMethodId] = useState('')
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [touched, setTouched] = useState(false)
+
+  /* r132-F1a (نقل حرفي من checkout-client.tsx للويب): مفتاح
+   * idempotency يُسك مرة واحدة لجلسة السلة ويُعاد عبر المحاولات —
+   * UUID جديد لكل نقرة كان يهزم dedup قاعدة البيانات
+   * @@unique([businessId, idempotencyKey]) فتكرّر الطلب عند
+   * إعادة المحاولة بعد فشل غامض (انقطاع الشبكة بعد commit).
+   * يُعتق فقط بعد نجاح مؤكد كي يُسك مفتاح جديد للطلب التالي. */
+  const checkoutKeyRef = useRef('')
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const zone = zoneById(data?.deliveryZones ?? [], cart.zoneId)
   const totals = useMemo(
@@ -58,6 +79,26 @@ export default function CartScreen() {
     [cart.lines, cart.fulfillment, zone],
   )
   const minOrderBlocked = belowMinOrder(totals.subtotal, cart.fulfillment, zone)
+
+  /* اختيار الدفع — نفس مشتقّات الويب (use-checkout-state.ts):
+   * الطريقة المحددة، رقم التحويل من config، وبوابة سقف المحفظة. */
+  const methods = data?.paymentMethods ?? []
+  const paymentMethod = methods.find((p) => p.id === paymentMethodId) ?? null
+  const paymentNum = paymentNumber(paymentMethod)
+  const overWalletCap = isWalletMethod(paymentMethod?.type ?? '') && totals.total > WALLET_CAP_LYD * 1000
+
+  const copyText = async (key: string, text: string) => {
+    try {
+      await Clipboard.setStringAsync(text)
+      setCopiedKey(key)
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
+      copyTimerRef.current = setTimeout(() => {
+        setCopiedKey((k) => (k === key ? null : k))
+      }, 2000)
+    } catch {
+      Alert.alert('تعذّر النسخ', 'انسخ الرقم يدويًا')
+    }
+  }
 
   if (query.isLoading) return <LoadingState label="جارٍ تجهيز السلة…" />
   if (query.isError)
@@ -75,6 +116,9 @@ export default function CartScreen() {
     touched && cart.fulfillment === 'DELIVERY' && addressLine.trim().length < 4
       ? 'أدخل عنوان التوصيل'
       : null
+  /* متجر بلا طرق دفع مُعرّفة يبقى على سلوك الخادم (paymentMethodId
+   * null مقبول)؛ متجر ليه طرق يتطلب الاختيار — نفس تصلّب الويب. */
+  const paymentError = touched && methods.length > 0 && !paymentMethod ? 'اختر طريقة الدفع' : null
 
   const canSubmit =
     cart.lines.length > 0 &&
@@ -83,16 +127,18 @@ export default function CartScreen() {
     phone.replace(/\D/g, '').length >= 7 &&
     (cart.fulfillment === 'PICKUP' || addressLine.trim().length >= 4) &&
     (cart.fulfillment === 'PICKUP' || !!cart.zoneId) &&
+    (methods.length === 0 || !!paymentMethod) &&
     !submitting
 
   const submit = async () => {
     setTouched(true)
     if (!canSubmit || !data) return
     setSubmitting(true)
+    if (!checkoutKeyRef.current) checkoutKeyRef.current = randomUUID()
     try {
       const res = await createOrder({
         slug,
-        idempotencyKey: randomUUID(),
+        idempotencyKey: checkoutKeyRef.current,
         fulfillmentType: cart.fulfillment,
         customerName: name.trim(),
         customerPhone: phone.trim(),
@@ -101,7 +147,7 @@ export default function CartScreen() {
         addressLine: addressLine.trim(),
         customerNote: customerNote.trim(),
         deliveryZoneId: cart.fulfillment === 'DELIVERY' ? cart.zoneId : null,
-        paymentMethodId: null,
+        paymentMethodId: paymentMethod ? paymentMethod.id : null,
         items: cart.lines.map((l) => ({
           productId: l.productId,
           variantId: l.variantId,
@@ -111,6 +157,7 @@ export default function CartScreen() {
         })),
       })
       cart.clear()
+      checkoutKeyRef.current = ''
       router.replace({
         pathname: '/track/[token]',
         params: { token: res.order.publicToken, fresh: '1' },
@@ -310,11 +357,111 @@ export default function CartScreen() {
               maxLength={300}
               multiline
             />
-            <Text style={s.payHint}>
-              الدفع عند الاستلام أو بالتحويل — يحدده المتجر عند التأكيد، وسيتواصل معك عبر
-              رقمك إن احتاج تفاصيل إضافية.
-            </Text>
           </View>
+
+          {/* طريقة الدفع — نفس لوحة الويب (payment-section.tsx): بلاطات
+           * المزوّدين، تعليمات الطريقة، رقم التحويل مع نسخ، رمز USSD
+           * السريع ببوابة سقف المحفظة، وحاشية النقد مقابل التحويل. */}
+          {methods.length > 0 ? (
+            <View style={s.card}>
+              <View style={s.cardTitleRow}>
+                <CoinsIcon size={16} color={t.primary} />
+                <Text style={s.cardTitle}>طريقة الدفع</Text>
+              </View>
+              <View style={s.payGrid}>
+                {methods.map((p) => {
+                  const active = paymentMethodId === p.id
+                  return (
+                    <Pressable
+                      key={p.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={`الدفع بـ ${p.name}`}
+                      accessibilityState={{ selected: active }}
+                      onPress={() => setPaymentMethodId(p.id)}
+                      style={({ pressed }) => [
+                        s.payTile,
+                        active && s.payTileActive,
+                        pressed && { opacity: 0.8 },
+                      ]}
+                    >
+                      <CoinsIcon size={17} color={active ? t.primary : t.mutedFg} />
+                      <Text
+                        style={[s.payTileName, active && s.payTileNameActive]}
+                        numberOfLines={1}
+                      >
+                        {p.name}
+                      </Text>
+                    </Pressable>
+                  )
+                })}
+              </View>
+              {paymentError ? <Text style={s.warnText}>{paymentError}</Text> : null}
+              {paymentMethod?.instructions ? (
+                <Text style={s.payHint}>{paymentMethod.instructions}</Text>
+              ) : null}
+              {paymentMethod && paymentNum ? (
+                <>
+                  <View style={s.transferBox}>
+                    <Text style={s.transferLabel}>حوّل المبلغ إلى الرقم</Text>
+                    <View style={s.transferRow}>
+                      <Text style={s.transferNumber}>{paymentNum}</Text>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="نسخ الرقم"
+                        onPress={() => copyText('number', paymentNum)}
+                        style={({ pressed }) => [s.copyBtn, pressed && { opacity: 0.8 }]}
+                      >
+                        <Text style={s.copyBtnText}>
+                          {copiedKey === 'number' ? 'تم النسخ ✓' : 'نسخ'}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                  {isWalletMethod(paymentMethod.type) ? (
+                    overWalletCap ? (
+                      <Text style={s.capNote}>
+                        المبالغ فوق {WALLET_CAP_LYD} د.ل لا تُدعم عبر رمز التحويل السريع — حوّل
+                        المبلغ يدويًا إلى الرقم أعلاه
+                      </Text>
+                    ) : (
+                      <View style={s.ussdBox}>
+                        <Text style={s.ussdLabel}>رمز التحويل السريع</Text>
+                        <View style={s.transferRow}>
+                          <Text style={s.ussdCode} numberOfLines={1}>
+                            {paymentMethod.type === 'LIBYANA'
+                              ? libyanaUssdCode(paymentNum, totals.total / 1000)
+                              : madarUssdCode(paymentNum, totals.total / 1000)}
+                          </Text>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel="نسخ رمز التحويل السريع"
+                            onPress={() =>
+                              copyText(
+                                'ussd',
+                                paymentMethod.type === 'LIBYANA'
+                                  ? libyanaUssdCode(paymentNum, totals.total / 1000)
+                                  : madarUssdCode(paymentNum, totals.total / 1000),
+                              )
+                            }
+                            style={({ pressed }) => [s.copyBtnPrimary, pressed && { opacity: 0.8 }]}
+                          >
+                            <Text style={s.copyBtnPrimaryText}>
+                              {copiedKey === 'ussd' ? 'تم النسخ ✓' : 'نسخ'}
+                            </Text>
+                          </Pressable>
+                        </View>
+                      </View>
+                    )
+                  ) : null}
+                </>
+              ) : null}
+              <Text style={s.payHint}>
+                {paymentMethod?.type === 'COD' || paymentMethod?.type === 'CASH'
+                  ? 'الدفع نقداً عند وصول طلبك — لا حاجة لأي تحويل مسبق.'
+                  : 'بعد إرسال الطلب، تواصل مع المتجر عبر واتساب لتأكيد تحويلك. يُؤكد المتجر الدفع يدوياً.'}
+              </Text>
+            </View>
+          ) : null}
         </ScrollView>
 
         {/* شريط الإرسال */}
@@ -472,6 +619,106 @@ const s = StyleSheet.create({
     fontFamily: 'IBMPlexSansArabic_400Regular',
     fontSize: 12,
     color: t.mutedFg,
+    lineHeight: 18,
+  },
+  cardTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  payGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  payTile: {
+    width: '48%',
+    minHeight: 58,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: t.border,
+    backgroundColor: t.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 9,
+  },
+  payTileActive: { borderColor: t.primary, backgroundColor: t.goldSoft },
+  payTileName: {
+    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontSize: 13,
+    color: t.mutedFg,
+  },
+  payTileNameActive: { color: t.ring },
+  transferBox: {
+    borderWidth: 1,
+    borderColor: t.border,
+    backgroundColor: t.background,
+    borderRadius: 8,
+    padding: 12,
+    gap: 6,
+  },
+  transferLabel: {
+    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontSize: 11.5,
+    color: t.mutedFg,
+  },
+  transferRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  transferNumber: {
+    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontSize: 17,
+    color: t.foreground,
+    letterSpacing: 0.5,
+    /* أرقام/رموز لاتينية داخل سياق RTL مفروض — الكتابة تظل LTR
+     * (writingDirection: iOS؛ bidi يتكفل بالأندرويد لهذه السلاسل
+     * الرقمية الخالصة). */
+    writingDirection: 'ltr',
+  },
+  copyBtn: {
+    borderWidth: 1,
+    borderColor: t.border,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  copyBtnText: {
+    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontSize: 12.5,
+    color: t.foreground,
+  },
+  ussdBox: {
+    borderWidth: 1,
+    borderColor: t.border,
+    borderRadius: 8,
+    backgroundColor: t.card,
+    padding: 12,
+    gap: 6,
+  },
+  ussdLabel: {
+    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontSize: 11.5,
+    color: t.mutedFg,
+  },
+  ussdCode: {
+    flex: 1,
+    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontSize: 13.5,
+    color: t.primary,
+    writingDirection: 'ltr',
+  },
+  copyBtnPrimary: {
+    backgroundColor: t.primary,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  copyBtnPrimaryText: {
+    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontSize: 12.5,
+    color: t.primaryFg,
+  },
+  capNote: {
+    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontSize: 12,
+    color: t.ring,
     lineHeight: 18,
   },
   footer: {

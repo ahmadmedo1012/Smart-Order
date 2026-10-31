@@ -7,6 +7,18 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg'
 
 export type IconProps = { size?: number; color?: string }
 
+/** عملات متراكبة (lucide coins) — لبطاقات طرق الدفع. */
+export function CoinsIcon({ size = 24, color = 'currentColor' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <Circle cx="8" cy="8" r="6" />
+      <Path d="M18.09 10.37A6 6 0 1110.34 18" />
+      <Path d="M7 6h1v4" />
+      <Path d="M16.71 13.88l.7.71-2.82 2.82" />
+    </Svg>
+  )
+}
+
 export function StoreIcon({ size = 24, color = 'currentColor' }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
