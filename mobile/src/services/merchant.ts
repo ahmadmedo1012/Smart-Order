@@ -298,6 +298,15 @@ export function archiveProduct(id: string, businessId: string): Promise<{ archiv
   })
 }
 
+/** GET /api/products/[id]?businessId — منتج واحد بالأحجام والإضافات. */
+export function fetchProductDetail(
+  id: string,
+  businessId: string,
+): Promise<{ product: MerchantProduct }> {
+  const qs = new URLSearchParams({ businessId })
+  return get<{ product: MerchantProduct }>(`/api/products/${encodeURIComponent(id)}?${qs.toString()}`)
+}
+
 /** GET /api/categories?businessId — مع _count.products (products.read). */
 export function fetchCategories(businessId: string): Promise<{ categories: MerchantCategory[] }> {
   const qs = new URLSearchParams({ businessId })
