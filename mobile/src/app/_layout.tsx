@@ -3,24 +3,34 @@
  *
  * - RTL عربي أولًا (نمط العائلة): كتابة الإعداد الأصلي قبل أي رسم +
  *   بوابة ensureRTL تضمن اتجاهًا صحيحًا من أول فتح بعد تثبيت نظيف.
- * - الخط: IBM Plex Sans Arabic 400/500/600/700 — وجه العلامة (نفس
- *   الوجه الذي يستضيفه الويب ذاتيًا).
+ * - الخط (عقد الويب r152 «ضوء النهار التشغيلي»): Tajawal 400/500/
+ *   700/800 صوتًا أساسيًا، Barlow Semi Condensed 600/700 للعرض
+ *   اللاتيني، وIBM Plex Mono 400/500 للرموز التشغيلية.
+ * - الوضع اللوني: ThemeProvider يقلع داكنًا (توافق الويب) مع
+ *   تبديل محفوظ؛ الحالة وشريط التنقّل يتبعان الوضع.
  * - المزودات: QueryClient (نفس مكتبة الويب).
  */
 import { I18nManager } from 'react-native'
 import { useEffect, useState } from 'react'
 import { Stack } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import {
-  IBMPlexSansArabic_400Regular,
-  IBMPlexSansArabic_500Medium,
-  IBMPlexSansArabic_600SemiBold,
-  IBMPlexSansArabic_700Bold,
-} from '@expo-google-fonts/ibm-plex-sans-arabic'
+  Tajawal_400Regular,
+  Tajawal_500Medium,
+  Tajawal_700Bold,
+  Tajawal_800ExtraBold,
+} from '@expo-google-fonts/tajawal'
+import {
+  BarlowSemiCondensed_600SemiBold,
+  BarlowSemiCondensed_700Bold,
+} from '@expo-google-fonts/barlow-semi-condensed'
+import {
+  IBMPlexMono_400Regular,
+  IBMPlexMono_500Medium,
+} from '@expo-google-fonts/ibm-plex-mono'
 import * as SplashScreen from 'expo-splash-screen'
-import { t } from '@/constants/theme'
+import { ThemeProvider, useTheme } from '@/theme/ThemeProvider'
 import { queryClient } from '@/lib/query-client'
 import { ensureRTL } from '@/lib/ensure-rtl'
 import { useAuthStore } from '@/state/auth'
@@ -33,12 +43,17 @@ I18nManager.forceRTL(true)
 SplashScreen.preventAutoHideAsync()
 
 function AppShell() {
+  const { t } = useTheme()
   const [rtlReady, setRtlReady] = useState(false)
   const [fontsLoaded] = useFonts({
-    IBMPlexSansArabic_400Regular,
-    IBMPlexSansArabic_500Medium,
-    IBMPlexSansArabic_600SemiBold,
-    IBMPlexSansArabic_700Bold,
+    Tajawal_400Regular,
+    Tajawal_500Medium,
+    Tajawal_700Bold,
+    Tajawal_800ExtraBold,
+    BarlowSemiCondensed_600SemiBold,
+    BarlowSemiCondensed_700Bold,
+    IBMPlexMono_400Regular,
+    IBMPlexMono_500Medium,
   })
 
   // بوابة RTL: لا نرسم أي شاشة قبل حسم الاتجاه.
@@ -87,8 +102,9 @@ function AppShell() {
 export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <StatusBar style="dark" />
-      <AppShell />
+      <ThemeProvider>
+        <AppShell />
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }

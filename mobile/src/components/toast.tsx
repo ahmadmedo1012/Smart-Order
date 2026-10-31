@@ -9,7 +9,8 @@
  */
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import { statusFamily } from '@/constants/theme'
+import { fonts } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 
 const TOAST_MS = 2400
 
@@ -34,6 +35,7 @@ export function showToast(message: string): void {
 /** مُضيف الإشعارات — يُركَّب مرة واحدة فوق محتوى المنطقة. */
 export function ToastHost() {
   const [message, setMessage] = useState('')
+  const { statusFamily } = useTheme()
 
   useEffect(() => {
     const fn: Listener = (msg) => setMessage(msg)
@@ -73,7 +75,7 @@ const s = StyleSheet.create({
     maxWidth: '100%',
   },
   text: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13.5,
     lineHeight: 20,
     textAlign: 'center',

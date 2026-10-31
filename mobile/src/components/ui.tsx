@@ -1,9 +1,12 @@
 /**
  * Smart Order Mobile — عناصر UI أولية (زر/حقل input/شريحة/طابع حالة).
  *
- * لغة الويب نفسها: نحاس أساسي، حبر فولاذي، خط شعر #E2E2DC، أنصاف
- * 6-20، ودرجة ضغط #8F3A00. الحقول ترتكز على بطاقة بيضاء بأرض
- * الورق — نفس تسلسل surfaces للمتجر الحيّ.
+ * لغة الويب نفسها (r152 «ضوء النهار التشغيلي»): برتقالي التوصيل
+ * أساسيًا بحبر فولاذي نهارًا والبرتقالي المضيء بحبر داكن ليلًا، خط
+ * شعر، طوابع مربعة (radius.stamp = 8 — rounded-sm للويب). الألوان
+ * كلها عبر useTheme — لا لون مثبّت. الشريحة النشطة تتحول إلى طابع
+ * copper مربّع (نفس رقائق التصفية على الويب)، والضغط على الزر
+ * الأساسي ينزل إلى درجة primaryPressed.
  */
 import React from 'react'
 import {
@@ -17,10 +20,11 @@ import {
   type TextInputProps,
   type ViewStyle,
 } from 'react-native'
-import { statusFamily, t } from '@/constants/theme'
+import { fonts, radius } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { ORDER_STATUS_AR, type OrderStatus } from '@/types/storefront'
 
-/* ── زر أساسي (نحاس) ──────────────────────────────────────────── */
+/* ── زر أساسي (برتقالي التوصيل) ──────────────────────────────── */
 export function Button({
   label,
   onPress,
@@ -34,6 +38,7 @@ export function Button({
   disabled?: boolean
   style?: StyleProp<ViewStyle>
 }) {
+  const { t } = useTheme()
   const bg = variant === 'primary' ? t.primary : variant === 'outline' ? t.card : 'transparent'
   const fg = variant === 'primary' ? t.primaryFg : t.primary
   return (
@@ -44,7 +49,8 @@ export function Button({
       onPress={onPress}
       style={({ pressed }) => [
         s.button,
-        { backgroundColor: bg, opacity: disabled ? 0.45 : pressed ? 0.82 : 1 },
+        { backgroundColor: bg, opacity: disabled ? 0.45 : pressed && variant !== 'primary' ? 0.82 : 1 },
+        pressed && variant === 'primary' && { backgroundColor: t.primaryPressed },
         variant === 'outline' && { borderWidth: 1, borderColor: t.primary },
         style,
       ]}
@@ -60,20 +66,21 @@ export function Field({
   error,
   ...inputProps
 }: TextInputProps & { label: string; error?: string | null }) {
+  const { t } = useTheme()
   return (
     <View style={s.fieldWrap}>
-      <Text style={s.fieldLabel}>{label}</Text>
+      <Text style={[s.fieldLabel, { color: t.foreground }]}>{label}</Text>
       <TextInput
         placeholderTextColor={t.mutedFg}
         {...inputProps}
-        style={[s.input, !!error && { borderColor: t.destructive }]}
+        style={[s.input, { backgroundColor: t.card, color: t.foreground, borderColor: error ? t.destructive : t.border }]}
       />
-      {error ? <Text style={s.fieldError}>{error}</Text> : null}
+      {error ? <Text style={[s.fieldError, { color: t.destructive }]}>{error}</Text> : null}
     </View>
   )
 }
 
-/* ── شريحة تصنيف ──────────────────────────────────────────────── */
+/* ── شريحة تصنيف — النشطة طابع copper مربّع (لغة رقائق الويب) ── */
 export function Chip({
   label,
   active,
@@ -83,23 +90,31 @@ export function Chip({
   active: boolean
   onPress: () => void
 }) {
+  const { t, statusFamily } = useTheme()
+  const fam = statusFamily.copper
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
       style={({ pressed }) => [
         s.chip,
-        active && { backgroundColor: t.primary, borderColor: t.primary },
+        { backgroundColor: t.card, borderColor: t.border },
+        active && {
+          backgroundColor: fam.bg,
+          borderColor: `${fam.ink}59`,
+          borderRadius: radius.stamp,
+        },
         pressed && { opacity: 0.75 },
       ]}
     >
-      <Text style={[s.chipText, active && { color: t.primaryFg }]}>{label}</Text>
+      <Text style={[s.chipText, { color: active ? fam.deep : t.mutedFg }]}>{label}</Text>
     </Pressable>
   )
 }
 
-/* ── طابع حالة الطلب — لغة الطوابع في الويب ───────────────────── */
+/* ── طابع حالة الطلب — طوابع الويب المربعة (rounded-sm) ─────── */
 export function StatusStamp({ status, size = 'md' }: { status: OrderStatus; size?: 'sm' | 'md' }) {
+  const { statusFamily } = useTheme()
   const fam = statusFamily[
     status === 'NEW' || status === 'READY'
       ? 'copper'
@@ -134,7 +149,8 @@ export function StatusStamp({ status, size = 'md' }: { status: OrderStatus; size
 
 /* ── فاصل شعري مسمّى ──────────────────────────────────────────── */
 export function Hairline() {
-  return <View style={s.hairline} />
+  const { t } = useTheme()
+  return <View style={[s.hairline, { backgroundColor: t.border }]} />
 }
 
 /* ── مفتاح تبديل (متاح/مميز/مفعّل) — Switch أصلي بلغة العلامة ──── */
@@ -149,9 +165,10 @@ export function Toggle({
   disabled?: boolean
   label: string
 }) {
+  const { t } = useTheme()
   return (
     <View style={s.toggleRow}>
-      <Text style={s.toggleLabel}>{label}</Text>
+      <Text style={[s.toggleLabel, { color: t.foreground }]}>{label}</Text>
       <Switch
         accessibilityLabel={label}
         accessibilityState={{ checked: value, disabled: !!disabled }}
@@ -159,7 +176,7 @@ export function Toggle({
         disabled={disabled}
         onValueChange={onValueChange}
         trackColor={{ false: t.border, true: t.primary }}
-        thumbColor="#FFFFFF"
+        thumbColor={t.card}
       />
     </View>
   )
@@ -173,6 +190,7 @@ export function MiniStamp({
   text: string
   family: 'copper' | 'sky' | 'yellow' | 'mint' | 'grey' | 'rose'
 }) {
+  const { statusFamily } = useTheme()
   const fam = statusFamily[family]
   return (
     <View
@@ -194,61 +212,53 @@ const s = StyleSheet.create({
     minHeight: 48,
   },
   buttonText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
   },
   fieldWrap: { gap: 6 },
   fieldLabel: {
-    color: t.foreground,
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13,
   },
   input: {
-    backgroundColor: t.card,
     borderWidth: 1,
-    borderColor: t.border,
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 10,
     minHeight: 46,
-    color: t.foreground,
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 15,
     textAlign: 'right',
   },
   fieldError: {
-    color: t.destructive,
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
   },
   chip: {
-    borderRadius: 999,
+    borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: t.border,
-    backgroundColor: t.card,
     paddingVertical: 7,
     paddingHorizontal: 16,
   },
   chipText: {
-    color: t.mutedFg,
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13,
   },
   stamp: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    borderRadius: 6,
+    borderRadius: radius.stamp,
     borderWidth: 1,
     alignSelf: 'flex-start',
   },
   stampDot: { width: 6, height: 6, borderRadius: 3 },
   stampText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 12,
     lineHeight: 18,
   },
-  hairline: { height: 1, backgroundColor: t.border },
+  hairline: { height: 1 },
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -257,20 +267,19 @@ const s = StyleSheet.create({
     paddingVertical: 4,
   },
   toggleLabel: {
-    color: t.foreground,
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13.5,
     flex: 1,
   },
   miniStamp: {
-    borderRadius: 6,
+    borderRadius: radius.stamp,
     borderWidth: 1,
     paddingVertical: 3,
     paddingHorizontal: 8,
     alignSelf: 'flex-start',
   },
   miniStampText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 11,
     lineHeight: 16,
   },
