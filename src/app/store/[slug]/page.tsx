@@ -4,6 +4,7 @@ import { cache } from "react";
 import { db } from "@/lib/db";
 import { Storefront, type StoreData } from "@/components/storefront/storefront";
 import { SITE_URL } from "@/app/layout";
+import { storeRobotsForBusinessName } from "@/lib/qa-fixtures";
 
 /* r131-F2 (SO-1, A8 perf): the money page left the force-dynamic path —
  * ISR 60s on the smart-menu twin pattern (menu/[slug]/page.tsx:2-24):
@@ -136,9 +137,17 @@ export async function generateMetadata({
       business.description ??
       `اطلب من ${business.name}${business.city ? ` في ${business.city}` : ""} — تصفح المنتجات واطلب توصيلاً أو استلاماً عبر سمارت أوردر`;
     const ogImage = absoluteUrl(business.coverUrl ?? business.logoUrl);
+    /* P35 (storefront robots — the third fixture gate): a published QA-fixture
+     * storefront (e2e residue) stays reachable but its metadata says
+     * noindex,follow — the sitemap/counters gates only stop OUR surfaces; a
+     * direct crawl or external link bypassed both. Genuine merchants and the
+     * flagship demo get undefined → NO robots meta rendered (byte-identical
+     * indexable output, their policy untouched). */
+    const robots = storeRobotsForBusinessName(business.name);
     return {
       title,
       description,
+      ...(robots ? { robots } : {}),
       alternates: { canonical: `/store/${business.slug}` },
       openGraph: {
         title,

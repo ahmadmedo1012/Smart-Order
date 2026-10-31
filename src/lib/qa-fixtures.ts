@@ -54,3 +54,26 @@ export const notQaFixtureBusiness = {
     OR: QA_FIXTURE_NAME_MARKERS.map((m) => ({ name: { startsWith: m } })),
   },
 };
+
+/** P35 (§ storefront robots — the THIRD fixture gate, after the sitemap
+ *  and the counters): page-meta robots policy by business name.
+ *
+ *  WHAT WAS STILL OPEN: a published QA-fixture storefront stayed fully
+ *  INDEXABLE on its own route — the sitemap gate (crawl budget) and the
+ *  counters gate (honesty numbers) only stop OUR surfaces; a direct
+ *  crawl or an external link bypasses both and lands the fixture in the
+ *  index.
+ *
+ *  THE POLICY: noindex,follow — the route stays reachable (the family
+ *  policy: exclusion is crawl budget, never a broken link), the page
+ *  leaves the index but its links stay followed. Every genuine merchant
+ *  AND the flagship demo («مخبز الواحة — تجريبي») return undefined —
+ *  Next renders NO robots meta at all, byte-identical to the pre-gate
+ *  output (their indexability is untouched). */
+export function storeRobotsForBusinessName(
+  name: string | null | undefined,
+): { index: boolean; follow: boolean } | undefined {
+  return isQaFixtureBusinessName(name)
+    ? { index: false, follow: true }
+    : undefined;
+}
