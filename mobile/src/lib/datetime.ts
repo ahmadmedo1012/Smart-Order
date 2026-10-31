@@ -7,7 +7,9 @@
 import type { OrderStatus } from '@/types/storefront'
 import { ORDER_STATUS_AR } from '@/types/storefront'
 
-const AR_MONTHS = [
+/** أسماء الأشهر الميلادية (مصدر واحد — التقويم المصغّر في التقارير
+ *  يستهلكها أيضًا). */
+export const AR_MONTHS = [
   'يناير',
   'فبراير',
   'مارس',
@@ -52,6 +54,13 @@ export function formatArabicClock(date: Date | string): string {
 export function formatArabicDayShort(date: Date | string): string {
   const d = toDate(date)
   return `${d.getDate()} ${AR_MONTHS[d.getMonth()] ?? ''}`
+}
+
+/** «17 سبتمبر 2026» — تاريخ تقويمي كامل بلا وقت (تواريخ العضوية
+ *  وسجل العملاء ونافذة التقارير). */
+export function formatArabicDate(date: Date | string): string {
+  const d = toDate(date)
+  return `${d.getDate()} ${AR_MONTHS[d.getMonth()] ?? ''} ${d.getFullYear()}`
 }
 
 /** اسم حالة عربي مع تحمّل قيم غير معروفة من history القديمة. */
