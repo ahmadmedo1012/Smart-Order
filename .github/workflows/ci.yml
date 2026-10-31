@@ -78,6 +78,16 @@ jobs:
       - name: Dependency audit (الشجرة كاملة، عتبة high)
         run: bun audit --audit-level=high
 
+      # P38 (severity-tiered governance): البوابة أعلاه تكسر على critical/
+      # high — هذه الخطوة تضيف ما فوقها: (1) تقرير كامل بكل الشدات في
+      # الشجرتين (كاملة + إنتاج) بلا أي تصفية (--audit-level=low — low
+      # يبقى مرئيًا دائمًا، لا يُخفى أبدًا)، (2) إلزام فرز moderate: أي
+      # moderate غير مقبول في docs/security/accepted-moderate.json (بقرار
+      # ≥20 حرفًا + تاريخ انتهاء ISO) يكسر الدفعة، والقبول المنتهي يكسرها
+      # كذلك. القبول استثناء لا قاعدة — السياسة fix-first.
+      - name: Dependency audit report (all severities + moderate triage)
+        run: node scripts/dependency-audit-report.mjs
+
       - name: Lint (ESLint صفر أخطاء)
         run: npm run lint
 

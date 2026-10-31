@@ -1,0 +1,4 @@
+{
+  "policy": "P38 severity-tiered vulnerability governance (SECURITY.md «Dependency vulnerability severity policy»). CRITICAL/HIGH are never acceptable here — fix them. MODERATE findings must be fixed, or accepted in this ledger with a remediation decision (>= 20 chars) and an ISO expiry date; untriaged or EXPIRED moderate findings fail CI (scripts/dependency-audit-report.mjs). LOW findings stay visible in every audit report but never block. Acceptances are exceptions, not defaults — renew or fix before the expiry.",
+  "accepted": []
+}
