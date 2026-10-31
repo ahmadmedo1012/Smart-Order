@@ -423,7 +423,7 @@ export function createPaymentMethod(
 export function updatePaymentMethod(
   id: string,
   businessId: string,
-  input: { name?: string; instructions?: string; number?: string; isActive?: boolean },
+  input: { name?: string; instructions?: string | null; number?: string; isActive?: boolean },
 ): Promise<{ method: MerchantPaymentMethod }> {
   return request<{ method: MerchantPaymentMethod }>(
     `/api/payment-methods/${encodeURIComponent(id)}`,
