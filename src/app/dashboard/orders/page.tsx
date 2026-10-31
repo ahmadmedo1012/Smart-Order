@@ -66,6 +66,12 @@ const STATUS_TABS: Array<{ value: string; label: string }> = [
   ...ORDER_STATUSES.map((s) => ({ value: s, label: ORDER_STATUS_AR[s] })),
 ];
 
+/* P37 (set-state-in-effect migration, B5-c): the theme-toggle's
+   mounted-flag idiom — a no-op store whose client snapshot is true and
+   server snapshot false. Gives a post-hydration render without an
+   effect; see the sound-pref block below. */
+const emptySubscribe = () => () => {};
+
 export default function OrdersPage() {
   const { businessId } = useBusiness();
   const params = useSearchParams();
@@ -82,6 +88,20 @@ export default function OrdersPage() {
      fetch deps, and the page resets with the settled term. */
   const [debouncedQ, setDebouncedQ] = React.useState("");
   const [page, setPage] = React.useState(1);
+  /* P37 (B5-c): the page reset used to live in an effect on
+     [debouncedQ] (setPage(1) — react-hooks/set-state-in-effect). It is
+     now the render-time prev-compare adjust (React docs «You Might Not
+     Need an Effect — adjusting state when a prop changes"): when the
+     settled term changes, page resets in the SAME render pass, so the
+     fetch effect below sees (debouncedQ=new, page=1) in one commit.
+     The old effect order fetched twice on a settle while page > 1
+     (fetch(q=new,page=old) then fetch(q=new,page=1)) — a
+     last-write-wins race the adjust removes. */
+  const [prevDebouncedQ, setPrevDebouncedQ] = React.useState("");
+  if (prevDebouncedQ !== debouncedQ) {
+    setPrevDebouncedQ(debouncedQ);
+    setPage(1);
+  }
   const [meta, setMeta] = React.useState({ total: 0, totalPages: 1 });
   /* r131 (F3, A5 P1-2 / A11 SO-1): the old retry passed
  setPage((p) => p) — a same-value setState bail-out that never
@@ -92,9 +112,6 @@ export default function OrdersPage() {
     const t = setTimeout(() => setDebouncedQ(q), 300);
     return () => clearTimeout(t);
   }, [q]);
-  React.useEffect(() => {
-    setPage(1);
-  }, [debouncedQ]);
 
   /* (phase4 W1-SO) تنبيه الطلبات الجديدة — وعد الـFAQ «كل طلب يصل فوراً
      إلى لوحة التحكم مع تنبيه» صار وظيفة حقيقية على هذه الصفحة: استطلاع
@@ -116,11 +133,33 @@ export default function OrdersPage() {
      poll effect — never churns when the operator flips the toggle. */
   const [soundOn, setSoundOn] = React.useState(false);
   const soundOnRef = React.useRef(false);
+  /* P37 (B5-c): the mount-effect pref read (readArrivalSoundPref() →
+     soundOnRef.current = on; setSoundOn(on)) tripped
+     react-hooks/set-state-in-effect. The repo's mounted-flag idiom
+     (theme-toggle.tsx useSyncExternalStore) now supplies the
+     post-hydration render; the adjust below syncs the STATE during
+     that render (setState-during-render, the React docs adjust
+     pattern), and the small [soundOn] effect mirrors it into the ref
+     (a ref write in an effect is the sanctioned place —
+     react-hooks/refs bans ref writes during render). Same timeline as
+     the old effect (server/hydration paint OFF; one post-hydration
+     re-render when the pref is ON, none when OFF). The ref keeps its
+     exact role: loadFeed reads it at beep time and stays out of the
+     sound wiring, so its identity (and the poll effect) never churns
+     on a toggle flip. */
+  const mounted = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+  const [prefLoaded, setPrefLoaded] = React.useState(false);
+  if (mounted && !prefLoaded) {
+    setPrefLoaded(true);
+    setSoundOn(readArrivalSoundPref());
+  }
   React.useEffect(() => {
-    const on = readArrivalSoundPref();
-    soundOnRef.current = on;
-    setSoundOn(on);
-  }, []);
+    soundOnRef.current = soundOn;
+  }, [soundOn]);
   const toggleSound = () => {
     const next = !soundOnRef.current;
     soundOnRef.current = next;
@@ -200,14 +239,36 @@ export default function OrdersPage() {
   }, [loadFeed]);
 
   /* the badge counts arrivals not yet reviewed in the «جديد» tab —
-     opening that tab IS the review, so it clears the count */
-  React.useEffect(() => {
-    if (status === "NEW") setNewCount(0);
-  }, [status]);
+     opening that tab IS the review, so it clears the count.
+     P37 (B5-c): the reset moved out of an effect into the ONE handler
+     that can enter the tab without already resetting (the badge button
+     resets itself; every other status setter leaves NEW or is ALL).
+     See the UnderlineTabs onChange below. */
+
+  /* P37 (B5-c): the fetch effect used to setError(false)
+     synchronously at its start (set-state-in-effect). The clear is now
+     a render-time prev-compare adjust on the fetch inputs: when ANY
+     dep changes, the stale banner drops in the same render (before
+     the effect even runs — the old order could paint the stale banner
+     for one frame between commit and passive-effect flush). The
+     catch keeps setting it; nothing else needed changing. */
+  const fetchKey = JSON.stringify([
+    businessId,
+    status,
+    payment,
+    fulfillment,
+    debouncedQ,
+    page,
+    reloadKey,
+  ]);
+  const [prevFetchKey, setPrevFetchKey] = React.useState(fetchKey);
+  if (prevFetchKey !== fetchKey) {
+    setPrevFetchKey(fetchKey);
+    if (error) setError(false);
+  }
 
   React.useEffect(() => {
     if (!businessId) return;
-    setError(false);
     const sp = new URLSearchParams({
       businessId,
       page: String(page),
@@ -309,6 +370,10 @@ export default function OrdersPage() {
           onChange={(v) => {
             setStatus(v);
             setPage(1);
+            /* P37 (B5-c): entering «جديد» IS the review — clear the
+               badge here (was an effect on [status]). The badge button
+               already resets on its own click. */
+            if (v === "NEW") setNewCount(0);
           }}
           items={STATUS_TABS}
         />

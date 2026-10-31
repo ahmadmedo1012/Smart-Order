@@ -47,10 +47,13 @@ export default function LoginPage() {
   const [expired, setExpired] = React.useState(false);
 
   React.useEffect(() => {
-    if (typeof window === "undefined") return;
     if (new URLSearchParams(window.location.search).get("expired") === "1") {
-      setExpired(true);
       window.history.replaceState(null, "", "/login");
+      /* the banner lands in a microtask — the effect body keeps only the
+         external-system side effect (react-hooks/set-state-in-effect,
+         P38 B5); SSR + hydration still paint no banner (the clock-text
+         law). */
+      Promise.resolve().then(() => setExpired(true));
     }
   }, []);
 

@@ -212,7 +212,10 @@ export function PricingClient({ initialPlans }: { initialPlans: Plan[] | null })
   }, []);
 
   useEffect(() => {
-    if (plans.length === 0) loadPlans();
+    /* P38 (B5): the reset pair at loadPlans' start is legal in event
+       handlers but not in an effect body — the microtask keeps the
+       exact frame sequence (skeletons on the first await boundary). */
+    if (plans.length === 0) Promise.resolve().then(loadPlans);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

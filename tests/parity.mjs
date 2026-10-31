@@ -1658,7 +1658,10 @@ const W6B4 = [
     /series\.reduce\(\(s, d\) => s \+ d\.revenue, 0\)/.test(REPORTS_QUERIES) &&
     REPORTS_QUERIES.includes('Math.round(revenue / orders)')],
   ['W6-B4 reports page: the honest state family (ErrorState retry / «لا توجد طلبات بعد» empty / shape-matched skeleton) + money formatted client-side via formatLyd',
-    REPORTS_PAGE.includes('<ErrorState retry={load} />') &&
+    /* P38 (B5): the retry anchor moved with the set-state-in-effect
+       migration — the reset wrapper is the new pinned form (same
+       honest-retry contract, now with the error reset explicit). */
+    REPORTS_PAGE.includes('<ErrorState retry={() => { setError(false); load(); }} />') &&
     REPORTS_PAGE.includes('title="لا توجد طلبات بعد"') &&
     REPORTS_PAGE.includes('role="status"') &&
     REPORTS_PAGE.includes('formatLyd(')],

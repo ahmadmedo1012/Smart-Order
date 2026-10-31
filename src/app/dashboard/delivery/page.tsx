@@ -52,16 +52,18 @@ export default function DeliveryPage() {
 
   const load = React.useCallback(() => {
     if (!businessId) return;
-    setError(false);
     api
       .get<{ zones: Zone[] }>(`/api/delivery-zones?businessId=${businessId}`)
-      .then((r) => setZones(r.data.zones))
+      .then((r) => {
+        setError(false);
+        setZones(r.data.zones);
+      })
       .catch(() => setError(true));
   }, [businessId]);
 
   React.useEffect(load, [load]);
 
-  if (error) return <ErrorState retry={load} />;
+  if (error) return <ErrorState retry={() => { setError(false); load(); }} />;
   if (zones === null) {
     /* r131 (F3, A5 P2-7): shape-matched rows skeleton. */
     return <DeliverySkeleton />;

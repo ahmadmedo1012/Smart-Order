@@ -72,12 +72,18 @@ export function StoreQRCard({
   const [src, setSrc] = React.useState("");
   const [downloading, setDownloading] = React.useState(false);
 
+  /* P38 (B5): url→"" transition (defensive — both call sites always pass
+     a URL): reset the skeleton during render instead of a synchronous
+     setState in the effect body (react-hooks/set-state-in-effect). */
+  const [prevStoreUrl, setPrevStoreUrl] = React.useState(storeUrl);
+  if (storeUrl !== prevStoreUrl) {
+    setPrevStoreUrl(storeUrl);
+    if (!storeUrl) setSrc("");
+  }
+
   React.useEffect(() => {
     let cancelled = false;
-    if (!storeUrl) {
-      setSrc("");
-      return;
-    }
+    if (!storeUrl) return; // generation only — the adjust above owns url→""
     qrPngDataUrl(storeUrl)
       .then((url) => {
         if (!cancelled) setSrc(url);

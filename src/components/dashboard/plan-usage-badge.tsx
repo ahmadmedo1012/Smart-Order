@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,15 +27,15 @@ export function PlanUsageBadge({
   monthOrders: number;
   className?: string;
 }) {
-  const [usage, setUsage] = React.useState<{ products: number; orders: number } | null>(null);
-
-  React.useEffect(() => {
-    if (!plan) return;
-    setUsage({
-      products: plan.maxProducts >= 9999 ? 0 : Math.min(100, Math.round((productCount / plan.maxProducts) * 100)),
-      orders: plan.maxOrders >= 99999 ? 0 : Math.min(100, Math.round((monthOrders / plan.maxOrders) * 100)),
-    });
-  }, [plan, productCount, monthOrders]);
+  /* P38 (B5): DERIVED, not stored — usage is pure math on the props.
+     The old effect-bounced copy lagged one render behind every
+     dashboard poll; derivation lands in the same commit as the numbers. */
+  const usage = !plan
+    ? null
+    : {
+        products: plan.maxProducts >= 9999 ? 0 : Math.min(100, Math.round((productCount / plan.maxProducts) * 100)),
+        orders: plan.maxOrders >= 99999 ? 0 : Math.min(100, Math.round((monthOrders / plan.maxOrders) * 100)),
+      };
 
   if (!plan) {
     // No plan yet — the family "بدون باقة" state with an upgrade nudge

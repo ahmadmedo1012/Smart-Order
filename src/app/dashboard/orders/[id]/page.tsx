@@ -198,10 +198,10 @@ export default function OrderDetailPage() {
 
   const load = React.useCallback(() => {
     if (!id) return;
-    setError(false);
     api
       .get<{ order: OrderDetail }>(`/api/orders/${id}?businessId=${businessId}`)
       .then((r) => {
+        setError(false);
         setOrder(r.data.order);
         setInternalNote(r.data.order.internalNote ?? "");
       })
@@ -256,7 +256,7 @@ export default function OrderDetailPage() {
     }
   }
 
-  if (error) return <ErrorState retry={load} />;
+  if (error) return <ErrorState retry={() => { setError(false); load(); }} />;
   if (!order) {
     /* r131 (F3, A5 P2-7): shape-matched detail skeleton (back chip +
        hero row + KPI tiles + cards), not generic bars. */

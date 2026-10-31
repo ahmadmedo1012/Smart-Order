@@ -108,12 +108,13 @@ export function TrackLookup() {
   const [submitting, setSubmitting] = React.useState(false);
   const missRef = React.useRef<HTMLDivElement>(null);
   /* W21-E: recents ride the mount-gated idiom — SSR + first paint show
-     none, the effect fills them after mount (zero hydration drift, the
-     same law as clock text). */
+     none, the read lands in a microtask after mount (zero hydration
+     drift, the same law as clock text — and no synchronous setState in
+     the effect body: react-hooks/set-state-in-effect, P38 B5). */
   const [recents, setRecents] = React.useState<TrackRecent[]>([]);
 
   React.useEffect(() => {
-    setRecents(readRecents());
+    Promise.resolve().then(() => setRecents(readRecents()));
   }, []);
 
   function validate(): boolean {

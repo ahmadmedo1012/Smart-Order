@@ -55,24 +55,33 @@ export default function CustomersPage() {
     const t = setTimeout(() => setDebouncedQ(q), 300);
     return () => clearTimeout(t);
   }, [q]);
-  React.useEffect(() => {
+  /* P38 (B5): page reset rides the render-adjust pattern (react.dev
+     «adjusting state when a prop changes») — fires only when the
+     settled query actually changes value, exactly like the old
+     [debouncedQ] effect, but without a synchronous setState in the
+     effect body (react-hooks/set-state-in-effect). */
+  const [prevDebouncedQ, setPrevDebouncedQ] = React.useState(debouncedQ);
+  if (prevDebouncedQ !== debouncedQ) {
+    setPrevDebouncedQ(debouncedQ);
     setPage(1);
-  }, [debouncedQ]);
+  }
 
   const load = React.useCallback(() => {
     if (!businessId) return;
-    setError(false);
     api
       .get<CustomerRow[]>(
         `/api/customers?businessId=${businessId}${debouncedQ.trim() ? `&q=${encodeURIComponent(debouncedQ.trim())}` : ""}`,
       )
-      .then((r) => setCustomers(r.data))
+      .then((r) => {
+        setError(false);
+        setCustomers(r.data);
+      })
       .catch(() => setError(true));
   }, [businessId, debouncedQ]);
 
   React.useEffect(load, [load]);
 
-  if (error) return <ErrorState retry={load} />;
+  if (error) return <ErrorState retry={() => { setError(false); load(); }} />;
 
   const totalPages = customers
     ? Math.max(1, Math.ceil(customers.length / PAGE_SIZE))

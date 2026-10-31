@@ -61,12 +61,12 @@ export default function CustomerDetailPage() {
 
   const load = React.useCallback(() => {
     if (!id) return;
-    setError(false);
     api
       .get<{ customer: CustomerDetail }>(
         `/api/customers/${id}?businessId=${businessId}`,
       )
       .then((r) => {
+        setError(false);
         setCustomer(r.data.customer);
         setNotes(r.data.customer.notes ?? "");
       })
@@ -91,7 +91,7 @@ export default function CustomerDetailPage() {
     }
   }
 
-  if (error) return <ErrorState retry={load} />;
+  if (error) return <ErrorState retry={() => { setError(false); load(); }} />;
   if (!customer) {
     /* r131 (F3, A5 P2-7): shape-matched — back chip + hero row + KPI
        tiles + two cards (DetailSkeleton), not generic bars. */

@@ -41,10 +41,10 @@ export function useCheckoutState(slug: string) {
   const [errors, setErrors] = React.useState<FieldErrors>({});
 
   const load = React.useCallback(() => {
-    setLoadError(false);
     api
       .get<StoreData>(`/api/public/store/${slug}`)
       .then((r) => {
+        setLoadError(false);
         setData(r.data);
         if (r.data.deliveryZones.length > 0) setZoneId(r.data.deliveryZones[0].id);
         if (r.data.paymentMethods.length > 0) setPaymentMethodId(r.data.paymentMethods[0].id);
@@ -53,6 +53,10 @@ export function useCheckoutState(slug: string) {
       .catch(() => setLoadError(true));
   }, [slug]);
 
+  /* P38 (B5): family fix — the sync reset moved into the success
+     continuation (react-hooks/set-state-in-effect). load() has no retry
+     prop consumer (loadError only gates section UI), so the .then reset
+     is the whole story. */
   React.useEffect(load, [load]);
 
   const subtotal = cartEstimatedSubtotal(items);

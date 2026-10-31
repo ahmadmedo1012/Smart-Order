@@ -75,7 +75,6 @@ export default function ProductsPage() {
 
   const load = React.useCallback(() => {
     if (!businessId) return;
-    setError(false);
     Promise.all([
       api.get<{ products: Product[] }>(
         `/api/products?businessId=${businessId}`,
@@ -85,6 +84,7 @@ export default function ProductsPage() {
       ),
     ])
       .then(([p, c]) => {
+        setError(false);
         setProducts(p.data.products);
         setCategories(c.data.categories);
       })
@@ -105,7 +105,7 @@ export default function ProductsPage() {
     }
   }
 
-  if (error) return <ErrorState retry={load} />;
+  if (error) return <ErrorState retry={() => { setError(false); load(); }} />;
 
   /* r150: normalizeArabic parity with the storefront search — the same
      product finds the same way on both surfaces (hamza/alef forms). */

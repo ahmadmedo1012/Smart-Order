@@ -153,7 +153,10 @@ function RegisterWizard() {
 
   React.useEffect(() => {
     const signal = { cancelled: false };
-    loadPlans(signal);
+    /* P38 (B5): the reset pair at loadPlans' start is legal in event
+       handlers but not in an effect body — the microtask keeps the exact
+       frame sequence; initial states already match the resets anyway. */
+    Promise.resolve().then(() => loadPlans(signal));
     return () => {
       signal.cancelled = true;
     };

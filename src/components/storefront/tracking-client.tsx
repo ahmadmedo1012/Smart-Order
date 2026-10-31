@@ -2,6 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
+
+/* Post-hydration mounted flag without an effect — twin of theme-toggle's
+   useMounted (src/components/shared/theme-toggle.tsx). getServerSnapshot
+   returns false so the hydration pass renders exactly what SSR rendered
+   (zero drift), then React re-reads the live snapshot (P38 B5). */
+const emptySubscribe = () => () => {};
 import { formatLyd } from "@/lib/money";
 import { formatArabicDateTime, formatStationStampAr, timeAgoAr } from "@/lib/arabic";
 import { countedArabicPhrase } from "@/lib/arabic-plural";
@@ -228,12 +234,12 @@ export function TrackingClient({
   const [ageText, setAgeText] = React.useState<string | null>(null);
 
   /* P18-W2-d: the per-station stamps are clock-TEXT — formatted after
-     mount only, so SSR paints no clock text and server/client can
+     hydration only, so SSR paints no clock text and server/client can
      never disagree (the same hydration-drift law the age chip rides).
      The DATA is SSR'd (statusHistory state above); only the formatted
-     string waits for mount. */
-  const [showStamps, setShowStamps] = React.useState(false);
-  React.useEffect(() => setShowStamps(true), []);
+     string waits for mount. Rule-clean mounted flag — the ThemeToggle
+     useMounted idiom (src/components/shared/theme-toggle.tsx), P38 B5. */
+  const showStamps = React.useSyncExternalStore(emptySubscribe, () => true, () => false);
 
   /* P18-W2-d: station → its real first-arrival timestamp. First
      occurrence wins: payment-confirm rows repeat the CURRENT status,

@@ -58,16 +58,18 @@ export default function StaffPage() {
 
   const load = React.useCallback(() => {
     if (!businessId) return;
-    setError(false);
     api
       .get<{ staff: StaffRow[] }>(`/api/staff?businessId=${businessId}`)
-      .then((r) => setStaff(r.data.staff))
+      .then((r) => {
+        setError(false);
+        setStaff(r.data.staff);
+      })
       .catch(() => setError(true));
   }, [businessId]);
 
   React.useEffect(load, [load]);
 
-  if (error) return <ErrorState retry={load} />;
+  if (error) return <ErrorState retry={() => { setError(false); load(); }} />;
   if (staff === null) {
     /* r131 (F3, A5 P2-7): shape-matched rows skeleton. */
     return <StaffSkeleton />;

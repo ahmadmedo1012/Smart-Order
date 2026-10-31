@@ -67,10 +67,12 @@ export default function AdminPaymentsPage() {
   );
 
   const load = React.useCallback(() => {
-    setError(false);
     api
       .get<{ payments: Payment[] }>(`/api/subscriptions/list?status=${tab}`)
-      .then((r) => setPayments(r.data.payments))
+      .then((r) => {
+        setError(false);
+        setPayments(r.data.payments);
+      })
       .catch(() => setError(true));
   }, [tab]);
 
@@ -103,7 +105,7 @@ export default function AdminPaymentsPage() {
     }
   }
 
-  if (error) return <ErrorState retry={load} />;
+  if (error) return <ErrorState retry={() => { setError(false); load(); }} />;
 
   return (
     <div className="space-y-6">

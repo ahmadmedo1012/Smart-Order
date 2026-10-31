@@ -114,13 +114,17 @@ export function PromptDialog({
   const [value, setValue] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
-  // reset for the next invocation
-  React.useEffect(() => {
+  /* P38 (B5): reset for the next invocation — render-time adjust on the
+     open transition (identical reset semantics, no effect; also removes
+     the one-frame stale-text flash the post-paint effect reset allowed). */
+  const [prevOpen, setPrevOpen] = React.useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open) {
       setValue("");
       setError(null);
     }
-  }, [open]);
+  }
 
   function submit() {
     if (!value.trim()) {

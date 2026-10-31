@@ -53,15 +53,20 @@ export function PaymentDialog({
   onSuccess,
   onApproved,
 }: PaymentDialogProps) {
-  const [provider, setProvider] = useState<Provider>("libyana");
   const requiresBank = Number(price) > WALLET_CAP_LYD;
-
-  // Auto-switch to bank when the plan exceeds the wallet cap
-  useEffect(() => {
+  /* P38 (B5): auto-switch to bank when the plan exceeds the wallet cap —
+     the render-time adjust pattern (react.dev «adjusting state when a
+     prop changes», no effect): the first render initializes from the cap;
+     a later cap change (plan switch) redirects a wallet selection to
+     bank before paint. */
+  const [provider, setProvider] = useState<Provider>(requiresBank ? "bank" : "libyana");
+  const [prevRequiresBank, setPrevRequiresBank] = useState(requiresBank);
+  if (requiresBank !== prevRequiresBank) {
+    setPrevRequiresBank(requiresBank);
     if (requiresBank && (provider === "libyana" || provider === "madar")) {
       setProvider("bank");
     }
-  }, [requiresBank, provider]);
+  }
 
   const [phone, setPhone] = useState("");
   /* r133 (A1 F11/S7): inline field error for the wallet phone (the
@@ -204,10 +209,17 @@ export function PaymentDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, paymentId, pollNonce]);
 
-  // Reset-on-open — clean form on every open or plan switch
-  useEffect(() => {
+  // P38 (B5): Reset-on-open — clean form on every open or plan switch.
+  // Render-time adjust keyed on the same open|planId|price transition the
+  // old effect watched (the "approved" button and the register page call
+  // the raw onOpenChange prop, so the reset must stay prop-driven).
+  // Improvement: the reset lands BEFORE commit, so reopening can no longer
+  // flash the previous session's step for one frame.
+  const [resetMarker, setResetMarker] = useState<string | null>(null);
+  const openMarker = open ? `${planId}|${price}` : null;
+  if (openMarker !== resetMarker) {
+    setResetMarker(openMarker);
     if (open) {
-      sentRef.current = false;
       setStep("form");
       setBankAmount(price);
       setPhone("");
@@ -220,6 +232,14 @@ export function PaymentDialog({
       setSubmitting(false);
       setPollFailed(false);
     }
+  }
+  /* the ref half of the reset rides a companion effect (ref writes are
+     the effect's sanctioned home — react-hooks/refs bans them in render,
+     P38 B5). Same marker the render-adjust watches: the raw onOpenChange
+     close paths (the «approved» button bypasses handleOpenChange) would
+     otherwise leave sentRef=true and block the next session's submit. */
+  useEffect(() => {
+    if (open) sentRef.current = false;
   }, [open, planId, price]);
 
   const handleOpenChange = (next: boolean) => {

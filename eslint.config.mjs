@@ -21,19 +21,14 @@ const __dirname = dirname(__filename);
  *    see the fonts.css Times-New-Roman post-mortem).
  *  - react-compiler + react-hooks/purity stay off (experimental lints,
  *    not part of the contract).
- *  - P37: react-hooks/set-state-in-effect joins that exception list.
- *    eslint-config-next 16.4.3 (arrived with next 16.4.3) requires
- *    eslint-plugin-react-hooks ^7.1.0, whose 7.1.x line promotes the
- *    React-Compiler-era rules into the default preset. The repo's r126
- *    lint contract predates them: 37 pre-existing load-in-effect sites
- *    (async load() { setState… } + useEffect(load, [load]) in the
- *    dashboard family) trip the new rule. Migrating them is a deliberate
- *    follow-up, not something to smuggle inside a dependency-hygiene
- *    commit — the rule stays off until that migration lands.
- *  - P37 (same family, same reason): react-hooks/static-components —
- *    7 pre-existing render-scoped component definitions (shell.tsx's
- *    NavLinks + 6 siblings). Component extraction is the same deliberate
- *    follow-up; the rules flip back on when it lands.
+ *  - P37→P38 CLOSED: react-hooks/set-state-in-effect +
+ *    react-hooks/static-components were promoted into the 7.1.x default
+ *    preset by eslint-config-next 16.4.3 and temporarily documented off
+ *    with 37 pre-existing sites as named debt. The P38 migration landed
+ *    all 37 (family fix + render-adjust + useSyncExternalStore mounted
+ *    flags + module-scope extractions — see the P38 commit for the
+ *    per-site map) and both rules are now PERMANENTLY "error": a new
+ *    violation fails lint from here on.
  */
 const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
   rules: {
@@ -49,12 +44,10 @@ const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
 
     // React hooks — effect correctness protects the data layer.
     "react-hooks/exhaustive-deps": "error",
-    // P37: promoted into the 7.1.x default preset via eslint-config-next
-    // 16.4.3 — 37 pre-existing sites predate the rule (see header note).
-    "react-hooks/set-state-in-effect": "off",
-    // P37 (same preset promotion): 7 render-scoped component definitions
-    // in the dashboard shell family predate the rule.
-    "react-hooks/static-components": "off",
+    // P38: the 37-site debt is paid (see header) — both promoted rules
+    // are permanent gates now.
+    "react-hooks/set-state-in-effect": "error",
+    "react-hooks/static-components": "error",
 
     // React
     "react/no-unescaped-entities": "error",

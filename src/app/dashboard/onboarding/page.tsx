@@ -37,6 +37,63 @@ interface Zone {
   isActive: boolean;
 }
 
+/* P37 (static-components migration, B5-c): Step used to be defined
+   INSIDE OnboardingPage — a fresh component identity every render, so
+   React remounted the entire subtree on every keystroke (new type =
+   unmount + mount): the wizard's inputs dropped focus to <body> after
+   each character, and StoreQRCard re-generated on unrelated edits.
+   It closes over NOTHING from the page — every value rides props —
+   so the extraction is verbatim; the JSX at the five call sites is
+   unchanged. */
+function Step({
+  n,
+  icon: Icon,
+  title,
+  desc,
+  done,
+  children,
+}: {
+  n: number;
+  icon: React.ElementType;
+  title: string;
+  desc: string;
+  done: boolean;
+  children?: React.ReactNode;
+}) {
+  return (
+    <section
+      className={`rounded-xl border p-5 transition-colors ${done ? "border-success/40 bg-success/[0.04]" : "border-border bg-card"}`}
+    >
+      <div className="flex items-start gap-4">
+        <span
+          className={`flex size-10 items-center justify-center rounded-xl shrink-0 ${done ? "bg-success/15 text-success-ink" : "bg-primary/10 text-accent-foreground"}`}
+        >
+          {done ? (
+            <Check className="size-5" aria-hidden="true" />
+          ) : (
+            <Icon className="size-5" aria-hidden="true" />
+          )}
+        </span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground font-mono tabular-nums">
+              خطوة {n}
+            </span>
+            {done && (
+              <span className="text-xs text-success-ink font-medium">
+                مكتملة
+              </span>
+            )}
+          </div>
+          <h2 className="font-heading font-semibold mt-0.5">{title}</h2>
+          <p className="text-sm text-muted-foreground mt-1">{desc}</p>
+          {children && <div className="mt-4">{children}</div>}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function OnboardingPage() {
   const { businessId, business } = useBusiness();
   const [loading, setLoading] = React.useState(true);
@@ -168,53 +225,6 @@ export default function OnboardingPage() {
     /* r131 (F3, A5 P2-7): shape-matched checklist skeleton. */
     return <OnboardingSkeleton />;
   }
-
-  const Step = ({
-    n,
-    icon: Icon,
-    title,
-    desc,
-    done,
-    children,
-  }: {
-    n: number;
-    icon: React.ElementType;
-    title: string;
-    desc: string;
-    done: boolean;
-    children?: React.ReactNode;
-  }) => (
-    <section
-      className={`rounded-xl border p-5 transition-colors ${done ? "border-success/40 bg-success/[0.04]" : "border-border bg-card"}`}
-    >
-      <div className="flex items-start gap-4">
-        <span
-          className={`flex size-10 items-center justify-center rounded-xl shrink-0 ${done ? "bg-success/15 text-success-ink" : "bg-primary/10 text-accent-foreground"}`}
-        >
-          {done ? (
-            <Check className="size-5" aria-hidden="true" />
-          ) : (
-            <Icon className="size-5" aria-hidden="true" />
-          )}
-        </span>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground font-mono tabular-nums">
-              خطوة {n}
-            </span>
-            {done && (
-              <span className="text-xs text-success-ink font-medium">
-                مكتملة
-              </span>
-            )}
-          </div>
-          <h2 className="font-heading font-semibold mt-0.5">{title}</h2>
-          <p className="text-sm text-muted-foreground mt-1">{desc}</p>
-          {children && <div className="mt-4">{children}</div>}
-        </div>
-      </div>
-    </section>
-  );
 
   /* r131 (F3, A5 P3-4): honest progress — an Arabic-numerals summary
      + a meter strip (StepIndicator grammar: accent fill on the

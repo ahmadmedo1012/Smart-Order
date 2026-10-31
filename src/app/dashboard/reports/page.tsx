@@ -66,13 +66,15 @@ export default function ReportsPage() {
 
   const load = React.useCallback(() => {
     if (!businessId) return;
-    setError(false);
-    setLocked(false);
     api
       .get<ReportsResponse>(
         `/api/dashboard/reports?businessId=${businessId}&days=${days}`,
       )
-      .then((r) => setData(r.data))
+      .then((r) => {
+        setError(false);
+        setLocked(false);
+        setData(r.data);
+      })
       .catch((e) => {
         if (e instanceof ApiError && e.code === "PLAN_ENTITLEMENT") {
           setLocked(true);
@@ -124,7 +126,7 @@ export default function ReportsPage() {
       .finally(() => setExporting(false));
   }, [businessId, business, days, exporting]);
 
-  if (error) return <ErrorState retry={load} />;
+  if (error) return <ErrorState retry={() => { setError(false); load(); }} />;
 
   /* W7-D — the locked state: below بريميوم the server's 403 lands here —
      honest, labeled, with the family's upgrade CTA to the pricing page

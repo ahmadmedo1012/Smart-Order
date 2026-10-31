@@ -54,18 +54,20 @@ export default function PaymentsPage() {
 
   const load = React.useCallback(() => {
     if (!businessId) return;
-    setError(false);
     api
       .get<{ methods: Method[] }>(
         `/api/payment-methods?businessId=${businessId}`,
       )
-      .then((r) => setMethods(r.data.methods))
+      .then((r) => {
+        setError(false);
+        setMethods(r.data.methods);
+      })
       .catch(() => setError(true));
   }, [businessId]);
 
   React.useEffect(load, [load]);
 
-  if (error) return <ErrorState retry={load} />;
+  if (error) return <ErrorState retry={() => { setError(false); load(); }} />;
   if (methods === null) {
     /* r131 (F3, A5 P2-7): shape-matched rows skeleton. */
     return <PaymentsSkeleton />;

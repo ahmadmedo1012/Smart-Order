@@ -114,79 +114,37 @@ const ADMIN_NAV = [
   },
 ];
 
-export function DashboardShell({
-  user,
-  businesses,
-  memberships,
-  children,
+/* ── P38 (B5): the nav family lives at module scope ─────────────────────
+   NavLinks/NavRail/AccentBar/navLinkClass were render-scoped inside
+   DashboardShell — a fresh component type per render meant React
+   unmounted/remounted the whole nav subtree on every re-render (menu
+   toggle, biz switch, pathname change…), replaying AccentBar's pop and
+   destroying nav state. Extraction: stable identity; the ONLY render
+   value NavLinks consumed was `pathname`, which rides as a prop now. */
+
+const navLinkClass = (active: boolean) =>
+  cn(
+    "group relative flex min-h-[30px] items-center gap-2.5 overflow-hidden rounded-sm ps-8 pe-3 py-1 text-[13px] font-medium transition-[color,background-color,box-shadow] duration-(--t-fast) ease-smooth outline-none",
+    active
+      ? "bg-sidebar-accent font-semibold text-sidebar-foreground dark:shadow-[0_0_18px_-4px_rgb(255_122_56/0.16),inset_0_0_0_1px_rgb(255_122_56/0.10)]"
+      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+  );
+
+/* P6-2-f3 (GROUP 3): the light-mode ROUTE-LINE / NAV-NODE grammar —
+   a quiet dashed vertical hairline (start rail, per-item segments
+   bridging the gap-1 gutters) + a node dot centered on each item.
+   Light-only (dark:hidden): the dark sidebar keeps its night-dispatch
+   waves + constellation. Paint-only, aria-hidden, never interactive. */
+function NavRail({
+  first,
+  last,
+  active,
 }: {
-  user: { name: string; email: string; isPlatformAdmin?: boolean };
-  businesses: Biz[];
-  /* r134 (V2 P3): optional so existing callers stay source-compatible. */
-  memberships?: { businessId: string; perms: string[] }[];
-  children: React.ReactNode;
+  first: boolean;
+  last: boolean;
+  active: boolean;
 }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  /* P6-2-f3 (GROUP 3): the «المزيد» bottom-sheet menu state. */
-  const [moreOpen, setMoreOpen] = React.useState(false);
-  const [biz, setBiz] = React.useState<Biz | null>(businesses[0] ?? null);
-
-  // persist active business in localStorage for API calls
-  React.useEffect(() => {
-    const saved = localStorage.getItem("smart-order-biz");
-    const found = businesses.find((b) => b.id === saved);
-    const active = found ?? businesses[0] ?? null;
-    setBiz(active);
-    if (active) localStorage.setItem("smart-order-biz", active.id);
-  }, [businesses]);
-
-  const businessId = biz?.id ?? "";
-  /* r134 (V2 P3): effective permissions for the ACTIVE business (mirrors the
-     server's permissionsFor resolution; client gate only — the API enforces). */
-  const activePerms = memberships?.find((mm) => mm.businessId === biz?.id)?.perms ?? [];
-
-  async function logout() {
-    try {
-      await api.post("/api/auth/logout");
-    } finally {
-      router.push("/login");
-      router.refresh();
-    }
-  }
-
-  /* Canonical Madarek nav item (layout.css:121-174): --r-sm (8px) radius,
- 30px compact height, 13px/500, hover = surface-2, active = the
- --sidebar-* token pair (gold wash dark / neutral-150 light) + ink text
- + 3px inline-start accent bar with pop entrance + dark-mode gold halo.
- The dead --sidebar-* tokens are wired here through the @theme color
- bridges (bg-sidebar, bg-sidebar-accent, …) — no globals.css edits.
- P6-2-f3 (GROUP 3): ps-8 hosts the LIGHT-mode route rail (node dot +
- dashed vertical hairline — see the NavLinks spans); dark keeps its
- night-dispatch paint untouched. */
-  const navLinkClass = (active: boolean) =>
-    cn(
-      "group relative flex min-h-[30px] items-center gap-2.5 overflow-hidden rounded-sm ps-8 pe-3 py-1 text-[13px] font-medium transition-[color,background-color,box-shadow] duration-(--t-fast) ease-smooth outline-none",
-      active
-        ? "bg-sidebar-accent font-semibold text-sidebar-foreground dark:shadow-[0_0_18px_-4px_rgb(255_122_56/0.16),inset_0_0_0_1px_rgb(255_122_56/0.10)]"
-        : "text-muted-foreground hover:bg-muted hover:text-foreground",
-    );
-
-  /* P6-2-f3 (GROUP 3): the light-mode ROUTE-LINE / NAV-NODE grammar —
-     a quiet dashed vertical hairline (start rail, per-item segments
-     bridging the gap-1 gutters) + a node dot centered on each item.
-     Light-only (dark:hidden): the dark sidebar keeps its night-dispatch
-     waves + constellation. Paint-only, aria-hidden, never interactive. */
-  const NavRail = ({
-    first,
-    last,
-    active,
-  }: {
-    first: boolean;
-    last: boolean;
-    active: boolean;
-  }) => (
+  return (
     <>
       <span
         aria-hidden="true"
@@ -207,8 +165,10 @@ export function DashboardShell({
       />
     </>
   );
+}
 
-  const AccentBar = () => (
+function AccentBar() {
+  return (
     <m.span
       aria-hidden="true"
       className="absolute start-[-3px] top-[calc(50%-8px)] block h-4 w-[3px] rounded-e-[2px] bg-sidebar-primary"
@@ -217,14 +177,20 @@ export function DashboardShell({
       transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
     />
   );
+}
 
-  const NavLinks = ({
-    onNavigate,
-    showAdmin,
-  }: {
-    onNavigate?: () => void;
-    showAdmin?: boolean;
-  }) => (
+/* Stable-identity nav — pathname arrives as a prop (was the render
+   closure). onNavigate/showAdmin were already props. */
+function NavLinks({
+  pathname,
+  onNavigate,
+  showAdmin,
+}: {
+  pathname: string;
+  onNavigate?: () => void;
+  showAdmin?: boolean;
+}) {
+  return (
     <nav aria-label="التنقل في اللوحة" className="flex flex-col gap-1 px-3">
       {NAV.map(({ href, label, icon: Icon, exact }, i) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
@@ -281,6 +247,52 @@ export function DashboardShell({
       )}
     </nav>
   );
+}
+
+export function DashboardShell({
+  user,
+  businesses,
+  memberships,
+  children,
+}: {
+  user: { name: string; email: string; isPlatformAdmin?: boolean };
+  businesses: Biz[];
+  /* r134 (V2 P3): optional so existing callers stay source-compatible. */
+  memberships?: { businessId: string; perms: string[] }[];
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  /* P6-2-f3 (GROUP 3): the «المزيد» bottom-sheet menu state. */
+  const [moreOpen, setMoreOpen] = React.useState(false);
+  const [biz, setBiz] = React.useState<Biz | null>(businesses[0] ?? null);
+
+  // persist active business in localStorage for API calls
+  React.useEffect(() => {
+    const saved = localStorage.getItem("smart-order-biz");
+    const found = businesses.find((b) => b.id === saved);
+    const active = found ?? businesses[0] ?? null;
+    /* P38 (B5): the external-system sync (read + write-back) stays in the
+       effect; the state push lands in a microtask — no synchronous setState
+       in the effect body (react-hooks/set-state-in-effect). */
+    Promise.resolve().then(() => setBiz(active));
+    if (active) localStorage.setItem("smart-order-biz", active.id);
+  }, [businesses]);
+
+  const businessId = biz?.id ?? "";
+  /* r134 (V2 P3): effective permissions for the ACTIVE business (mirrors the
+     server's permissionsFor resolution; client gate only — the API enforces). */
+  const activePerms = memberships?.find((mm) => mm.businessId === biz?.id)?.perms ?? [];
+
+  async function logout() {
+    try {
+      await api.post("/api/auth/logout");
+    } finally {
+      router.push("/login");
+      router.refresh();
+    }
+  }
 
   return (
     <MotionConfig reducedMotion="user">
@@ -322,7 +334,7 @@ export function DashboardShell({
               </div>
             </div>
             <div className="py-4 overflow-y-auto flex-1">
-              <NavLinks showAdmin={user.isPlatformAdmin} />
+              <NavLinks pathname={pathname} showAdmin={user.isPlatformAdmin} />
             </div>
             <div className="p-3 border-t border-sidebar-border">
               {biz && (
@@ -380,6 +392,7 @@ export function DashboardShell({
                   </div>
                   <div className="py-4">
                     <NavLinks
+                      pathname={pathname}
                       onNavigate={() => setMenuOpen(false)}
                       showAdmin={user.isPlatformAdmin}
                     />

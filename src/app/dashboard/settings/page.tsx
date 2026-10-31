@@ -74,12 +74,12 @@ export default function SettingsPage() {
 
   const load = React.useCallback(() => {
     if (!businessId) return;
-    setError(false);
     api
       .get<{ business: BusinessSettings }>(
         `/api/business?businessId=${businessId}`,
       )
       .then((r) => {
+        setError(false);
         setSettings(r.data.business);
         setForm({
           name: r.data.business.name,
@@ -161,7 +161,7 @@ export default function SettingsPage() {
     }
   }
 
-  if (error) return <ErrorState retry={load} />;
+  if (error) return <ErrorState retry={() => { setError(false); load(); }} />;
   if (!settings) {
     /* r131 (F3, A5 P2-7): shape-matched settings skeleton. */
     return <SettingsSkeleton />;

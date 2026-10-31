@@ -98,12 +98,14 @@ export function Storefront({
   // refresh must never nuke SSR'd content back to an error state.
   const hasDataRef = React.useRef(!!initialData);
 
-  const load = React.useCallback(() => {
-    setError(false);
+  // P38 (B5): fetch core — effect-safe: every setState rides the async
+  // chain. The mount-path sync reset was a no-op (error starts false).
+  const fetchStore = React.useCallback(() => {
     api
       .get<StoreData>(`/api/public/store/${slug}`)
       .then((r) => {
         hasDataRef.current = true;
+        setError(false);
         setData(r.data);
       })
       .catch(() => {
@@ -113,7 +115,23 @@ export function Storefront({
       });
   }, [slug]);
 
-  React.useEffect(load, [load]);
+  // Retry entry (ErrorState button): the sync error reset is legal in an
+  // event handler — clears the banner instantly, then the skeleton shows
+  // via !data. Same shape the dashboard family rides (P38 B5).
+  const load = React.useCallback(() => {
+    setError(false);
+    fetchStore();
+  }, [fetchStore]);
+
+  React.useEffect(fetchStore, [fetchStore]);
+
+  // Client nav store→store under one mounted instance: clear a stale
+  // error before the refetch (what the old effect's sync reset did).
+  const [prevSlug, setPrevSlug] = React.useState(slug);
+  if (slug !== prevSlug) {
+    setPrevSlug(slug);
+    setError(false);
+  }
 
   // r134 (W2 #10): normalized search index — name + description are
   // normalized ONCE per data change, not re-normalized for every product

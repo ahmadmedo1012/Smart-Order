@@ -39,18 +39,21 @@ export default function CategoriesPage() {
 
   const load = React.useCallback(() => {
     if (!businessId) return;
-    setError(false);
     api
       .get<{ categories: Category[] }>(
         `/api/categories?businessId=${businessId}`,
       )
-      .then((r) => setCategories(r.data.categories))
+      .then((r) => {
+        setError(false);
+        setCategories(r.data.categories);
+      })
       .catch(() => setError(true));
   }, [businessId]);
 
   React.useEffect(load, [load]);
 
-  if (error) return <ErrorState retry={load} />;
+  /* P38 (B5): the reset moved out of the effect path — see ErrorState. */
+  if (error) return <ErrorState retry={() => { setError(false); load(); }} />;
   if (categories === null) {
     /* r131 (F3, A5 P2-7): shape-matched card-grid skeleton. */
     return <CategoriesSkeleton />;

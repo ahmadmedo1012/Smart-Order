@@ -81,10 +81,12 @@ export default function DashboardOverview() {
 
   const load = React.useCallback(() => {
     if (!businessId) return;
-    setError(false);
     api
       .get<Data>(`/api/dashboard/stats?businessId=${businessId}`)
-      .then((r) => setData(r.data))
+      .then((r) => {
+        setError(false);
+        setData(r.data);
+      })
       .catch(() => setError(true));
   }, [businessId]);
 
@@ -106,7 +108,7 @@ export default function DashboardOverview() {
     };
   }, [load]);
 
-  if (error) return <ErrorState retry={load} />;
+  if (error) return <ErrorState retry={() => { setError(false); load(); }} />;
 
   if (!data) {
     /* r131 (F3, A5 P2-7): shape-matched — PageHeader bar + the real
