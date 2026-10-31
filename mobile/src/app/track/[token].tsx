@@ -12,7 +12,8 @@ import { useLocalSearchParams } from 'expo-router'
 import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useQuery } from '@tanstack/react-query'
-import { t } from '@/constants/theme'
+import { fonts, type StatusFamily, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { trackOrder } from '@/services/storefront'
 import { formatLyd } from '@/lib/money'
 import { CheckCircleIcon, ClockIcon } from '@/components/icons'
@@ -42,6 +43,9 @@ function flowIndex(status: OrderStatus): number {
 }
 
 export default function TrackScreen() {
+  const { t, statusFamily } = useTheme()
+  const s = makeStyles(t, statusFamily)
+
   const params = useLocalSearchParams<{ token: string; fresh?: string }>()
   const token = typeof params.token === 'string' ? params.token : ''
   const fresh = params.fresh === '1'
@@ -227,29 +231,29 @@ export default function TrackScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors, sf: Record<string, StatusFamily>) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 14, paddingBottom: 32 },
   successBanner: {
     flexDirection: 'row',
     gap: 12,
     alignItems: 'center',
-    backgroundColor: '#DCF0E4',
+    backgroundColor: sf.mint.bg,
     borderWidth: 1,
-    borderColor: '#1E7A4659',
+    borderColor: `${sf.mint.ink}59`,
     borderRadius: 14,
     padding: 16,
   },
   successText: { flex: 1, gap: 3 },
   successTitle: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 15,
-    color: '#14522D',
+    color: sf.mint.deep,
   },
   successHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
-    color: '#1E7A46',
+    color: sf.mint.ink,
     lineHeight: 19,
   },
   card: {
@@ -263,17 +267,17 @@ const s = StyleSheet.create({
   orderHeader: { flexDirection: 'row', gap: 12, alignItems: 'center' },
   orderHeaderText: { flex: 1, gap: 2 },
   businessName: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 16,
     color: t.foreground,
   },
   orderNumber: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.mono,
     fontSize: 13,
     color: t.primary,
   },
   meta: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },
@@ -295,42 +299,42 @@ const s = StyleSheet.create({
   flowLabel: {
     flex: 1,
     textAlign: 'center',
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 10,
     color: t.mutedFg,
   },
-  flowLabelActive: { color: t.primary, fontFamily: 'IBMPlexSansArabic_600SemiBold' },
-  brokenCard: { backgroundColor: '#FBE3E6', borderColor: '#C4384A59' },
+  flowLabelActive: { color: t.primary, fontFamily: fonts.bold },
+  brokenCard: { backgroundColor: sf.rose.bg, borderColor: `${sf.rose.ink}59` },
   brokenText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
-    color: '#8C2733',
+    color: sf.rose.deep,
     textAlign: 'center',
   },
   cardTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   itemRow: { flexDirection: 'row', gap: 10, paddingVertical: 8, alignItems: 'center' },
   itemText: { flex: 1, gap: 2 },
   itemName: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 14,
     color: t.foreground,
   },
   itemOptions: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 11.5,
     color: t.mutedFg,
   },
   itemQty: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },
   itemTotal: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13,
     color: t.foreground,
     minWidth: 70,
@@ -339,34 +343,34 @@ const s = StyleSheet.create({
   totalsBox: { gap: 8 },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between' },
   totalLabel: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
   },
   totalValue: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13,
     color: t.foreground,
   },
   grandLabel: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   grandValue: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.primary,
   },
   historyRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 4 },
   historyText: {
     flex: 1,
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13,
     color: t.foreground,
   },
   historyTime: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 11,
     color: t.mutedFg,
   },

@@ -24,7 +24,8 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useQuery } from '@tanstack/react-query'
-import { t } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { createOrder, fetchStorefront, ApiError, NetworkError } from '@/services/storefront'
 import { useCart, zoneById } from '@/state/cart'
 import { belowMinOrder, cartTotals } from '@/state/pricing'
@@ -43,6 +44,9 @@ import { ErrorState, LoadingState } from '@/components/state-views'
 import type { FulfillmentType } from '@/types/storefront'
 
 export default function CartScreen() {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const params = useLocalSearchParams<{ slug: string }>()
   const slug = typeof params.slug === 'string' ? params.slug : ''
 
@@ -482,7 +486,7 @@ export default function CartScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 14, paddingBottom: 24 },
   card: {
@@ -494,28 +498,28 @@ const s = StyleSheet.create({
     gap: 12,
   },
   cardTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   lineRow: { flexDirection: 'row', gap: 10, paddingVertical: 8 },
   lineImage: { width: 52, height: 52, borderRadius: 10, backgroundColor: t.goldSoft },
   lineImageFallback: { alignItems: 'center', justifyContent: 'center' },
-  lineImageText: { fontFamily: 'IBMPlexSansArabic_700Bold', fontSize: 20, color: t.ring },
+  lineImageText: { fontFamily: fonts.bold, fontSize: 20, color: t.ring },
   lineText: { flex: 1, gap: 3 },
   lineName: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.foreground,
   },
   lineOptions: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 11.5,
     color: t.mutedFg,
     lineHeight: 17,
   },
   linePrice: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13,
     color: t.primary,
     marginTop: 2,
@@ -532,29 +536,29 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   qtyText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   totalsBox: { gap: 8, marginTop: 4 },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between' },
   totalLabel: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
   },
   totalValue: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13,
     color: t.foreground,
   },
   grandLabel: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   grandValue: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.primary,
   },
@@ -576,7 +580,7 @@ const s = StyleSheet.create({
   },
   segActive: { backgroundColor: t.primary },
   segText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13.5,
     color: t.mutedFg,
   },
@@ -593,30 +597,30 @@ const s = StyleSheet.create({
   },
   zoneActive: { borderColor: t.primary, backgroundColor: t.goldSoft },
   zoneName: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.foreground,
   },
   zoneFee: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },
   zoneNameActive: { color: t.ring },
   warnText: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.destructive,
     lineHeight: 19,
   },
   pickupHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
     lineHeight: 20,
   },
   payHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     lineHeight: 18,
@@ -638,7 +642,7 @@ const s = StyleSheet.create({
   },
   payTileActive: { borderColor: t.primary, backgroundColor: t.goldSoft },
   payTileName: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13,
     color: t.mutedFg,
   },
@@ -652,7 +656,7 @@ const s = StyleSheet.create({
     gap: 6,
   },
   transferLabel: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 11.5,
     color: t.mutedFg,
   },
@@ -663,7 +667,7 @@ const s = StyleSheet.create({
     gap: 10,
   },
   transferNumber: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.mono,
     fontSize: 17,
     color: t.foreground,
     letterSpacing: 0.5,
@@ -680,7 +684,7 @@ const s = StyleSheet.create({
     paddingVertical: 9,
   },
   copyBtnText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 12.5,
     color: t.foreground,
   },
@@ -693,13 +697,13 @@ const s = StyleSheet.create({
     gap: 6,
   },
   ussdLabel: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 11.5,
     color: t.mutedFg,
   },
   ussdCode: {
     flex: 1,
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.mono,
     fontSize: 13.5,
     color: t.primary,
     writingDirection: 'ltr',
@@ -711,12 +715,12 @@ const s = StyleSheet.create({
     paddingVertical: 9,
   },
   copyBtnPrimaryText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 12.5,
     color: t.primaryFg,
   },
   capNote: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.ring,
     lineHeight: 18,
@@ -732,12 +736,12 @@ const s = StyleSheet.create({
   },
   footerPrice: { flex: 1 },
   footerTotalLabel: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 11,
     color: t.mutedFg,
   },
   footerTotal: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 17,
     color: t.primary,
   },

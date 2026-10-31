@@ -11,7 +11,8 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useQuery } from '@tanstack/react-query'
-import { t } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { fetchStorefront } from '@/services/storefront'
 import { unitPriceFor } from '@/state/pricing'
 import { useCart } from '@/state/cart'
@@ -21,6 +22,9 @@ import { Button } from '@/components/ui'
 import { ErrorState, LoadingState } from '@/components/state-views'
 
 export default function ProductScreen() {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const params = useLocalSearchParams<{ id: string; slug: string }>()
   const productId = typeof params.id === 'string' ? params.id : ''
   const slug = typeof params.slug === 'string' ? params.slug : ''
@@ -250,39 +254,39 @@ export default function ProductScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { paddingBottom: 16 },
   heroImage: { width: '100%', height: 220, backgroundColor: t.goldSoft },
   heroFallback: { alignItems: 'center', justifyContent: 'center' },
-  heroFallbackText: { fontFamily: 'IBMPlexSansArabic_700Bold', fontSize: 64, color: t.ring },
+  heroFallbackText: { fontFamily: fonts.bold, fontSize: 64, color: t.ring },
   body: { padding: 16, gap: 18 },
   name: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 20,
     color: t.foreground,
   },
   desc: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 14,
     color: t.mutedFg,
     lineHeight: 22,
   },
   section: { gap: 10 },
   sectionTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   requiredMark: { color: t.primary, fontSize: 13 },
   sectionHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
     marginTop: -6,
   },
   invalidHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.destructive,
     marginTop: -6,
@@ -301,13 +305,13 @@ const s = StyleSheet.create({
   },
   pillActive: { backgroundColor: t.primary, borderColor: t.primary },
   pillText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13,
     color: t.foreground,
   },
   pillTextActive: { color: t.primaryFg },
   pillDelta: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 11,
     color: t.mutedFg,
   },
@@ -320,7 +324,7 @@ const s = StyleSheet.create({
     paddingVertical: 6,
   },
   note: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 14,
     color: t.foreground,
     textAlign: 'right',
@@ -338,7 +342,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   qtyText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 18,
     color: t.foreground,
     minWidth: 34,
@@ -355,12 +359,12 @@ const s = StyleSheet.create({
   },
   footerPrice: { flex: 1, gap: 0 },
   footerTotalLabel: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 11,
     color: t.mutedFg,
   },
   footerTotal: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 17,
     color: t.primary,
   },

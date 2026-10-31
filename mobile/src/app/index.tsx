@@ -19,14 +19,18 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { queryClient } from '@/lib/query-client'
-import { t } from '@/constants/theme'
+import { fonts, radius, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { fetchStorefront, ApiError, NetworkError } from '@/services/storefront'
 import { readRecents, type RecentStore } from '@/state/recents'
-import { SearchIcon, StoreIcon, TruckIcon, ChartIcon } from '@/components/icons'
+import { SearchIcon, StoreIcon, TruckIcon, ChartIcon, SunIcon, MoonIcon } from '@/components/icons'
 import { Button, Hairline } from '@/components/ui'
 import { WEB_BASE_URL } from '@/constants/config'
 
 export default function LookupScreen() {
+  const { t, name, setTheme } = useTheme()
+  const s = makeStyles(t)
+
   const [code, setCode] = useState('')
   const [recents, setRecents] = useState<RecentStore[]>([])
   const [opening, setOpening] = useState(false)
@@ -75,6 +79,24 @@ export default function LookupScreen() {
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
+        {/* مفتاح الوضع — متاح للزائر من الشاشة الأولى (الافتراضي ليلي
+            * مثل الويب؛ الاختيار يُحفظ ويبقى عبر إعادة التشغيل). */}
+        <View style={s.topBar}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={name === 'dark' ? 'الوضع النهاري' : 'الوضع الليلي'}
+            onPress={() => setTheme(name === 'dark' ? 'light' : 'dark')}
+            style={({ pressed }) => [s.themeBtn, pressed && { opacity: 0.7 }]}
+          >
+            {name === 'dark' ? (
+              <SunIcon size={16} color={t.accentText} />
+            ) : (
+              <MoonIcon size={16} color={t.accentText} />
+            )}
+            <Text style={s.themeBtnText}>{name === 'dark' ? 'الوضع النهاري' : 'الوضع الليلي'}</Text>
+          </Pressable>
+        </View>
+
         {/* الترويسة */}
         <View style={s.hero}>
           <View style={s.markWell}>
@@ -208,10 +230,28 @@ export default function LookupScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   scroll: { padding: 16, gap: 14, paddingBottom: 32 },
-  hero: { alignItems: 'center', paddingTop: 24, paddingBottom: 8, gap: 10 },
+  topBar: { flexDirection: 'row', justifyContent: 'flex-start' },
+  themeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    backgroundColor: t.card,
+    borderWidth: 1,
+    borderColor: t.border,
+    borderRadius: radius.pill,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    minHeight: 44,
+  },
+  themeBtnText: {
+    fontFamily: fonts.medium,
+    fontSize: 12.5,
+    color: t.accentText,
+  },
+  hero: { alignItems: 'center', paddingTop: 18, paddingBottom: 8, gap: 10 },
   markWell: {
     width: 68,
     height: 68,
@@ -221,12 +261,12 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   heroTitle: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 26,
     color: t.foreground,
   },
   heroSub: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 14,
     color: t.mutedFg,
     textAlign: 'center',
@@ -242,17 +282,17 @@ const s = StyleSheet.create({
     gap: 12,
   },
   cardTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   cardHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 13,
     color: t.mutedFg,
     lineHeight: 20,
   },
-  mono: { fontFamily: 'IBMPlexSansArabic_500Medium', color: t.ring },
+  mono: { fontFamily: fonts.mono, color: t.ring },
   row: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   inputWrap: {
     flex: 1,
@@ -268,7 +308,7 @@ const s = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 15,
     color: t.foreground,
     paddingVertical: 8,
@@ -285,12 +325,12 @@ const s = StyleSheet.create({
   },
   recentText: { flex: 1, gap: 2 },
   recentName: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.foreground,
   },
   recentSlug: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.mono,
     fontSize: 12,
     color: t.mutedFg,
   },
@@ -304,15 +344,15 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepNum: { fontFamily: 'IBMPlexSansArabic_600SemiBold', fontSize: 13, color: t.ring },
+  stepNum: { fontFamily: fonts.bold, fontSize: 13, color: t.ring },
   stepText: { flex: 1, gap: 2 },
   stepTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.foreground,
   },
   stepHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
     lineHeight: 19,
@@ -344,18 +384,18 @@ const s = StyleSheet.create({
   },
   merchantText: { flex: 1, gap: 2 },
   merchantTitle: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   merchantHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
     lineHeight: 19,
   },
   webText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 13,
     color: t.mutedFg,
   },

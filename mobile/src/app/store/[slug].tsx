@@ -11,7 +11,8 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useQuery } from '@tanstack/react-query'
-import { t } from '@/constants/theme'
+import { fonts, type ThemeColors } from '@/constants/theme'
+import { useTheme } from '@/theme/ThemeProvider'
 import { fetchStorefront } from '@/services/storefront'
 import { useCart, zoneById } from '@/state/cart'
 import { cartTotals } from '@/state/pricing'
@@ -22,6 +23,9 @@ import { Chip } from '@/components/ui'
 import { EmptyState, ErrorState, LoadingState } from '@/components/state-views'
 
 export default function StoreScreen() {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+
   const params = useLocalSearchParams<{ slug: string; name?: string }>()
   const slug = typeof params.slug === 'string' ? params.slug : ''
   const [activeCat, setActiveCat] = useState<string | 'ALL'>('ALL')
@@ -173,7 +177,7 @@ export default function StoreScreen() {
   )
 }
 
-const s = StyleSheet.create({
+const makeStyles = (t: ThemeColors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: t.background },
   header: {
     flexDirection: 'row',
@@ -189,12 +193,12 @@ const s = StyleSheet.create({
   backText: { color: t.primary, fontSize: 22, lineHeight: 26 },
   headerText: { flex: 1, gap: 1 },
   storeName: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 17,
     color: t.foreground,
   },
   storeCity: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12,
     color: t.mutedFg,
   },
@@ -206,7 +210,7 @@ const s = StyleSheet.create({
   },
   logoFallback: { alignItems: 'center', justifyContent: 'center' },
   logoFallbackText: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 18,
     color: t.ring,
   },
@@ -239,23 +243,23 @@ const s = StyleSheet.create({
   star: { color: t.ring, fontSize: 12 },
   productName: {
     flex: 1,
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.foreground,
   },
   productDesc: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 12.5,
     color: t.mutedFg,
     lineHeight: 19,
   },
   productPrice: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.primary,
   },
   optionsHint: {
-    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontFamily: fonts.regular,
     fontSize: 11.5,
     color: t.mutedFg,
   },
@@ -267,7 +271,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 8,
   },
   unavailableText: {
-    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontFamily: fonts.medium,
     fontSize: 11,
     color: t.mutedFg,
   },
@@ -279,7 +283,7 @@ const s = StyleSheet.create({
   },
   imageFallback: { alignItems: 'center', justifyContent: 'center' },
   imageFallbackText: {
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 26,
     color: t.ring,
   },
@@ -295,7 +299,7 @@ const s = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     gap: 12,
-    shadowColor: '#1B2A41',
+    shadowColor: t.shadow,
     shadowOpacity: 0.25,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
@@ -305,24 +309,24 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(255,255,255,0.22)',
+    backgroundColor: t.onPrimaryWash,
     borderRadius: 999,
     paddingVertical: 4,
     paddingHorizontal: 10,
   },
   cartCountText: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 13,
     color: t.primaryFg,
   },
   cartTotal: {
     flex: 1,
-    fontFamily: 'IBMPlexSansArabic_700Bold',
+    fontFamily: fonts.bold,
     fontSize: 15,
     color: t.primaryFg,
   },
   cartCta: {
-    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontFamily: fonts.bold,
     fontSize: 14,
     color: t.primaryFg,
   },
