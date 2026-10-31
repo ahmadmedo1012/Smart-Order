@@ -66,13 +66,17 @@ export function LandingFooter() {
               منصة الطلبات الرقمية للأعمال في ليبيا — متجر رقمي، طلبات عبر
               الويب وواتساب، لوحة تحكم كاملة.
             </p>
+            {/* P40 (P1-2 sibling sweep): the old «مدار الساعة» label was a
+                24/7 promise on the same WhatsApp line the hub honestly
+                advertises as أوقات الدوام (9 صباحاً — 9 مساءً) — the
+                sibling copy now speaks the hub's truth, verbatim. */}
             <a
               href={`https://wa.me/${SUPPORT_WHATSAPP}`}
               target="_blank"
               rel="noopener noreferrer"
               className="landing-footer-link"
             >
-              واتساب الدعم — على مدار الساعة
+              واتساب الدعم — أوقات الدوام (9 صباحاً — 9 مساءً)
             </a>
           </div>
 

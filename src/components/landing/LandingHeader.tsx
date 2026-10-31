@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, ArrowLeft, Route, BarChart3, Banknote, ShoppingBag, PackageSearch } from "lucide-react";
+import { Menu, X, ChevronDown, ArrowLeft, Route, BarChart3, Banknote, ShoppingBag, PackageSearch, MessageCircle } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 /* r128 Stage B (F4b) — the landing header, converted from the product
@@ -30,6 +30,11 @@ import { ThemeToggle } from "@/components/shared/theme-toggle";
    The product MainNav keeps serving every non-landing surface. */
 
 const SPY_SECTIONS = "#stations, #store, #dashboard, #payments";
+
+/* P40 (benchmark rank 2 / SL-7): the support WhatsApp — the same line the
+ * product footer and login dialog carry. Honest framing only: no 24/7
+ * claims anywhere (the hub's truth is أوقات الدوام 9ص–9م). */
+const SUPPORT_WHATSAPP = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP || "218910089975";
 
 export function LandingHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -217,6 +222,21 @@ export function LandingHeader() {
           </nav>
 
           <div className="landing-header-cta">
+            {/* P40 (benchmark rank 2 / SL-7): the persistent WhatsApp
+                support CTA — a SECONDARY rung, never a second primary: the
+                WhatsApp green (sanctioned for WhatsApp surfaces, the
+                --whatsapp constant) can never compete with the ONE lime
+                conversion pill, and the ≤1080px CTA fold hides this slot so
+                the mobile menu below carries the twin. */}
+            <a
+              href={`https://wa.me/${SUPPORT_WHATSAPP}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="landing-header-wa"
+            >
+              <MessageCircle size={15} aria-hidden="true" />
+              تحدث معنا واتساب
+            </a>
             <Link href="/login" className="ln-btn-ghost">تسجيل الدخول</Link>
             {/* P31-D (CTA de-competition): the register affordance rode
                 the filled gold pill — a SECOND primary fighting the
@@ -256,6 +276,18 @@ export function LandingHeader() {
             <a href="#dashboard" className="ln-btn-ghost">لوحة التاجر</a>
             <a href="#payments" className="ln-btn-ghost">محطات الدفع</a>
             <Link href="/track" className="ln-btn-ghost">تتبع طلبك</Link>
+            {/* P40: the header WhatsApp CTA's mobile twin — the ≤1080px CTA
+                fold hides the header slot, so the channel stays reachable
+                from the folded menu (same wa.me line, same honest framing). */}
+            <a
+              href={`https://wa.me/${SUPPORT_WHATSAPP}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="landing-header-wa"
+            >
+              <MessageCircle size={16} aria-hidden="true" />
+              تحدث معنا واتساب
+            </a>
             <Link href="/login" className="ln-btn-ghost">تسجيل الدخول</Link>
             <Link href="/register" className="ln-btn-gold">
               أنشئ متجرك

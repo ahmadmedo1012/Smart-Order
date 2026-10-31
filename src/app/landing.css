@@ -503,6 +503,52 @@
   outline-offset: 2px;
 }
 
+/* P40 (benchmark rank 2 / SL-7): the persistent WhatsApp support CTA —
+   the header's secondary channel rung. WhatsApp green is sanctioned for
+   WhatsApp surfaces only (the --whatsapp constant; the storefront-scene
+   twin), so it never competes with the ONE lime conversion pill; the
+   geometry rides the ghost-pill family at the 44px floor. On the ink pair
+   #07361d on #25d366 = 6.8:1 (5.5:1 on the --whatsapp-deep hover). The
+   ≤1080px CTA fold hides the header slot — the mobile menu carries the
+   full-width twin (48px floor, the menu's own rung). */
+.landing .landing-header-wa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7.6px 16px;
+  min-block-size: 44px;
+  border-radius: var(--ln-radius-pill);
+  font-size: 14px;
+  font-weight: var(--fw-semibold);
+  font-family: inherit;
+  /* r150 tracking law: the label is Arabic — no letter-spacing */
+  letter-spacing: 0;
+  text-decoration: none;
+  cursor: pointer;
+  background: var(--whatsapp);
+  color: var(--whatsapp-foreground);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  transition:
+    background var(--ln-t-base) var(--ln-ease),
+    transform var(--ln-t-fast) var(--ln-ease-out);
+}
+.landing .landing-header-wa:hover { background: var(--whatsapp-deep); }
+.landing .landing-header-wa:active {
+  transform: scale(var(--press-scale, 0.97));
+  transition-duration: var(--t-micro);
+}
+.landing .landing-header-wa:focus-visible {
+  outline: 2px solid var(--ln-lime);
+  outline-offset: 2px;
+}
+/* the mobile-menu twin rides the menu's own full-width 48px rung */
+.landing .landing-mobile-menu .landing-header-wa {
+  justify-content: center;
+  inline-size: 100%;
+  min-block-size: 48px;
+}
+
 /* ── 5 · chapter scaffolding — let every scene breathe ─────────────── */
 .landing .ln-chapter {
   position: relative;

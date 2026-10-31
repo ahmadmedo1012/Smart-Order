@@ -715,6 +715,12 @@ const LANDING_DARK_LAYER = [
   ['E3 toggle wiring: the toggle rides its own .landing-header-tools slot AFTER the burger (end-of-rail; survives the ≤1080px CTA hide)',
     /<div className="landing-header-tools">\s*<ThemeToggle \/>\s*<\/div>/.test(landingHeaderSrc) &&
     landingHeaderSrc.indexOf('className="landing-header-tools"') > landingHeaderSrc.indexOf('className="landing-burger"')],
+  ['P40 benchmark rank-2: the landing header carries the persistent WhatsApp CTA (wa.me secondary rung, header + mobile-menu twins) and the footer speaks the hub\'s support hours — no 24/7 claim anywhere',
+    landingHeaderSrc.includes('landing-header-wa') &&
+    landingHeaderSrc.includes('https://wa.me/${SUPPORT_WHATSAPP}') &&
+    !landingHeaderSrc.includes('مدار الساعة') &&
+    readFileSync(new URL('../src/components/landing/LandingFooter.tsx', import.meta.url), 'utf8').includes('أوقات الدوام (9 صباحاً — 9 مساءً)') &&
+    !readFileSync(new URL('../src/components/landing/LandingFooter.tsx', import.meta.url), 'utf8').includes('على مدار الساعة')],
   ['E3 hero depth layer: waypoints paint currentColor (theme-blind fix — the hardcoded navy fill is gone)',
     heroDepthSrc.includes('fill="currentColor"') && !heroDepthSrc.includes('fill="rgba(27,42,65,0.5)")')],
   ['E3 hero depth layer: both stages owned in CSS — daylight keeps the byte-identical ink, night points to pale ink',
