@@ -7,10 +7,12 @@
  * الدخول مركزيًا من هذه البوابة.
  */
 import React, { useEffect } from 'react'
+import { View } from 'react-native'
 import { Stack, usePathname, router } from 'expo-router'
 import { t } from '@/constants/theme'
 import { useAuthStore } from '@/state/auth'
 import { LoadingState } from '@/components/state-views'
+import { ToastHost } from '@/components/toast'
 
 export default function MerchantLayout() {
   const pathname = usePathname()
@@ -36,16 +38,31 @@ export default function MerchantLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: t.background },
-      }}
-    >
-      <Stack.Screen name="login" />
-      <Stack.Screen name="business" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="order/[id]" />
-    </Stack>
+    <View style={{ flex: 1, backgroundColor: t.background }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: t.background },
+        }}
+      >
+        <Stack.Screen name="login" />
+        <Stack.Screen name="business" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="order/[id]" />
+        <Stack.Screen name="manage/index" />
+        <Stack.Screen name="manage/products" />
+        <Stack.Screen name="manage/product/[id]" />
+        <Stack.Screen name="manage/categories" />
+        <Stack.Screen name="manage/delivery-zones" />
+        <Stack.Screen name="manage/payment-methods" />
+        <Stack.Screen name="manage/settings" />
+        <Stack.Screen name="manage/customers" />
+        <Stack.Screen name="manage/customer/[id]" />
+        <Stack.Screen name="manage/staff" />
+        <Stack.Screen name="manage/reports" />
+      </Stack>
+      {/* إشعارات النجاح العابرة لكل شاشات التاجر */}
+      <ToastHost />
+    </View>
   )
 }

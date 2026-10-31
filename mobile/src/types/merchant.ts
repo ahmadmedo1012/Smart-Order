@@ -222,3 +222,192 @@ export interface DashboardStats {
   lowStock: { id: string; name: string; stockQuantity: number }[]
   weekSeries: { day: string; revenue: number; orders: number }[]
 }
+
+/* ── الإدارة: المنتجات والأقسام (C2-REST) ─────────────────────── */
+
+export interface MerchantVariant {
+  id: string
+  name: string
+  priceDelta: number
+}
+
+export interface MerchantOption {
+  id: string
+  name: string
+  priceDelta: number
+}
+
+export interface MerchantOptionGroup {
+  id: string
+  name: string
+  minSelect: number
+  maxSelect: number
+  required: boolean
+  options: MerchantOption[]
+}
+
+/** منتج التاجر — GET/POST/PATCH /api/products (بلا isArchived: القائمة
+ * تُرجع الحيّة فقط). الأسعار مليم صحيح؛ التحرير بسلاسل عشرية. */
+export interface MerchantProduct {
+  id: string
+  name: string
+  description: string | null
+  imageUrl: string | null
+  categoryId: string | null
+  category: { id: string; name: string } | null
+  price: number
+  isAvailable: boolean
+  isFeatured: boolean
+  variants: MerchantVariant[]
+  optionGroups: MerchantOptionGroup[]
+}
+
+export interface MerchantCategory {
+  id: string
+  name: string
+  description: string | null
+  imageUrl: string | null
+  sortOrder: number
+  _count?: { products: number }
+}
+
+/* ── مناطق التوصيل ────────────────────────────────────────────── */
+
+export interface MerchantZone {
+  id: string
+  name: string
+  fee: number
+  minOrder: number
+  isActive: boolean
+  sortOrder: number
+}
+
+/* ── طرق الدفع ────────────────────────────────────────────────── */
+
+export type PaymentType = 'CASH' | 'COD' | 'MANUAL' | 'WHATSAPP' | 'MADAR' | 'LIBYANA'
+
+/** كتالوج الأنواع الست (PAYMENT_TYPES في الخادم) — بهذا الترتيب في
+ * منتقي الإضافة. */
+export const PAYMENT_TYPES: readonly PaymentType[] = [
+  'CASH',
+  'COD',
+  'MANUAL',
+  'WHATSAPP',
+  'MADAR',
+  'LIBYANA',
+]
+
+/** الأنواع التي تحمل رقم هاتف مستقبِل للحوالات (تعليمات واجهة الويب). */
+export const PAYMENT_TYPES_NEEDING_NUMBER: readonly PaymentType[] = ['MADAR', 'LIBYANA', 'MANUAL', 'WHATSAPP']
+
+/** وصف افتراضي لكل نوع (PAYMENT_TYPE_DESCRIPTIONS في الخادم) — يُقترح
+ * في حقل التعليمات عند الإضافة. */
+export const PAYMENT_TYPE_DESCRIPTION_AR: Record<PaymentType, string> = {
+  CASH: 'ادفع نقداً عند استلام طلبك من الفرع',
+  COD: 'ادفع نقداً لمندوب التوصيل عند وصول الطلب',
+  MANUAL: 'حوّل المبلغ يدوياً ثم أرسل إشعار التحويل للرقم الموضح',
+  WHATSAPP: 'تواصل معنا عبر واتساب لتأكيد الدفع بعد التحويل',
+  MADAR: 'حوّل المبلغ عبر خدمة مدار للرقم الموضح، ثم أرسل صورة التحويل',
+  LIBYANA: 'حوّل المبلغ عبر خدمة ليبيانا money أو Tijarta للرقم الموضح، ثم أرسل صورة التحويل',
+}
+
+/** طريقة دفع مفعّلة — config سلسلة JSON "{number}" أو null. */
+export interface MerchantPaymentMethod {
+  id: string
+  type: PaymentType
+  name: string
+  instructions: string | null
+  config: string | null
+  isActive: boolean
+  sortOrder: number
+}
+
+/* ── إعدادات المتجر ───────────────────────────────────────────── */
+
+/** GET/PATCH /api/business — PATCH يعيد isActive ولا يعيد currency/
+ * createdAt، والعكس؛ لذا الحقول المشتركة إلزامية والهامشية اختيارية. */
+export interface MerchantBusinessFull {
+  id: string
+  slug: string
+  name: string
+  description: string | null
+  logoUrl: string | null
+  coverUrl: string | null
+  city: string | null
+  phone: string | null
+  whatsappNumber: string | null
+  address: string | null
+  receiptFooter: string | null
+  isPublished: boolean
+  onboardingStep: number
+  currency?: string
+  createdAt?: string
+  isActive?: boolean
+}
+
+/* ── العملاء ──────────────────────────────────────────────────── */
+
+/** سطر قائمة العملاء المُثراة (GET /api/customers — orders/totalSpent). */
+export interface MerchantCustomerListItem {
+  id: string
+  name: string
+  phone: string
+  notes: string | null
+  createdAt: string
+  orderCount: number
+  totalSpent: number
+  avgOrder: number
+  lastOrderAt: string | null
+}
+
+export interface CustomerAddress {
+  id: string
+  customerId: string
+  label: string | null
+  city: string
+  area: string | null
+  addressLine: string
+  isDefault: boolean
+}
+
+export interface CustomerOrderRow {
+  id: string
+  orderNumber: string
+  status: OrderStatus
+  total: number
+  paymentStatus: PaymentStatus
+  fulfillmentType: FulfillmentType
+  createdAt: string
+}
+
+/** تفاصيل العميل (GET /api/customers/[id]) — مع سجل الطلبات والإحصاء. */
+export interface MerchantCustomerDetail {
+  id: string
+  name: string
+  phone: string
+  notes: string | null
+  createdAt: string
+  addresses: CustomerAddress[]
+  orders: CustomerOrderRow[]
+  stats: { orderCount: number; totalSpent: number; avgOrder: number }
+}
+
+/* ── الفريق ───────────────────────────────────────────────────── */
+
+export interface StaffMember {
+  id: string
+  role: Role
+  extraPerms: string[] | null
+  createdAt: string
+  user: { id: string; email: string; name: string; phone: string | null; createdAt: string }
+}
+
+/* ── التقارير (GET /api/mobile/reports) ───────────────────────── */
+
+export interface MobileReportSummary {
+  window: { from: string; to: string; days: number }
+  totals: { orders: number; revenue: number; avgOrder: number }
+  statusCounts: Record<string, number>
+  series: { day: string; date: string; revenue: number; orders: number }[]
+  canExportCsv: boolean
+}

@@ -9,6 +9,7 @@ import React from 'react'
 import {
   Pressable,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -136,6 +137,53 @@ export function Hairline() {
   return <View style={s.hairline} />
 }
 
+/* ── مفتاح تبديل (متاح/مميز/مفعّل) — Switch أصلي بلغة العلامة ──── */
+export function Toggle({
+  value,
+  onValueChange,
+  disabled,
+  label,
+}: {
+  value: boolean
+  onValueChange: (next: boolean) => void
+  disabled?: boolean
+  label: string
+}) {
+  return (
+    <View style={s.toggleRow}>
+      <Text style={s.toggleLabel}>{label}</Text>
+      <Switch
+        accessibilityLabel={label}
+        accessibilityState={{ checked: value, disabled: !!disabled }}
+        value={value}
+        disabled={disabled}
+        onValueChange={onValueChange}
+        trackColor={{ false: t.border, true: t.primary }}
+        thumbColor="#FFFFFF"
+      />
+    </View>
+  )
+}
+
+/** سطر طابع صغير (متاح/مميز/معطلة…) — عائلات حالة الويب نفسها. */
+export function MiniStamp({
+  text,
+  family,
+}: {
+  text: string
+  family: 'copper' | 'sky' | 'yellow' | 'mint' | 'grey' | 'rose'
+}) {
+  const fam = statusFamily[family]
+  return (
+    <View
+      accessibilityRole="text"
+      style={[s.miniStamp, { backgroundColor: fam.bg, borderColor: `${fam.ink}59` }]}
+    >
+      <Text style={[s.miniStampText, { color: fam.deep }]}>{text}</Text>
+    </View>
+  )
+}
+
 const s = StyleSheet.create({
   button: {
     borderRadius: 12,
@@ -201,4 +249,29 @@ const s = StyleSheet.create({
     lineHeight: 18,
   },
   hairline: { height: 1, backgroundColor: t.border },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    paddingVertical: 4,
+  },
+  toggleLabel: {
+    color: t.foreground,
+    fontFamily: 'IBMPlexSansArabic_500Medium',
+    fontSize: 13.5,
+    flex: 1,
+  },
+  miniStamp: {
+    borderRadius: 6,
+    borderWidth: 1,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    alignSelf: 'flex-start',
+  },
+  miniStampText: {
+    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontSize: 11,
+    lineHeight: 16,
+  },
 })

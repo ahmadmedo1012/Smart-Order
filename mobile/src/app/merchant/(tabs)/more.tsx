@@ -16,7 +16,7 @@ import { fetchSessions, revokeSession, ApiError, NetworkError } from '@/services
 import { formatArabicDateTime } from '@/lib/datetime'
 import { ROLE_AR, type DeviceSession } from '@/types/merchant'
 import { Hairline } from '@/components/ui'
-import { LogOutIcon, SmartphoneIcon, StoreIcon } from '@/components/icons'
+import { LogOutIcon, SettingsIcon, SmartphoneIcon, StoreIcon } from '@/components/icons'
 
 const PLATFORM_AR: Record<string, string> = {
   ios: 'آيفون',
@@ -145,6 +145,26 @@ export default function MerchantMoreScreen() {
           <Text style={s.userName}>{user?.name ?? ''}</Text>
           <Text style={s.userEmail}>{user?.email ?? ''}</Text>
         </View>
+
+        {/* الإدارة — بوابة شاشات الإدارة (C2-REST)، الصفوف تُبوَّب
+            بالصلاحيات داخلها. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="الإدارة"
+          onPress={() => router.push('/merchant/manage')}
+          style={({ pressed }) => [s.manageCard, pressed && { opacity: 0.8 }]}
+        >
+          <View style={s.manageWell}>
+            <SettingsIcon size={20} color={t.primary} />
+          </View>
+          <View style={s.manageText}>
+            <Text style={s.manageTitle}>الإدارة</Text>
+            <Text style={s.manageHint} numberOfLines={1}>
+              المنتجات · الأقسام · التوصيل · الدفع · العملاء · التقارير
+            </Text>
+          </View>
+          <Text style={s.chevron}>‹</Text>
+        </Pressable>
 
         {/* الأجهزة النشطة */}
         <View style={s.card}>
@@ -290,6 +310,35 @@ const s = StyleSheet.create({
   userEmail: {
     fontFamily: 'IBMPlexSansArabic_400Regular',
     fontSize: 12.5,
+    color: t.mutedFg,
+  },
+  manageCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: t.card,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: t.border,
+    padding: 14,
+  },
+  manageWell: {
+    width: 42,
+    height: 42,
+    borderRadius: 11,
+    backgroundColor: t.goldSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  manageText: { flex: 1, gap: 2 },
+  manageTitle: {
+    fontFamily: 'IBMPlexSansArabic_600SemiBold',
+    fontSize: 14.5,
+    color: t.foreground,
+  },
+  manageHint: {
+    fontFamily: 'IBMPlexSansArabic_400Regular',
+    fontSize: 12,
     color: t.mutedFg,
   },
   sessionRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 },
