@@ -57,6 +57,7 @@ model User {
   updatedAt       DateTime @updatedAt
 
   sessions             Session[]
+  mobileSessions       MobileSession[]
   memberships          BusinessMember[]
   subscriptionPayments SubscriptionPayment[] @relation("PaymentReviewer")
 }
@@ -129,6 +130,33 @@ model Session {
   createdAt DateTime @default(now())
   ip        String?
   userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/* P36 Phase C (C3): native-app device sessions — the Bearer transport
+   for the merchant React-Native app. Opaque 32-byte token ("som_" +
+   base64url), SHA-256-hashed at rest exactly like Session; carries
+   device metadata (platform, deviceName, appVersion, lastUsedAt) and a
+   soft revocation stamp (revokedAt) so the app can list/revoke devices.
+   Sliding 30d TTL + hard 90d absolute cap (src/lib/mobile-session.ts).
+   The cookie Session stays untouched — two transports, ONE identity
+   system (same User + PBKDF2 + permissionsFor). */
+model MobileSession {
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  platform   String    @default("unknown") // ios | android | unknown
+  deviceName String?   // client-supplied label, e.g. "iPhone 15"
+  appVersion String?
+  ip         String?
+  userAgent  String?
+  lastUsedAt DateTime  @default(now())
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+  revokedAt  DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

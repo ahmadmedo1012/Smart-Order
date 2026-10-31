@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { requireAuth, requireBusiness, requirePermission } from "@/lib/auth";
 import { ok, handleError } from "@/lib/api";
+import { ORDER_STATUSES } from "@/lib/constants";
 import { tripoliDayStart, tripoliMonthStart, tripoliDateParts } from "@/lib/arabic";
 
 export const runtime = "nodejs";
@@ -35,6 +36,7 @@ export async function GET(req: NextRequest) {
       productCount,
       categoryCount,
       zoneCount,
+      statusRows,
     ] = await Promise.all([
       db.order.count({ where: { businessId, createdAt: { gte: dayStart } } }),
       db.order.count({ where: { businessId, status: { in: ["NEW", "CONFIRMED", "PREPARING", "READY", "OUT_FOR_DELIVERY"] } } }),
@@ -71,10 +73,19 @@ export async function GET(req: NextRequest) {
       db.product.count({ where: { businessId, isArchived: false } }),
       db.category.count({ where: { businessId, isArchived: false } }),
       db.deliveryZone.count({ where: { businessId, isActive: true } }),
+      /* P36 Phase C (C4): counts by status — the mobile orders inbox's
+         tab badges, all 8 statuses zero-filled. Real data, one grouped
+         query, additive to the web shape (the dashboard page ignores
+         the field). */
+      db.order.groupBy({ by: ["status"], where: { businessId }, _count: { _all: true } }),
     ]);
 
     const todayRevenue = todayRevenueAgg._sum.total ?? 0;
     const avgOrder = todayCompleted > 0 ? Math.round(todayRevenue / todayCompleted) : 0;
+
+    const statusCounts: Record<string, number> = {};
+    for (const s of ORDER_STATUSES) statusCounts[s] = 0;
+    for (const row of statusRows) statusCounts[row.status] = row._count._all;
 
     // last 7 days for the mini chart
     /* r134 (W2 #11): the series used to fetch EVERY delivered order row
@@ -154,6 +165,7 @@ export async function GET(req: NextRequest) {
         productCount,
         categoryCount,
         zoneCount,
+        statusCounts,
       },
       recentOrders,
       lowStock,

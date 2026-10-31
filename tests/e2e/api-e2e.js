@@ -100,7 +100,7 @@ async function main() {
   ok("unauthenticated API blocked with Arabic message", unauth.status === 401 || unauth.body?.error?.code === "UNAUTHENTICATED", JSON.stringify(unauth.body).slice(0, 80));
 
   const A = makeCtx();
-  const { r: regA } = await registerBiz(A, "مخبز الاختبار أ");
+  const { email: emailA, r: regA } = await registerBiz(A, "مخبز الاختبار أ");
   ok("business A registers", regA.status === 201 || regA.body?.success === true, JSON.stringify(regA.body).slice(0, 100));
 
   const meA = await A.call("/api/auth/me");
@@ -109,7 +109,7 @@ async function main() {
   ok("session persists after register (me)", meA.body?.success === true && !!bizAId, JSON.stringify(meA.body).slice(0, 120));
 
   const B = makeCtx();
-  const { r: regB } = await registerBiz(B, "متجر الاختبار ب");
+  const { email: emailB, r: regB } = await registerBiz(B, "متجر الاختبار ب");
   ok("business B registers", regB.status === 201 || regB.body?.success === true);
 
   // ---------- 3. tenant isolation ----------
@@ -669,6 +669,186 @@ async function main() {
     proReports.status === 200 && proReports.body?.data?.window?.days === 90 && proReports.body?.data?.series?.length === 90 && proReports.body?.data?.canExportCsv === true,
     JSON.stringify(proReports.body).slice(0, 120),
   );
+
+  // ---------- 11.5 native merchant sessions — the Bearer transport (P36 Phase C) ----------
+  console.log("— الجلسات الأصلية للتجار: ناقل الـBearer (P36-C)");
+  /* C3+C4 contract battery: the RN merchant app authenticates with a
+     Bearer device token and consumes the SAME merchant surface the web
+     dashboard does (no duplicated business rules — the transport was
+     added at the auth-resolution layer, src/lib/auth.ts getAuthUser).
+     Pins: login ok/bad-password/rate-limit, me + selection context,
+     cookie-less merchant reads, the SAME order state machine through
+     the mobile surface, STAFF permission boundaries, cross-tenant
+     isolation with a Bearer token, device list + revocation, logout. */
+  const mobileLogin = (email, password, extra = {}) =>
+    makeCtx().call("/api/mobile/auth/login", { method: "POST", body: JSON.stringify({ email, password, ...extra }) });
+  const bearer = (token) => {
+    // fresh cookie jar (empty) + Authorization header = a pure Bearer client
+    const ctx = makeCtx();
+    return (path, opts = {}) => ctx.call(path, { ...opts, headers: { Authorization: `Bearer ${token}`, ...(opts.headers || {}) } });
+  };
+
+  const mLogin = await mobileLogin(emailA, "Test#2026Pass", { platform: "android", deviceName: "هاتف المالك", appVersion: "1.0.0" });
+  const mTok = mLogin.body?.data?.token;
+  ok(
+    "mobile login mints a prefixed device token (som_ + 43 base64url chars)",
+    mLogin.body?.success === true && typeof mTok === "string" && /^som_[A-Za-z0-9_-]{43}$/.test(mTok),
+    JSON.stringify(mLogin.body).slice(0, 100),
+  );
+  ok(
+    "mobile login answers tokenType Bearer + the ~30d sliding expiry",
+    mLogin.body?.data?.tokenType === "Bearer" && typeof mLogin.body?.data?.expiresAt === "string" &&
+      new Date(mLogin.body.data.expiresAt).getTime() > Date.now() + 29 * 24 * 3600 * 1000,
+    JSON.stringify(mLogin.body?.data?.expiresAt),
+  );
+  const mMem = mLogin.body?.data?.memberships?.[0];
+  ok(
+    "mobile login ships the selection context (memberships + RESOLVED permissions)",
+    !!mMem && mMem.role === "OWNER" && mMem.businessId === bizAId && Array.isArray(mMem.permissions) &&
+      mMem.permissions.includes("settings.manage") && mMem.permissions.includes("orders.cancel"),
+    JSON.stringify(mMem).slice(0, 120),
+  );
+
+  const mA = bearer(mTok);
+  const meMobile = await mA("/api/mobile/auth/me");
+  const meSess = meMobile.body?.data?.session;
+  ok(
+    "me (Bearer): user + memberships + the device metadata sent at login",
+    meMobile.body?.data?.user?.email === emailA && meMobile.body?.data?.memberships?.length >= 1 &&
+      meSess?.platform === "android" && meSess?.deviceName === "هاتف المالك" && !!meSess?.id,
+    JSON.stringify(meMobile.body).slice(0, 140),
+  );
+
+  // the EXISTING merchant surface serves cookie-less Bearer requests
+  const ordersBearer = await mA(`/api/orders?businessId=${bizAId}`);
+  ok(
+    "existing merchant API serves Bearer-only requests (orders inbox)",
+    ordersBearer.body?.success === true && Array.isArray(ordersBearer.body?.data),
+    JSON.stringify(ordersBearer.body).slice(0, 100),
+  );
+  ok(
+    "orders inbox pagination meta rides the envelope",
+    ordersBearer.body?.meta?.total >= 0 && ordersBearer.body?.meta?.page === 1,
+    JSON.stringify(ordersBearer.body?.meta),
+  );
+
+  const statsBearer = await mA(`/api/dashboard/stats?businessId=${bizAId}`);
+  const sc = statsBearer.body?.data?.stats?.statusCounts;
+  ok(
+    "dashboard KPIs via Bearer + counts-by-status (P36-C4, all 8 statuses zero-filled)",
+    statsBearer.body?.success === true && !!sc &&
+      ["NEW", "CONFIRMED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED", "REJECTED"].every((s) => typeof sc[s] === "number"),
+    JSON.stringify(sc),
+  );
+
+  // order transitions through the mobile surface — the SAME server machine
+  const twinId = twinOrder?.id;
+  const badJump = await mA(`/api/orders/${twinId}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, status: "DELIVERED" }) });
+  ok(
+    "mobile transition respects the machine: NEW→DELIVERED refused 409 INVALID_TRANSITION",
+    rateLimited || (badJump.status === 409 && badJump.body?.error?.code === "INVALID_TRANSITION"),
+    JSON.stringify(badJump.body).slice(0, 100),
+  );
+  const goodJump = await mA(`/api/orders/${twinId}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, status: "CONFIRMED" }) });
+  ok(
+    "mobile transition NEW→CONFIRMED lands (history + audit as ever)",
+    rateLimited || goodJump.body?.data?.order?.status === "CONFIRMED",
+    JSON.stringify(goodJump.body).slice(0, 100),
+  );
+
+  // STAFF permission boundaries via the mobile surface
+  const mStaffLogin = await mobileLogin(staffEmail, "Test#2026Pass", { platform: "ios", deviceName: "هاتف الموظف" });
+  const mStaffTok = mStaffLogin.body?.data?.token;
+  const sMem = mStaffLogin.body?.data?.memberships?.[0];
+  ok(
+    "staff mobile login resolves the 4 STAFF permissions (no settings/staff/cancel)",
+    !!mStaffTok && sMem?.role === "STAFF" && sMem.permissions.includes("orders.update") &&
+      !sMem.permissions.includes("settings.manage") && !sMem.permissions.includes("staff.manage") && !sMem.permissions.includes("orders.cancel"),
+    JSON.stringify(sMem).slice(0, 140),
+  );
+  const mS = bearer(mStaffTok);
+  const staffAdvance = await mS(`/api/orders/${twinId}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, status: "PREPARING" }) });
+  ok(
+    "STAFF can advance orders via mobile (orders.update is in the STAFF set)",
+    rateLimited || staffAdvance.body?.data?.order?.status === "PREPARING",
+    JSON.stringify(staffAdvance.body).slice(0, 100),
+  );
+  const staffCancel = await mS(`/api/orders/${twinId}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, status: "CANCELLED" }) });
+  ok(
+    "STAFF cannot cancel/reject via mobile — orders.cancel is OWNER/ADMIN (403)",
+    rateLimited || staffCancel.status === 403,
+    JSON.stringify(staffCancel.body).slice(0, 100),
+  );
+  const staffSettings = await mS("/api/business", { method: "PATCH", body: JSON.stringify({ businessId: bizAId, receiptFooter: "x" }) });
+  ok("STAFF cannot touch business settings (403 settings.manage)", staffSettings.status === 403 || staffSettings.body?.error?.code === "FORBIDDEN");
+  const staffStaff = await mS("/api/staff", { method: "POST", body: JSON.stringify({ businessId: bizAId, name: "متسلل", email: rnd("intr_") + "@test.ly", password: "Test#2026Pass", role: "STAFF" }) });
+  ok("STAFF cannot create staff (403 staff.manage)", staffStaff.status === 403 || staffStaff.body?.error?.code === "FORBIDDEN");
+
+  // cross-tenant isolation with a Bearer token (business B's owner)
+  const mBLogin = await mobileLogin(emailB, "Test#2026Pass", { platform: "android", deviceName: "هاتف ب" });
+  const mB = bearer(mBLogin.body?.data?.token);
+  const xSpoof = await mB(`/api/orders?businessId=${bizAId}`);
+  ok(
+    "cross-tenant (Bearer): B's token + A's businessId → 403 (membership guard)",
+    xSpoof.status === 403 || xSpoof.body?.error?.code === "FORBIDDEN",
+    JSON.stringify(xSpoof.body).slice(0, 90),
+  );
+  const xOrder = await mB(`/api/orders/${twinId}`);
+  ok(
+    "cross-tenant (Bearer): B's token reading A's order → 404 (tenant-scoped findFirst)",
+    rateLimited || xOrder.status === 404,
+    JSON.stringify(xOrder.body).slice(0, 90),
+  );
+  const xStats = await mB(`/api/dashboard/stats?businessId=${bizAId}`);
+  ok("cross-tenant (Bearer): B's token cannot read A's dashboard KPIs", xStats.status === 403);
+
+  // device sessions list + revocation of ANOTHER device
+  const mIosLogin = await mobileLogin(emailA, "Test#2026Pass", { platform: "ios", deviceName: "آيباد المالك" });
+  const mIos = bearer(mIosLogin.body?.data?.token);
+  const sessList = await mIos("/api/mobile/auth/sessions");
+  const lst = sessList.body?.data?.sessions ?? [];
+  const androidEntry = lst.find((s) => s.id === meSess?.id);
+  const iosEntry = lst.find((s) => s.current === true);
+  ok(
+    "sessions list: both owner devices active, current flagged, metadata intact",
+    lst.length === 2 && !!iosEntry && !!androidEntry && androidEntry.current === false && androidEntry.platform === "android",
+    JSON.stringify(lst).slice(0, 160),
+  );
+  const revoke = await mIos(`/api/mobile/auth/sessions/${meSess?.id}`, { method: "DELETE" });
+  ok("revoking another device answers { revoked: true }", revoke.body?.data?.revoked === true, JSON.stringify(revoke.body).slice(0, 80));
+  const revokedMe = await mA("/api/mobile/auth/me");
+  ok(
+    "the revoked device's token is rejected (401, never a silent cookie fallback)",
+    revokedMe.status === 401 && revokedMe.body?.error?.code === "UNAUTHENTICATED",
+    JSON.stringify(revokedMe.body).slice(0, 80),
+  );
+  const revokedOrders = await mA(`/api/orders?businessId=${bizAId}`);
+  ok("the revoked token is rejected on the merchant surface too", revokedOrders.status === 401);
+
+  // logout (current device)
+  const logout = await mIos("/api/mobile/auth/logout", { method: "POST" });
+  ok("logout revokes the presenting device", logout.body?.data?.loggedOut === true, JSON.stringify(logout.body).slice(0, 80));
+  const afterLogout = await mIos("/api/mobile/auth/me");
+  ok("post-logout me → 401", afterLogout.status === 401);
+
+  // bad password + the login rate limit (LAST: burns the per-IP mobile budget)
+  const badPw = await mobileLogin(emailA, "wrong-password");
+  ok(
+    "bad password → the web login's exact Arabic 401 copy",
+    badPw.status === 401 && badPw.body?.error?.message === "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    JSON.stringify(badPw.body).slice(0, 90),
+  );
+  let m429 = false;
+  let mRetry = "";
+  for (let i = 0; i < 14; i++) {
+    const r = await mobileLogin(emailA, "wrong-password");
+    if (r.status === 429) { m429 = true; mRetry = String(r.headers?.get?.("retry-after") ?? ""); break; }
+  }
+  if (m429) {
+    ok("mobile login rate limit (429) triggers — the web dbRateLimit pattern", true);
+    ok("mobile 429 carries a numeric Retry-After", /^\d+$/.test(mRetry) && Number(mRetry) > 0, `retry-after="${mRetry}"`);
+  }
+  else { skipped++; console.log("  - mobile login rate limit not reached — skipped"); }
 
   // ---------- 12. public surfaces ignore QA fixtures (P30-B) ----------
   console.log("— الأسطح العامة تتجاهل بيانات الاختبار (P30-B)");
