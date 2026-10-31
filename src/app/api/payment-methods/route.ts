@@ -76,3 +76,54 @@ export async function POST(req: NextRequest) {
     return handleError(err);
   }
 }
+
+/* ── P36 Phase C (C4) — reorder: the checkout screen's display order ──
+ *
+ * The merchant decides which methods the customer sees first (sortOrder
+ * rides the public storefront payload). The web surface never exposed a
+ * reorder verb; the mobile payments screen needs one. Contract: the
+ * client submits the FULL ordered id list of the business's methods —
+ * a foreign id is indistinguishable from a missing one (404, the
+ * tenant-isolation no-oracle law), an incomplete or duplicated list is
+ * refused (422) so sortOrder can never end up ambiguous. Writes carry
+ * businessId in their own WHERE (the categories/[id] CAS doctrine — a
+ * write can never cross tenants even if the pre-check raced) and share
+ * one transaction, so the reorder is atomic. */
+const reorderSchema = z.object({
+  businessId: z.string().optional(),
+  order: z.array(z.string().trim().min(1)).max(PAYMENT_TYPES.length),
+});
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const user = await requireAuth();
+    const input = reorderSchema.parse(await readJson(req));
+    const member = await requireBusiness(user, input.businessId);
+    requirePermission(member, "payments.manage");
+
+    const methods = await db.paymentMethod.findMany({
+      where: { businessId: member.businessId },
+      select: { id: true },
+    });
+    const known = new Set(methods.map((m) => m.id));
+    if (input.order.some((id) => !known.has(id))) {
+      return fail("طريقة الدفع غير موجودة", 404, "NOT_FOUND");
+    }
+    if (new Set(input.order).size !== input.order.length || input.order.length !== methods.length) {
+      return fail("أرسل ترتيب جميع طرق الدفع", 422, "VALIDATION");
+    }
+
+    await db.$transaction(
+      input.order.map((id, i) =>
+        db.paymentMethod.updateMany({ where: { id, businessId: member.businessId }, data: { sortOrder: i } }),
+      ),
+    );
+    const list = await db.paymentMethod.findMany({
+      where: { businessId: member.businessId },
+      orderBy: { sortOrder: "asc" },
+    });
+    return ok({ methods: list });
+  } catch (err) {
+    return handleError(err);
+  }
+}

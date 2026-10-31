@@ -802,6 +802,321 @@ async function main() {
   const xStats = await mB(`/api/dashboard/stats?businessId=${bizAId}`);
   ok("cross-tenant (Bearer): B's token cannot read A's dashboard KPIs", xStats.status === 403);
 
+  // ---------- 11.6 C4: the full merchant business surface over Bearer (P36-C4) ----------
+  console.log("— سطح أعمال التاجر الكامل عبر الـBearer (P36-C4)");
+  /* Placement contract: this battery rides INSIDE the 11.5 fixture region
+     on purpose — it reuses the C3-minted tokens (mA owner-A · mS staff-A ·
+     mB owner-B) and mints NO new sessions (the sessions-list count below
+     pins exactly 2 owner devices, and the mobile-login budget burns at
+     the tail). Every merchant capability is driven through the Bearer
+     transport on the SAME routes the web dashboard uses — the C3
+     insight: the transport landed at the auth-resolution layer, so the
+     business surface is one code path, never a mobile fork of the rules.
+     NEW surface pinned here: PATCH /api/payment-methods (reorder) and
+     GET /api/mobile/reports (windowed summary — from/to + status
+     distribution, the two things the 30/90 web reports don't carry). */
+  /* A's deterministic order census on a fresh database: order1 (§5) + the
+     raced twin (§6) + the re-priced badPrice order (§7) + ONE loop order
+     before §8's 429 — every one 39500 millimes (same payload, server
+     re-priced). The customers upsert keys on (businessId, phone) so all
+     four land on the ONE «عميل اختبار» row (order1 alone is DELIVERED →
+     totalSpent 39500). */
+  const c4Orders = rateLimited ? 0 : 4;
+  const c4Revenue = rateLimited ? 0 : 158000; // 39500 × 4
+
+  // — orders inbox: filters + search through the Bearer lens —
+  const inboxAll = await mA(`/api/orders?businessId=${bizAId}&pageSize=50`);
+  const inboxRows = inboxAll.body?.data ?? [];
+  ok(
+    "C4 inbox: the full A inbox via Bearer",
+    inboxAll.body?.success === true && inboxRows.length >= c4Orders && inboxAll.body?.meta?.total >= c4Orders,
+    JSON.stringify({ rows: inboxRows.length, meta: inboxAll.body?.meta }),
+  );
+  const inboxDelivered = await mA(`/api/orders?businessId=${bizAId}&status=DELIVERED`);
+  ok(
+    "C4 inbox: status filter returns only DELIVERED rows",
+    rateLimited || ((inboxDelivered.body?.data ?? []).length === 1 && inboxDelivered.body?.data[0].status === "DELIVERED"),
+    JSON.stringify(inboxDelivered.body?.meta),
+  );
+  const inboxSearch = await mA(`/api/orders?businessId=${bizAId}&q=${encodeURIComponent("عميل السباق")}`);
+  ok(
+    "C4 inbox: q search finds the raced order by customer name",
+    rateLimited || (inboxSearch.body?.data ?? []).some((o) => o.id === twinOrder?.id),
+    JSON.stringify((inboxSearch.body?.data ?? []).map((o) => o.customerName)).slice(0, 120),
+  );
+
+  // — order detail: line items + modifiers + delivery + payment + history —
+  const c4Det = await mA(`/api/orders/${created?.id}?businessId=${bizAId}`);
+  const c4Ord = c4Det.body?.data?.order;
+  const c4Item = c4Ord?.items?.[0];
+  ok(
+    "C4 detail: items carry the variant + options snapshot and the server-priced money",
+    rateLimited || (
+      c4Det.body?.success === true && c4Item?.variantName === "كبير" &&
+      (c4Item?.optionsJson ?? "").includes("صوص") &&
+      c4Item?.unitPrice === 17750 && c4Item?.quantity === 2 && c4Item?.lineTotal === 35500
+    ),
+    JSON.stringify(c4Item).slice(0, 140),
+  );
+  ok(
+    "C4 detail: delivery + payment + customer + full status history ride the payload",
+    rateLimited || (
+      c4Ord?.fulfillmentType === "DELIVERY" && c4Ord?.city === "طرابلس" && c4Ord?.deliveryFee === 4000 &&
+      c4Ord?.paymentStatus === "UNPAID" && c4Ord?.customer?.phone === "0912345678" &&
+      Array.isArray(c4Ord?.history) && c4Ord?.history?.length >= 6
+    ),
+    JSON.stringify({ fee: c4Ord?.deliveryFee, pm: c4Ord?.paymentStatus, hist: c4Ord?.history?.length }),
+  );
+
+  // — the payment sub-machine through Bearer (owner) —
+  const refundEarly = await mA(`/api/orders/${twinOrder?.id}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, paymentStatus: "REFUNDED" }) });
+  ok(
+    "C4 payment machine: REFUNDED without PAID is refused 409 (same rule, same route)",
+    rateLimited || (refundEarly.status === 409 && refundEarly.body?.error?.code === "INVALID_TRANSITION"),
+    JSON.stringify(refundEarly.body).slice(0, 100),
+  );
+  const markPaid = await mA(`/api/orders/${created?.id}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, paymentStatus: "PAID" }) });
+  ok(
+    "C4 payment machine: DELIVERED order marked PAID (history row rides the same tx)",
+    rateLimited || (markPaid.body?.data?.order?.paymentStatus === "PAID"),
+    JSON.stringify(markPaid.body).slice(0, 100),
+  );
+
+  // — status transitions through Bearer: advance the twin, then a refused backward jump —
+  const c4Advance = await mA(`/api/orders/${twinOrder?.id}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, status: "READY" }) });
+  ok(
+    "C4 transition: PREPARING→READY lands via Bearer",
+    rateLimited || c4Advance.body?.data?.order?.status === "READY",
+    JSON.stringify(c4Advance.body).slice(0, 100),
+  );
+  const c4Back = await mA(`/api/orders/${twinOrder?.id}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, status: "CONFIRMED" }) });
+  ok(
+    "C4 transition: backward jump READY→CONFIRMED refused 409 (machine integrity)",
+    rateLimited || (c4Back.status === 409 && c4Back.body?.error?.code === "INVALID_TRANSITION"),
+    JSON.stringify(c4Back.body).slice(0, 100),
+  );
+
+  // — categories CRUD via Bearer —
+  const c4Cat = await mA("/api/categories", { method: "POST", body: JSON.stringify({ businessId: bizAId, name: "قسم الجوال" }) });
+  const c4CatId = c4Cat.body?.data?.category?.id;
+  ok("C4 categories: create via Bearer", !!c4CatId, JSON.stringify(c4Cat.body).slice(0, 100));
+  const c4CatRename = await mA(`/api/categories/${c4CatId}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, name: "قسم الجوال المعدل" }) });
+  ok("C4 categories: rename via Bearer", c4CatRename.body?.data?.category?.name === "قسم الجوال المعدل", JSON.stringify(c4CatRename.body).slice(0, 100));
+  const c4CatDel = await mA(`/api/categories/${c4CatId}?businessId=${bizAId}`, { method: "DELETE" });
+  ok("C4 categories: empty category hard-deletes via Bearer", c4CatDel.body?.data?.deleted === true, JSON.stringify(c4CatDel.body).slice(0, 80));
+
+  // — products CRUD via Bearer (variants + optionGroups, edit, archive) —
+  const c4Prod = await mA("/api/products", {
+    method: "POST",
+    body: JSON.stringify({
+      businessId: bizAId, categoryId: catId, name: "طبق الجوال", description: "من الشاشة الصغيرة",
+      price: "9.750", isAvailable: true,
+      variants: [{ name: "عادي", priceDelta: "0" }, { name: "كبير", priceDelta: "1.500" }],
+      optionGroups: [{ name: "إضافات", minSelect: 1, maxSelect: 2, required: true, options: [{ name: "جبنة إضافية", priceDelta: "0.750" }] }],
+    }),
+  });
+  const c4ProdId = c4Prod.body?.data?.product?.id;
+  ok(
+    "C4 products: create with variants+optionGroups (millimes parsed server-side)",
+    !!c4ProdId && c4Prod.body?.data?.product?.price === 9750 &&
+      c4Prod.body?.data?.product?.variants?.[1]?.priceDelta === 1500 &&
+      c4Prod.body?.data?.product?.optionGroups?.[0]?.options?.[0]?.priceDelta === 750,
+    JSON.stringify(c4Prod.body).slice(0, 140),
+  );
+  const c4ProdEdit = await mA(`/api/products/${c4ProdId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      businessId: bizAId, price: "11.000", isFeatured: true,
+      variants: [{ name: "وسط", priceDelta: "0.500" }],
+    }),
+  });
+  ok(
+    "C4 products: edit re-prices + replaces variants + flips featured",
+    c4ProdEdit.body?.data?.product?.price === 11000 && c4ProdEdit.body?.data?.product?.isFeatured === true &&
+      c4ProdEdit.body?.data?.product?.variants?.length === 1 && c4ProdEdit.body?.data?.product?.variants?.[0]?.name === "وسط",
+    JSON.stringify(c4ProdEdit.body?.data?.product?.variants).slice(0, 100),
+  );
+  const c4ProdGet = await mA(`/api/products/${c4ProdId}?businessId=${bizAId}`);
+  ok(
+    "C4 products: single read keeps the option group tree",
+    c4ProdGet.body?.data?.product?.optionGroups?.[0]?.options?.[0]?.name === "جبنة إضافية",
+    JSON.stringify(c4ProdGet.body?.data?.product?.optionGroups).slice(0, 120),
+  );
+  const c4ProdArch = await mA(`/api/products/${c4ProdId}?businessId=${bizAId}`, { method: "DELETE" });
+  ok("C4 products: archive (never hard-delete) via Bearer", c4ProdArch.body?.data?.archived === true, JSON.stringify(c4ProdArch.body).slice(0, 80));
+  const c4ProdList = await mA(`/api/products?businessId=${bizAId}`);
+  ok(
+    "C4 products: archived product vanishes from the list",
+    !(c4ProdList.body?.data?.products ?? []).some((p) => p.id === c4ProdId),
+    `list length ${(c4ProdList.body?.data?.products ?? []).length}`,
+  );
+  const c4StaffProduct = await mS("/api/products", { method: "POST", body: JSON.stringify({ businessId: bizAId, name: "منتج متسلل", price: "1.000" }) });
+  ok("C4 RBAC: STAFF cannot create products via Bearer (403 products.manage)", c4StaffProduct.status === 403 || c4StaffProduct.body?.error?.code === "FORBIDDEN");
+  const c4XProduct = await mB(`/api/products/${c4ProdId}`, { method: "PATCH", body: JSON.stringify({ businessId: bizBId, price: "1.000" }) });
+  ok("C4 RBAC: B's token cannot edit A's product (404 tenant-scoped)", c4XProduct.status === 404 || c4XProduct.body?.error?.code === "NOT_FOUND");
+
+  // — delivery zones CRUD via Bearer —
+  const c4Zone = await mA("/api/delivery-zones", { method: "POST", body: JSON.stringify({ businessId: bizAId, name: "حي الأندلس", fee: "3.000", minOrder: "10.000" }) });
+  const c4ZoneId = c4Zone.body?.data?.zone?.id;
+  ok(
+    "C4 zones: create with fee + minOrder (millimes)",
+    !!c4ZoneId && c4Zone.body?.data?.zone?.fee === 3000 && c4Zone.body?.data?.zone?.minOrder === 10000,
+    JSON.stringify(c4Zone.body).slice(0, 100),
+  );
+  const c4ZoneEdit = await mA(`/api/delivery-zones/${c4ZoneId}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, fee: "3.500", isActive: false }) });
+  ok("C4 zones: edit fee + deactivate", c4ZoneEdit.body?.data?.zone?.fee === 3500 && c4ZoneEdit.body?.data?.zone?.isActive === false, JSON.stringify(c4ZoneEdit.body).slice(0, 100));
+  const c4ZoneDel = await mA(`/api/delivery-zones/${c4ZoneId}?businessId=${bizAId}`, { method: "DELETE" });
+  ok("C4 zones: delete via Bearer", c4ZoneDel.body?.data?.deleted === true, JSON.stringify(c4ZoneDel.body).slice(0, 80));
+
+  // — payment methods config via Bearer (enable/disable/instructions/order) —
+  const c4PmList0 = await mA(`/api/payment-methods?businessId=${bizAId}`);
+  const c4Pm0 = c4PmList0.body?.data?.methods ?? [];
+  ok(
+    "C4 payment methods: register-seeded COD+CASH list via Bearer",
+    c4Pm0.length === 2 && c4Pm0.some((m) => m.type === "COD") && c4Pm0.some((m) => m.type === "CASH"),
+    JSON.stringify(c4Pm0.map((m) => m.type)),
+  );
+  const c4PmCreate = await mA("/api/payment-methods", {
+    method: "POST",
+    body: JSON.stringify({ businessId: bizAId, type: "WHATSAPP", name: "تأكيد عبر واتساب", instructions: "أرسل الإيصال", number: "0913456789" }),
+  });
+  const c4PmId = c4PmCreate.body?.data?.method?.id;
+  ok(
+    "C4 payment methods: create WhatsApp method with a normalized transfer number",
+    !!c4PmId && (() => { try { return JSON.parse(c4PmCreate.body.data.method.config).number === "0913456789"; } catch { return false; } })(),
+    JSON.stringify(c4PmCreate.body).slice(0, 120),
+  );
+  const c4PmEdit = await mA(`/api/payment-methods/${c4PmId}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, instructions: "أرسل صورة التحويل", isActive: false }) });
+  ok(
+    "C4 payment methods: instructions update + disable",
+    c4PmEdit.body?.data?.method?.instructions === "أرسل صورة التحويل" && c4PmEdit.body?.data?.method?.isActive === false,
+    JSON.stringify(c4PmEdit.body).slice(0, 100),
+  );
+  const codId = c4Pm0.find((m) => m.type === "COD")?.id;
+  const cashId = c4Pm0.find((m) => m.type === "CASH")?.id;
+  const c4PmReorder = await mA("/api/payment-methods", { method: "PATCH", body: JSON.stringify({ businessId: bizAId, order: [c4PmId, cashId, codId] }) });
+  const c4Reordered = c4PmReorder.body?.data?.methods ?? [];
+  ok(
+    "C4 payment methods: reorder (NEW C4 endpoint) rewrites the display order",
+    c4PmReorder.body?.success === true && c4Reordered.map((m) => m.type).join(",") === "WHATSAPP,CASH,COD",
+    JSON.stringify(c4Reordered.map((m) => m.type)),
+  );
+  const c4PmPersist = await mA(`/api/payment-methods?businessId=${bizAId}`);
+  ok(
+    "C4 payment methods: the new order persists on the next read",
+    (c4PmPersist.body?.data?.methods ?? []).map((m) => m.type).join(",") === "WHATSAPP,CASH,COD",
+    JSON.stringify((c4PmPersist.body?.data?.methods ?? []).map((m) => m.type)),
+  );
+  const c4PmPartial = await mA("/api/payment-methods", { method: "PATCH", body: JSON.stringify({ businessId: bizAId, order: [c4PmId] }) });
+  ok("C4 payment methods: partial reorder refused (422 — the full list is the contract)", c4PmPartial.status === 422 && c4PmPartial.body?.error?.code === "VALIDATION", JSON.stringify(c4PmPartial.body).slice(0, 90));
+  const c4PmX = await mB("/api/payment-methods", { method: "PATCH", body: JSON.stringify({ businessId: bizBId, order: [c4PmId, cashId, codId] }) });
+  ok("C4 payment methods: B's token reordering A's ids → 404 (no cross-tenant oracle)", c4PmX.status === 404 || c4PmX.body?.error?.code === "NOT_FOUND", JSON.stringify(c4PmX.body).slice(0, 90));
+  const c4PmDel = await mA(`/api/payment-methods/${c4PmId}?businessId=${bizAId}`, { method: "DELETE" });
+  ok("C4 payment methods: delete via Bearer", c4PmDel.body?.data?.deleted === true, JSON.stringify(c4PmDel.body).slice(0, 80));
+
+  // — business settings via Bearer (WhatsApp/contact — publish stays web-pinned) —
+  const c4Biz = await mA("/api/business", { method: "PATCH", body: JSON.stringify({ businessId: bizAId, receiptFooter: "شكراً لثقتكم — من الجوال", whatsappNumber: "0913456789" }) });
+  ok(
+    "C4 business: settings PATCH normalizes the WhatsApp number",
+    c4Biz.body?.data?.business?.whatsappNumber === "0913456789" && c4Biz.body?.data?.business?.receiptFooter === "شكراً لثقتكم — من الجوال",
+    JSON.stringify(c4Biz.body?.data?.business).slice(0, 120),
+  );
+
+  // — customers: list + search + profile with order history —
+  const c4CustList = await mA(`/api/customers?businessId=${bizAId}`);
+  const c4Customers = c4CustList.body?.data ?? [];
+  const c4Cust = c4Customers.find((c) => c.name === "عميل اختبار");
+  ok(
+    "C4 customers: enriched list via Bearer (orderCount + spend stats)",
+    (rateLimited || c4Customers.length >= 1) && (rateLimited || (!!c4Cust && c4Cust.orderCount >= 1 && typeof c4Cust.totalSpent === "number")),
+    JSON.stringify(c4Customers.map((c) => c.name)).slice(0, 120),
+  );
+  const c4CustSearch = await mA(`/api/customers?businessId=${bizAId}&q=${encodeURIComponent("عميل")}`);
+  ok(
+    "C4 customers: q search filters by name",
+    (c4CustSearch.body?.data ?? []).length >= 1 && (c4CustSearch.body?.data ?? []).every((c) => c.name.includes("عميل")),
+    JSON.stringify((c4CustSearch.body?.data ?? []).map((c) => c.name)).slice(0, 120),
+  );
+  const c4CustDetail = await mA(`/api/customers/${c4Cust?.id}?businessId=${bizAId}`);
+  const c4CustOrd = c4CustDetail.body?.data?.customer;
+  ok(
+    "C4 customers: profile ships the order history + stats (all 4 orders, 1 delivered)",
+    rateLimited || (
+      Array.isArray(c4CustOrd?.orders) && c4CustOrd?.orders?.some((o) => o.orderNumber?.startsWith("SO-")) &&
+      c4CustOrd?.stats?.orderCount === 4 && c4CustOrd?.stats?.totalSpent === 39500
+    ),
+    JSON.stringify(c4CustOrd?.stats).slice(0, 100),
+  );
+  const c4CustStaff = await mS(`/api/customers?businessId=${bizAId}`);
+  ok("C4 RBAC: STAFF reads customers (customers.read is in the STAFF set)", c4CustStaff.body?.success === true, JSON.stringify(c4CustStaff.body?.error ?? null).slice(0, 80));
+
+  // — staff: the roster with roles —
+  const c4Staff = await mA(`/api/staff?businessId=${bizAId}`);
+  const c4Roster = c4Staff.body?.data?.staff ?? [];
+  ok(
+    "C4 staff: roster lists roles + users (owner + 2 staff)",
+    c4Roster.length === 3 && c4Roster.some((s) => s.role === "OWNER") && c4Roster.filter((s) => s.role === "STAFF").length === 2 &&
+      c4Roster.every((s) => !!s.user?.email),
+    JSON.stringify(c4Roster.map((s) => s.role)).slice(0, 100),
+  );
+  const c4StaffDenied = await mS(`/api/staff?businessId=${bizAId}`);
+  ok("C4 RBAC: STAFF cannot list the roster (403 staff.manage)", c4StaffDenied.status === 403 || c4StaffDenied.body?.error?.code === "FORBIDDEN");
+
+  // — reports: the web 30/90 surface + the NEW windowed mobile summary —
+  const c4WebReports = await mA(`/api/dashboard/reports?businessId=${bizAId}&days=30`);
+  ok(
+    "C4 reports: the web 30-day surface answers over Bearer (A is Pro)",
+    c4WebReports.body?.success === true && c4WebReports.body?.data?.window?.days === 30 && c4WebReports.body?.data?.series?.length === 30,
+    JSON.stringify(c4WebReports.body?.error ?? null).slice(0, 90),
+  );
+  // Tripoli calendar-day key (fixed +2h, no DST — the server's own law)
+  const c4DayKey = (offsetDays = 0) => new Date(Date.now() + 2 * 3600 * 1000 + offsetDays * 86400000).toISOString().slice(0, 10);
+  const c4Rep = await mA(`/api/mobile/reports?businessId=${bizAId}`);
+  const c4Summary = c4Rep.body?.data;
+  const c4Sc = c4Summary?.statusCounts ?? {};
+  ok(
+    "C4 mobile reports (NEW): default 30-day window with the exact accounting",
+    c4Rep.body?.success === true && c4Summary?.window?.days === 30 && c4Summary?.series?.length === 30 &&
+      c4Summary?.totals?.orders === c4Orders && c4Summary?.totals?.revenue === c4Revenue && c4Summary?.totals?.avgOrder === (c4Orders > 0 ? 39500 : 0),
+    JSON.stringify(c4Summary?.totals).slice(0, 100),
+  );
+  ok(
+    "C4 mobile reports: status distribution — all 8 statuses, terminals included, sums to the window",
+    ["NEW", "CONFIRMED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED", "REJECTED"].every((s) => typeof c4Sc[s] === "number") &&
+      Object.values(c4Sc).reduce((a, b) => a + b, 0) >= c4Orders,
+    JSON.stringify(c4Sc),
+  );
+  const c4Rep7 = await mA(`/api/mobile/reports?businessId=${bizAId}&from=${c4DayKey(-6)}&to=${c4DayKey(0)}`);
+  ok(
+    "C4 mobile reports: from/to date filters shape the window + series",
+    c4Rep7.body?.data?.window?.days === 7 && c4Rep7.body?.data?.series?.length === 7 && c4Rep7.body?.data?.series?.[0]?.date === c4DayKey(-6),
+    JSON.stringify(c4Rep7.body?.data?.window).slice(0, 100),
+  );
+  const c4RepBadFrom = await mA(`/api/mobile/reports?businessId=${bizAId}&from=${c4DayKey(0)}&to=${c4DayKey(-1)}`);
+  ok("C4 mobile reports: from after to → 422", c4RepBadFrom.status === 422, JSON.stringify(c4RepBadFrom.body).slice(0, 90));
+  const c4RepSpan = await mA(`/api/mobile/reports?businessId=${bizAId}&from=${c4DayKey(-400)}&to=${c4DayKey(0)}`);
+  ok("C4 mobile reports: span beyond 366 days → 422", c4RepSpan.status === 422, JSON.stringify(c4RepSpan.body).slice(0, 90));
+  const c4RepFuture = await mA(`/api/mobile/reports?businessId=${bizAId}&to=${c4DayKey(1)}`);
+  ok("C4 mobile reports: future window → 422", c4RepFuture.status === 422, JSON.stringify(c4RepFuture.body).slice(0, 90));
+  const c4RepFakeDay = await mA(`/api/mobile/reports?businessId=${bizAId}&from=2026-02-31`);
+  ok("C4 mobile reports: impossible calendar day (2026-02-31) → 422 (round-trip gate)", c4RepFakeDay.status === 422, JSON.stringify(c4RepFakeDay.body).slice(0, 90));
+  const c4RepNoBearer = await A.call(`/api/mobile/reports?businessId=${bizAId}`);
+  ok(
+    "C4 mobile reports: Bearer-only law — a valid WEB cookie never authenticates the mobile namespace (401)",
+    c4RepNoBearer.status === 401 && c4RepNoBearer.body?.error?.code === "UNAUTHENTICATED",
+    JSON.stringify(c4RepNoBearer.body).slice(0, 90),
+  );
+  const c4RepAnon = await anon.call(`/api/mobile/reports?businessId=${bizAId}`);
+  ok("C4 mobile reports: anonymous → 401", c4RepAnon.status === 401);
+  const c4RepFree = await mB(`/api/mobile/reports?businessId=${bizBId}`);
+  ok(
+    "C4 mobile reports: the web Premium+ gate rides the mobile surface too (Free B → 403 PLAN_ENTITLEMENT)",
+    c4RepFree.status === 403 && c4RepFree.body?.error?.code === "PLAN_ENTITLEMENT",
+    JSON.stringify(c4RepFree.body).slice(0, 100),
+  );
+  const c4RepX = await mA(`/api/mobile/reports?businessId=${bizBId}`);
+  ok("C4 mobile reports: cross-tenant businessId → 403", c4RepX.status === 403 || c4RepX.body?.error?.code === "FORBIDDEN");
+
   // device sessions list + revocation of ANOTHER device
   const mIosLogin = await mobileLogin(emailA, "Test#2026Pass", { platform: "ios", deviceName: "آيباد المالك" });
   const mIos = bearer(mIosLogin.body?.data?.token);
