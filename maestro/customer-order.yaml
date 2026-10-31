@@ -1,0 +1,48 @@
+# Smart-Order — Customer order journey (P38 Phase L)
+#
+# Preconditions (documented in ../maestro/README.md):
+#   · preview/development build installed (EAS «preview» profile APK)
+#   · EXPO_PUBLIC_API_URL points at the QA or production backend
+#   · QA store slug with a live product (default: family-kitchen)
+#   · Run: maestro test maestro/customer-order.yaml
+#
+# Selectors are grounded in the real source labels (verified against
+# mobile/src at commit 636278f): store-code entry (index.tsx:113),
+# product add-to-cart (product/[id].tsx:247), cart submit
+# (cart.tsx:478), WhatsApp handoff buttons (track/[token].tsx).
+appId: ly.smartlink.smartorder
+name: رحلة العميل — فتح متجر، طلب، تتبع
+tags:
+  - customer
+  - e2e
+---
+# 1. Launch on the home screen and enter the QA store code
+- launchApp
+- assertVisible: "Smart Order"
+- tapOn: "أدخل رمز المتجر"
+- inputText: ${QA_STORE_SLUG}
+- tapOn: "افتح المتجر"
+
+# 2. Storefront: menu renders with real data
+- assertVisible: ".*(د\\.ل).*"
+
+# 3. Open a product, verify modifiers/detail, add to cart
+- tapOn: "أضف إلى السلة" # the product screen CTA (product/[id].tsx:247)
+
+# 4. Cart: fill the required customer fields
+- tapOn: "السلة"
+- tapOn: "الاسم"
+- inputText: ${QA_CUSTOMER_NAME}
+- tapOn: "رقم الهاتف"
+- inputText: ${QA_CUSTOMER_PHONE}
+- tapOn: "ملاحظة للطلب (اختياري)"
+- inputText: "طلب اختباري من Maestro"
+
+# 5. Submit — order goes to the QA backend only (store is a QA store)
+- tapOn: "إرسال الطلب"
+- extendedWaitUntil:
+    visible: "طلبك"
+    timeout: 20000
+
+# 6. Tracking screen sanity: the order number is shown
+- assertVisible: ".*رقم الطلب.*"

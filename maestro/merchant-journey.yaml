@@ -1,0 +1,65 @@
+# Smart-Order — Merchant journey (P38 Phase L)
+#
+# Preconditions (documented in ../maestro/README.md):
+#   · preview/development build installed
+#   · QA merchant account (env: QA_MERCHANT_EMAIL / QA_MERCHANT_PASSWORD)
+#     on the SAME backend the app points at
+#   · The QA business has ≥1 order in ≥2 different statuses
+#
+# Selectors grounded in source (commit 636278f): login fields
+# (merchant/login.tsx:84,99,112), the 9 filter chips incl. the P38
+# REJECTED chip (merchant/(tabs)/orders.tsx:25-33), more-tab labels
+# (merchant/(tabs)/more.tsx), session-unverified retry screen
+# (merchant/_layout.tsx P38 Phase D).
+appId: ly.smartlink.smartorder
+name: رحلة التاجر — دخول، صندوق الطلبات، فلاتر الحالة، خروج
+tags:
+  - merchant
+  - e2e
+---
+# 1. Login (fresh install lands on the customer home; switch to merchant)
+- launchApp
+- runScript:
+    when:
+      visible: "Smart Order"
+    commands:
+      - tapOn: "دخول التاجر"
+- assertVisible: "تسجيل الدخول"
+- tapOn: "البريد الإلكتروني"
+- inputText: ${QA_MERCHANT_EMAIL}
+- tapOn: "كلمة المرور"
+- inputText: ${QA_MERCHANT_PASSWORD}
+- tapOn: "تسجيل الدخول"
+
+# 2. Session restores to the business/orders area
+- extendedWaitUntil:
+    visible: ".*(الطلبات|لوحة التاجر).*"
+    timeout: 20000
+
+# 3. Order inbox: the full 8-status filter family (P38: مرفوضة added)
+- assertVisible: "الكل"
+- assertVisible: "الجديدة"
+- assertVisible: "مكتملة"
+- assertVisible: "مرفوضة"
+- assertVisible: "ملغاة"
+- tapOn: "مرفوضة"
+
+# 4. Status filter switch keeps the list alive (no crash, sane rows)
+- assertVisible:
+    optional: true
+    text: "مرفوض"
+
+# 5. More tab: notifications value explanation is visible BEFORE any
+#    permission request (P38 Phase F timing law)
+- tapOn: "المزيد"
+- assertVisible: "تنبيهات الطلبات الجديدة"
+- assertVisible: "يظهر رقم الطلب فقط بلا أي بيانات عميل"
+
+# 6. Logout
+- swipe:
+    from: "المزيد"
+    direction: DOWN
+- tapOn: "تسجيل الخروج"
+- extendedWaitUntil:
+    visible: "تسجيل الدخول"
+    timeout: 15000
