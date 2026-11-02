@@ -60,7 +60,23 @@ export async function GET(req: NextRequest) {
       where: { businessId: member.businessId },
       orderBy: { sortOrder: "asc" },
     });
-    return ok({ zones });
+    /* W2-ORD-5 (P42-W3): سقف المناطق مع القائمة — نفس مصدر الحقيقة الذي
+     * يرفض الـPOST (currentPlan + zoneCapFor، ونفس أساس العدّ: كل صفوف
+     * المنطقة) يُقرأ هنا أيضًا، فترى الواجهة العداد الصادق (الحالي/
+     * الأقصى) ودعوة الترقية قبل نموذج تُرفض إضافته عند الإرسال — عائلة
+     * عدّاد مقاعد الفريق (W2-ORD-4)، البوابة لم تتغيّر. */
+    const plan = await currentPlan(db, member.businessId);
+    const cap = zoneCapFor(plan.name);
+    return ok({
+      zones,
+      caps: {
+        current: zones.length,
+        max: cap,
+        planNameAr: plan.nameAr,
+        /** false = بلغت الباقة حدّها — نفس مقارنة بوابة الـPOST معكوسة. */
+        canCreate: zones.length < cap,
+      },
+    });
   } catch (err) {
     return handleError(err);
   }

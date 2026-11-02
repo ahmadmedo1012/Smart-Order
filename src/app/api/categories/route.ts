@@ -54,7 +54,24 @@ export async function GET(req: NextRequest) {
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       include: { _count: { select: { products: { where: { isArchived: false } } } } },
     });
-    return ok({ categories });
+    /* W2-ORD-5 (P42-W3): سقف الأقسام مع القائمة — نفس
+     * مصدر الحقيقة الذي يرفض الـPOST (currentPlan + categoryCapFor، ونفس
+     * أساس العدّ isArchived:false الذي تحسبه البوابة داخل معاملتها)
+     * يُقرأ هنا أيضًا، فترى الواجهة العداد الصادق (الحالي/الأقصى) ودعوة
+     * الترقية قبل نموذج تُرفض إضافته عند الإرسال — عائلة عدّاد مقاعد
+     * الفريق (W2-ORD-4 في مسار الموظفين)، البوابة لم تتغيّر. */
+    const plan = await currentPlan(db, member.businessId);
+    const cap = categoryCapFor(plan.name);
+    return ok({
+      categories,
+      caps: {
+        current: categories.length,
+        max: cap,
+        planNameAr: plan.nameAr,
+        /** false = بلغت الباقة حدّها — نفس مقارنة بوابة الـPOST معكوسة. */
+        canCreate: categories.length < cap,
+      },
+    });
   } catch (err) {
     return handleError(err);
   }

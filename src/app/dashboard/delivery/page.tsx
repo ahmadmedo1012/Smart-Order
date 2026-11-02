@@ -33,6 +33,17 @@ interface Zone {
   sortOrder: number;
 }
 
+/* W2-ORD-5 (P42-W3): سقف مناطق التوصيل من نفس مصدر حقيقة الـPOST —
+ * العداد يظهر دائمًا (بطاقة المجاني تبيع «منطقة توصيل واحدة» فيجب أن
+ * يُرى الحد قادمًا لا عند الاصطدام)، وعند اكتمال العدد تُفتح دعوة
+ * الترقية بدل زرٍّ ترفضه البوابة — عدّاد مقاعد الفريق (W2-ORD-4) نفسه. */
+interface CapInfo {
+  current: number;
+  max: number;
+  planNameAr: string;
+  canCreate: boolean;
+}
+
 const EXAMPLES = [
   { name: "وسط المدينة", fee: "5" },
   { name: "تاجوراء", fee: "8" },
@@ -42,6 +53,7 @@ const EXAMPLES = [
 export default function DeliveryPage() {
   const { businessId } = useBusiness();
   const [zones, setZones] = React.useState<Zone[] | null>(null);
+  const [caps, setCaps] = React.useState<CapInfo | null>(null);
   const [error, setError] = React.useState(false);
   const [editing, setEditing] = React.useState<Zone | null>(null);
   const [creating, setCreating] = React.useState(false);
@@ -53,10 +65,11 @@ export default function DeliveryPage() {
   const load = React.useCallback(() => {
     if (!businessId) return;
     api
-      .get<{ zones: Zone[] }>(`/api/delivery-zones?businessId=${businessId}`)
+      .get<{ zones: Zone[]; caps: CapInfo }>(`/api/delivery-zones?businessId=${businessId}`)
       .then((r) => {
         setError(false);
         setZones(r.data.zones);
+        setCaps(r.data.caps);
       })
       .catch(() => setError(true));
   }, [businessId]);
@@ -75,10 +88,38 @@ export default function DeliveryPage() {
         title="مناطق التوصيل"
         subtitle="حدد المناطق التي توصل إليها، ورسوم كل منطقة، والحد الأدنى للطلب"
         actions={
-          <Button onClick={() => setCreating(true)}>
-            <Plus className="size-4.5" aria-hidden="true" />
-            منطقة جديدة
-          </Button>
+          /* W2-ORD-5: العداد الصادق دائمًا بجانب الزر، وعند اكتمال العدد
+           * يُستبدل زر الإضافة بدعوة الترقية (نفس عائلة PlanUsageBadge —
+           * الرابط إلى /pricing). الباقة المدفوعة تُظهر حدّها المفروض
+           * نفسه (200) كما يُظهر عدّاد المقاعد 9999 — العدد المفروض
+           * لا رقمًا مخترعًا. */
+          caps ? (
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-sm border border-(--c-grey-ink)/35 bg-(--c-grey-bg) px-3 py-1 text-xs font-semibold text-(--c-grey-deep)">
+                <Truck className="size-3.5" aria-hidden="true" />
+                مناطق التوصيل: {caps.current} من {caps.max}
+              </span>
+              {caps.canCreate ? (
+                <Button onClick={() => setCreating(true)}>
+                  <Plus className="size-4.5" aria-hidden="true" />
+                  منطقة جديدة
+                </Button>
+              ) : (
+                <a
+                  href="/pricing"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-(--c-copper-ink)/35 bg-(--c-copper-bg) px-3 py-1 text-xs font-semibold text-(--c-copper-deep) transition-[color,background-color,transform] duration-(--t-fast) hover:-translate-y-px"
+                >
+                  <Plus className="size-3.5" aria-hidden="true" />
+                  مناطق أكثر — رقّ خطتك
+                </a>
+              )}
+            </div>
+          ) : (
+            <Button onClick={() => setCreating(true)}>
+              <Plus className="size-4.5" aria-hidden="true" />
+              منطقة جديدة
+            </Button>
+          )
         }
       />
 

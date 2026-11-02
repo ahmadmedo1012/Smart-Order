@@ -1911,6 +1911,35 @@ for (const [name, okFlag] of W7D) {
   else failures.push(`w7-d entitlement-gate parity FAILED: ${name}`);
 }
 
+// ── W2-ORD-5 (P42-W3): the per-page plan-cap COUNTERS — the categories and
+// zones manage pages adopt the staff W2-ORD-4 counter family verbatim: the
+// honest counter chip (grey family stamp, always visible — the Free card's
+// «3 أقسام» / «منطقة توصيل واحدة» must be seen COMING, not met as a wall)
+// and the copper upgrade door that replaces the add button exactly when the
+// POST gate would refuse it (caps.canCreate from the SAME endpoint — the
+// fill-then-fail dead end retired on both screens). ─────────────────────────
+const W2ORD5 = [
+  ['W2-ORD-5 categories: the counter chip is the staff grey stamp + the copper door at the cap (caps.canCreate decides, /pricing destination)',
+    R('src/app/dashboard/categories/page.tsx').includes('rounded-sm border border-(--c-grey-ink)/35 bg-(--c-grey-bg) px-3 py-1 text-xs font-semibold text-(--c-grey-deep)') &&
+    R('src/app/dashboard/categories/page.tsx').includes('border-(--c-copper-ink)/35 bg-(--c-copper-bg) px-3 py-1 text-xs font-semibold text-(--c-copper-deep)') &&
+    R('src/app/dashboard/categories/page.tsx').includes('caps.canCreate') &&
+    R('src/app/dashboard/categories/page.tsx').includes('الأقسام: {caps.current} من {caps.max}')],
+  ['W2-ORD-5 delivery: the same counter family rides the zones header (grey stamp chip + copper door, caps.canCreate decides)',
+    R('src/app/dashboard/delivery/page.tsx').includes('rounded-sm border border-(--c-grey-ink)/35 bg-(--c-grey-bg) px-3 py-1 text-xs font-semibold text-(--c-grey-deep)') &&
+    R('src/app/dashboard/delivery/page.tsx').includes('border-(--c-copper-ink)/35 bg-(--c-copper-bg) px-3 py-1 text-xs font-semibold text-(--c-copper-deep)') &&
+    R('src/app/dashboard/delivery/page.tsx').includes('caps.canCreate') &&
+    R('src/app/dashboard/delivery/page.tsx').includes('مناطق التوصيل: {caps.current} من {caps.max}')],
+  ['W2-ORD-5 api: both list GETs answer with the caps object from the POST\'s own source (currentPlan + the per-plan map, canCreate = the gate negated)',
+    R('src/app/api/categories/route.ts').includes('canCreate: categories.length < cap') &&
+    R('src/app/api/delivery-zones/route.ts').includes('canCreate: zones.length < cap') &&
+    R('src/app/api/categories/route.ts').includes('await currentPlan(db, member.businessId);') &&
+    R('src/app/api/delivery-zones/route.ts').includes('await currentPlan(db, member.businessId);')],
+];
+for (const [name, okFlag] of W2ORD5) {
+  if (okFlag) passed += 1;
+  else failures.push(`w2-ord-5 counter parity FAILED: ${name}`);
+}
+
 // ── report ───────────────────────────────────────────────────────────────────
 
 if (failures.length > 0) {

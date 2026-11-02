@@ -26,9 +26,21 @@ import { toast } from "sonner";
 import { LayoutGrid, Plus, Trash2, Pencil, ImagePlus, X } from "lucide-react";
 import type { Category } from "@/app/dashboard/products/page";
 
+/* W2-ORD-5 (P42-W3): سقف الأقسام من نفس مصدر حقيقة الـPOST — العداد
+ * يظهر دائمًا (بطاقة المجاني تبيع «3 أقسام» فيجب أن يُرى الحد قادمًا
+ * لا عند الاصطدام)، وعند اكتمال العدد تُفتح دعوة الترقية بدل زرٍّ
+ * ترفضه البوابة — عدّاد مقاعد الفريق (W2-ORD-4) نفسه. */
+interface CapInfo {
+  current: number;
+  max: number;
+  planNameAr: string;
+  canCreate: boolean;
+}
+
 export default function CategoriesPage() {
   const { businessId } = useBusiness();
   const [categories, setCategories] = React.useState<Category[] | null>(null);
+  const [caps, setCaps] = React.useState<CapInfo | null>(null);
   const [error, setError] = React.useState(false);
   const [editing, setEditing] = React.useState<Category | null>(null);
   const [creating, setCreating] = React.useState(false);
@@ -40,12 +52,13 @@ export default function CategoriesPage() {
   const load = React.useCallback(() => {
     if (!businessId) return;
     api
-      .get<{ categories: Category[] }>(
+      .get<{ categories: Category[]; caps: CapInfo }>(
         `/api/categories?businessId=${businessId}`,
       )
       .then((r) => {
         setError(false);
         setCategories(r.data.categories);
+        setCaps(r.data.caps);
       })
       .catch(() => setError(true));
   }, [businessId]);
@@ -69,10 +82,38 @@ export default function CategoriesPage() {
           </span>
         }
         actions={
-          <Button onClick={() => setCreating(true)}>
-            <Plus className="size-4.5" aria-hidden="true" />
-            قسم جديد
-          </Button>
+          /* W2-ORD-5: العداد الصادق دائمًا بجانب الزر، وعند اكتمال العدد
+           * يُستبدل زر الإضافة بدعوة الترقية (نفس عائلة PlanUsageBadge —
+           * الرابط إلى /pricing). الباقة المدفوعة تُظهر حدّها المفروض
+           * نفسه (500) كما يُظهر عدّاد المقاعد 9999 — العدد المفروض
+           * لا رقمًا مخترعًا. */
+          caps ? (
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-sm border border-(--c-grey-ink)/35 bg-(--c-grey-bg) px-3 py-1 text-xs font-semibold text-(--c-grey-deep)">
+                <LayoutGrid className="size-3.5" aria-hidden="true" />
+                الأقسام: {caps.current} من {caps.max}
+              </span>
+              {caps.canCreate ? (
+                <Button onClick={() => setCreating(true)}>
+                  <Plus className="size-4.5" aria-hidden="true" />
+                  قسم جديد
+                </Button>
+              ) : (
+                <a
+                  href="/pricing"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-(--c-copper-ink)/35 bg-(--c-copper-bg) px-3 py-1 text-xs font-semibold text-(--c-copper-deep) transition-[color,background-color,transform] duration-(--t-fast) hover:-translate-y-px"
+                >
+                  <Plus className="size-3.5" aria-hidden="true" />
+                  أقسام أكثر — رقّ خطتك
+                </a>
+              )}
+            </div>
+          ) : (
+            <Button onClick={() => setCreating(true)}>
+              <Plus className="size-4.5" aria-hidden="true" />
+              قسم جديد
+            </Button>
+          )
         }
       />
 
