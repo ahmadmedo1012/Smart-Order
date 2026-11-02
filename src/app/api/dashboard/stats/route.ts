@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
       db.business.findUnique({
         where: { id: businessId },
         select: {
+          subscriptionEnds: true,
           plan: {
             select: { name: true, nameAr: true, price: true, maxProducts: true, maxOrders: true },
           },
@@ -82,6 +83,25 @@ export async function GET(req: NextRequest) {
 
     const todayRevenue = todayRevenueAgg._sum.total ?? 0;
     const avgOrder = todayCompleted > 0 ? Math.round(todayRevenue / todayCompleted) : 0;
+
+    /* P42 (§2 — badge truth): every currentPlan twin in the API ENFORCES a
+     * null planId (the register flow writes none — including the wizard's
+     * «متابعة بدون باقة» path) and an expired paid plan as the FREE plan,
+     * but this route reported `plan: null` for exactly that state — so the
+     * dashboard badge said «اختر باقة لمتجرك» about a business the platform
+     * treats (and gates) as Free. The stats route now resolves the plan the
+     * same way (the W2-D2 currentPlan contract): the badge speaks the
+     * enforced truth («باقة مجاني — مجانية» with its honest usage bars),
+     * and the ترقية CTA stays — it rides the badge component's own isFree
+     * branch, so only the plan IDENTITY changed. */
+    const planExpired = !!planInfo?.subscriptionEnds && planInfo.subscriptionEnds.getTime() <= Date.now();
+    const plan =
+      planInfo?.plan && !planExpired
+        ? planInfo.plan
+        : (await db.plan.findFirst({
+            where: { name: "Free" },
+            select: { name: true, nameAr: true, price: true, maxProducts: true, maxOrders: true },
+          })) ?? { name: "Free", nameAr: "مجاني", price: 0, maxProducts: 15, maxOrders: 100 };
 
     const statusCounts: Record<string, number> = {};
     for (const s of ORDER_STATUSES) statusCounts[s] = 0;
@@ -152,7 +172,7 @@ export async function GET(req: NextRequest) {
     }
 
     return ok({
-      plan: planInfo?.plan ?? null,
+      plan,
       monthOrders,
       stats: {
         todayOrders,
