@@ -1,11 +1,38 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireAuth, requireBusiness, requirePermission } from "@/lib/auth";
-import { ok, fail, handleError, readJson } from "@/lib/api";
+import { ok, handleError, readJson, ApiFailError } from "@/lib/api";
+import { zoneCapFor, zoneCapMessage } from "@/lib/plan-resource-caps";
 import { parseLyd } from "@/lib/money";
 
 export const runtime = "nodejs";
+
+/* ── P42 (plan-truth §1) — the business's CURRENT plan ──
+ *
+ * The staff/products routes' currentPlan twin, verbatim (see the
+ * categories route's copy for the full contract): a paid plan past its
+ * window falls back to Free, and a null planId resolves to the Free
+ * plan ROW — the enforced plan is the ONLY plan the cap map reads. */
+type PlanCaps = { name: string; nameAr: string; maxProducts: number; maxOrders: number };
+
+async function currentPlan(tx: Prisma.TransactionClient, businessId: string): Promise<PlanCaps> {
+  const biz = await tx.business.findUnique({
+    where: { id: businessId },
+    select: {
+      subscriptionEnds: true,
+      plan: { select: { name: true, nameAr: true, maxProducts: true, maxOrders: true } },
+    },
+  });
+  const expired = !!biz?.subscriptionEnds && biz.subscriptionEnds.getTime() <= Date.now();
+  if (biz?.plan && !expired) return biz.plan;
+  const free = await tx.plan.findFirst({
+    where: { name: "Free" },
+    select: { name: true, nameAr: true, maxProducts: true, maxOrders: true },
+  });
+  return free ?? { name: "Free", nameAr: "مجاني", maxProducts: 15, maxOrders: 100 };
+}
 
 const createSchema = z.object({
   businessId: z.string().optional(),
@@ -46,17 +73,33 @@ export async function POST(req: NextRequest) {
     const member = await requireBusiness(user, input.businessId);
     requirePermission(member, "delivery.manage");
 
-    const count = await db.deliveryZone.count({ where: { businessId: member.businessId } });
-    if (count >= 40) return fail("وصلت للحد الأقصى من مناطق التوصيل (40)", 422);
-
-    const zone = await db.deliveryZone.create({
-      data: {
-        businessId: member.businessId,
-        name: input.name,
-        fee: input.fee,
-        minOrder: input.minOrder,
-        sortOrder: count,
-      },
+    /* P42 (plan-truth §1): the Free card sells «منطقة توصيل واحدة» and
+     * Basic sells «مناطق توصيل متعددة» — the gate that lived here was a
+     * GLOBAL 40 no card ever promised (a Free business could stack 39
+     * zones past its promise). The cap is now the plan's OWN
+     * (lib/plan-resource-caps — Free 1 / paid 200, the staff route's
+     * TEAM_SEATS_BY_PLAN pattern, NO schema change), and the count runs
+     * INSIDE the create transaction behind the business-row lock (the
+     * W3-F portable guard — the categories/products/staff gate
+     * doctrine). Rejections answer 409 PLAN_LIMIT with the family's cap
+     * copy (the products-route wording, the plan's own number). */
+    const zone = await db.$transaction(async (tx) => {
+      await tx.business.update({ where: { id: member.businessId }, data: { updatedAt: new Date() } });
+      const plan = await currentPlan(tx, member.businessId);
+      const cap = zoneCapFor(plan.name);
+      const count = await tx.deliveryZone.count({ where: { businessId: member.businessId } });
+      if (count >= cap) {
+        throw new ApiFailError(zoneCapMessage(cap), 409, "PLAN_LIMIT");
+      }
+      return tx.deliveryZone.create({
+        data: {
+          businessId: member.businessId,
+          name: input.name,
+          fee: input.fee,
+          minOrder: input.minOrder,
+          sortOrder: count,
+        },
+      });
     });
     return ok({ zone }, { status: 201 });
   } catch (err) {

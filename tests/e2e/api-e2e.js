@@ -476,6 +476,59 @@ async function main() {
      captured as evidence against the dev DB (see w2-evidence/W2-D2) while
      the pass-through side stays pinned by section 5's order creation. */
 
+  /* P42 (§1): the resource caps — Free's card sells «3 أقسام» /
+     «منطقة توصيل واحدة», and the retired gates were GLOBAL 50/40 no card
+     ever promised. B is the battery's never-upgraded Free business with a
+     clean catalog here (0 categories, 0 zones): drive both boundaries —
+     fill to the card's own number, the N+1st is refused 409 PLAN_LIMIT
+     with the honest copy carrying the card's own number. */
+  let catsCreated = 0;
+  let catCapStatus = 0;
+  let catCapMsg = "";
+  for (let i = 1; i <= 4; i++) {
+    const r = await B.call("/api/categories", {
+      method: "POST",
+      body: JSON.stringify({ businessId: bizBId, name: "قسم الحد " + i }),
+    });
+    if (r.body?.success === true) catsCreated++;
+    else { catCapStatus = r.status; catCapMsg = r.body?.error?.message ?? ""; break; }
+  }
+  ok("categories gate: 3 creations pass on Free (the card's own number)", catsCreated === 3, `created ${catsCreated}`);
+  ok(
+    "categories gate: the 4th is refused (409 PLAN_LIMIT)",
+    catCapStatus === 409 && /أقسام/.test(catCapMsg),
+    `status ${catCapStatus} ${JSON.stringify(catCapMsg).slice(0, 80)}`,
+  );
+  ok(
+    "categories gate: honest Arabic message carries the Free card's own number (3)",
+    /\(3\)/.test(catCapMsg) && /لقد وصلت للحد الأقصى للأقسام/.test(catCapMsg) && catCapMsg.includes("ترقية"),
+    catCapMsg.slice(0, 90),
+  );
+
+  const zoneFirst = await B.call("/api/delivery-zones", {
+    method: "POST",
+    body: JSON.stringify({ businessId: bizBId, name: "منطقة الحد", fee: "2.000" }),
+  });
+  ok(
+    "zones gate: the FIRST zone passes on Free (a business needs one to deliver)",
+    zoneFirst.body?.success === true,
+    JSON.stringify(zoneFirst.body).slice(0, 100),
+  );
+  const zoneSecond = await B.call("/api/delivery-zones", {
+    method: "POST",
+    body: JSON.stringify({ businessId: bizBId, name: "منطقة ثانية", fee: "3.000" }),
+  });
+  ok(
+    "zones gate: the SECOND is refused (409 PLAN_LIMIT — «منطقة توصيل واحدة»)",
+    zoneSecond.status === 409 && zoneSecond.body?.error?.code === "PLAN_LIMIT" && /مناطق التوصيل/.test(zoneSecond.body?.error?.message ?? ""),
+    JSON.stringify(zoneSecond.body).slice(0, 120),
+  );
+  ok(
+    "zones gate: honest Arabic message carries the Free card's own number (1)",
+    /\(1\)/.test(zoneSecond.body?.error?.message ?? "") && (zoneSecond.body?.error?.message ?? "").includes("ترقية"),
+    (zoneSecond.body?.error?.message ?? "").slice(0, 90),
+  );
+
   // ---------- 10. subscription review CAS — one payment, one application (W3-F) ----------
   console.log("— مراجعة الاشتراك: CAS واحد لكل دفعة (W3-F)");
   /* cba655a regression pin. The PENDING pre-check alone was a
