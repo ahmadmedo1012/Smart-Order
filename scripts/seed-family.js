@@ -225,28 +225,56 @@ async function main() {
     console.log(`demo products: ${createdCount} created, ${refreshed} photo-refreshed`);
   }
 
-  // Payment methods
-  if (demo.paymentMethods.length === 0) {
+  // Payment methods — P42 (§4 — money-safety): the demo store's wallet
+  // methods previously carried the REAL platform collection numbers (the
+  // payment-constants.ts fallbacks — those stay untouched for REAL
+  // payments); a demo customer inside a «تجريبي» flow got a live USSD code
+  // targeting a real wallet. The seed now writes unmistakably-DEMO numbers
+  // (0940000000 / 0910000000). The upsert-by-(businessId, type) HEALS the
+  // already-seeded production rows on the next deploy — the old
+  // create-only gate would have frozen the real numbers on every demo
+  // store that already exists (@@unique([businessId, type]) is the natural
+  // key; config/name/instructions/sortOrder all refresh).
+  {
     const pmDefs = [
       { type: "COD", name: "الدفع عند التوصيل", instructions: "ادفع نقداً عند وصول طلبك", config: null, sortOrder: 1 },
-      { type: "LIBYANA", name: "ليبيانا", instructions: "حوّل المبلغ على الرقم الظاهر ثم أكمل الطلب", config: JSON.stringify({ number: "0942119637" }), sortOrder: 2 },
-      { type: "MADAR", name: "مدار", instructions: "حوّل المبلغ على الرقم الظاهر ثم أكمل الطلب", config: JSON.stringify({ number: "0910089975" }), sortOrder: 3 },
+      { type: "LIBYANA", name: "ليبيانا", instructions: "حوّل المبلغ على الرقم الظاهر ثم أكمل الطلب", config: JSON.stringify({ number: "0940000000" }), sortOrder: 2 },
+      { type: "MADAR", name: "مدار", instructions: "حوّل المبلغ على الرقم الظاهر ثم أكمل الطلب", config: JSON.stringify({ number: "0910000000" }), sortOrder: 3 },
     ];
     for (const pm of pmDefs) {
-      await db.paymentMethod.create({ data: { businessId: demo.id, ...pm } });
+      await db.paymentMethod.upsert({
+        where: { businessId_type: { businessId: demo.id, type: pm.type } },
+        update: { name: pm.name, instructions: pm.instructions, config: pm.config, sortOrder: pm.sortOrder, isActive: true },
+        create: { businessId: demo.id, ...pm },
+      });
     }
-    console.log("seeded demo payment methods");
+    console.log("demo payment methods: ensured (demo wallet numbers — existing rows healed)");
   }
 
-  // Delivery zones
-  if (demo.deliveryZones.length === 0) {
-    await db.deliveryZone.create({
-      data: { businessId: demo.id, name: "تاجوراء", fee: 8000, minOrder: 30000, isActive: true },
-    });
-    await db.deliveryZone.create({
-      data: { businessId: demo.id, name: "وسط المدينة", fee: 5000, minOrder: 20000, isActive: true },
-    });
-    console.log("seeded demo delivery zones");
+  // Delivery zones — P42 (§1 pre-check): the demo store rides the FREE plan,
+  // so its own catalog must model the Free caps the cards sell («منطقة
+  // توصيل واحدة»). The seed now owns exactly ONE zone — «وسط المدينة»
+  // (fee 5 د.ل — the landing storefront mock references it verbatim) — and
+  // HEALS the pre-P42 surplus (تاجوراء was the second seeded zone): the
+  // demo store is code-owned (the P30-A ownership guard above), orders
+  // snapshot their fees (no DeliveryZone FK on Order), so retiring the
+  // surplus zone is safe and restores the honest Free catalog.
+  {
+    const DEMO_ZONES = [{ name: "وسط المدينة", fee: 5000, minOrder: 20000 }];
+    const seededNames = new Set(DEMO_ZONES.map((z) => z.name));
+    for (const z of DEMO_ZONES) {
+      const match = demo.deliveryZones.find((e) => e.name === z.name);
+      if (!match) {
+        await db.deliveryZone.create({ data: { businessId: demo.id, ...z, isActive: true, sortOrder: 1 } });
+      } else {
+        await db.deliveryZone.update({ where: { id: match.id }, data: { fee: z.fee, minOrder: z.minOrder, isActive: true } });
+      }
+    }
+    const surplus = demo.deliveryZones.filter((e) => !seededNames.has(e.name));
+    for (const e of surplus) {
+      await db.deliveryZone.delete({ where: { id: e.id } });
+    }
+    console.log(`demo delivery zones: ${DEMO_ZONES.length} ensured${surplus.length ? `, ${surplus.length} surplus retired (Free cap)` : ""}`);
   }
 }
 

@@ -131,22 +131,43 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (demo.paymentMethods.length === 0) {
-      const pmDefs = [
-        { type: "COD", name: "الدفع عند التوصيل", instructions: "ادفع نقداً عند وصول طلبك", config: null, sortOrder: 1 },
-        { type: "LIBYANA", name: "ليبيانا", instructions: "حوّل المبلغ على الرقم الظاهر ثم أكمل الطلب", config: JSON.stringify({ number: "0942119637" }), sortOrder: 2 },
-        { type: "MADAR", name: "مدار", instructions: "حوّل المبلغ على الرقم الظاهر ثم أكمل الطلب", config: JSON.stringify({ number: "0910089975" }), sortOrder: 3 },
-      ];
-      for (const pm of pmDefs) {
-        await db.paymentMethod.create({ data: { businessId: demo.id, ...pm } });
-      }
-      created.paymentMethods = 3;
+    /* P42 (§4 — money-safety, twin of scripts/seed-family.js): the demo
+     * store's wallet methods carry DEMO numbers (0940000000 /
+     * 0910000000) — never the real platform collection numbers a real
+     * payment flow uses. Upsert-by-(businessId, type) heals already-seeded
+     * rows on re-runs (the create-only gate froze stale values).
+     * P42 (§1): Free's advertised zone cap is ONE — «وسط المدينة» is the
+     * zone the browser battery pins; the seed owns exactly that set and
+     * retires any surplus from a previous seed run. */
+    const pmDefs = [
+      { type: "COD", name: "الدفع عند التوصيل", instructions: "ادفع نقداً عند وصول طلبك", config: null, sortOrder: 1 },
+      { type: "LIBYANA", name: "ليبيانا", instructions: "حوّل المبلغ على الرقم الظاهر ثم أكمل الطلب", config: JSON.stringify({ number: "0940000000" }), sortOrder: 2 },
+      { type: "MADAR", name: "مدار", instructions: "حوّل المبلغ على الرقم الظاهر ثم أكمل الطلب", config: JSON.stringify({ number: "0910000000" }), sortOrder: 3 },
+    ];
+    for (const pm of pmDefs) {
+      await db.paymentMethod.upsert({
+        where: { businessId_type: { businessId: demo.id, type: pm.type } },
+        update: { name: pm.name, instructions: pm.instructions, config: pm.config, sortOrder: pm.sortOrder, isActive: true },
+        create: { businessId: demo.id, ...pm },
+      });
+      created.paymentMethods += 1;
     }
 
-    if (demo.deliveryZones.length === 0) {
-      await db.deliveryZone.create({ data: { businessId: demo.id, name: "تاجوراء", fee: 8000, minOrder: 30000, isActive: true } });
-      await db.deliveryZone.create({ data: { businessId: demo.id, name: "وسط المدينة", fee: 5000, minOrder: 20000, isActive: true } });
-      created.zones = 2;
+    const DEMO_ZONES = [{ name: "وسط المدينة", fee: 5000, minOrder: 20000 }];
+    const seededNames = new Set(DEMO_ZONES.map((z) => z.name));
+    for (const z of DEMO_ZONES) {
+      const match = demo.deliveryZones.find((e) => e.name === z.name);
+      if (!match) {
+        await db.deliveryZone.create({ data: { businessId: demo.id, ...z, isActive: true, sortOrder: 1 } });
+        created.zones += 1;
+      } else {
+        await db.deliveryZone.update({ where: { id: match.id }, data: { fee: z.fee, minOrder: z.minOrder, isActive: true } });
+      }
+    }
+    const surplus = demo.deliveryZones.filter((e) => !seededNames.has(e.name));
+    for (const e of surplus) {
+      await db.deliveryZone.delete({ where: { id: e.id } });
+      created.zones += 1;
     }
 
     return ok({ seeded: created });

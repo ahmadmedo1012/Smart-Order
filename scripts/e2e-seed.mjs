@@ -113,15 +113,22 @@ const DEMO_PRODUCTS = [
   { name: "عصير برتقال طازج", cat: "مشروبات", price: 9000, desc: "برتقال طبيعي 100٪", featured: false, img: "/demo/orange-juice.jpg" },
   { name: "شاي أخضر بالنعنع", cat: "مشروبات", price: 5000, desc: "شاي بالنعنع الطازج", featured: false, img: "/demo/mint-tea.jpg" },
 ];
+/* P42 (§4 — money-safety, twin of seed-family.js): the demo store's wallet
+   methods ride DEMO numbers (0940000000 / 0910000000) — NEVER the real
+   platform collection numbers from payment-constants.ts; a browser-battery
+   customer inside the demo flow must never get a live USSD code targeting
+   a real wallet. P42 (§1): Free's advertised zone cap is ONE — «وسط
+   المدينة» (the zone tests/browser/helpers.ts pins its fee/minOrder).
+   Both blocks upsert/heal idempotently (the old create-only gates would
+   freeze stale rows on a reused local db/e2e.db). */
 const PAYMENT_METHODS = [
   { type: "COD", name: "الدفع عند التوصيل", instructions: "ادفع نقداً عند وصول طلبك", config: null, sortOrder: 1 },
-  { type: "LIBYANA", name: "ليبيانا", instructions: "حوّل المبلغ على الرقم الظاهر ثم أكمل الطلب", config: JSON.stringify({ number: "0942119637" }), sortOrder: 2 },
-  { type: "MADAR", name: "مدار", instructions: "حوّل المبلغ على الرقم الظاهر ثم أكمل الطلب", config: JSON.stringify({ number: "0910089975" }), sortOrder: 3 },
+  { type: "LIBYANA", name: "ليبيانا", instructions: "حوّل المبلغ على الرقم الظاهر ثم أكمل الطلب", config: JSON.stringify({ number: "0940000000" }), sortOrder: 2 },
+  { type: "MADAR", name: "مدار", instructions: "حوّل المبلغ على الرقم الظاهر ثم أكمل الطلب", config: JSON.stringify({ number: "0910000000" }), sortOrder: 3 },
 ];
 
 const DELIVERY_ZONES = [
-  { name: "تاجوراء", fee: 8000, minOrder: 30000, sortOrder: 1 },
-  { name: "وسط المدينة", fee: 5000, minOrder: 20000, sortOrder: 2 },
+  { name: "وسط المدينة", fee: 5000, minOrder: 20000, sortOrder: 1 },
 ];
 
 async function main() {
@@ -211,17 +218,34 @@ async function main() {
     }
   }
 
-  // طرق الدفع
-  if (demo.paymentMethods.length === 0) {
-    for (const pm of PAYMENT_METHODS) {
-      await db.paymentMethod.create({ data: { businessId: demo.id, ...pm } });
-    }
+  // طرق الدفع — P42: upsert-by-(businessId, type) يحوي الأرقام التجريبية
+  // ويصلح صفوفاً قديمة من تشغيل بذرة سابقة على قاعدة e2e محلية معاد
+  // استخدامها (البوابة القديمة "أنشئ عند الفراغ" كانت تجمّد الأرقام
+  // القديمة إلى الأبد).
+  for (const pm of PAYMENT_METHODS) {
+    await db.paymentMethod.upsert({
+      where: { businessId_type: { businessId: demo.id, type: pm.type } },
+      update: { name: pm.name, instructions: pm.instructions, config: pm.config, sortOrder: pm.sortOrder, isActive: true },
+      create: { businessId: demo.id, ...pm },
+    });
   }
 
-  // مناطق التوصيل
-  if (demo.deliveryZones.length === 0) {
+  // مناطق التوصيل — P42: ضمان مجموعة البذرة حرفياً (منطقة Free واحدة)،
+  // مع إحالة أي منطقة فائضة من بذرة سابقة (تاجوراء) — الطلبات تحفظ
+  // رسومها كصورة لحظية فلا FK يمنع الحذف.
+  {
+    const seededNames = new Set(DELIVERY_ZONES.map((z) => z.name));
     for (const z of DELIVERY_ZONES) {
-      await db.deliveryZone.create({ data: { businessId: demo.id, ...z, isActive: true } });
+      const match = demo.deliveryZones.find((e) => e.name === z.name);
+      if (!match) {
+        await db.deliveryZone.create({ data: { businessId: demo.id, ...z, isActive: true } });
+      } else {
+        await db.deliveryZone.update({ where: { id: match.id }, data: { fee: z.fee, minOrder: z.minOrder, isActive: true } });
+      }
+    }
+    const surplus = demo.deliveryZones.filter((e) => !seededNames.has(e.name));
+    for (const e of surplus) {
+      await db.deliveryZone.delete({ where: { id: e.id } });
     }
   }
 
@@ -251,7 +275,7 @@ async function main() {
   });
 
   console.log(
-    `[e2e-seed] demo-store جاهز (٢ فئة نشطة، ${DEMO_PRODUCTS.length} منتجات، ${PAYMENT_METHODS.length} طرق دفع، ${DELIVERY_ZONES.length} مناطق) + التاجر ${MERCHANT_EMAIL} (OWNER)`,
+    `[e2e-seed] demo-store جاهز (3 أقسام، ${DEMO_PRODUCTS.length} منتجات، ${PAYMENT_METHODS.length} طرق دفع تجريبية، ${DELIVERY_ZONES.length} منطقة) + التاجر ${MERCHANT_EMAIL} (OWNER)`,
   );
 }
 
