@@ -376,6 +376,14 @@ model Order {
   @@unique([businessId, idempotencyKey])
   @@index([businessId, status, createdAt])
   @@index([businessId, customerPhone, createdAt])
+  // P42-W6 (تدقيق §7 — فهارس المسارات الساخنة):
+  // (businessId, createdAt) يخدم قائمة طلبات التاجر (الفرض+الترتيب
+  // الافتراضيان وفلترة from/to وعدّ اليوم في المسار المالي).
+  // (orderNumber, customerPhone, createdAt) يخدم بحث التتبع العام
+  // (POST /api/public/track) الذي لم يكن له فهرس يغطيه — الفهرس الفريد
+  // (businessId, orderNumber) لا يخدم orderNumber منفردًا. إضافيان بحتان.
+  @@index([businessId, createdAt])
+  @@index([orderNumber, customerPhone, createdAt])
 }
 
 model OrderItem {
