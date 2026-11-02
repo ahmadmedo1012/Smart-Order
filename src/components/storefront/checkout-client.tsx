@@ -373,6 +373,7 @@ export function CheckoutClient({
           paymentConfig={paymentConfig}
           overWalletCap={overWalletCap}
           total={total}
+          storeWhatsapp={business.whatsappNumber}
         />
         <NoteSection customerNote={customerNote} setCustomerNote={setCustomerNote} />
         </form>

@@ -28,6 +28,7 @@ export function PaymentSection({
   paymentConfig,
   overWalletCap,
   total,
+  storeWhatsapp,
 }: {
   data: StoreData | null;
   loadError: boolean;
@@ -39,6 +40,9 @@ export function PaymentSection({
   paymentConfig: PaymentConfig;
   overWalletCap: boolean;
   total: number;
+  /* P42-2 (E-1): the store's WhatsApp (business.whatsappNumber) — the
+     contact lifeline shown when zero payment methods are active. */
+  storeWhatsapp?: string | null;
 }) {
   /* P18-W2-d (W1-d #8 — USSD copy feedback state): the copy action
      answers INLINE, not only via toast — the button flips to a franked
@@ -85,6 +89,31 @@ export function PaymentSection({
               <Skeleton className="h-14 rounded-sm" />
             </>
           )
+        ) : data.paymentMethods.length === 0 ? (
+          /* P42-2 (E-1): zero active payment methods used to render a silent
+             empty grid while the submit bar stayed blocked on «اختر طريقة
+             الدفع» — a dead end with no explanation. The merchant surface
+             warns (payments/page.tsx empty-state), the register seeds COD+CASH,
+             but a merchant who disables both leaves customers stranded mid-
+             checkout. Honest copy + the store's own WhatsApp channel (when
+             configured) — the same degrade-grammar as no-zones→PICKUP. */
+          <p className="col-span-2 rounded-sm border border-dashed border-border bg-muted/30 p-3 text-center text-[12px] leading-relaxed text-muted-foreground sm:col-span-3">
+            لم يفعّل هذا المتجر طرق دفع بعد
+            {storeWhatsapp ? (
+              <>
+                {" — "}
+                <a
+                  href={`https://wa.me/${storeWhatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-foreground underline underline-offset-4"
+                >
+                  تواصل مع المتجر عبر واتساب
+                </a>
+                {" لترتيب الدفع معه مباشرة"}
+              </>
+            ) : null}
+          </p>
         ) : (
           data.paymentMethods.map((p) => {
           const selected = paymentMethodId === p.id;
