@@ -16,6 +16,11 @@ const patchSchema = z.object({
   price: z.union([z.string(), z.number()]).transform((v) => {
     const m = parseLyd(v);
     if (m < 0) throw new Error("السعر لا يمكن أن يكون سالباً");
+    /* P42-W6: نفس سقف مسار الإنشاء (r140 P3-2) — كان التعديل بلا سقف،
+       فتاجر يدخل «999999999.999» يرفع lineTotal (unit×99×50 سطرًا)
+       إلى حافة MAX_SAFE_INTEGER وتفسد الإجماليات. الإنشاء يرفض هذا
+       الرقم أصلًا، فلا منتج شرعي فوق السقف ليتعارض معه التعديل. */
+    if (m > 999_999_000) throw new Error("السعر كبير جداً");
     return m;
   }).optional(),
   isAvailable: z.boolean().optional(),
