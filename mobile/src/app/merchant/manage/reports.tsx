@@ -8,7 +8,10 @@
  * (UTC+2 ثابتة)، ومدى ≤ 366 يومًا. الملخص: إيراد النافذة وطلباتها
  * ومتوسط الطلب (مليم صحيح — formatMillimes) وتوزيع الحالات بأشرطة
  * أفقية بألوان عائلات الحالة نفسها. بوابة الخطة بريميوم+ تردّ 403
- * برسالة عربية تظهر كما هي.
+ * PLAN_ENTITLEMENT — حالة مقفولة مسمّاة بباب ترقية (مرآة
+ * reports/page.tsx:131 على الويب)، لا خطأً ميتًا: العنوان يُبنى
+ * من نفس ثابت الحد الأدنى للبوابة والباب يفتح شاشة الباقات
+ * الأصلية (P42-W4، GAP-SO-1).
  */
 import React, { useMemo, useState } from 'react'
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -24,7 +27,13 @@ import { formatNumber } from '@/lib/money'
 import { formatMillimes } from '@/lib/money-millimes'
 import { AR_MONTHS } from '@/lib/datetime'
 import { ORDER_STATUS_AR, type OrderStatus } from '@/types/storefront'
-import { ErrorState, LoadingState } from '@/components/state-views'
+import { ErrorState, LoadingState, LockedState } from '@/components/state-views'
+import { isPlanEntitlementRefusal } from '@/lib/plan-gates'
+import {
+  PRICING_CTA_LABEL,
+  REPORTS_LOCK_DESCRIPTION,
+  reportsLockTitle,
+} from '@/lib/plans'
 
 /* ── مفاتيح الأيام التقويمية (طرابلس UTC+2 ثابتة — بلا صيفي) ───── */
 
@@ -211,6 +220,9 @@ export default function ManageReportsScreen() {
   }
 
   const report = query.data
+  /* رفض استحقاق الخطة (403 PLAN_ENTITLEMENT) — يُستبدل السطح كله
+   * بالحالة المقفولة (مرآة الويب: لا منتقي نافذة فوق رفض). */
+  const locked = query.isError && isPlanEntitlementRefusal(query.error)
   const statusRows = useMemo(() => {
     if (!report) return []
     return STATUS_ORDER.filter((st) => (report.statusCounts[st] ?? 0) > 0).map((st) => ({
@@ -259,6 +271,16 @@ export default function ManageReportsScreen() {
         <Text style={s.title}>التقارير</Text>
         <Text style={s.sub}>إيرادات متجرك وطلباته على نافذة تختارها — بتوقيت طرابلس</Text>
 
+        {locked ? (
+          /* الحالة المقفولة (P42-W4): رفض الاستحقاق حالة مسمّاة بباب
+           * ترقية — تحل محل السطح كله كما في الويب. */
+          <LockedState
+            title={reportsLockTitle()}
+            description={REPORTS_LOCK_DESCRIPTION}
+            ctaLabel={PRICING_CTA_LABEL}
+          />
+        ) : (
+          <>
         {/* نافذة التقرير */}
         <View style={s.card}>
           <View style={s.rangeRow}>
@@ -372,6 +394,8 @@ export default function ManageReportsScreen() {
                 {formatNumber(report.window.days)} يومًا — الملغاة والمرفوضة لا تُحسب في الإيراد
               </Text>
             </View>
+          </>
+        )}
           </>
         )}
       </ScrollView>

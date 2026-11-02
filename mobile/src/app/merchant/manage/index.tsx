@@ -1,9 +1,11 @@
 /**
  * Smart Order Mobile — مركز الإدارة (C2-REST).
  *
- * بوابة شاشات الإدارة الثماني من تبويب «المزيد»: المنتجات، الأقسام،
+ * بوابة شاشات الإدارة من تبويب «المزيد»: المنتجات، الأقسام،
  * مناطق التوصيل، طرق الدفع، إعدادات المتجر، العملاء، الفريق،
- * والتقارير. الصفوف محكومة بصلاحيات العضوية الفعلية (لا الدور) —
+ * والتقارير — وصف «الباقات والأسعار» الدائم لكل عضو (P42-W4:
+ * كتالوج الباقات حقيقة عامة ومقصد أبواب الترقية، لا صلاحية
+ * تُقيّدها). الصفوف محكومة بصلاحيات العضوية الفعلية (لا الدور) —
  * الموظف يرى ما يخص الطلبات والقراءة فقط، وأسرار الإدارة (الفريق/
  * الإعدادات/الدفع/التوصيل) تختفي كليًا لمن لا يملكها.
  */
@@ -17,6 +19,7 @@ import { useAuthStore } from '@/state/auth'
 import { Hairline } from '@/components/ui'
 import {
   ChartIcon,
+  CoinsIcon,
   PackageIcon,
   SettingsIcon,
   TagIcon,
@@ -32,7 +35,9 @@ interface ManageRow {
   hint: string
   icon: React.ComponentType<{ size?: number; color?: string }>
   href: Href
-  perm: string
+  /** null = صف دائم لكل عضو — كتالوج الباقات حقيقة عامة (لا صلاحية
+   *  تُقيّدها؛ /api/plans نفسه عام بلا مصادقة على الويب). */
+  perm: string | null
 }
 
 /** كتالوج الصفوف — البوابة perm من صلاحيات العضوية (الخادم يفرضها
@@ -102,6 +107,14 @@ const ROWS: ManageRow[] = [
     href: '/merchant/manage/settings',
     perm: 'settings.manage',
   },
+  {
+    key: 'pricing',
+    label: 'الباقات والأسعار',
+    hint: 'خطتك وحدودها والترقية — نفس أرقام الموقع',
+    icon: CoinsIcon,
+    href: '/merchant/manage/pricing',
+    perm: null,
+  },
 ]
 
 export default function ManageHubScreen() {
@@ -112,7 +125,10 @@ export default function ManageHubScreen() {
   const businessName = membership?.business.name ?? ''
 
   const perms = useMemo(() => new Set(membership?.permissions ?? []), [membership])
-  const rows = useMemo(() => ROWS.filter((r) => perms.has(r.perm)), [perms])
+  const rows = useMemo(
+    () => ROWS.filter((r) => r.perm === null || perms.has(r.perm)),
+    [perms],
+  )
 
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>

@@ -30,9 +30,11 @@ import type {
   MerchantProduct,
   MerchantZone,
   MeResponse,
+  MobilePlan,
   MobileReportSummary,
   PaymentType,
   StaffMember,
+  StaffSeats,
 } from '@/types/merchant'
 import type { OrderStatus } from '@/types/storefront'
 
@@ -528,10 +530,14 @@ export function fetchCustomerDetail(
   )
 }
 
-/** GET /api/staff?businessId — أعضاء الفريق (staff.manage). */
-export function fetchStaff(businessId: string): Promise<{ staff: StaffMember[] }> {
+/** GET /api/staff?businessId — أعضاء الفريق مع مقاعد الخطة (W2-ORD-4:
+ * نفس مصدر الحقيقة الذي يرفض الـPOST — seats.canInvite=false تفتح
+ * باب الترقية بدل نموذج محكوم بالرفض). */
+export function fetchStaff(
+  businessId: string,
+): Promise<{ staff: StaffMember[]; seats: StaffSeats }> {
   const qs = new URLSearchParams({ businessId })
-  return get<{ staff: StaffMember[] }>(`/api/staff?${qs.toString()}`)
+  return get<{ staff: StaffMember[]; seats: StaffSeats }>(`/api/staff?${qs.toString()}`)
 }
 
 /** POST /api/staff — إنشاء حساب + عضوية فريق (بلا دعوات، كلمة المرور
@@ -577,4 +583,16 @@ export function fetchMobileReports(
 ): Promise<MobileReportSummary> {
   const qs = new URLSearchParams({ businessId, from, to })
   return get<MobileReportSummary>(`/api/mobile/reports?${qs.toString()}`)
+}
+
+/**
+ * GET /api/plans — كتالوج الباقات العام (P42-W4، GAP-SO-1): نفس
+ * المسار الذي تحمّل به صفحة /pricing في الويب كتالوجها (البذور
+ * الذاتية + آليات التعافي عند القراءة تعيش في الخادم). العام بلا
+ * مصادقة — التوكن إن وُجد يُرفق فقط ولا يغير الجواب. عند تعذر
+ * الشبكة تسقط الشاشة على FALLBACK_PLANS (lib/plans.ts — مثبتة
+ * باختبار يقرأ بذور الويب) مع بيان صادق، فلا باب ميت أبدًا.
+ */
+export function fetchPlans(): Promise<MobilePlan[]> {
+  return get<MobilePlan[]>('/api/plans')
 }

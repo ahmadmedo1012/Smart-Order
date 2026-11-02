@@ -90,6 +90,11 @@ export default function MerchantLayout() {
         <Stack.Screen name="manage/customer/[id]" />
         <Stack.Screen name="manage/staff" />
         <Stack.Screen name="manage/reports" />
+        {/* P42-W4 (GAP-SO-1): مقصد الترقية الأصلي — كل أبواب رفض الخطة
+            (تقارير 403، مقاعد 409) تفتح هنا، وبوابة الإدارة تسجّلها
+            بصفٍ دائم لكل عضو (كتالوج الباقات حقيقة عامة لا صلاحية
+            تُقيّدها). */}
+        <Stack.Screen name="manage/pricing" />
       </Stack>
       {/* إشعارات النجاح العابرة لكل شاشات التاجر */}
       <ToastHost />

@@ -9,9 +9,14 @@
  * P38 (C3 — parity): الإنشاء/تغيير الدور/الإزالة صارت أصلية هنا عبر
  * نفس مسارات الويب (POST /api/staff · PATCH /api/staff/[id] · DELETE
  * /api/staff/[id]) — الخادم هو مرجع الصلاحية دائمًا: المالك محصّن من
- * التعديل والإزالة (403)، وحد المقاعد حسب الخطة يردّ 409 برسالة
- * الترقية العربية فتُعرض كما هي. لا صلاحيات إضافية (extraPerms)
- * في النسخة الأصلية — بقيت تحرر من الويب حيث نموذجها الكامل.
+ * التعديل والإزالة (403)، وحد المقاعد حسب الخطة يردّ 409 PLAN_LIMIT
+ * برسالة الترقية العربية — تظهر كما هي (الصدق أولًا) ومعها باب
+ * الترقية إلى شاشة الباقات (P42-W4، GAP-SO-1: مرآة staff:98 على
+ * الويب — لا رفض بلا مخرج). القائمة نفسها تحمل seats.canInvite
+ * من نفس مصدر الحقيقة الذي يرفض الـPOST، فالباب يفتح قبل النموذج
+ * أصلًا (مع عدّاد المقاعد الرمادي — مرآة رقاقة الويب) والـ409 يبقى
+ * شبكة الأمان عند السباق. لا صلاحيات إضافية (extraPerms) في
+ * النسخة الأصلية — بقيت تحرر من الويب حيث نموذجها الكامل.
  */
 import React, { useMemo, useState } from 'react'
 import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -22,11 +27,13 @@ import { fonts, type ThemeColors } from '@/constants/theme'
 import { useTheme } from '@/theme/ThemeProvider'
 import { useAuthStore } from '@/state/auth'
 import { ApiError, NetworkError, createStaff, fetchStaff, removeStaff, updateStaffRole } from '@/services/merchant'
+import { isPlanLimitRefusal } from '@/lib/plan-gates'
+import { STAFF_SEATS_DOOR_LABEL } from '@/lib/plans'
 import { formatNumber } from '@/lib/money'
 import { formatArabicDate } from '@/lib/datetime'
 import { ROLE_AR, type Role } from '@/types/merchant'
 import { Button, Chip, Field, Hairline, MiniStamp } from '@/components/ui'
-import { EmptyState, ErrorState, LoadingState } from '@/components/state-views'
+import { EmptyState, ErrorState, LoadingState, UpgradeDoor } from '@/components/state-views'
 import { showToast } from '@/components/toast'
 import { PlusIcon, TrashIcon, UserIcon } from '@/components/icons'
 
@@ -59,6 +66,9 @@ function AddMemberForm({
   const [password, setPassword] = useState('')
   const [role, setRole] = useState<'ADMIN' | 'STAFF'>('STAFF')
   const [errors, setErrors] = useState<AddErrors>({})
+  /* 409 PLAN_LIMIT — رسالة الخادم تبقى ظاهرة في النموذج (لا Alert
+   * عابرًا يخفيها) ومعها باب الترقية. */
+  const [limitMsg, setLimitMsg] = useState<string | null>(null)
 
   const mutation = useMutation({
     mutationFn: () => createStaff(businessId, { name: name.trim(), email: email.trim().toLowerCase(), password, role }),
@@ -68,7 +78,12 @@ function AddMemberForm({
       onClose(true)
     },
     onError: (err) => {
-      // 409 حد المقاعد: رسالة الترقية العربية تصل كما هي من الخادم.
+      // 409 حد المقاعد: رسالة الخادم العربية تبقى مرئية داخل النموذج
+      // ومعها باب الترقية (الصدق أولًا ثم المخرج)؛ ما سواه Alert كما كان.
+      if (isPlanLimitRefusal(err)) {
+        setLimitMsg(err instanceof Error ? err.message : 'حد مقاعد الفريق حسب باقتك')
+        return
+      }
       Alert.alert('تعذّرت الإضافة', errMsg(err, 'تعذّرت الإضافة — حاول بعد قليل'))
     },
   })
@@ -80,6 +95,7 @@ function AddMemberForm({
     if (password.length < 8) e.password = 'كلمة المرور 8 أحرف على الأقل'
     setErrors(e)
     if (Object.keys(e).length > 0) return
+    setLimitMsg(null)
     mutation.mutate()
   }
 
@@ -122,6 +138,12 @@ function AddMemberForm({
           secureTextEntry
           autoCapitalize="none"
         />
+        {limitMsg ? (
+          <View style={s.limitBox}>
+            <Text style={s.limitText}>{limitMsg}</Text>
+            <UpgradeDoor label={STAFF_SEATS_DOOR_LABEL} />
+          </View>
+        ) : null}
         <View style={s.roleWrap}>
           <Text style={s.roleLabel}>الدور</Text>
           <View style={s.roleRow} accessible accessibilityLabel="اختيار الدور">
@@ -165,6 +187,11 @@ export default function ManageStaffScreen() {
     enabled: !!businessId && canManage,
   })
   const staff = useMemo(() => query.data?.staff ?? [], [query.data])
+  /* مقاعد الخطة من نفس مصدر الحقيقة الذي يرفض الـPOST — الباب يفتح
+   * قبل النموذج (مرآة staff:98 على الويب): canInvite=false تعني أن
+   * الباقة لا تبيع مقاعد أو العدد اكتمل. */
+  const seats = query.data?.seats ?? null
+  const seatsBlocked = !!seats && !seats.canInvite
 
   const roleMutation = useMutation({
     mutationFn: (input: { id: string; role: 'ADMIN' | 'STAFF' }) =>
@@ -244,15 +271,32 @@ export default function ManageStaffScreen() {
         </Text>
 
         {!adding ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="إضافة عضو فريق"
-            onPress={() => setAdding(true)}
-            style={({ pressed }) => [s.addButton, pressed && { opacity: 0.7 }]}
-          >
-            <PlusIcon size={16} color={t.primary} />
-            <Text style={s.addText}>إضافة عضو</Text>
-          </Pressable>
+          seatsBlocked ? (
+            /* الباقة بلا مقاعد أو العدد اكتمل — الحالة الصادقة بباب
+             * ترقية بدل زر يفتح نموذجًا محكومًا بالرفض (staff:98).
+             * العدّاد الرمادي مرآة رقاقة الويب (staff:101-104
+             * «{current} / {max}» بdir="ltr") بصيغة عربية آمنة في
+             * RTL: الأرقام المجردة مع الشرطة تنعكس في نص RTL،
+             * والصيغة «X من Y» هي قواعد عائلة W2-ORD-5 نفسها،
+             * والتسمية تحمل دلالة أيقونة الويب. */
+            <View style={s.blockedRow}>
+              <MiniStamp
+                text={`مقاعد الفريق: ${formatNumber(seats.current)} من ${formatNumber(seats.max)}`}
+                family="grey"
+              />
+              <UpgradeDoor label={STAFF_SEATS_DOOR_LABEL} />
+            </View>
+          ) : (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="إضافة عضو فريق"
+              onPress={() => setAdding(true)}
+              style={({ pressed }) => [s.addButton, pressed && { opacity: 0.7 }]}
+            >
+              <PlusIcon size={16} color={t.primary} />
+              <Text style={s.addText}>إضافة عضو</Text>
+            </Pressable>
+          )
         ) : (
           <AddMemberForm
             businessId={businessId as string}
@@ -422,6 +466,21 @@ const makeStyles = (t: ThemeColors) => StyleSheet.create({
     lineHeight: 17,
   },
   formActions: { flexDirection: 'row', gap: 10 },
+  limitBox: {
+    borderWidth: 1,
+    borderColor: `${t.destructive}50`,
+    borderRadius: 12,
+    backgroundColor: t.card,
+    padding: 12,
+    gap: 10,
+  },
+  limitText: {
+    fontFamily: fonts.medium,
+    fontSize: 12.5,
+    color: t.destructive,
+    lineHeight: 19,
+  },
+  blockedRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, padding: 12 },
   iconWell: {
     width: 36,

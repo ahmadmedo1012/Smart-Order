@@ -402,6 +402,38 @@ export interface StaffMember {
   user: { id: string; email: string; name: string; phone: string | null; createdAt: string }
 }
 
+/**
+ * مقاعد الفريق (GET /api/staff يحملها مع القائمة — W2-ORD-4): نفس
+ * مصدر الحقيقة الذي يرفض الـPOST (currentPlan + teamSeatsFor).
+ * canInvite = false تعني: الباقة لا تبيع مقاعد (المالك وحده) أو
+ * العدد اكتمل — تُستبدل أزرار الإضافة بباب الترقية (لا درب مسدود).
+ */
+export interface StaffSeats {
+  current: number
+  max: number
+  planNameAr: string
+  canInvite: boolean
+}
+
+/* ── الباقات (GET /api/plans — نفس كتالوج صفحة الأسعار) ───────── */
+
+/**
+ * بطاقة باقة — مرآة عقد /api/plans وPlan في الويب (lib/plan-types).
+ * المعرف اختياري: النسخة الساقطة في lib/plans.ts بلا cuid (يولده
+ * الخادم) ولا شيء في التطبيق يحتاجه — الاشتراك يُتم من الويب.
+ */
+export interface MobilePlan {
+  id?: string | null
+  name: string
+  nameAr: string
+  price: number
+  periodDays: number
+  maxProducts: number
+  maxOrders: number
+  sortOrder: number
+  features: string[]
+}
+
 /* ── التقارير (GET /api/mobile/reports) ───────────────────────── */
 
 export interface MobileReportSummary {

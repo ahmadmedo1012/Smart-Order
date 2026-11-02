@@ -1,11 +1,20 @@
 /**
  * Smart Order Mobile — حالات موحدة (تحميل/خطأ/فراغ) بنبرة العلامة.
  * الألوان عبر useTheme — تتبع الوضع الليلي/النهاري.
+ *
+ * P42-W4 (GAP-SO-1): عائلة رفض الخطة — الحالة المقفولة وباب الترقية.
+ * رفض الباقة ليس خطأً ولا فراغًا: إنه رفض مسمّى مع مخرج. الويب يعرض
+ * EmptyState بقفل + زر «عرض الباقات والترقية» → /pricing (تقارير)،
+ * ورقاقة copper «مقاعد أكثر — رقّ خطتك» (فريق) — هنا مرآتهما:
+ * LockedState (الحالة الكاملة) وUpgradeDoor (الرقاقة البابية)،
+ * وكلاهما يفتح شاشة الباقات الأصلية للتطبيق.
  */
 import React from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
-import { fonts, type ThemeColors } from '@/constants/theme'
+import { router } from 'expo-router'
+import { fonts, radius, type ThemeColors } from '@/constants/theme'
 import { useTheme } from '@/theme/ThemeProvider'
+import { PlusIcon } from '@/components/icons'
 
 export function LoadingState({ label = 'جارٍ التحميل…' }: { label?: string }) {
   const { t } = useTheme()
@@ -60,6 +69,81 @@ export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   )
 }
 
+/**
+ * الحالة المقفولة (رفض خطة 403 PLAN_ENTITLEMENT) — مرآة عائلة الويب:
+ * رفض الاستحقاق حالة مقفولة مسمّاة بباب ترقية، لا خطأً ميتًا ولا
+ * دورانًا كاذبًا. العنوان يُقرأ من ثابت الحد الأدنى (مثبّت باختبار
+ * يقرأ مصدر الويب) فلا ينحرف عن البوابة أبدًا؛ والباب الافتراضي
+ * هو شاشة الباقات الأصلية (المقصد العائلي الوحيد للترقية).
+ */
+export function LockedState({
+  title,
+  description,
+  ctaLabel = 'عرض الباقات والترقية',
+  onCta,
+}: {
+  title: string
+  description?: string | null
+  ctaLabel?: string
+  onCta?: () => void
+}) {
+  const { t } = useTheme()
+  const s = makeStyles(t)
+  return (
+    <View style={s.center}>
+      <Text style={s.emoji} accessibilityRole="image" aria-label="مقفل">
+        🔒
+      </Text>
+      <Text style={s.title}>{title}</Text>
+      {description ? <Text style={s.label}>{description}</Text> : null}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={ctaLabel}
+        onPress={onCta ?? (() => router.push('/merchant/manage/pricing'))}
+        style={({ pressed }) => [s.retry, pressed && { opacity: 0.8 }]}
+      >
+        <Text style={s.retryText}>{ctaLabel}</Text>
+      </Pressable>
+    </View>
+  )
+}
+
+/**
+ * باب الترقية (رقاقة copper) — مرآة رقاقة الويب في staff:98 (حدّ
+ * الحبر العائلي 59 على أرض العائلة وطابع مربّع radius.stamp). يظهر
+ * حيث يقع الرفض أو قبله: رفض الخطة لا يُترك بلا مخرج، والافتراضي
+ * يفتح شاشة الباقات الأصلية.
+ */
+export function UpgradeDoor({
+  label,
+  onPress,
+}: {
+  label: string
+  onPress?: () => void
+}) {
+  const { t, statusFamily } = useTheme()
+  const s = makeStyles(t)
+  const fam = statusFamily.copper
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress ?? (() => router.push('/merchant/manage/pricing'))}
+      style={({ pressed }) => [
+        s.door,
+        {
+          backgroundColor: fam.bg,
+          borderColor: `${fam.ink}59`,
+        },
+        pressed && { opacity: 0.8 },
+      ]}
+    >
+      <PlusIcon size={14} color={fam.deep} />
+      <Text style={[s.doorText, { color: fam.deep }]}>{label}</Text>
+    </Pressable>
+  )
+}
+
 const makeStyles = (t: ThemeColors) =>
   StyleSheet.create({
     center: {
@@ -94,5 +178,21 @@ const makeStyles = (t: ThemeColors) =>
       color: t.primaryFg,
       fontFamily: fonts.bold,
       fontSize: 14,
+    },
+    door: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      borderRadius: radius.stamp,
+      borderWidth: 1,
+      paddingVertical: 8,
+      paddingHorizontal: 14,
+      alignSelf: 'flex-start',
+      minHeight: 44,
+    },
+    doorText: {
+      fontFamily: fonts.bold,
+      fontSize: 12.5,
+      lineHeight: 18,
     },
   })
