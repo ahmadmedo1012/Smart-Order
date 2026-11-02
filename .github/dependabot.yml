@@ -1,0 +1,38 @@
+# P42 (Wave 1) — automated dependency hygiene, adapted to a TWO-lockfile repo
+# (the Smart-Link r9 family pattern, where it fits, and not where it doesn't):
+#
+#   · /mobile is npm-managed (mobile/package-lock.json) — Dependabot's npm
+#     ecosystem covers it natively (the mobile CI job installs with npm ci).
+#
+#   · The ROOT is bun-managed: bun.lock is NOT a lockfile format Dependabot
+#     speaks (unsupported ecosystem for lockfile updates), and package.json
+#     without the lock would file phantom PRs that drift from the frozen
+#     resolution CI and production actually install (bun.lock is the repo's
+#     contract — package-lock.json is deliberately gitignored; see the CI
+#     header for the npm-vs-bun resolution incident). So there is NO "/"
+#     npm entry BY DESIGN: the root's supply-chain gate stays where it
+#     already lives — CI's `bun audit --audit-level=high` plus the P38
+#     moderate-triage report (scripts/dependency-audit-report.mjs).
+#
+#   · github-actions: the workflow actions (checkout/setup-node/setup-bun)
+#     are dependencies too — same weekly cadence as the family.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/mobile"
+    schedule:
+      interval: "weekly"
+    # Security fixes immediately; group minor/patch noise into one PR.
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(ci)"
