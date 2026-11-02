@@ -17,7 +17,8 @@ import { useAuthStore } from '@/state/auth'
 import { fetchCategories, fetchProducts } from '@/services/merchant'
 import { formatMillimes } from '@/lib/money-millimes'
 import { Button, Chip, MiniStamp } from '@/components/ui'
-import { EmptyState, ErrorState, LoadingState } from '@/components/state-views'
+import { EmptyState, ErrorState } from '@/components/state-views'
+import { ManageListSkeleton } from '@/components/skeleton'
 
 const NO_CATEGORY = '__none__'
 
@@ -96,7 +97,7 @@ export default function ManageProductsScreen() {
       ) : null}
 
       {productsQuery.isPending ? (
-        <LoadingState label="جارٍ تحميل المنتجات…" />
+        <ManageListSkeleton label="جارٍ تحميل المنتجات…" rows={5} />
       ) : productsQuery.isError ? (
         <ErrorState
           message="تعذر تحميل المنتجات — تحقق من الإنترنت وحاول مجددًا"

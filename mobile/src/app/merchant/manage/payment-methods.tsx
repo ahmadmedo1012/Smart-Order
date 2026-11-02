@@ -33,7 +33,8 @@ import {
   type PaymentType,
 } from '@/types/merchant'
 import { Button, Field, Hairline, MiniStamp } from '@/components/ui'
-import { EmptyState, ErrorState, LoadingState } from '@/components/state-views'
+import { EmptyState, ErrorState } from '@/components/state-views'
+import { ManageListSkeleton } from '@/components/skeleton'
 import { showToast } from '@/components/toast'
 import { ChevronDownIcon, ChevronUpIcon, PencilIcon, WalletIcon } from '@/components/icons'
 
@@ -184,7 +185,7 @@ export default function ManagePaymentMethodsScreen() {
         <Text style={s.sub}>اختر ما يظهر للعملاء في صفحة الدفع — الأسهم ترتّب ظهورها</Text>
 
         {query.isPending ? (
-          <LoadingState label="جارٍ تحميل طرق الدفع…" />
+          <ManageListSkeleton label="جارٍ تحميل طرق الدفع…" rows={2} />
         ) : query.isError ? (
           <ErrorState
             message="تعذر تحميل طرق الدفع — تحقق من الإنترنت وحاول مجددًا"

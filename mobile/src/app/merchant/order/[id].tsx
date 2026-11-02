@@ -28,7 +28,8 @@ import {
 } from '@/types/merchant'
 import { FULFILLMENT_AR, type OrderStatus } from '@/types/storefront'
 import { Button, Hairline, StatusStamp } from '@/components/ui'
-import { ErrorState, LoadingState } from '@/components/state-views'
+import { ErrorState } from '@/components/state-views'
+import { DetailSkeleton } from '@/components/skeleton'
 import { MapPinIcon, PhoneIcon } from '@/components/icons'
 
 /** فك لقطة الإضافات — فشل التفكيك يعرض السطر بلا إضافات. */
@@ -127,7 +128,7 @@ export default function MerchantOrderDetailScreen() {
         />
       )
     }
-    return <LoadingState label="جارٍ تحميل الطلب…" />
+    return <DetailSkeleton label="جارٍ تحميل الطلب…" />
   }
 
   const isDelivery = order.fulfillmentType === 'DELIVERY'

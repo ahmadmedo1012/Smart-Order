@@ -19,7 +19,8 @@ import { createCategory, deleteCategory, fetchCategories, renameCategory } from 
 import { apiErrorMessage } from '@/lib/api-error'
 import type { MerchantCategory } from '@/types/merchant'
 import { Button, Field, Hairline, MiniStamp } from '@/components/ui'
-import { EmptyState, ErrorState, LoadingState } from '@/components/state-views'
+import { EmptyState, ErrorState } from '@/components/state-views'
+import { ManageListSkeleton } from '@/components/skeleton'
 import { showToast } from '@/components/toast'
 import { PencilIcon } from '@/components/icons'
 
@@ -155,7 +156,7 @@ export default function ManageCategoriesScreen() {
         ) : null}
 
         {query.isPending ? (
-          <LoadingState label="جارٍ تحميل الأقسام…" />
+          <ManageListSkeleton label="جارٍ تحميل الأقسام…" rows={4} />
         ) : query.isError ? (
           <ErrorState
             message="تعذر تحميل الأقسام — تحقق من الإنترنت وحاول مجددًا"

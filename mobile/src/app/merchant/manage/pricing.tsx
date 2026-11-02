@@ -38,7 +38,8 @@ import {
   planBadge,
 } from '@/lib/plans'
 import type { MobilePlan } from '@/types/merchant'
-import { ErrorState, LoadingState } from '@/components/state-views'
+import { ErrorState } from '@/components/state-views'
+import { PricingSkeleton } from '@/components/skeleton'
 
 /** بطاقة باقة — مرآة بنية بطاقة الويب: الشارة، الاسم، السعر،
  *  الحدود، الميزات (بعد طيّ إعادة ذكر الحدين)، والباب. */
@@ -232,7 +233,7 @@ export default function ManagePricingScreen() {
         </View>
 
         {query.isPending ? (
-          <LoadingState label="جارٍ تحميل الباقات…" />
+          <PricingSkeleton />
         ) : query.isError ? (
           <>
             {/* التعذر الصادق: نسخة التطبيق المثبَّتة على بذور الويب */}

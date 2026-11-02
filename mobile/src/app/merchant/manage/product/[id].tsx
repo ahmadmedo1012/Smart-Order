@@ -44,7 +44,8 @@ import { apiErrorMessage } from '@/lib/api-error'
 import { formatMillimesAmount, parseAmountMillimes } from '@/lib/money-millimes'
 import type { MerchantCategory, MerchantProduct } from '@/types/merchant'
 import { Button, Chip, Field, Hairline, Toggle } from '@/components/ui'
-import { LoadingState, ErrorState } from '@/components/state-views'
+import { ErrorState } from '@/components/state-views'
+import { ProductFormSkeleton } from '@/components/skeleton'
 import { showToast } from '@/components/toast'
 import { PlusIcon, TrashIcon } from '@/components/icons'
 
@@ -142,7 +143,7 @@ export default function ProductFormScreen() {
         />
       )
     }
-    return <LoadingState label="جارٍ تحميل المنتج…" />
+    return <ProductFormSkeleton />
   }
 
   return (

@@ -18,7 +18,8 @@ import { trackOrder } from '@/services/storefront'
 import { formatLyd } from '@/lib/money'
 import { CheckCircleIcon, ClockIcon } from '@/components/icons'
 import { Button, Hairline, StatusStamp } from '@/components/ui'
-import { ErrorState, LoadingState } from '@/components/state-views'
+import { ErrorState } from '@/components/state-views'
+import { TrackSkeleton } from '@/components/skeleton'
 import {
   FULFILLMENT_AR,
   ORDER_STATUS_AR,
@@ -60,7 +61,7 @@ export default function TrackScreen() {
     },
   })
 
-  if (query.isLoading) return <LoadingState label="جارٍ فتح الطلب…" />
+  if (query.isLoading) return <TrackSkeleton />
   if (query.isError)
     return (
       <ErrorState

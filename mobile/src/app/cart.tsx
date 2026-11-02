@@ -40,7 +40,8 @@ import {
 import { randomUUID } from '@/lib/uuid'
 import { CoinsIcon, MinusIcon, PlusIcon } from '@/components/icons'
 import { Button, Field, Hairline } from '@/components/ui'
-import { ErrorState, LoadingState } from '@/components/state-views'
+import { ErrorState } from '@/components/state-views'
+import { CartSkeleton } from '@/components/skeleton'
 import type { FulfillmentType } from '@/types/storefront'
 
 export default function CartScreen() {
@@ -104,7 +105,7 @@ export default function CartScreen() {
     }
   }
 
-  if (query.isLoading) return <LoadingState label="جارٍ تجهيز السلة…" />
+  if (query.isLoading) return <CartSkeleton />
   if (query.isError)
     return (
       <ErrorState

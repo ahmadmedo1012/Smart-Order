@@ -33,7 +33,8 @@ import { formatNumber } from '@/lib/money'
 import { formatArabicDate } from '@/lib/datetime'
 import { ROLE_AR, type Role } from '@/types/merchant'
 import { Button, Chip, Field, Hairline, MiniStamp } from '@/components/ui'
-import { EmptyState, ErrorState, LoadingState, UpgradeDoor } from '@/components/state-views'
+import { EmptyState, ErrorState, UpgradeDoor } from '@/components/state-views'
+import { ManageListSkeleton } from '@/components/skeleton'
 import { showToast } from '@/components/toast'
 import { PlusIcon, TrashIcon, UserIcon } from '@/components/icons'
 
@@ -308,7 +309,7 @@ export default function ManageStaffScreen() {
         )}
 
         {query.isPending ? (
-          <LoadingState label="جارٍ تحميل الفريق…" />
+          <ManageListSkeleton label="جارٍ تحميل الفريق…" rows={3} />
         ) : query.isError ? (
           <ErrorState
             message="تعذر تحميل الفريق — تحقق من الإنترنت وحاول مجددًا"

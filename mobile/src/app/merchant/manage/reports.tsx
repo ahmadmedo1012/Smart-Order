@@ -27,7 +27,8 @@ import { formatNumber } from '@/lib/money'
 import { formatMillimes } from '@/lib/money-millimes'
 import { AR_MONTHS } from '@/lib/datetime'
 import { ORDER_STATUS_AR, type OrderStatus } from '@/types/storefront'
-import { ErrorState, LoadingState, LockedState } from '@/components/state-views'
+import { ErrorState, LockedState } from '@/components/state-views'
+import { ReportsSkeleton } from '@/components/skeleton'
 import { isPlanEntitlementRefusal } from '@/lib/plan-gates'
 import {
   PRICING_CTA_LABEL,
@@ -346,7 +347,7 @@ export default function ManageReportsScreen() {
 
         {/* التقرير */}
         {windowError ? null : query.isPending ? (
-          <LoadingState label="جارٍ تحميل التقرير…" />
+          <ReportsSkeleton />
         ) : query.isError || !report ? (
           <ErrorState
             message={query.isError ? apiErrorMessage(query.error, 'تعذر تحميل التقرير — حاول بعد قليل') : 'تعذر تحميل التقرير'}

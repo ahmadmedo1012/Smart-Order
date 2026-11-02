@@ -339,3 +339,18 @@ export function MoonIcon({ size = 24, color = 'currentColor' }: IconProps) {
     </Svg>
   )
 }
+
+/** واي فاي مقطوع (lucide wifi-off) — لافتة انقطاع الاتصال (P42-W5). */
+export function WifiOffIcon({ size = 24, color = 'currentColor' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M12 20h.01" />
+      <Path d="M8.5 16.4a5 5 0 0 1 7 0" />
+      <Path d="M5 12.9a10 10 0 0 1 5.2-2.7" />
+      <Path d="M19 12.9a10 10 0 0 0-3.2-2" />
+      <Path d="M2 8.8a15 15 0 0 1 4.2-2.6" />
+      <Path d="M22 8.8a15 15 0 0 0-8.4-3.5" />
+      <Path d="m2 2 20 20" />
+    </Svg>
+  )
+}

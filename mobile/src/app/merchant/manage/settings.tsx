@@ -22,7 +22,8 @@ import { useAuthStore } from '@/state/auth'
 import { fetchBusiness, updateBusiness } from '@/services/merchant'
 import { apiErrorMessage } from '@/lib/api-error'
 import { Button, Field, Hairline, MiniStamp, Toggle } from '@/components/ui'
-import { EmptyState, ErrorState, LoadingState } from '@/components/state-views'
+import { EmptyState, ErrorState } from '@/components/state-views'
+import { SettingsSkeleton } from '@/components/skeleton'
 import { showToast } from '@/components/toast'
 import { CopyIcon, ShareIcon } from '@/components/icons'
 
@@ -210,7 +211,7 @@ export default function ManageSettingsScreen() {
         <Text style={s.sub}>الاسم والتواصل والعنوان — وبيانات النشر ورابط المتجر</Text>
 
         {query.isPending ? (
-          <LoadingState label="جارٍ تحميل الإعدادات…" />
+          <SettingsSkeleton />
         ) : query.isError || !business ? (
           <ErrorState
             message="تعذر تحميل إعدادات المتجر — تحقق من الإنترنت وحاول مجددًا"

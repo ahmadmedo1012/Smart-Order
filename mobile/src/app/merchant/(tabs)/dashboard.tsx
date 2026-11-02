@@ -16,7 +16,8 @@ import { fetchDashboardStats } from '@/services/merchant'
 import { formatNumber } from '@/lib/money'
 import { formatMillimes } from '@/lib/money-millimes'
 import { ORDER_STATUS_AR, type OrderStatus } from '@/types/storefront'
-import { ErrorState, LoadingState } from '@/components/state-views'
+import { ErrorState } from '@/components/state-views'
+import { DashboardSkeleton } from '@/components/skeleton'
 
 /** صف عدّادات الحالات — نفس ترتيب آلة الخادم. */
 const STATUS_ORDER: OrderStatus[] = [
@@ -57,7 +58,7 @@ export default function MerchantDashboardScreen() {
   })
 
   if (query.isPending) {
-    return <LoadingState label="جارٍ تحميل لوحة القيادة…" />
+    return <DashboardSkeleton />
   }
   if (query.isError || !query.data) {
     return (

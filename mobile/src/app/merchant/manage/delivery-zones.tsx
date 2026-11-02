@@ -19,7 +19,8 @@ import { apiErrorMessage } from '@/lib/api-error'
 import { formatMillimes, formatMillimesAmount, parseAmountMillimes } from '@/lib/money-millimes'
 import type { MerchantZone } from '@/types/merchant'
 import { Button, Field, Hairline, MiniStamp, Toggle } from '@/components/ui'
-import { EmptyState, ErrorState, LoadingState } from '@/components/state-views'
+import { EmptyState, ErrorState } from '@/components/state-views'
+import { ManageListSkeleton } from '@/components/skeleton'
 import { showToast } from '@/components/toast'
 import { PencilIcon, TruckIcon } from '@/components/icons'
 
@@ -127,7 +128,7 @@ export default function ManageZonesScreen() {
         <CreateZoneCard busy={busy} onSubmit={(input) => createMutation.mutate(input)} />
 
         {query.isPending ? (
-          <LoadingState label="جارٍ تحميل المناطق…" />
+          <ManageListSkeleton label="جارٍ تحميل المناطق…" rows={3} />
         ) : query.isError ? (
           <ErrorState
             message="تعذر تحميل المناطق — تحقق من الإنترنت وحاول مجددًا"

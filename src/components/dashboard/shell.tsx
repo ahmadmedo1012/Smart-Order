@@ -23,6 +23,9 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/lib/client";
 import { EmptyState } from "@/components/shared/states";
+/* P42-W5 (GAP-X2): شريط انقطاع الإنترنت الصادق — مرآة نمط WifiOff في
+   صفحة التتبع، مرفوعًا إلى القشرة ليحمله كل سطح تاجر. */
+import { OfflineBanner } from "@/components/dashboard/offline-banner";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -361,6 +364,9 @@ export function DashboardShell({
           </aside>
 
           <div className="flex-1 min-w-0 flex flex-col">
+            {/* Device-offline strip (GAP-X2) — under the sticky topbar,
+                quiet, persistent, honest (no save claims). */}
+            <OfflineBanner />
             {/* Topbar */}
             <header className="sticky top-0 z-(--z-dropdown) h-16 border-b border-border bg-background/90 backdrop-blur-md flex items-center gap-3 px-4 sm:px-6">
               {/* Mobile menu */}

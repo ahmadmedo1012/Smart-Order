@@ -8,9 +8,11 @@
  *   اللاتيني، وIBM Plex Mono 400/500 للرموز التشغيلية.
  * - الوضع اللوني: ThemeProvider يقلع داكنًا (توافق الويب) مع
  *   تبديل محفوظ؛ الحالة وشريط التنقّل يتبعان الوضع.
- * - المزودات: QueryClient (نفس مكتبة الويب).
+ * - المزودات: QueryClient (نفس مكتبة الويب) + لافتة الاتصال
+ *   العالمية (P42-W5: NetInfo → onlineManager — العودة للاتصال
+ *   تعيد جلب الاستعلامات الراكدة وتستأنف المتوقفة، بلا فقدان صامت).
  */
-import { I18nManager } from 'react-native'
+import { I18nManager, View } from 'react-native'
 import { useEffect, useState } from 'react'
 import { Stack } from 'expo-router'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -35,6 +37,7 @@ import { queryClient } from '@/lib/query-client'
 import { ensureRTL } from '@/lib/ensure-rtl'
 import { useAuthStore } from '@/state/auth'
 import { LoadingState } from '@/components/state-views'
+import { ConnectivityBanner } from '@/components/connectivity-banner'
 
 // عربي أولًا — قبل أي رسم.
 I18nManager.allowRTL(true)
@@ -84,18 +87,22 @@ function AppShell() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: t.background },
-      }}
-    >
-      <Stack.Screen name="index" />
-      <Stack.Screen name="store/[slug]" />
-      <Stack.Screen name="product/[id]" />
-      <Stack.Screen name="cart" />
-      <Stack.Screen name="track/[token]" />
-    </Stack>
+    <View style={{ flex: 1, backgroundColor: t.background }}>
+      {/* لافتة انقطاع الاتصال — فوق كل شاشات التطبيق (ضيفًا وتاجرًا) */}
+      <ConnectivityBanner />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: t.background },
+        }}
+      >
+        <Stack.Screen name="index" />
+        <Stack.Screen name="store/[slug]" />
+        <Stack.Screen name="product/[id]" />
+        <Stack.Screen name="cart" />
+        <Stack.Screen name="track/[token]" />
+      </Stack>
+    </View>
   )
 }
 

@@ -18,7 +18,8 @@ import { formatArabicClock, formatArabicDayShort } from '@/lib/datetime'
 import { formatMillimes } from '@/lib/money-millimes'
 import { FULFILLMENT_AR, type OrderStatus } from '@/types/storefront'
 import { Chip, StatusStamp } from '@/components/ui'
-import { EmptyState, ErrorState, LoadingState } from '@/components/state-views'
+import { EmptyState, ErrorState } from '@/components/state-views'
+import { OrdersSkeleton } from '@/components/skeleton'
 
 /** رقائق الصندوق — «الكل» + الحالات السبع الحية للتاجر. */
 const FILTERS: { value: OrderStatus | 'ALL'; label: string }[] = [
@@ -76,7 +77,7 @@ export default function MerchantOrdersScreen() {
 
       {/* القائمة */}
       {query.isPending ? (
-        <LoadingState label="جارٍ تحميل الطلبات…" />
+        <OrdersSkeleton />
       ) : query.isError ? (
         <ErrorState
           message="تعذر تحميل الطلبات — تحقق من الإنترنت وحاول مجددًا"

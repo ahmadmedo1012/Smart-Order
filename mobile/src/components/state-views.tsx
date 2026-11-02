@@ -16,6 +16,14 @@ import { fonts, radius, type ThemeColors } from '@/constants/theme'
 import { useTheme } from '@/theme/ThemeProvider'
 import { PlusIcon } from '@/components/icons'
 
+/**
+ * حالة التحميل الدوّارة — عقيدة العائلة (P42-W5، GAP-SO-2): أسطح
+ * البيانات الرئيسية ترسم هيكلًا عظميًا مطابقًا للشكل
+ * (components/skeleton.tsx — مرآة الـ19 هيكلًا في الويب)، وهذا الدوار
+ * يبقى فقط حيث لا شكل ثابتًا له: بوابات الإقلاع/الجلسة (جذر التخطيط
+ * قبل جاهزية الخطوط، وبوابة تاجر قبل حسم الوجهة دخولًا/تبويبات) —
+ * هناك الصدق دوار قصير، لا هيكلًا يكذب على ما هو قادم.
+ */
 export function LoadingState({ label = 'جارٍ التحميل…' }: { label?: string }) {
   const { t } = useTheme()
   const s = makeStyles(t)

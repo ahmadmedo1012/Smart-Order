@@ -19,7 +19,8 @@ import { useCart } from '@/state/cart'
 import { formatLyd } from '@/lib/money'
 import { MinusIcon, PlusIcon } from '@/components/icons'
 import { Button } from '@/components/ui'
-import { ErrorState, LoadingState } from '@/components/state-views'
+import { ErrorState } from '@/components/state-views'
+import { ProductDetailSkeleton } from '@/components/skeleton'
 
 export default function ProductScreen() {
   const { t } = useTheme()
@@ -48,7 +49,7 @@ export default function ProductScreen() {
 
   const cart = useCart()
 
-  if (query.isLoading) return <LoadingState label="جارٍ فتح الصنف…" />
+  if (query.isLoading) return <ProductDetailSkeleton />
   if (query.isError)
     return (
       <ErrorState

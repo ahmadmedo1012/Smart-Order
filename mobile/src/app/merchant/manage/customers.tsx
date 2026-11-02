@@ -20,7 +20,8 @@ import { formatNumber } from '@/lib/money'
 import { formatMillimes } from '@/lib/money-millimes'
 import { formatArabicDate } from '@/lib/datetime'
 import { Hairline } from '@/components/ui'
-import { EmptyState, ErrorState, LoadingState } from '@/components/state-views'
+import { EmptyState, ErrorState } from '@/components/state-views'
+import { ManageListSkeleton } from '@/components/skeleton'
 import { SearchIcon, UserIcon } from '@/components/icons'
 
 /** حد الخادم (take: 200) — نُظهره بصدق عند بلوغه. */
@@ -116,7 +117,7 @@ export default function ManageCustomersScreen() {
         {searching ? <Text style={s.searchingHint}>جارٍ البحث…</Text> : null}
 
         {query.isPending ? (
-          <LoadingState label="جارٍ تحميل العملاء…" />
+          <ManageListSkeleton label="جارٍ تحميل العملاء…" rows={5} />
         ) : query.isError ? (
           <ErrorState
             message="تعذر تحميل العملاء — تحقق من الإنترنت وحاول مجددًا"

@@ -20,7 +20,8 @@ import { rememberStore } from '@/state/recents'
 import { formatLyd } from '@/lib/money'
 import { CartIcon } from '@/components/icons'
 import { Chip } from '@/components/ui'
-import { EmptyState, ErrorState, LoadingState } from '@/components/state-views'
+import { EmptyState, ErrorState } from '@/components/state-views'
+import { StorefrontSkeleton } from '@/components/skeleton'
 
 export default function StoreScreen() {
   const { t } = useTheme()
@@ -54,7 +55,7 @@ export default function StoreScreen() {
     return data.products.filter((p) => p.categoryId === activeCat)
   }, [data, activeCat])
 
-  if (query.isLoading) return <LoadingState label="جارٍ فتح المتجر…" />
+  if (query.isLoading) return <StorefrontSkeleton />
   if (query.isError)
     return (
       <ErrorState

@@ -21,7 +21,8 @@ import { formatMillimes } from '@/lib/money-millimes'
 import { formatArabicDate, formatArabicDateTime } from '@/lib/datetime'
 import { PAYMENT_STATUS_AR, type PaymentStatus } from '@/types/merchant'
 import { Hairline, MiniStamp, StatusStamp } from '@/components/ui'
-import { ErrorState, LoadingState } from '@/components/state-views'
+import { ErrorState } from '@/components/state-views'
+import { DetailSkeleton } from '@/components/skeleton'
 import { MapPinIcon, PhoneIcon } from '@/components/icons'
 
 function KpiCard({ label, value }: { label: string; value: string }) {
@@ -92,7 +93,7 @@ export default function ManageCustomerDetailScreen() {
         <Text style={s.title}>ملف العميل</Text>
 
         {query.isPending ? (
-          <LoadingState label="جارٍ تحميل ملف العميل…" />
+          <DetailSkeleton label="جارٍ تحميل ملف العميل…" section />
         ) : query.isError || !customer ? (
           <ErrorState
             message="تعذر تحميل ملف العميل — ربما حُذف أو تحقق من الإنترنت وحاول مجددًا"
