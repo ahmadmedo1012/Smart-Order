@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Noto_Kufi_Arabic } from "next/font/google";
 import { Providers } from "@/app/providers";
+import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
 
 /* P12-2d — the editorial display pair (spec-smart-order.md):
@@ -22,11 +23,9 @@ const kufi = Noto_Kufi_Arabic({
   display: "swap",
 });
 
-/** Canonical production origin (order.smart-link.ly, Vercel + Neon).
- * The old smart-order.onrender.com host is retired — keep OG/canonical/
- * sitemap URLs pointed at the live domain even when the env var is
- * unset (e.g. preview deployments). */
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://order.smart-link.ly";
+/* Canonical production origin: lib/site-url.ts (P42-W7) — the ONE source
+ * shared with robots.ts + sitemap.ts, so a lost env var can never leave
+ * the sitemap silently empty while OG/canonical keep the live domain. */
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

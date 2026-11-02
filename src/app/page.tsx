@@ -1,6 +1,6 @@
 import "./landing.css";
 import { SkipLink } from "@/components/shared/skip-link";
-import { SITE_URL } from "@/app/layout";
+import { SITE_URL } from "@/lib/site-url";
 import { getLandingStats } from "@/lib/landing-stats";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroSection } from "@/components/landing/hero-section";

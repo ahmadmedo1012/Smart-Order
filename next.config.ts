@@ -92,6 +92,15 @@ const nextConfig: NextConfig = {
        * revalidated it. Day + SWR (SM's og rule shape): the art only
        * changes on a deliberate re-upload. */
       { source: "/og-default.png", headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }] },
+      /* P42-W7 (§7.4 privacy — the tracking surface, belt over the meta):
+       * X-Robots-Tag noindex on every /track response (the lookup door +
+       * the per-order token pages) at the HTTP layer. The page metadata
+       * already speaks noindex,follow on every branch (P40/P42-W7), but
+       * a metadata failure path (generateMetadata throw — verified live:
+       * renders 200 with NO robots meta) or a robots.txt-ignoring
+       * crawler is exactly what the header still answers. `:path*`
+       * matches zero-or-more segments, so /track itself is covered. */
+      { source: "/track/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
     ];
   },
 };

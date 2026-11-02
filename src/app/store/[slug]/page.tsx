@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { cache } from "react";
 import { db } from "@/lib/db";
 import { Storefront, type StoreData } from "@/components/storefront/storefront";
-import { SITE_URL } from "@/app/layout";
+import { SITE_URL } from "@/lib/site-url";
 import { storeRobotsForBusinessName } from "@/lib/qa-fixtures";
 
 /* r131-F2 (SO-1, A8 perf): the money page left the force-dynamic path —
@@ -168,6 +168,15 @@ export async function generateMetadata({
         title,
         description,
         type: "website",
+        /* P42-W7 (§7.4): the page's openGraph object REPLACES the layout's
+         * (Next's shallow metadata merge), so the money page used to lose
+         * og:url + og:site_name on every share — the card had no URL (the
+         * scraper fell back to canonical) and no site attribution. url is
+         * the SELF page (same absolute param-safe target as the canonical,
+         * resolved through metadataBase; the slug is public DB data) and
+         * siteName is the real platform name (the layout's own value). */
+        url: `/store/${business.slug}`,
+        siteName: "سمارت أوردر",
         /* r133 (R11 / A12 S13): ar_AR — Facebook scrapers drop ar_LY. */
         locale: "ar_AR",
         images: ogImages,

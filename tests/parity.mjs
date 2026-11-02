@@ -1940,6 +1940,57 @@ for (const [name, okFlag] of W2ORD5) {
   else failures.push(`w2-ord-5 counter parity FAILED: ${name}`);
 }
 
+// ── P42-W7 (§7.4): the SEO discovery contract — the indexable surface is
+// the public store pages + marketing routes; tracking (private order
+// tokens + customer data), checkout, and every merchant/admin surface are
+// doors that must never leak into indexes. Source-contract pins over the
+// metadata/robots/sitemap seams (live-verified on a dev server before
+// pinning; the behavioral fallback is pinned in seo-contract.test.ts). ──
+const P42W7_SEO = [
+  ['P42-W7 one origin: lib/site-url.ts owns the fallback (|| — an explicitly-empty env is the documented new URL("") crash, closed) and NO source reads NEXT_PUBLIC_SITE_URL outside it',
+    R('src/lib/site-url.ts').includes('process.env.NEXT_PUBLIC_SITE_URL || "https://order.smart-link.ly"') &&
+    ['src/app/layout.tsx', 'src/app/page.tsx', 'src/app/store/[slug]/page.tsx',
+     'src/app/robots.ts', 'src/app/sitemap.ts']
+      .every((p) => R(p).includes('from "@/lib/site-url"') &&
+                    !R(p).includes('process.env.NEXT_PUBLIC_SITE_URL'))],
+  ['P42-W7 sitemap resilience: robots.ts + sitemap.ts ride the shared SITE_URL — a lost env var can no longer leave the sitemap silently empty while OG/canonical keep the live domain (the layout-comment promise, now universal)',
+    R('src/app/sitemap.ts').includes('const site = SITE_URL;') &&
+    R('src/app/robots.ts').includes('sitemap: `${site}/sitemap.xml`') &&
+    !R('src/app/robots.ts').includes('site ? ') &&
+    !R('src/app/sitemap.ts').includes('return [];')],
+  ['P42-W7 sitemap scope: exactly the four marketing base routes + the fixture-gated /store/{slug} template (public-store-only listings — doors/dashboard/checkout never ride it)',
+    /const base: MetadataRoute\.Sitemap = \[\s*\{ url: site,/.test(R('src/app/sitemap.ts')) &&
+    R('src/app/sitemap.ts').includes('`${site}/pricing`') &&
+    R('src/app/sitemap.ts').includes('`${site}/terms`') &&
+    R('src/app/sitemap.ts').includes('`${site}/privacy`') &&
+    R('src/app/sitemap.ts').includes('`${site}/store/${b.slug}`') &&
+    R('src/app/sitemap.ts').includes('notQaFixtureBusiness') &&
+    ((R('src/app/sitemap.ts').split('const base: MetadataRoute.Sitemap = [')[1] || '').split('];')[0].match(/url: /g) || []).length === 4],
+  ['P42-W7 robots budget: the private disallows stay AND /api/media/ opens (og:image + JSON-LD image direct URLs of real stores — the <img> tags ride /_next/image which was never blocked)',
+    R('src/app/robots.ts').includes('"/api/media/"') &&
+    ['/dashboard', '/api', '/track', '/login', '/register', '/store/*/checkout']
+      .every((d) => R('src/app/robots.ts').includes(`"${d}"`))],
+  ['P42-W7 checkout door: the P40 family\'s missing member — noindex,follow + SELF-canonical (was nofollow + the inherited homepage canonical, the triple contradiction)',
+    R('src/app/store/[slug]/checkout/page.tsx').includes('alternates: { canonical: `/store/${slug}/checkout` }') &&
+    R('src/app/store/[slug]/checkout/page.tsx').includes('robots: { index: false, follow: true }') &&
+    !R('src/app/store/[slug]/checkout/page.tsx').includes('follow: false')],
+  ['P42-W7 token privacy: /track/[token] emits NO canonical at all (canonical: null — verified live: no tag, no root-layout inheritance; the 122-bit credential never rides a head signal) and the door posture stays noindex,FOLLOW',
+    R('src/app/track/[token]/page.tsx').includes('canonical: null') &&
+    !R('src/app/track/[token]/page.tsx').includes('canonical: `/track/${token}`') &&
+    !R('src/app/track/[token]/page.tsx').includes('follow: false')],
+  ['P42-W7 token resilience: the track generateMetadata DB read is guarded (a throw was verified live to render 200 with NO robots meta — the noindex must survive an outage)',
+    /try \{[\s\S]*findUnique[\s\S]*\} catch \{/.test(R('src/app/track/[token]/page.tsx'))],
+  ['P42-W7 token belt: X-Robots-Tag noindex rides /track/:path* in next.config.ts — the HTTP layer answers even the metadata-failure paths (and :path* covers the bare /track door)',
+    NEXTCFG.includes('{ source: "/track/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex" }] }')],
+  ['P42-W7 store OG completeness: the money page\'s openGraph (which REPLACES the layout\'s under Next\'s shallow merge) carries its own url (self, param-safe, canonical-identical) + siteName — the share card lost both before the fix',
+    R('src/app/store/[slug]/page.tsx').includes('url: `/store/${business.slug}`') &&
+    R('src/app/store/[slug]/page.tsx').includes('siteName: "سمارت أوردر"')],
+];
+for (const [name, okFlag] of P42W7_SEO) {
+  if (okFlag) passed += 1;
+  else failures.push(`p42-w7 seo parity FAILED: ${name}`);
+}
+
 // ── report ───────────────────────────────────────────────────────────────────
 
 if (failures.length > 0) {

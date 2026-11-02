@@ -20,28 +20,48 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { token } = await params;
   /* P40 (P2-9): every branch speaks the robots.txt policy itself —
-   * noindex,follow + SELF-canonical. The token page previously said
-   * noindex,nofollow with NO canonical, so it inherited the root
-   * layout's canonical "/" (a per-order utility URL canonicalized to
-   * the homepage). follow:true aligns it with /track, /login and
-   * /register: these are doors, not content — never indexed, but links
-   * on them stay crawlable. */
-  const selfCanonical = { alternates: { canonical: `/track/${token}` } };
+   * noindex,follow. The token page previously said noindex,nofollow
+   * with NO canonical, so it inherited the root layout's canonical "/"
+   * (a per-order utility URL canonicalized to the homepage).
+   * follow:true aligns it with /track, /login and /register: these are
+   * doors, not content — never indexed, but links on them stay
+   * crawlable.
+   *
+   * P42-W7 (§7.4 privacy): the token IS the credential (the 122-bit
+   * order key) — it must never appear in ANY head signal. P40's
+   * self-canonical `/track/${token}` repeated the credential in the
+   * canonical link; `canonical: null` emits NO canonical at all in
+   * Next 16 (verified live: no tag, and no root-layout inheritance —
+   * the homepage-canonicalization P40 fixed stays fixed, the strictest
+   * way). og:url already inherits "/" (no token). */
+  const noCanonical = { alternates: { canonical: null } };
+  const robots = { index: false, follow: true };
   if (!/^[0-9a-f-]{16,64}$/i.test(token)) {
-    return { title: "الطلب غير متاح", robots: { index: false, follow: true }, ...selfCanonical };
+    return { title: "الطلب غير متاح", robots, ...noCanonical };
   }
-  const order = await db.order.findUnique({
-    where: { publicToken: token },
-    select: { orderNumber: true },
-  });
-  if (!order) {
-    return { title: "الطلب غير متاح", robots: { index: false, follow: true }, ...selfCanonical };
+  try {
+    const order = await db.order.findUnique({
+      where: { publicToken: token },
+      select: { orderNumber: true },
+    });
+    if (!order) {
+      return { title: "الطلب غير متاح", robots, ...noCanonical };
+    }
+    return {
+      title: `تتبع الطلب ${order.orderNumber}`,
+      robots,
+      ...noCanonical,
+    };
+  } catch {
+    /* P42-W7 (verified live): a THROWING generateMetadata (DB outage)
+     * renders 200 with NO robots meta at all — the noindex vanishes
+     * exactly when the page needs it most. The store page's doctrine
+     * (metadata failure must not 500 the document / must not lose the
+     * policy) applied to the privacy-critical route; the X-Robots-Tag
+     * header on /track/:path* (next.config.ts) covers the remaining
+     * total-failure paths at the HTTP layer. */
+    return { title: "الطلب غير متاح", robots, ...noCanonical };
   }
-  return {
-    title: `تتبع الطلب ${order.orderNumber}`,
-    robots: { index: false, follow: true },
-    ...selfCanonical,
-  };
 }
 
 export default async function TrackPage({
