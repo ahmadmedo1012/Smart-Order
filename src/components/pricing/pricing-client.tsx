@@ -9,7 +9,6 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { cn } from "@/lib/utils";
 import { Reveal } from "@/components/ui/scroll-reveal";
-import { CountUp } from "@/components/ui/CountUp";
 import { useMagnetic } from "@/hooks/useMagnetic";
 import { PageScrollProgress } from "@/components/shared/page-scroll-progress";
 import { api } from "@/lib/client";
@@ -120,9 +119,13 @@ function PlanCard({ plan, index, yearly }: { plan: Plan; index: number; yearly: 
         </div>
 
         <div className="mb-6 space-y-2">
-          {/* r128-F8 (B18): CountUp on the REAL plan limits (B9 port) —
-              unlimited plans keep their plain word; numerals ride the
-              mono stack (tabular, Latin digits settle). */}
+          {/* P42 (B9-retirement): contractual limits render as plain instant
+              text — never animated. The CountUp port briefly rendered «0»/
+              «حتى 0» on the first frame and ~1.1s of false intermediates
+              (same root cause Smart-Menu fixed in Wave 1); plan-limit numbers
+              must never momentarily communicate false entitlements.
+              Unlimited plans keep their plain word; numerals keep the
+              mono stack (tabular, Latin digits). */}
           {[
             ["المنتجات", plan.maxProducts === 9999 ? null : "", plan.maxProducts],
             ["الطلبات الشهرية", plan.maxOrders === 99999 ? null : "حتى ", plan.maxOrders],
@@ -130,11 +133,9 @@ function PlanCard({ plan, index, yearly }: { plan: Plan; index: number; yearly: 
             <div key={label as string} className="flex items-center justify-between rounded-lg bg-muted/45 px-3 py-2 text-sm">
               <span className="text-muted-foreground">{label as string}</span>
               <span className="font-mono font-semibold tabular-nums">
-                {prefix === null ? (
-                  "غير محدود"
-                ) : (
-                  <CountUp value={`${prefix as string}${toArabicNumber(num as number)}`} />
-                )}
+                {prefix === null
+                  ? "غير محدود"
+                  : `${prefix as string}${toArabicNumber(num as number)}`}
               </span>
             </div>
           ))}
