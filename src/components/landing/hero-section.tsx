@@ -3,6 +3,7 @@ import { HeroDepthLayer } from "@/components/landing/HeroDepthLayer";
 import { GlobeMount } from "@/components/landing/GlobeMount";
 import { CountUp } from "@/components/ui/CountUp";
 import { PAYMENT_TYPES } from "@/lib/constants";
+import { getArabicPlural, countedArabicPhrase } from "@/lib/arabic-plural";
 
 /* ═══════════════════════════════════════════════════════════════════════
    P12-2d — HeroSection «الطريق مفتوح» — the United-style split hero.
@@ -33,21 +34,39 @@ export function HeroSection({
 }) {
   const showTrustBadge = !!trustCount && trustCount > 0;
 
-  /* the roadmark board — live DB figures, the "+" rides non-zero counts.
-     (phase4) «3 مدن» سقطت: رقم ثابت بلا مصدر بين جارين أحيا من DB —
-     حلّ محلها حقيقة المنتج القابلة للتحقق: الطرق الست الحقيقية
-     (constants.ts PAYMENT_TYPES — نفس الستة في محطة الدفع أسفل الصفحة).
-     (P19-D2) الرقم الآن مشتق من الثابت نفسه — نفس درس r140 «القالب
-     يتبع الثابت»: «6» حرفية كانت ستكذب لو نما PAYMENT_TYPES يومًا
+  /* P42 (§3 — quantifier honesty): «+N» / «أكثر من N» are approximations
+     that are materially FALSE at the platform's real single-digit scale
+     («+2 / أكثر من 2» with exactly 2 stores). Below the 10-floor the
+     figures read as plain COUNTED phrases (the repo's arabic-plural seam);
+     the «+» convention returns only once the approximation is honest.
+     The floor is a display decision, not data: the counts themselves stay
+     the same live DB numbers (lib/landing-stats). */
+  const HONEST_QUANTIFIER_FLOOR = 10;
+  /* the roadmark numeral — plain count below the floor, «+» above */
+  const figure = (n: number | undefined) =>
+    n !== undefined && n >= HONEST_QUANTIFIER_FLOOR ? `+${n}` : `${n ?? 0}`;
+  /* the roadmark caption noun — the counted Arabic form below the floor
+     («متجر / متجران / متاجر»), the family's static caption above it */
+  const countedNoun = (n: number | undefined, singular: string, dual: string, plural: string) =>
+    n !== undefined && n > 0 && n < HONEST_QUANTIFIER_FLOOR
+      ? getArabicPlural(n, singular, dual, plural)
+      : singular;
+
+  /* the roadmark board — live DB figures; the "+" rides only the honest
+     scale (P42 §3). (phase4) «3 مدن» سقطت: رقم ثابت بلا مصدر بين جارين
+     أحيا من DB — حلّ محلها حقيقة المنتج القابلة للتحقق: الطرق الست
+     الحقيقية (constants.ts PAYMENT_TYPES — نفس الستة في محطة الدفع أسفل
+     الصفحة). (P19-D2) الرقم الآن مشتق من الثابت نفسه — نفس درس r140
+     «القالب يتبع الثابت»: «6» حرفية كانت ستكذب لو نما PAYMENT_TYPES يومًا
      بينما محطة الدفع أسفل الصفحة تعرض العدد الجديد. */
   const roadmarks = [
     {
-      value: trustCount && trustCount > 0 ? `+${trustCount}` : `${trustCount ?? 0}`,
-      label: "متجر على الطريق",
+      value: figure(trustCount),
+      label: `${countedNoun(trustCount, "متجر", "متجران", "متاجر")} على الطريق`,
     },
     {
-      value: totalOrders && totalOrders > 0 ? `+${totalOrders}` : `${totalOrders ?? 0}`,
-      label: "طلب عبر المنصّة",
+      value: figure(totalOrders),
+      label: `${countedNoun(totalOrders, "طلب", "طلبان", "طلبات")} عبر المنصّة`,
     },
     { value: String(PAYMENT_TYPES.length), label: "طرق دفع" },
   ];
@@ -120,8 +139,19 @@ export function HeroSection({
               {/* أرقام غربية حية (سياسة src/lib/money.ts — canon الأرقام
                   الغربية في هذا المنتج؛ لا وحدة format.ts هنا) — كانت عبر
                   toArabicNumber من وحدة client فانفجر الترطيب الخادمي على
-                  Vercel فقط (محلياً trustCount=0 لم ينفّذ السطر). */}
-              أكثر من {trustCount} متجر يثقون بنا
+                  Vercel فقط (محلياً trustCount=0 لم ينفّذ السطر).
+                  P42 (§3): نفس أرضية الصدق أسفل — دون العشرة تُقرأ
+                  العبارة عدًا صريحاً (المثنى بفعله، والجمع غير العاقل
+                  بتأنيث المفرد)، و«أكثر من» تعود حين تصدق. */}
+              {(trustCount ?? 0) >= HONEST_QUANTIFIER_FLOOR
+                ? `أكثر من ${trustCount} متجر يثقون بنا`
+                : trustCount === 2
+                  ? "متجران يثقان بنا"
+                  : `${countedArabicPhrase(trustCount ?? 0, "متجر", {
+                      one: "متجر واحد",
+                      two: "متجران",
+                      few: "متاجر",
+                    })} ${trustCount === 1 ? "يثق" : "تثق"} بنا`}
             </div>
           )}
         </div>

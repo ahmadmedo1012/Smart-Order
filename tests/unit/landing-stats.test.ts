@@ -3,7 +3,8 @@
 // WHAT THIS PROVES (against a REAL dedicated SQLite database — the
 // e2e-seed.mjs dedicated-universe doctrine, never the dev db): the
 // landing roadmark board («متجر على الطريق» / «طلب عبر المنصّة») and
-// the trust pill («أكثر من N متجر يثقون بنا») count ONLY genuine
+// the trust pill (the honest counted phrase below 10 — «أكثر من N متجر
+// يثقون بنا» only at the honest scale, P42 §3) count ONLY genuine
 // stores and their orders:
 //   · QA-fixture businesses (published + active!) are NOT counted —
 //     the exact production defect (7 fixtures inflated «+9 متجر»)

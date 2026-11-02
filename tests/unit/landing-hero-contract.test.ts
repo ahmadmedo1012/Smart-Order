@@ -186,6 +186,32 @@ test("interaction contract: the canvas never hijacks the page scroll; the dock i
   assert.equal(selectCallSites.length, 1, "selection fires from exactly one path — the click/tap handler, never hover");
 });
 
+test("quantifier honesty (P42 §3): «+N» / «أكثر من N» ride only the honest scale — below 10 the figures read plain counted phrases", () => {
+  // The platform's real scale is single digits («أكثر من 2» with exactly 2
+  // stores is materially false). The 10-floor: below it the numerals lose
+  // the "+" and the captions read the counted Arabic noun (the repo's
+  // arabic-plural seam); the approximation conventions return only once
+  // they can be true.
+  assert.ok(heroSection.includes("HONEST_QUANTIFIER_FLOOR = 10"), "the honesty floor exists and is pinned at 10");
+  assert.ok(
+    /n >= HONEST_QUANTIFIER_FLOOR \? `\+\$\{n\}` : `\$\{n \?\? 0\}`/.test(heroSection),
+    "the roadmark numeral rides «+» ONLY at/above the floor — plain count below",
+  );
+  assert.ok(
+    />= HONEST_QUANTIFIER_FLOOR\s*\n?\s*\? `أكثر من \$\{trustCount\} متجر يثقون بنا`/.test(heroSection),
+    "«أكثر من N متجر يثقون بنا» renders ONLY in the ≥10 branch of the trust pill",
+  );
+  assert.ok(
+    heroSection.includes('countedNoun(trustCount, "متجر", "متجران", "متاجر")') &&
+      heroSection.includes('countedNoun(totalOrders, "طلب", "طلبان", "طلبات")'),
+    "the roadmark captions below the floor read the counted Arabic noun (singular/dual/plural)",
+  );
+  assert.ok(
+    heroSection.includes('countedArabicPhrase(trustCount ?? 0, "متجر"'),
+    "the trust pill below the floor reads the counted phrase (the arabic-plural seam)",
+  );
+});
+
 test("storefront truth: the mock text never renders below the 12px legibility floor", () => {
   const sizes = [...storefrontScene.matchAll(/text-\[(\d+(?:\.\d+)?)px\]/g)].map((m) => Number(m[1]));
   assert.ok(sizes.length > 0, "the mock uses explicit px sizes (sanity)");
