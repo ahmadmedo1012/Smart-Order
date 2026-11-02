@@ -81,6 +81,7 @@ const staffSrc = stripped(read("../../src/app/api/staff/route.ts"));
 const ordersPublicSrc = stripped(read("../../src/app/api/public/orders/route.ts"));
 const ordersPatchSrc = stripped(read("../../src/app/api/orders/[id]/route.ts"));
 const reviewSrc = stripped(read("../../src/app/api/subscriptions/[id]/review/route.ts"));
+const registerSrc = stripped(read("../../src/app/api/auth/register/route.ts"));
 
 /* ═══ 5106777 — the plan-gate business row lock (products) ═══ */
 
@@ -246,4 +247,33 @@ test("review route (W5-C4): the single retry is preceded by a randomized 25–75
     gate !== -1 && delay > gate,
     "jitter fires after the isRetryableTxError gate and before the single retry",
   );
+});
+
+/* ═══ P42-W6 (§5 multi-step atomicity) — the register fan-out ═══ */
+
+test("register (P42-W6): user + business + membership + default payment methods + audit row commit atomically", () => {
+  /* The pre-fix shape was a one-element $transaction([user.create])
+     followed by THREE independent post-tx writes — a failure after the
+     user commit (e.g. a raced slug on the same business name) left an
+     orphan user: email burned (re-register 409), login works but
+     requireBusiness refuses, and no route ever creates a business for
+     an existing account. The whole fan-out now rides ONE interactive
+     transaction; createSession stays outside BY DESIGN (it writes a
+     Session row + cookie — failing there costs a manual login, not an
+     orphaned identity). */
+  const body = txCallbackBody(registerSrc, "db.$transaction(");
+  assert.match(body, /await tx\.user\.create\(/, "the user create rides the tx");
+  assert.match(body, /await tx\.business\.create\(/, "the business + OWNER membership create rides the tx");
+  assert.match(body, /await tx\.paymentMethod\.createMany\(/, "the default COD/CASH methods ride the tx");
+  assert.match(body, /await tx\.auditLog\.create\(/, "the BUSINESS_CREATED audit row rides the tx (the W3-F doctrine)");
+  assert.equal(
+    registerSrc.includes("db.$transaction(["),
+    false,
+    "the array-form $transaction([...]) is the pre-fix shape (a one-element array guards nothing)",
+  );
+  // No orphan windows: every business/paymentMethod/auditLog write must
+  // go through the tx client, never the root db handle.
+  assert.equal(registerSrc.includes("db.business.create"), false, "a post-tx business create resurrects the orphan-user window");
+  assert.equal(registerSrc.includes("db.paymentMethod.createMany"), false, "a post-tx payment-methods write can leave the business half-provisioned");
+  assert.equal(registerSrc.includes("db.auditLog.create"), false, "a post-tx audit write resurrects the r134/W2-#13 crash window");
 });

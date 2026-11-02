@@ -57,47 +57,62 @@ export async function POST(req: NextRequest) {
       if (plan && plan.isActive && plan.price === 0) planId = plan.id;
     }
 
-    const [user] = await db.$transaction([
-      db.user.create({
+    /* P42-W6 (تدقيق §5 — ذرّية الخطوات المتعددة): كانت الكتابات الأربع
+     * (المستخدم → المتجر+العضوية → طريقتا الدفع الافتراضيتان → سجل
+     * التدقيق) أربع جمل مستقلة — أولًا عبر $transaction([user.create])
+     * (مصفوفة من عنصر واحد، لا تحرس شيئًا) ثم ثلاث كتابات خارجها. أي
+     * فشل بعد الالتزام الأول (تصادم slug متسابق على اسم العمل نفسه،
+     * خطأ قاعدة) يترك مستخدمًا يتيمًا بلا عمل: البريد «مسجل» فلا
+     * إعادة تسجيل (409)، والدخول ينجح لكن requireBusiness يرفضه
+     * («لا يوجد عمل مرتبط بحسابك») ولا مسار ينشئ عملًا لاحقًا — حساب
+     * ميت لا سبيل له. الآن الكتابات كلها معاملة تفاعلية واحدة: فشل
+     * أي خطوة يرجع كل شيء، فيعيد الزبون المحاولة باسم عمل آخر وبريده
+     * حرًا كما كان. createSession تبقى خارج المعاملة عمدًا (تكتب
+     * Session وتضبط كوكي — فشلها بعد الالتزام يعني تسجيل دخول يدوي،
+     * لا كيانًا يتيمًا). */
+    const { user, business } = await db.$transaction(async (tx) => {
+      const user = await tx.user.create({
         data: {
           email: input.email,
           name: input.name,
           passwordHash: hashPassword(input.password),
           phone: input.phone || null,
         },
-      }),
-    ]);
+      });
 
-    const business = await db.business.create({
-      data: {
-        slug,
-        name: input.businessName,
-        city: input.city || null,
-        phone: input.phone || null,
-        onboardingStep: 2,
-        planId,
-        members: {
-          create: { userId: user.id, role: "OWNER" },
+      const business = await tx.business.create({
+        data: {
+          slug,
+          name: input.businessName,
+          city: input.city || null,
+          phone: input.phone || null,
+          onboardingStep: 2,
+          planId,
+          members: {
+            create: { userId: user.id, role: "OWNER" },
+          },
         },
-      },
-    });
+      });
 
-    // Sensible defaults: COD + cash payment methods so checkout works immediately after publish
-    await db.paymentMethod.createMany({
-      data: [
-        { businessId: business.id, type: "COD", name: "الدفع عند التوصيل", sortOrder: 1, instructions: "ادفع نقداً لمندوب التوصيل عند وصول طلبك" },
-        { businessId: business.id, type: "CASH", name: "نقداً في الفرع", sortOrder: 2, instructions: "ادفع نقداً عند استلام طلبك من الفرع" },
-      ],
-    });
+      // Sensible defaults: COD + cash payment methods so checkout works immediately after publish
+      await tx.paymentMethod.createMany({
+        data: [
+          { businessId: business.id, type: "COD", name: "الدفع عند التوصيل", sortOrder: 1, instructions: "ادفع نقداً لمندوب التوصيل عند وصول طلبك" },
+          { businessId: business.id, type: "CASH", name: "نقداً في الفرع", sortOrder: 2, instructions: "ادفع نقداً عند استلام طلبك من الفرع" },
+        ],
+      });
 
-    await db.auditLog.create({
-      data: {
-        businessId: business.id,
-        userId: user.id,
-        action: "BUSINESS_CREATED",
-        entity: "Business",
-        entityId: business.id,
-      },
+      await tx.auditLog.create({
+        data: {
+          businessId: business.id,
+          userId: user.id,
+          action: "BUSINESS_CREATED",
+          entity: "Business",
+          entityId: business.id,
+        },
+      });
+
+      return { user, business };
     });
 
     await createSession(user.id, ip, req.headers.get("user-agent") ?? undefined);
