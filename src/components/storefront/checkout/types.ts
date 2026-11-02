@@ -7,6 +7,16 @@
 export interface StoreData {
   deliveryZones: Array<{ id: string; name: string; fee: number; minOrder: number }>;
   paymentMethods: Array<{ id: string; type: string; name: string; instructions: string | null; config: string | null }>;
+  /* W2-ORD-2 (P42-W3): المنتجات الحيّة تصل أصلًا في نفس الاستجابة (كانت
+     تُهدر) — منها يحتسب الإجمالي الحقيقي عند التأكيد لا تقدير
+     localStorage القديم. الشكل الفرعي: ما يحتاجه التقييم فقط. */
+  products: Array<{
+    id: string;
+    price: number;
+    isAvailable: boolean;
+    variants: Array<{ id: string; priceDelta: number }>;
+    optionGroups: Array<{ options: Array<{ id: string; priceDelta: number }> }>;
+  }>;
 }
 
 export type Step = "form" | "success";

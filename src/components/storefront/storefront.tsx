@@ -11,6 +11,9 @@ import { useCart, useCartHydrated, cartCount, cartEstimatedSubtotal } from "@/ho
 import { StorefrontSkeleton } from "@/components/storefront/skeletons";
 import { ProductCard } from "@/components/storefront/product-card";
 import { CartDrawer } from "@/components/storefront/cart-drawer";
+/* W2-ORD-3 (P42-W3): حارس السلة عبر المتاجر — الحوار الوحيد الذي يستهلك
+   حدث cross-store-add (سلة متجر آخر تُستبدل بسؤال لا صمتًا). */
+import { CrossStoreAddGuard } from "@/components/storefront/cross-store-add-guard";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { EmptyState, ErrorState } from "@/components/shared/states";
 import { SkipLink } from "@/components/shared/skip-link";
@@ -208,6 +211,7 @@ export function Storefront({
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SkipLink />
+      <CrossStoreAddGuard />
       {/* Store header */}
       <header className="sticky top-0 z-(--z-dropdown) safe-top">
         <div className="bg-background/92 backdrop-blur-md border-b border-border/70">

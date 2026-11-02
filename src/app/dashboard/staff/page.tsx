@@ -30,7 +30,7 @@ import { ROLE_AR, ROLES, ROLE_PERMISSIONS, type Role } from "@/lib/constants";
 import { formatArabicDate } from "@/lib/arabic";
 import { useDirtyClose } from "@/hooks/use-dirty-close";
 import { toast } from "sonner";
-import { UserCog, Plus, Trash2, ShieldCheck, X } from "lucide-react";
+import { UserCog, Plus, Trash2, ShieldCheck, X, Users } from "lucide-react";
 
 interface StaffRow {
   id: string;
@@ -46,9 +46,20 @@ interface StaffRow {
   };
 }
 
+/* W2-ORD-4 (P42-W3): مقاعد الفريق من نفس مصدر حقيقة الـPOST — العداد
+ * يُعرض ويُقفل النموذج قبل الدرب المسدود (كان المالك على باقة بلا
+ * مقاعد يملأ الدعوة ثم يُرفض عند الإرسال). */
+interface SeatInfo {
+  current: number;
+  max: number;
+  planNameAr: string;
+  canInvite: boolean;
+}
+
 export default function StaffPage() {
   const { businessId } = useBusiness();
   const [staff, setStaff] = React.useState<StaffRow[] | null>(null);
+  const [seats, setSeats] = React.useState<SeatInfo | null>(null);
   const [error, setError] = React.useState(false);
   const [creating, setCreating] = React.useState(false);
   /* r131 (F3, A5 P2-5): destructive confirm via the shared Radix
@@ -59,10 +70,11 @@ export default function StaffPage() {
   const load = React.useCallback(() => {
     if (!businessId) return;
     api
-      .get<{ staff: StaffRow[] }>(`/api/staff?businessId=${businessId}`)
+      .get<{ staff: StaffRow[]; seats: SeatInfo }>(`/api/staff?businessId=${businessId}`)
       .then((r) => {
         setError(false);
         setStaff(r.data.staff);
+        setSeats(r.data.seats);
       })
       .catch(() => setError(true));
   }, [businessId]);
@@ -81,10 +93,29 @@ export default function StaffPage() {
         title="فريق العمل"
         subtitle="أضف حسابات لموظفيك بصلاحيات محددة"
         actions={
-          <Button onClick={() => setCreating(true)}>
-            <Plus className="size-4.5" aria-hidden="true" />
-            عضو جديد
-          </Button>
+          /* W2-ORD-4: الباقة بلا مقاعد (المالك فقط) أو العدد اكتمل → الحالة
+           * الصادقة بدل زر يفتح نموذجًا محكومًا بالرفض: العداد + دعوة
+           * الترقية (نفس عائلة PlanUsageBadge — الرابط إلى /pricing). */
+          seats && !seats.canInvite ? (
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-sm border border-(--c-grey-ink)/35 bg-(--c-grey-bg) px-3 py-1 text-xs font-semibold text-(--c-grey-deep)" dir="ltr">
+                <Users className="size-3.5" aria-hidden="true" />
+                {seats.current} / {seats.max}
+              </span>
+              <a
+                href="/pricing"
+                className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-(--c-copper-ink)/35 bg-(--c-copper-bg) px-3 py-1 text-xs font-semibold text-(--c-copper-deep) transition-[color,background-color,transform] duration-(--t-fast) hover:-translate-y-px"
+              >
+                <Plus className="size-3.5" aria-hidden="true" />
+                مقاعد أكثر — رقّ خطتك
+              </a>
+            </div>
+          ) : (
+            <Button onClick={() => setCreating(true)}>
+              <Plus className="size-4.5" aria-hidden="true" />
+              عضو جديد
+            </Button>
+          )
         }
       />
 

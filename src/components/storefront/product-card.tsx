@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { useCart } from "@/hooks/use-cart";
+/* W2-ORD-3 (P42-W3): إضافة بحارس المتاجر — سلة متجر آخر غير فارغة
+   تستبدل فقط بعد سؤال صريح (كانت تُمحى صامتة). */
+import { addItemWithGuard } from "@/lib/add-item-guard";
 import { formatLyd } from "@/lib/money";
 import { countedArabicPhrase } from "@/lib/arabic-plural";
 import type { StoreProduct } from "@/components/storefront/storefront";
@@ -26,7 +28,6 @@ export function ProductCard({
   eager?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
-  const addItem = useCart((s) => s.addItem);
 
   // r132-F1a (A2 F1): the out-of-stock overlay is rendered INSIDE the
   // image/title buttons — tapping the "غير متاح حالياً" overlay used to
@@ -42,7 +43,7 @@ export function ProductCard({
       setOpen(true); // needs selection
       return;
     }
-    addItem(slug, businessName, {
+    const added = addItemWithGuard(slug, businessName, {
       productId: product.id,
       productName: product.name,
       productImage: product.imageUrl,
@@ -53,6 +54,7 @@ export function ProductCard({
       note: "",
       unitPrice: product.price,
     });
+    if (!added) return; // W2-ORD-3: تأكيد الاستبدال معلّق — لا توست قبل قرار الزبون
     toast.success(`أُضيف ${product.name} إلى السلة`, {
       action: { label: "عرض السلة", onClick: () => window.dispatchEvent(new CustomEvent("open-cart")) },
     });

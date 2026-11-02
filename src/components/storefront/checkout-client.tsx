@@ -97,6 +97,8 @@ export function CheckoutClient({
     errors,
     setErrors,
     subtotal,
+    /* W2-ORD-2: تقييم الأسطر الحيّة (السعر الحالي/المتغيّر/غير المتاح) */
+    evaluation,
     zone,
     deliveryFee,
     total,
@@ -127,6 +129,13 @@ export function CheckoutClient({
       return;
     }
     if (items.length === 0) return toast.error("سلتك فارغة");
+    /* W2-ORD-2: سطر غير متاح (منتج أُخفي/حُذف أو صيغة/إضافة أُوقفت) —
+     * الخادم كان سيرفض الطلب بلا تفسير؛ الآن السبب معروض على السطر
+     * نفسه والإرسال يُمنع هنا بصريًا لا بعد فشل الشبكة. */
+    if (evaluation.hasUnavailable) {
+      toast.error("بعض أصناف سلتك لم تعد متاحة — أزِلها لإتمام الطلب");
+      return;
+    }
 
     const found: Partial<Record<FieldKey, string>> = {};
     if (name.trim().length < 2) found.name = "أدخل اسمك الكامل";
@@ -378,7 +387,7 @@ export function CheckoutClient({
         <NoteSection customerNote={customerNote} setCustomerNote={setCustomerNote} />
         </form>
 
-        <CartSummarySection items={items} />
+        <CartSummarySection items={items} evaluation={evaluation} />
       </main>
 
       <StickySubmitBar

@@ -2,7 +2,10 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { useCart, MAX_CART_QUANTITY } from "@/hooks/use-cart";
+import { MAX_CART_QUANTITY } from "@/hooks/use-cart";
+/* W2-ORD-3 (P42-W3): إضافة بحارس المتاجر — نفس نقطة القرار الواحدة
+   مع الإضافة السريعة للبطاقة (سلة متجر آخر → سؤال قبل الاستبدال). */
+import { addItemWithGuard } from "@/lib/add-item-guard";
 import { formatLyd } from "@/lib/money";
 import { api } from "@/lib/client";
 import type { StoreProduct, StoreData } from "@/components/storefront/storefront";
@@ -25,7 +28,6 @@ export function ProductDialog({
   open: boolean;
   onClose: () => void;
 }) {
-  const addItem = useCart((s) => s.addItem);
   const [variantId, setVariantId] = React.useState<string | null>(
     product.variants.length > 0 ? product.variants[0].id : null
   );
@@ -116,7 +118,7 @@ export function ProductDialog({
       toast.error("أكمل الاختيارات المطلوبة أولاً");
       return;
     }
-    addItem(slug, businessName, {
+    const added = addItemWithGuard(slug, businessName, {
       productId: product.id,
       productName: product.name,
       productImage: product.imageUrl,
@@ -127,6 +129,7 @@ export function ProductDialog({
       note: note.trim(),
       unitPrice,
     });
+    if (!added) return; // W2-ORD-3: حوار الاستبدال مفتوح — النموذج يبقى كما هو حتى القرار
     toast.success(`أُضيف ${product.name} إلى السلة`);
     onClose();
   }

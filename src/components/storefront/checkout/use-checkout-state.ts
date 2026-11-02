@@ -3,6 +3,7 @@
 import * as React from "react";
 import { api } from "@/lib/client";
 import { useCart, useCartHydrated, cartEstimatedSubtotal } from "@/hooks/use-cart";
+import { evaluateCartAgainstProducts, type CartEvaluation } from "@/lib/checkout-refresh";
 import { WALLET_CAP_LYD } from "@/lib/payment-constants";
 import type { CheckoutResult, FieldErrors, StoreData, Step } from "./types";
 
@@ -59,7 +60,30 @@ export function useCheckoutState(slug: string) {
      is the whole story. */
   React.useEffect(load, [load]);
 
-  const subtotal = cartEstimatedSubtotal(items);
+  /* W2-ORD-2 (P42-W3، تدقيق 3c): الإجمالي الصادق — قبل وصول بيانات
+   * المتجر تبقى تقديرات السلة (سلوك ما قبل التحميل كما كان)، وبمجرد
+   * وصولها يحتسب الإجمالي من الأسعار الحيّة (نفس منطق إعادة التسعير
+   * الخادمي) — ما يقرّره الزبون على الشاشة هو ما سيسعّره الـPOST.
+   * السطر غير المتاح يسقط من المال ويُمنع الإرسال (الخادم كان سيرفضه
+   * بلا تفسير). */
+  const evaluation: CartEvaluation = React.useMemo(
+    () =>
+      data
+        ? evaluateCartAgainstProducts(
+            items.map((i) => ({
+              key: i.key,
+              productId: i.productId,
+              variantId: i.variantId,
+              optionIds: i.options.map((o) => o.id),
+              quantity: i.quantity,
+              staleUnitPrice: i.unitPrice,
+            })),
+            data.products,
+          )
+        : { lines: [], currentSubtotal: 0, hasUnavailable: false, hasPriceChanges: false },
+    [items, data],
+  );
+  const subtotal = data ? evaluation.currentSubtotal : cartEstimatedSubtotal(items);
   const zone = data?.deliveryZones.find((z) => z.id === zoneId) ?? null;
   const deliveryFee = fulfillment === "DELIVERY" ? (zone?.fee ?? 0) : 0;
   const total = subtotal + deliveryFee;
@@ -143,6 +167,8 @@ export function useCheckoutState(slug: string) {
     setErrors,
     // derived
     subtotal,
+    /* W2-ORD-2: تقييم الأسطر (الحالي/المتغيّر/غير المتاح) لملخص السلة */
+    evaluation,
     zone,
     deliveryFee,
     total,

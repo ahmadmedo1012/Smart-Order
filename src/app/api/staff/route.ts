@@ -79,6 +79,13 @@ export async function GET(req: NextRequest) {
       },
       orderBy: { createdAt: "asc" },
     });
+    /* W2-ORD-4 (P42-W3، تدقيق 3c): مقاعد الفريق مع القائمة — الواجهة كانت
+     * تفتح نموذج الدعوة على باقة بلا مقاعد (Free/Basic: المالك وحده)
+     * فيملأ المالك النموذج ثم يُرفض عند الإرسال. نفس مصدر الحقيقة الذي
+     * يرفض الـPOST (currentPlan + teamSeatsFor) يُقرأ هنا قبل النموذج،
+     * فتُعرض الحالة الصادقة (العداد + دعوة الترقية) بدل الدرب المسدود. */
+    const plan = await currentPlan(db, member.businessId);
+    const seats = teamSeatsFor(plan.name);
     return ok({
       staff: staff.map((s) => ({
         id: s.id,
@@ -87,6 +94,13 @@ export async function GET(req: NextRequest) {
         createdAt: s.createdAt,
         user: s.user,
       })),
+      seats: {
+        current: staff.length,
+        max: seats,
+        planNameAr: plan.nameAr,
+        /** false = الباقة لا تبيع مقاعد (المالك فقط) أو العدد اكتمل. */
+        canInvite: staff.length < seats,
+      },
     });
   } catch (err) {
     return handleError(err);
