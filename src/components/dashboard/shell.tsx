@@ -42,6 +42,8 @@ import {
   LogOut,
   ExternalLink,
   Store,
+  Radio,
+  TicketPercent,
 } from "lucide-react";
 
 interface Biz {
@@ -59,7 +61,13 @@ const NAV = [
     exact: true,
   },
   { href: "/dashboard/orders", label: "الطلبات", icon: ClipboardList },
+  /* P43 SO-1: لوحة الطلبات المباشرة — سطح العمليات الحي بجانب صندوق
+     الطلبات (الممرات الخمسة + مؤقت العمر + الإجراء التالي بضغطة). */
+  { href: "/dashboard/live", label: "الطلبات المباشرة", icon: Radio },
   { href: "/dashboard/products", label: "المنتجات", icon: Package },
+  /* P43 SO-2: أكواد الخصم — سطح التاجر التسويقي بجانب المنتجات
+     (تُطبّق في صفحة الدفع ويُعاد التحقق منها في الخادم). */
+  { href: "/dashboard/coupons", label: "أكواد الخصم", icon: TicketPercent },
   { href: "/dashboard/categories", label: "الأقسام", icon: LayoutGrid },
   { href: "/dashboard/customers", label: "العملاء", icon: Users },
   /* W6-B4 (audit gap #1): the business reporting surface — best sellers,
@@ -100,6 +108,10 @@ const MORE_NAV: Array<{
   icon: typeof LayoutDashboard;
   exact?: boolean;
 }> = [
+  /* P43: المباشرة وأكواد الخصم أولًا في قائمة «المزيد» — سطحا العمليات
+     والتسويق الجديدان على الجوال من أول فتح. */
+  { href: "/dashboard/live", label: "الطلبات المباشرة", icon: Radio },
+  { href: "/dashboard/coupons", label: "أكواد الخصم", icon: TicketPercent },
   { href: "/dashboard/categories", label: "الأقسام", icon: LayoutGrid },
   { href: "/dashboard/reports", label: "التقارير", icon: BarChart3 },
   { href: "/dashboard/delivery", label: "التوصيل", icon: Truck },

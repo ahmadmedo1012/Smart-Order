@@ -9,7 +9,14 @@ export const runtime = "nodejs";
 
 const listQuery = z.object({
   businessId: z.string().optional(),
-  status: z.enum(ORDER_STATUSES).optional(),
+  /* P43 SO-1 (لوحة الطلبات المباشرة): النشط = الحالات الخمس قيد
+   * المعالجة — معامل إضافي واحد على العقد القائم (قيمة حرفية "ACTIVE"
+   * إلى جانب أسماء الحالات المفردة)، فتستطلع اللوحة الحية كل مساراتها
+   * بطلب واحد كل 10 ثوان بدل خمسة. لا تغيير لأي مستهلك قائم (مفرد
+   * كما كان). */
+  status: z
+    .union([z.enum(ORDER_STATUSES), z.literal("ACTIVE")])
+    .optional(),
   paymentStatus: z.enum(PAYMENT_STATUSES).optional(),
   fulfillment: z.enum(["DELIVERY", "PICKUP"]).optional(),
   q: z.string().trim().max(80).optional(),
@@ -18,6 +25,9 @@ const listQuery = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });
+
+/* الحالات الخمس «على القضيب» — نفس قائمة ممرات اللوحة الحية. */
+const ACTIVE_STATUSES = ["NEW", "CONFIRMED", "PREPARING", "READY", "OUT_FOR_DELIVERY"] as const;
 
 export async function GET(req: NextRequest) {
   try {
@@ -28,7 +38,9 @@ export async function GET(req: NextRequest) {
     requirePermission(member, "orders.read");
 
     const where: Record<string, unknown> = { businessId: member.businessId };
-    if (q.status) where.status = q.status;
+    if (q.status) {
+      where.status = q.status === "ACTIVE" ? { in: [...ACTIVE_STATUSES] } : q.status;
+    }
     if (q.paymentStatus) where.paymentStatus = q.paymentStatus;
     if (q.fulfillment) where.fulfillmentType = q.fulfillment;
     if (q.from || q.to) {
@@ -57,6 +69,15 @@ export async function GET(req: NextRequest) {
           total: true, paymentStatus: true, paymentType: true,
           customerName: true, customerPhone: true, city: true, area: true,
           createdAt: true, customerConfirmedAt: true, _count: { select: { items: true } },
+          /* P43 SO-1: ملخص الأصناف للبطاقة الحية — أعلى سطرين قيمةً
+           * (orderBy lineTotal) + العدّ الكامل من _count أعلاه. حقلان
+           * إضافيان على الشكل القائم (المستهلكات القديمة لا تقرأهما؛
+           * تطبيق الجوال يتسلم JSON إضافيًا — حقول تراكمية بلا كسر). */
+          items: {
+            select: { productName: true, quantity: true },
+            orderBy: { lineTotal: "desc" },
+            take: 2,
+          },
         },
       }),
       db.order.count({ where }),

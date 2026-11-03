@@ -453,3 +453,51 @@ export function AdminPaymentsSkeleton() {
     </SkeletonPage>
   );
 }
+
+/* P43 SO-1: لوحة الطلبات المباشرة — ترويسة + شريط أدوات + أعمدة
+   الممرات الخمسة (ممرات أفقية على الشاشات الواسعة، أقسام مكدسة على
+   الجوال — نفس تشريح الصفحة الحية). */
+export function LiveBoardSkeleton() {
+  return (
+    <SkeletonPage label="جارٍ تحميل لوحة الطلبات المباشرة…">
+      <HeaderSkeleton />
+      <ToolbarSkeleton />
+      {/* desktop lanes — خمسة أعمدة قابلة للتمرير الأفقي */}
+      <div className="hidden md:flex gap-4 overflow-hidden" aria-hidden="true">
+        {Array.from({ length: 5 }, (_, i) => (
+          <div key={i} className="w-72 shrink-0 space-y-3">
+            <Skeleton className="h-10 rounded-lg" />
+            {Array.from({ length: i === 0 ? 3 : 2 }, (_, j) => (
+              <Skeleton key={j} className="h-36 rounded-xl" />
+            ))}
+          </div>
+        ))}
+      </div>
+      {/* mobile stacked sections */}
+      <div className="md:hidden space-y-4" aria-hidden="true">
+        {Array.from({ length: 3 }, (_, i) => (
+          <div key={i} className="space-y-3">
+            <Skeleton className="h-10 rounded-lg" />
+            <Skeleton className="h-36 rounded-xl" />
+          </div>
+        ))}
+      </div>
+    </SkeletonPage>
+  );
+}
+
+/* P43 SO-2: أكواد الخصم — ترويسة + قائمة صفوف البطاقات (نفس تشريح
+   صفحة الممرات). */
+export function CouponsSkeleton() {
+  return (
+    <SkeletonPage label="جارٍ تحميل أكواد الخصم…">
+      <HeaderSkeleton />
+      <div className="space-y-2.5" aria-hidden="true">
+        {Array.from({ length: 4 }, (_, i) => (
+          <Skeleton key={i} className="h-20 rounded-xl" />
+        ))}
+      </div>
+    </SkeletonPage>
+  );
+}
+
