@@ -190,7 +190,9 @@ const makeStyles = (t: ThemeColors) => StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: t.border,
   },
-  backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  /* P42-W8c: 36→44 — أرضية اللمس 44px (الشعار المجاور 44 أصلاً،
+     والصف مرن بالحشو فلا كسور تخطيط). */
+  backBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   backText: { color: t.primary, fontSize: 22, lineHeight: 26 },
   headerText: { flex: 1, gap: 1 },
   storeName: {

@@ -662,9 +662,10 @@ const makeStyles = (t: ThemeColors) => StyleSheet.create({
     justifyContent: 'space-between',
     gap: 8,
   },
+  /* P42-W8c: 36→44 — أرضية اللمس 44px (رأس التقويم صف حشو مرن). */
   calNavBtn: {
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: t.border,

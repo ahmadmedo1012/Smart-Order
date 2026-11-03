@@ -340,10 +340,14 @@ export function DashboardShell({
               <NavLinks pathname={pathname} showAdmin={user.isPlatformAdmin} />
             </div>
             <div className="p-3 border-t border-sidebar-border">
+              {/* P42-W8c: rel joins the family contract — the third
+                  blank-tab store link found by the parity sweep (all
+                  same-origin → hardening). */}
               {biz && (
                 <Link
                   href={`/store/${biz.slug}`}
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center gap-2 rounded-lg px-3 h-11 text-xs text-muted-foreground hover:text-accent-foreground hover:bg-primary/5 transition-colors"
                 >
                   <ExternalLink className="size-3.5" aria-hidden="true" />

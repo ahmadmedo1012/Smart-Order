@@ -1991,6 +1991,43 @@ for (const [name, okFlag] of P42W7_SEO) {
   else failures.push(`p42-w7 seo parity FAILED: ${name}`);
 }
 
+// ── P42-W8c (quality wave): two consistency hardenings verified by a
+// full-src sweep this session — (a) the FAQ JSON-LD was the ONLY inline
+// ld+json in src/ without the r140 P3-9 "<" escape its two siblings carry
+// (landing graph page.tsx:113, store graph store/[slug]/page.tsx:269 —
+// JSON.stringify alone does not escape "<", and an inline script payload
+// carrying </script> breaks out and executes; the FAQ answers are static
+// today, so this is doctrine consistency, not a live vuln); (b) three
+// blank-tab store links (shell dropdown, reports + customers empty
+// states) were the only target=_blank tags in src/ without rel (10+
+// other sites carry "noopener noreferrer"; all same-origin → hardening,
+// not an exploitable tab-nabbing path). The sweep itself found the third
+// (shell) after the manual grep had counted only two — the pin earns its
+// keep on day one. ──
+const P42W8C_QUALITY = [
+  ['P42-W8c JSON-LD consistency: every inline ld+json block in src/ escapes "<" as \\u003c (the r140 P3-9 family doctrine — LandingFaq was the last unescaped member; static content today, future-dynamic insurance)',
+    ['src/app/page.tsx', 'src/app/store/[slug]/page.tsx', 'src/components/landing/LandingFaq.tsx']
+      .every((p) => R(p).includes('JSON.stringify(') && R(p).includes('.replace(/</g, "\\\\u003c")'))],
+  ['P42-W8c tab safety: zero target="_blank" tags in src/ without rel="noopener noreferrer" in the SAME opening tag (shell dropdown + reports + customers previews were the offenders; the sweep walks every src file, so future additions can never drift silently — it caught the shell one the manual grep missed)',
+    (() => {
+      for (const f of walk(srcRoot)) {
+        const body = readFileSync(f, 'utf8');
+        const targets = body.split('target="_blank"');
+        for (let i = 1; i < targets.length; i++) {
+          // the rel attribute must appear within the same opening tag
+          // (before the next ">" that closes it)
+          const tagRest = targets[i].split('>')[0];
+          if (!tagRest.includes('rel="noopener noreferrer"')) return false;
+        }
+      }
+      return true;
+    })()],
+];
+for (const [name, okFlag] of P42W8C_QUALITY) {
+  if (okFlag) passed += 1;
+  else failures.push(`p42-w8c quality parity FAILED: ${name}`);
+}
+
 // ── report ───────────────────────────────────────────────────────────────────
 
 if (failures.length > 0) {

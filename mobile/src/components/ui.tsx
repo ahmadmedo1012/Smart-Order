@@ -90,6 +90,10 @@ export function Chip({
   active: boolean
   onPress: () => void
 }) {
+  /* P42-W8c: minHeight 44 — الشريحة كانت ~34px (7+7 padding + سطر 13)
+     تحت أرضية اللمس 44px التي يطلبها موجّه العائلة (HIG 44pt /
+     Material 48dp؛ توأم الويب h-11 على رقائق المتجر). الشريحة عنصر
+     تفاعلي أساسي (فلاتر الأقسام/الحالة/الدور) وليست زخرفة. */
   const { t, statusFamily } = useTheme()
   const fam = statusFamily.copper
   return (
@@ -239,6 +243,9 @@ const s = StyleSheet.create({
     borderWidth: 1,
     paddingVertical: 7,
     paddingHorizontal: 16,
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   chipText: {
     fontFamily: fonts.medium,

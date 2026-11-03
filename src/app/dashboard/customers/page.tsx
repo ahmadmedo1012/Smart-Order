@@ -138,7 +138,10 @@ export default function CustomersPage() {
           action={
             business ? (
               <Button asChild variant="outline" size="sm">
-                <Link href={`/store/${business.slug}`} target="_blank">
+                {/* P42-W8c: the reports/page.tsx twin — blank-tab store
+                    link gains the family rel contract (see the parity
+                    sweep pin). */}
+                <Link href={`/store/${business.slug}`} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="size-3.5" aria-hidden="true" />
                   معاينة المتجر ومشاركته
                 </Link>

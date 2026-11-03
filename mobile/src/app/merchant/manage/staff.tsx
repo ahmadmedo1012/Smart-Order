@@ -511,9 +511,10 @@ const makeStyles = (t: ThemeColors) => StyleSheet.create({
     marginTop: 6,
   },
   roleToggle: { flexDirection: 'row', gap: 8 },
+  /* P42-W8c: 36→44 — أرضية اللمس 44px (صف الإجراءات مرن بالحشو). */
   removeButton: {
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: `${t.destructive}40`,

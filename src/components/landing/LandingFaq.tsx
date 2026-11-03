@@ -46,9 +46,17 @@ const faqJsonLd = {
 export function LandingFaq() {
   return (
     <section className="ln-faq" aria-label="الأسئلة الشائعة">
+      {/* P42-W8c (r140 P3-9 family doctrine): the FAQ JSON-LD now escapes
+          "<" exactly like its two siblings (page.tsx landing graph,
+          store/[slug]/page.tsx store graph) — JSON.stringify alone does not
+          escape it, and an inline <script type="application/ld+json"> whose
+          payload carries </script> breaks out and executes (stored XSS when
+          the content is owner-controlled). The FAQ answers are static
+          today, so this is consistency hardening against future dynamic
+          values — the same justification page.tsx:107-110 records. */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd).replace(/</g, "\\u003c") }}
       />
       <div className="ln-faq-head">
         <span className="ln-micro" aria-hidden="true">{"SMART ORDER — 006 · FAQ"}</span>

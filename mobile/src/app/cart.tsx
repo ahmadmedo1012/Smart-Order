@@ -526,9 +526,11 @@ const makeStyles = (t: ThemeColors) => StyleSheet.create({
     marginTop: 2,
   },
   qtyCol: { alignItems: 'center', gap: 6 },
+  /* P42-W8c: 32→44 — أرضية اللمس 44px (التوأم في product/[id]
+     كان 44 أصلاً — اتساق العائلة). */
   qtyBtn: {
-    width: 32,
-    height: 32,
+    width: 44,
+    height: 44,
     borderRadius: 10,
     backgroundColor: t.background,
     borderWidth: 1,

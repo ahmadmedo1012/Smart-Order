@@ -270,7 +270,11 @@ export default function ReportsPage() {
           action={
             business ? (
               <Button asChild variant="outline" size="sm">
-                <Link href={`/store/${business.slug}`} target="_blank">
+                {/* P42-W8c: blank-tab store links gain the family rel
+                    contract (the parity sweep walks every src file for
+                    this); same-origin here, so consistency/hardening,
+                    not an exploitable tab-nabbing path. */}
+                <Link href={`/store/${business.slug}`} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="size-3.5" aria-hidden="true" />
                   معاينة المتجر ومشاركته
                 </Link>
