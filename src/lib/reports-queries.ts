@@ -7,7 +7,12 @@
 import { db } from "@/lib/db";
 import { tripoliDayStart, tripoliDateParts } from "@/lib/arabic";
 import { ORDER_STATUSES } from "@/lib/constants";
-import type { ReportsData } from "@/lib/report-csv";
+import { COUPON_TYPE_AR } from "@/lib/coupon";
+import type { ReportsData, ReconciliationOrderRow } from "@/lib/report-csv";
+import {
+  buildCouponUsageRows,
+  buildPaymentMethodBreakdown,
+} from "@/lib/reports-reconciliation";
 
 export type ReportsWindowDays = 30 | 90;
 
@@ -168,7 +173,7 @@ export async function getReportData(
      REPORT over 30/90 days that dropped every in-flight/preparing order
      would understate the trend the owner is asking about. One rule per
      surface, both documented. */
-  const [dayRows, fulfillment, topRows] = await Promise.all([
+  const [dayRows, fulfillment, topRows, paymentMethodRows, couponUsageRows, couponTypeRows] = await Promise.all([
     /* Day-bucketing is the stats route's dialect-discriminated raw query
        verbatim (r134/r138): Prisma groupBy can't truncate a DateTime to
        a calendar day, so $queryRaw + the dialect's date function —
@@ -244,6 +249,39 @@ export async function getReportData(
       GROUP BY oi."productName"
       ORDER BY "revenue" DESC
       LIMIT 10`,
+    /* ── P43 SO-2c: مطابقة المدفوعات — the per-payment-method rows
+       (method × paymentStatus groups; the pure builder collapses them
+       into one reconciliation row per method). Same exclusion + window
+       as every other table; model-level groupBy = dialect-safe. */
+    db.order.groupBy({
+      by: ["paymentMethodName", "paymentType", "paymentStatus"],
+      where: {
+        businessId,
+        status: { notIn: ["CANCELLED", "REJECTED"] },
+        createdAt: { gte: from },
+      },
+      _count: { _all: true },
+      _sum: { subtotal: true, deliveryFee: true, discount: true, total: true },
+    }),
+    /* ── P43 SO-2c: أكواد الخصم — the usage ledger over the committed
+       couponCode snapshots (null never counted). */
+    db.order.groupBy({
+      by: ["couponCode"],
+      where: {
+        businessId,
+        status: { notIn: ["CANCELLED", "REJECTED"] },
+        createdAt: { gte: from },
+        couponCode: { not: null },
+      },
+      _count: { _all: true },
+      _sum: { discount: true },
+    }),
+    /* The business's current coupon rows — the type context for the
+       usage ledger (best-effort; deleted coupons read «—»). */
+    db.coupon.findMany({
+      where: { businessId },
+      select: { code: true, type: true },
+    }),
   ]);
 
   const dayMap = new Map(
@@ -289,5 +327,47 @@ export async function getReportData(
       revenue: Number(r.revenue),
       orderCount: Number(r.orderCount),
     })),
+    /* P43 SO-2c: جدولا المطابقة — نفس النافذة ونفس قاعدة الاستبعاد؛
+     * البُناة أنقياء في reports-reconciliation.ts (نفس الأرقام على
+     * الشاشة وفي الـCSV حكماً). */
+    paymentMethods: buildPaymentMethodBreakdown(paymentMethodRows),
+    coupons: buildCouponUsageRows(couponUsageRows, couponTypeRows, COUPON_TYPE_AR),
   };
+}
+
+/* ── P43 SO-2c: سجل المطابقة — the per-order rows the CSV export rides
+ * (order number, date, method, the money ledger, couponCode,
+ * paymentReference, payment status). The reports PAGE deliberately does
+ * NOT fetch these (its surface is aggregates); the export route calls
+ * this beside getReportData so the file carries the owner's statement-
+ * matching worksheet. Same window math (Tripoli-day anchored), same
+ * exclusion convention, newest first. */
+export async function getReconciliationOrders(
+  businessId: string,
+  days: ReportsWindowDays,
+): Promise<ReconciliationOrderRow[]> {
+  const dayStart = tripoliDayStart();
+  const from = new Date(dayStart.getTime() - (days - 1) * 24 * 60 * 60 * 1000);
+  const rows = await db.order.findMany({
+    where: {
+      businessId,
+      status: { notIn: ["CANCELLED", "REJECTED"] },
+      createdAt: { gte: from },
+    },
+    orderBy: { createdAt: "desc" },
+    select: {
+      orderNumber: true,
+      createdAt: true,
+      paymentMethodName: true,
+      paymentType: true,
+      subtotal: true,
+      deliveryFee: true,
+      discount: true,
+      couponCode: true,
+      paymentReference: true,
+      paymentStatus: true,
+      total: true,
+    },
+  });
+  return rows;
 }

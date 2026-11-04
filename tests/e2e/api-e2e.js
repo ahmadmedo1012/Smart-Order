@@ -817,12 +817,46 @@ async function main() {
     /^attachment; filename="smart-order-report-[^"]+-30d-\d{8}\.csv"$/.test(proExport.headers?.get?.("content-disposition") ?? ""),
     proExport.headers?.get?.("content-disposition") ?? "",
   );
+  /* P43 SO-2c: the export carries the reconciliation worksheets — the
+     method table, the coupon ledger, and the per-order log (the coupon
+     order + the transfer reference from section 7.5 are real rows in
+     business A's window, so the file must carry them). */
+  ok(
+    "export body (P43 SO-2c): the reconciliation worksheets — method table + coupon ledger + the per-order log with discount/couponCode/paymentReference",
+    typeof proExport.body === "string" &&
+      proExport.body.includes("مطابقة المدفوعات (حسب طريقة الدفع)") &&
+      proExport.body.includes("الطريقة,الطلبات,قبل الخصم (د.ل),الخصم (د.ل),الصافي (د.ل),مدفوع,غير مدفوع") &&
+      proExport.body.includes("أكواد الخصم") &&
+      proExport.body.includes("E2EPCT10") &&
+      proExport.body.includes("رقم الطلب,التاريخ,طريقة الدفع,المجموع الفرعي (د.ل),التوصيل (د.ل),الخصم (د.ل),كود الخصم,مرجع التحويل,حالة الدفع,الإجمالي (د.ل)") &&
+      proExport.body.includes("TRX-9F3A2C"),
+    String(proExport.body).slice(0, 160),
+  );
 
   const proReports = await A.call(reportsPath(bizAId, 90));
   ok(
     "reports response after Pro: the CSV preference flag flips true (and the 90-day window still answers)",
     proReports.status === 200 && proReports.body?.data?.window?.days === 90 && proReports.body?.data?.series?.length === 90 && proReports.body?.data?.canExportCsv === true,
     JSON.stringify(proReports.body).slice(0, 120),
+  );
+  /* P43 SO-2c: the page surface carries the reconciliation aggregates —
+     the coupon from section 7.5 must appear in the usage ledger with its
+     committed uses/discount, and the method table must reconcile
+     (gross − discount = net per row). */
+  const reconCoupons = proReports.body?.data?.coupons || [];
+  const e2ePct = reconCoupons.find((c) => c.code === "E2EPCT10");
+  ok(
+    "reports response (P43 SO-2c): the coupon usage ledger carries the committed redemption (1 use, 3.550 د.ل)",
+    Array.isArray(reconCoupons) && e2ePct?.uses === 1 && e2ePct?.discount === 3550,
+    JSON.stringify(reconCoupons).slice(0, 140),
+  );
+  const reconMethods = proReports.body?.data?.paymentMethods || [];
+  ok(
+    "reports response (P43 SO-2c): the method table reconciles — gross − discount = net on every row (paid + unpaid = orders)",
+    Array.isArray(reconMethods) &&
+      reconMethods.length > 0 &&
+      reconMethods.every((m) => m.gross - m.discount === m.net && m.paid + m.unpaid === m.orders),
+    JSON.stringify(reconMethods).slice(0, 160),
   );
 
   // ---------- 11.5 native merchant sessions — the Bearer transport (P36 Phase C) ----------

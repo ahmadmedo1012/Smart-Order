@@ -1882,7 +1882,10 @@ const W7D = [
     REPORTS_CSV_LIB.includes('export function buildReportCsv')],
   ['W7-D export body = screen numbers: the export route and the reports route share ONE aggregation (lib/reports-queries) — the file can never disagree with the screen',
     REPORTS_ROUTE.includes('import { getReportData, type ReportsWindowDays } from "@/lib/reports-queries";') &&
-    REPORTS_EXPORT_ROUTE.includes('import { getReportData, type ReportsWindowDays } from "@/lib/reports-queries";')],
+    /* P43 SO-2c: the export route additionally pulls the per-order
+       reconciliation rows from the SAME seam (same window + exclusion
+       law) — the pin follows the extended import. */
+    REPORTS_EXPORT_ROUTE.includes('import { getReportData, getReconciliationOrders, type ReportsWindowDays } from "@/lib/reports-queries";')],
   ['W7-D preference vs enforcement: the CSV flag rides the same tier read that enforces the reports gate (never a second source), and the page treats a 403 as a LOCKED state — Lock EmptyState + the /pricing CTA, never a dead error/retry',
     REPORTS_ROUTE.includes('canExportCsv: planAllowsFeature(tier, "csvExport"),') &&
     REPORTS_PAGE.includes('e.code === "PLAN_ENTITLEMENT"') &&

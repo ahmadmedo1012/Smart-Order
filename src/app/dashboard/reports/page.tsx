@@ -16,7 +16,7 @@ import {
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatLyd } from "@/lib/money";
-import { FULFILLMENT_AR } from "@/lib/constants";
+import { FULFILLMENT_AR, PAYMENT_TYPE_AR } from "@/lib/constants";
 import {
   PLAN_FEATURES,
   planFeatureLockLabel,
@@ -32,6 +32,8 @@ import {
   Download,
   ExternalLink,
   Lock,
+  Banknote,
+  TicketPercent,
 } from "lucide-react";
 
 type WindowDays = 30 | 90;
@@ -606,6 +608,187 @@ export default function ReportsPage() {
           </ul>
         </CardContent>
       </Card>
+      {/* P43 SO-2c — مطابقة المدفوعات: the per-payment-method
+          reconciliation table (gross − discount = net, paid vs unpaid) —
+          the owner's month-end statement-matching surface, the same
+          table grammar as أفضل المنتجات (md table + mobile card twin). */}
+      <Card className="border-border/80">
+        <CardHeader className="pb-3">
+          <div className="flex items-baseline justify-between gap-x-3 gap-y-1 flex-wrap">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Banknote className="size-4 text-muted-foreground" aria-hidden="true" />
+              مطابقة المدفوعات
+            </CardTitle>
+            <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+              حسب طريقة الدفع · قبل الخصم − الخصم = الصافي
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <table className="hidden md:table w-full text-[13px]">
+            <caption className="sr-only">
+              مطابقة المدفوعات حسب طريقة الدفع في النافذة
+            </caption>
+            <thead>
+              <tr className="border-b border-border bg-muted text-muted-foreground text-[11px] font-semibold">
+                <th scope="col" className="text-start font-semibold px-4 py-3">
+                  الطريقة
+                </th>
+                <th scope="col" className="text-start font-semibold px-4 py-3">
+                  الطلبات
+                </th>
+                <th scope="col" className="text-start font-semibold px-4 py-3">
+                  قبل الخصم
+                </th>
+                <th scope="col" className="text-start font-semibold px-4 py-3">
+                  الخصم
+                </th>
+                <th scope="col" className="text-start font-semibold px-4 py-3">
+                  الصافي
+                </th>
+                <th scope="col" className="text-start font-semibold px-4 py-3">
+                  مدفوع / غير مدفوع
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/60">
+              {data.paymentMethods.map((m) => (
+                <tr key={`${m.name}|${m.type ?? ""}`} className="transition-colors hover:bg-muted/40">
+                  <td className="px-4 py-3">
+                    <span className="block truncate max-w-56 font-medium">{m.name}</span>
+                    {m.type && (
+                      <span className="text-[11px] text-muted-foreground">
+                        {PAYMENT_TYPE_AR[m.type as keyof typeof PAYMENT_TYPE_AR] ?? m.type}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 font-mono tabular-nums">{m.orders}</td>
+                  <td className="px-4 py-3 font-mono tabular-nums text-muted-foreground">
+                    {formatLyd(m.gross)}
+                  </td>
+                  <td className="px-4 py-3 font-mono tabular-nums text-muted-foreground">
+                    {m.discount > 0 ? `−${formatLyd(m.discount)}` : "—"}
+                  </td>
+                  <td className="px-4 py-3 font-semibold font-mono tabular-nums">
+                    {formatLyd(m.net)}
+                  </td>
+                  <td className="px-4 py-3 font-mono tabular-nums text-[12px]">
+                    <span className="text-success-ink">{m.paid}</span>
+                    <span className="text-muted-foreground"> / </span>
+                    <span className={m.unpaid > 0 ? "text-warning-ink" : "text-muted-foreground"}>
+                      {m.unpaid}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {/* Mobile card twin */}
+          <ul className="md:hidden divide-y divide-border/60">
+            {data.paymentMethods.map((m) => (
+              <li key={`${m.name}|${m.type ?? ""}`} className="p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium">{m.name}</div>
+                    <div className="mt-0.5 text-[11px] text-muted-foreground font-mono tabular-nums">
+                      {m.orders} طلب · {m.paid} مدفوع · {m.unpaid} غير مدفوع
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-end">
+                    <div className="font-mono text-sm font-semibold tabular-nums">{formatLyd(m.net)}</div>
+                    {m.discount > 0 && (
+                      <div className="text-[11px] text-muted-foreground font-mono tabular-nums">
+                        −{formatLyd(m.discount)} خصم
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <p className="border-t border-border/60 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+            «غير مدفوع» يشمل المسترجَع — طابِق الصافي مع كشف محفظتك أو
+            حسابك البنكي، ومراجع التحويل في تصدير CSV.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* P43 SO-2c — أكواد الخصم: the coupon usage ledger (code, type,
+          uses, discount given) — rendered only when a coupon actually
+          redeemed in the window (no empty ghost section). */}
+      {data.coupons.length > 0 && (
+        <Card className="border-border/80">
+          <CardHeader className="pb-3">
+            <div className="flex items-baseline justify-between gap-x-3 gap-y-1 flex-wrap">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <TicketPercent className="size-4 text-muted-foreground" aria-hidden="true" />
+                أكواد الخصم
+              </CardTitle>
+              <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                ما أنفقته تسويقياً عبر الكوبونات في النافذة
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <table className="hidden md:table w-full text-[13px]">
+              <caption className="sr-only">استخدام أكواد الخصم في النافذة</caption>
+              <thead>
+                <tr className="border-b border-border bg-muted text-muted-foreground text-[11px] font-semibold">
+                  <th scope="col" className="text-start font-semibold px-4 py-3">
+                    الكود
+                  </th>
+                  <th scope="col" className="text-start font-semibold px-4 py-3">
+                    النوع
+                  </th>
+                  <th scope="col" className="text-start font-semibold px-4 py-3">
+                    الاستخدامات
+                  </th>
+                  <th scope="col" className="text-start font-semibold px-4 py-3">
+                    إجمالي الخصم
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {data.coupons.map((c) => (
+                  <tr key={c.code} className="transition-colors hover:bg-muted/40">
+                    <td className="px-4 py-3">
+                      <span className="font-mono font-semibold tracking-wide" dir="ltr">
+                        {c.code}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{c.type}</td>
+                    <td className="px-4 py-3 font-mono tabular-nums">{c.uses}</td>
+                    <td className="px-4 py-3 font-semibold font-mono tabular-nums">
+                      {formatLyd(c.discount)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {/* Mobile card twin */}
+            <ul className="md:hidden divide-y divide-border/60">
+              {data.coupons.map((c) => (
+                <li key={c.code} className="flex items-center justify-between gap-3 p-4">
+                  <div className="min-w-0">
+                    <div className="font-mono text-sm font-semibold tracking-wide" dir="ltr">
+                      {c.code}
+                    </div>
+                    <div className="mt-0.5 text-[11px] text-muted-foreground">{c.type}</div>
+                  </div>
+                  <div className="shrink-0 text-end">
+                    <div className="font-mono text-sm font-semibold tabular-nums">{formatLyd(c.discount)}</div>
+                    <div className="text-[11px] text-muted-foreground font-mono tabular-nums">{c.uses} استخدام</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="border-t border-border/60 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+              «—» في النوع = كوبون حُذف بعد استخدامه — الاستخدام مسجّل من
+              لقطة الطلب.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

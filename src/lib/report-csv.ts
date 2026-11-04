@@ -14,6 +14,11 @@
 // node can resolve them without a bundler/paths runtime.
 import { formatLydAmount } from "./money.ts";
 import { tripoliDateParts } from "./arabic.ts";
+import { PAYMENT_STATUS_AR } from "./constants.ts";
+import type {
+  CouponUsageRow,
+  PaymentMethodBreakdownRow,
+} from "./reports-reconciliation.ts";
 
 /** The reports API response shape — the one contract shared by
  *  /api/dashboard/reports, the export route, and the page. */
@@ -33,6 +38,27 @@ export interface ReportsData {
     revenue: number;
     orderCount: number;
   }>;
+  /* P43 SO-2c: جدولا المطابقة — نفس القاعدة (لا ملغي ولا مرفوض)،
+   * أنقياء من reports-reconciliation.ts. */
+  paymentMethods: PaymentMethodBreakdownRow[];
+  coupons: CouponUsageRow[];
+}
+
+/** P43 SO-2c — one row of the CSV's reconciliation worksheet (the
+ *  per-order log the owner matches against a wallet/bank statement).
+ *  getReconciliationOrders() (reports-queries.ts) produces these. */
+export interface ReconciliationOrderRow {
+  orderNumber: string;
+  createdAt: Date;
+  paymentMethodName: string | null;
+  paymentType: string | null;
+  subtotal: number;
+  deliveryFee: number;
+  discount: number;
+  couponCode: string | null;
+  paymentReference: string | null;
+  paymentStatus: string;
+  total: number;
 }
 
 /* CSV cell escaping — quote only when the value can break the row
@@ -52,8 +78,16 @@ export function csvCell(v: string | number): string {
 /** The export body — revenue-per-day rows + top-products rows, plus the
  *  honest header (store / window / the exclusion rule). Money rides
  *  formatLydAmount (raw 3-decimal) so Excel parses it as a number.
- *  (W6-B4's builder, byte-identical.) */
-export function buildReportCsv(d: ReportsData, businessName: string): string {
+ *  (W6-B4's builder, byte-identical.)
+ *  P43 SO-2c: the file gains the reconciliation worksheets — the
+ *  per-method breakdown, the coupon usage ledger, and (when the export
+ *  route passes them) the per-order log with discount / couponCode /
+ *  paymentReference columns for statement matching. */
+export function buildReportCsv(
+  d: ReportsData,
+  businessName: string,
+  orders?: ReconciliationOrderRow[],
+): string {
   const rows: string[] = [];
   rows.push("سمارت أوردر — تقرير الأداء");
   rows.push(`المتجر,${csvCell(businessName)}`);
@@ -83,6 +117,63 @@ export function buildReportCsv(d: ReportsData, businessName: string): string {
       `${i + 1},${csvCell(p.productName)},${p.units},${p.orderCount},${formatLydAmount(p.revenue)}`,
     );
   });
+  /* ── P43 SO-2c: مطابقة المدفوعات — gross − discount = net per method
+   * (the one ledger law), paid/unpaid split for the statement match. */
+  rows.push("");
+  rows.push("مطابقة المدفوعات (حسب طريقة الدفع)");
+  rows.push("الطريقة,الطلبات,قبل الخصم (د.ل),الخصم (د.ل),الصافي (د.ل),مدفوع,غير مدفوع");
+  for (const m of d.paymentMethods) {
+    rows.push(
+      [
+        csvCell(m.name),
+        m.orders,
+        formatLydAmount(m.gross),
+        formatLydAmount(m.discount),
+        formatLydAmount(m.net),
+        m.paid,
+        m.unpaid,
+      ].join(","),
+    );
+  }
+  /* ── P43 SO-2c: أكواد الخصم — the marketing spend the owner granted. */
+  rows.push("");
+  rows.push("أكواد الخصم");
+  rows.push("الكود,النوع,الاستخدامات,إجمالي الخصم (د.ل)");
+  for (const c of d.coupons) {
+    rows.push(
+      [csvCell(c.code), csvCell(c.type), c.uses, formatLydAmount(c.discount)].join(","),
+    );
+  }
+  /* ── P43 SO-2c: سجل المطابقة — the per-order worksheet (only the
+   * export route passes it; the on-screen surface stays aggregates).
+   * The date is the Tripoli calendar day (tripoliDateParts, r138); a
+   * leading-dash reference rides csvCell's formula guard like every
+   * other staff-editable cell. */
+  if (orders && orders.length > 0) {
+    rows.push("");
+    rows.push("الطلبات (سجل المطابقة)");
+    rows.push(
+      "رقم الطلب,التاريخ,طريقة الدفع,المجموع الفرعي (د.ل),التوصيل (د.ل),الخصم (د.ل),كود الخصم,مرجع التحويل,حالة الدفع,الإجمالي (د.ل)",
+    );
+    for (const o of orders) {
+      const { y, m, d: dd } = tripoliDateParts(o.createdAt);
+      const day = `${y}-${String(m).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
+      rows.push(
+        [
+          csvCell(o.orderNumber),
+          day,
+          csvCell(o.paymentMethodName ?? "غير محدد"),
+          formatLydAmount(o.subtotal),
+          formatLydAmount(o.deliveryFee),
+          formatLydAmount(o.discount),
+          o.couponCode ? csvCell(o.couponCode) : "",
+          o.paymentReference ? csvCell(o.paymentReference) : "",
+          csvCell(PAYMENT_STATUS_AR[o.paymentStatus as keyof typeof PAYMENT_STATUS_AR] ?? o.paymentStatus),
+          formatLydAmount(o.total),
+        ].join(","),
+      );
+    }
+  }
   return rows.join("\r\n");
 }
 

@@ -32,7 +32,7 @@ import { db } from "@/lib/db";
 import { requireAuth, requireBusiness, requirePermission } from "@/lib/auth";
 import { handleError } from "@/lib/api";
 import { resolveBusinessPlanTier, assertPlanFeature } from "@/lib/plan-entitlements";
-import { getReportData, type ReportsWindowDays } from "@/lib/reports-queries";
+import { getReportData, getReconciliationOrders, type ReportsWindowDays } from "@/lib/reports-queries";
 import { buildReportCsv, reportCsvFileName } from "@/lib/report-csv";
 
 export const runtime = "nodejs";
@@ -67,15 +67,20 @@ export async function GET(req: NextRequest) {
        behavior). */
     const days: ReportsWindowDays = q.days === 90 ? 90 : 30;
 
-    const [biz, data] = await Promise.all([
+    const [biz, data, reconOrders] = await Promise.all([
       db.business.findUnique({
         where: { id: businessId },
         select: { slug: true, name: true },
       }),
       getReportData(businessId, days),
+      /* P43 SO-2c: سجل المطابقة — the per-order worksheet (discount /
+         couponCode / paymentReference columns) rides the SAME window +
+         exclusion the aggregates use; bounded by the plan's own monthly
+         order caps, the same cost class as the aggregation itself. */
+      getReconciliationOrders(businessId, days),
     ]);
 
-    const csv = buildReportCsv(data, biz?.name ?? "");
+    const csv = buildReportCsv(data, biz?.name ?? "", reconOrders);
     /* UTF-8 BOM keeps Excel reading the Arabic headers correctly (the
        W6-B4 transport contract, now server-side). */
     const body = `\uFEFF${csv}`;
