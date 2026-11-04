@@ -1028,10 +1028,17 @@ async function main() {
      raced twin (§6) + the re-priced badPrice order (§7) + ONE loop order
      before §8's 429 — every one 39500 millimes (same payload, server
      re-priced). The customers upsert keys on (businessId, phone) so all
-     four land on the ONE «عميل اختبار» row (order1 alone is DELIVERED →
-     totalSpent 39500). */
-  const c4Orders = rateLimited ? 0 : 4;
-  const c4Revenue = rateLimited ? 0 : 158000; // 39500 × 4
+     land on the ONE «عميل اختبار» row (order1 alone is DELIVERED →
+     totalSpent 39500).
+     P43 (§7.5) adds FOUR more on the SAME business via the isolated
+     CP-IP bucket (immune to the shared-localhost 429): the coupon order
+     (35950 — 35500 + 4000 − 3550 discount), the FREE_DELIVERY order
+     (35500 — the 4000 fee waived onto the discount line), the MANUAL
+     transfer-reference order (39500) and the reference-on-COD control
+     order (39500, nothing stored). Total P43 revenue = 150450. */
+  const c4P43Orders = rateLimited ? 4 : 4; // CP bucket: its own IP limiter — survives §8's shared-bucket 429 either way
+  const c4Orders = (rateLimited ? 0 : 4) + c4P43Orders;
+  const c4Revenue = (rateLimited ? 0 : 158000) + 150450; // baseline 39500×4 + P43 35950+35500+39500+39500
 
   // — orders inbox: filters + search through the Bearer lens —
   const inboxAll = await mA(`/api/orders?businessId=${bizAId}&pageSize=50`);
@@ -1181,8 +1188,8 @@ async function main() {
   const c4PmList0 = await mA(`/api/payment-methods?businessId=${bizAId}`);
   const c4Pm0 = c4PmList0.body?.data?.methods ?? [];
   ok(
-    "C4 payment methods: register-seeded COD+CASH list via Bearer",
-    c4Pm0.length === 2 && c4Pm0.some((m) => m.type === "COD") && c4Pm0.some((m) => m.type === "CASH"),
+    "C4 payment methods: register-seeded COD+CASH list via Bearer (+ P43's MANUAL)",
+    c4Pm0.length === 3 && c4Pm0.some((m) => m.type === "COD") && c4Pm0.some((m) => m.type === "CASH") && c4Pm0.some((m) => m.type === "MANUAL"),
     JSON.stringify(c4Pm0.map((m) => m.type)),
   );
   const c4PmCreate = await mA("/api/payment-methods", {
@@ -1203,17 +1210,17 @@ async function main() {
   );
   const codId = c4Pm0.find((m) => m.type === "COD")?.id;
   const cashId = c4Pm0.find((m) => m.type === "CASH")?.id;
-  const c4PmReorder = await mA("/api/payment-methods", { method: "PATCH", body: JSON.stringify({ businessId: bizAId, order: [c4PmId, cashId, codId] }) });
+  const c4PmReorder = await mA("/api/payment-methods", { method: "PATCH", body: JSON.stringify({ businessId: bizAId, order: [c4PmId, cashId, codId, manualId] }) });
   const c4Reordered = c4PmReorder.body?.data?.methods ?? [];
   ok(
     "C4 payment methods: reorder (NEW C4 endpoint) rewrites the display order",
-    c4PmReorder.body?.success === true && c4Reordered.map((m) => m.type).join(",") === "WHATSAPP,CASH,COD",
+    c4PmReorder.body?.success === true && c4Reordered.map((m) => m.type).join(",") === "WHATSAPP,CASH,COD,MANUAL",
     JSON.stringify(c4Reordered.map((m) => m.type)),
   );
   const c4PmPersist = await mA(`/api/payment-methods?businessId=${bizAId}`);
   ok(
     "C4 payment methods: the new order persists on the next read",
-    (c4PmPersist.body?.data?.methods ?? []).map((m) => m.type).join(",") === "WHATSAPP,CASH,COD",
+    (c4PmPersist.body?.data?.methods ?? []).map((m) => m.type).join(",") === "WHATSAPP,CASH,COD,MANUAL",
     JSON.stringify((c4PmPersist.body?.data?.methods ?? []).map((m) => m.type)),
   );
   const c4PmPartial = await mA("/api/payment-methods", { method: "PATCH", body: JSON.stringify({ businessId: bizAId, order: [c4PmId] }) });
@@ -1249,10 +1256,10 @@ async function main() {
   const c4CustDetail = await mA(`/api/customers/${c4Cust?.id}?businessId=${bizAId}`);
   const c4CustOrd = c4CustDetail.body?.data?.customer;
   ok(
-    "C4 customers: profile ships the order history + stats (all 4 orders, 1 delivered)",
+    "C4 customers: profile ships the order history + stats (4 baseline + 4 P43 orders, 1 delivered)",
     rateLimited || (
       Array.isArray(c4CustOrd?.orders) && c4CustOrd?.orders?.some((o) => o.orderNumber?.startsWith("SO-")) &&
-      c4CustOrd?.stats?.orderCount === 4 && c4CustOrd?.stats?.totalSpent === 39500
+      c4CustOrd?.stats?.orderCount === c4Orders && c4CustOrd?.stats?.totalSpent === 39500
     ),
     JSON.stringify(c4CustOrd?.stats).slice(0, 100),
   );
@@ -1286,7 +1293,7 @@ async function main() {
   ok(
     "C4 mobile reports (NEW): default 30-day window with the exact accounting",
     c4Rep.body?.success === true && c4Summary?.window?.days === 30 && c4Summary?.series?.length === 30 &&
-      c4Summary?.totals?.orders === c4Orders && c4Summary?.totals?.revenue === c4Revenue && c4Summary?.totals?.avgOrder === (c4Orders > 0 ? 39500 : 0),
+      c4Summary?.totals?.orders === c4Orders && c4Summary?.totals?.revenue === c4Revenue && c4Summary?.totals?.avgOrder === (c4Orders > 0 ? Math.round(c4Revenue / c4Orders) : 0),
     JSON.stringify(c4Summary?.totals).slice(0, 100),
   );
   ok(
