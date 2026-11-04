@@ -29,8 +29,10 @@ test("paymentReferenceError: empty is NOT an error (optional by design), every r
   assert.equal(paymentReferenceError(""), null);
   assert.equal(paymentReferenceError("TRX-9F3A2C"), null);
   assert.equal(paymentReferenceError("TRX"), "مرجع التحويل قصير جداً — 4 محارف على الأقل");
-  assert.ok(paymentReferenceError("T".repeat(51)).includes("50"));
-  assert.ok(paymentReferenceError("TRX 9F3A").includes("الحروف والأرقام"));
+  const tooLong = paymentReferenceError("T".repeat(51));
+  assert.ok(!!tooLong && tooLong.includes("50"));
+  const badCharset = paymentReferenceError("TRX 9F3A");
+  assert.ok(!!badCharset && badCharset.includes("الحروف والأرقام"));
 });
 
 test("normalizePaymentReference: trims only — the stored form is what the customer typed", () => {

@@ -17,8 +17,8 @@ import {
 function memoryStorage(initial = "") {
   const map = new Map(initial ? [[CUSTOMER_PREFILL_KEY, initial]] : []);
   return {
-    getItem: (k) => map.get(k) ?? null,
-    setItem: (k, v) => void map.set(k, v),
+    getItem: (k: string) => map.get(k) ?? null,
+    setItem: (k: string, v: string) => void map.set(k, v),
     dump: () => map.get(CUSTOMER_PREFILL_KEY) ?? null,
   };
 }

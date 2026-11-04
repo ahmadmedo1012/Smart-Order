@@ -76,7 +76,9 @@ test("breakdown: bigint sums (PG prod shape) and null sums are coerced, never Na
   const out = buildPaymentMethodBreakdown([
     pmRow({
       _count: { _all: 2 },
-      _sum: { subtotal: 10_000n, deliveryFee: 2_000n, discount: 500n, total: 11_500n },
+      /* PG ترسل المجاميع BigInt — تُبنى عبر BigInt() (هدف tsc ES2017 لا
+         يقبل الحرفية n-لاحقة، والاستدعاء معلن في lib esnext) */
+      _sum: { subtotal: BigInt(10_000), deliveryFee: BigInt(2_000), discount: BigInt(500), total: BigInt(11_500) },
     }),
     pmRow({ paymentMethodName: "فارغ", paymentType: "CASH", _count: { _all: 0 }, _sum: { subtotal: null, deliveryFee: null, discount: null, total: null } }),
   ]);
@@ -95,7 +97,7 @@ test("breakdown: empty window answers an empty table (no ghost rows)", () => {
 
 /* ── buildCouponUsageRows ────────────────────────────────────────── */
 
-function couponRow(code: string | null, uses: number, discount: number): CouponUsageGroupRow {
+function couponRow(code: string | null, uses: number, discount: number | bigint): CouponUsageGroupRow {
   return { couponCode: code, _count: { _all: uses }, _sum: { discount } };
 }
 
@@ -133,6 +135,6 @@ test("coupon usage: null/blank snapshot codes are skipped defensively; sorted by
 });
 
 test("coupon usage: bigint discount sums (PG prod shape) coerce to Number", () => {
-  const out = buildCouponUsageRows([couponRow("B", 2, 3_000n)], []);
+  const out = buildCouponUsageRows([couponRow("B", 2, BigInt(3_000))], []);
   assert.equal(out[0]!.discount, 3_000);
 });
