@@ -413,6 +413,108 @@ async function main() {
   const noStore = await anon.call("/api/public/orders", { method: "POST", body: JSON.stringify({ ...orderPayload, slug: "does-not-exist" }) });
   ok("unknown store 404", rateLimited || noStore.status === 404 || noStore.body?.error?.code === "NOT_FOUND");
 
+  // ---------- 7.5 coupons + transfer reference (P43 SO-2) ----------
+  console.log("— أكواد الخصم ومرجع التحويل (P43-SO2)");
+  /* This section's public POSTs run on an ISOLATED client-IP bucket
+     (x-real-ip — the client-ip trust model on a local server): the
+     shared localhost bucket is nearly consumed by sections 5–7 (the
+     order path allows 8/min) while this section legitimately needs
+     several order creations. The preview endpoint owns its own key
+     class (coupon-validate:IP, 12/min). */
+  const CP = makeCtx();
+  const cip = { "x-real-ip": "198.18.53.77" };
+  const cpo = (body) => ({ method: "POST", headers: cip, body: JSON.stringify(body) });
+
+  // the merchant's marketing surface: four coupons on business A
+  const mkCoupon = async (over) =>
+    (await A.call("/api/coupons", { method: "POST", body: JSON.stringify({ businessId: bizAId, ...over }) }))?.body;
+  const cPct = await mkCoupon({ code: "E2EPCT10", type: "PERCENT", value: 10 });
+  ok("merchant creates a PERCENT coupon", cPct?.data?.coupon?.code === "E2EPCT10", JSON.stringify(cPct).slice(0, 120));
+  const cExp = await mkCoupon({ code: "E2EOLD", type: "FIXED", value: "2.000", expiresAt: new Date(Date.now() - 86_400_000).toISOString() });
+  ok("merchant creates an already-expired coupon (window in the past)", cExp?.data?.coupon?.code === "E2EOLD", JSON.stringify(cExp).slice(0, 120));
+  const cMin = await mkCoupon({ code: "E2EMIN50", type: "FIXED", value: "3.000", minOrder: "50.000" });
+  ok("merchant creates a min-order coupon (50 د.ل)", cMin?.data?.coupon?.code === "E2EMIN50", JSON.stringify(cMin).slice(0, 120));
+  const cFree = await mkCoupon({ code: "E2ESHIP", type: "FREE_DELIVERY" });
+  ok("merchant creates a FREE_DELIVERY coupon", cFree?.data?.coupon?.code === "E2ESHIP", JSON.stringify(cFree).slice(0, 120));
+
+  /* preview endpoint (/api/public/coupons/validate) — display-only: the
+     honest math the customer SEES (the order route re-decides everything
+     inside its own transaction). Order math fixture: 2× (12.5 + 4 كبير +
+     1.25 صوص) = 35.5 د.ل + 4 د.ل توصيل = 39.5 د.ل = 39500 millimes. */
+  const prev = await CP.call("/api/public/coupons/validate", cpo({ slug, code: "e2epct10", fulfillmentType: "DELIVERY", subtotal: 35500, deliveryFee: 4000 }));
+  ok(
+    "validate: flyer case answers the merchant's canonical spelling + the honest total",
+    prev.body?.data?.code === "E2EPCT10" && prev.body?.data?.discount === 3550 && prev.body?.data?.total === 35950,
+    JSON.stringify(prev.body).slice(0, 140),
+  );
+  const prevExp = await CP.call("/api/public/coupons/validate", cpo({ slug, code: "E2EOLD", fulfillmentType: "DELIVERY", subtotal: 35500, deliveryFee: 4000 }));
+  ok("validate: expired coupon refused (422 COUPON)", prevExp.status === 422 && prevExp.body?.error?.code === "COUPON" && /انتهت صلاحية/.test(prevExp.body?.error?.message ?? ""), JSON.stringify(prevExp.body).slice(0, 120));
+  const prevMin = await CP.call("/api/public/coupons/validate", cpo({ slug, code: "E2EMIN50", fulfillmentType: "DELIVERY", subtotal: 35500, deliveryFee: 4000 }));
+  ok("validate: below the coupon's min-order refused with the millimes-honest copy", prevMin.status === 422 && /الحد الأدنى/.test(prevMin.body?.error?.message ?? ""), JSON.stringify(prevMin.body).slice(0, 120));
+  const prevPickup = await CP.call("/api/public/coupons/validate", cpo({ slug, code: "E2ESHIP", fulfillmentType: "PICKUP", subtotal: 35500, deliveryFee: 0 }));
+  ok("validate: FREE_DELIVERY on pickup refused (a useless redemption must not burn a use)", prevPickup.status === 422 && /طلبات التوصيل/.test(prevPickup.body?.error?.message ?? ""), JSON.stringify(prevPickup.body).slice(0, 120));
+  const prevUnknown = await CP.call("/api/public/coupons/validate", cpo({ slug, code: "NOPE-CODE", fulfillmentType: "DELIVERY", subtotal: 35500, deliveryFee: 4000 }));
+  ok("validate: unknown code refused", prevUnknown.status === 422 && prevUnknown.body?.error?.code === "COUPON", JSON.stringify(prevUnknown.body).slice(0, 120));
+
+  /* ── the money path itself (POST /api/public/orders) ── */
+  const couponPayload = { ...orderPayload, idempotencyKey: rnd("e2e-cp-"), couponCode: "E2EPCT10" };
+  const couponOrder = await CP.call("/api/public/orders", cpo(couponPayload));
+  const cOrd = couponOrder.body?.data?.order;
+  ok(
+    "order with coupon: discount computed + committed inside the tx (35500 + 4000 − 3550)",
+    couponOrder.body?.success === true && cOrd?.discount === 3550 && cOrd?.total === 35950 && cOrd?.couponCode === "E2EPCT10",
+    JSON.stringify(couponOrder.body).slice(0, 160),
+  );
+  const couponsAfter = await A.call(`/api/coupons?businessId=${bizAId}`);
+  const pctRow = (couponsAfter.body?.data?.coupons || []).find((c) => c.code === "E2EPCT10");
+  ok("coupon usedCount incremented exactly once by the order", pctRow?.usedCount === 1, `got ${pctRow?.usedCount}`);
+
+  const couponReplay = await CP.call("/api/public/orders", cpo({ ...couponPayload, customerName: "عميل إعادة الإرسال" }));
+  const pctRow2 = ((await A.call(`/api/coupons?businessId=${bizAId}`)).body?.data?.coupons || []).find((c) => c.code === "E2EPCT10");
+  ok(
+    "idempotent replay: the SAME order replays and usedCount stays 1 (never double-incremented)",
+    couponReplay.body?.data?.order?.id === cOrd?.id && pctRow2?.usedCount === 1,
+    `id ${couponReplay.body?.data?.order?.id} vs ${cOrd?.id} · usedCount ${pctRow2?.usedCount}`,
+  );
+
+  const expiredOrder = await CP.call("/api/public/orders", cpo({ ...orderPayload, idempotencyKey: rnd("e2e-exp-"), couponCode: "E2EOLD" }));
+  ok("order path: expired coupon refuses the order (422 COUPON, tx aborted)", expiredOrder.status === 422 && expiredOrder.body?.error?.code === "COUPON", JSON.stringify(expiredOrder.body).slice(0, 120));
+  const minOrderTry = await CP.call("/api/public/orders", cpo({ ...orderPayload, idempotencyKey: rnd("e2e-min-"), couponCode: "E2EMIN50" }));
+  ok("order path: below the coupon's min-order refuses (422, server-priced subtotal)", minOrderTry.status === 422 && /الحد الأدنى/.test(minOrderTry.body?.error?.message ?? ""), JSON.stringify(minOrderTry.body).slice(0, 120));
+
+  const freeOrder = await CP.call("/api/public/orders", cpo({ ...orderPayload, idempotencyKey: rnd("e2e-free-"), couponCode: "E2ESHIP" }));
+  const fOrd = freeOrder.body?.data?.order;
+  ok(
+    "FREE_DELIVERY: the waived fee rides the discount line — total = subtotal (net delivery 0)",
+    freeOrder.body?.success === true && fOrd?.discount === 4000 && fOrd?.total === 35500 && fOrd?.couponCode === "E2ESHIP",
+    JSON.stringify(freeOrder.body).slice(0, 160),
+  );
+
+  /* ── transfer references (MANUAL/MADAR/LIBYANA) ── */
+  const pmManual = await A.call("/api/payment-methods", { method: "POST", body: JSON.stringify({ businessId: bizAId, type: "MANUAL", name: "تحويل بنكي", number: "0912345678" }) });
+  const manualId = pmManual.body?.data?.method?.id;
+  ok("merchant adds a MANUAL transfer method (collects references)", !!manualId, JSON.stringify(pmManual.body).slice(0, 120));
+
+  const refGood = await CP.call("/api/public/orders", cpo({ ...orderPayload, idempotencyKey: rnd("e2e-ref-"), paymentMethodId: manualId, paymentReference: "TRX-9F3A2C" }));
+  ok("well-formed transfer reference accepted (order succeeds)", refGood.body?.success === true, JSON.stringify(refGood.body).slice(0, 120));
+  const refDetail = await A.call(`/api/orders/${refGood.body?.data?.order?.id}`);
+  ok(
+    "the reference rides the merchant's order row (reconciliation context, paymentStatus still UNPAID)",
+    refDetail.body?.data?.order?.paymentReference === "TRX-9F3A2C" && refDetail.body?.data?.order?.paymentStatus === "UNPAID",
+    JSON.stringify(refDetail.body?.data?.order ?? null).slice(0, 140),
+  );
+
+  const refBad = await CP.call("/api/public/orders", cpo({ ...orderPayload, idempotencyKey: rnd("e2e-refbad-"), paymentMethodId: manualId, paymentReference: "AB" }));
+  ok("malformed reference refused (422 — one source with the checkout copy)", refBad.status === 422 && /مرجع التحويل/.test(refBad.body?.error?.message ?? ""), JSON.stringify(refBad.body).slice(0, 120));
+
+  const refIgnored = await CP.call("/api/public/orders", cpo({ ...orderPayload, idempotencyKey: rnd("e2e-refign-"), paymentReference: "TRX-123456" }));
+  const refIgnoredDetail = await A.call(`/api/orders/${refIgnored.body?.data?.order?.id}`);
+  ok(
+    "reference on a NON-transfer method is silently ignored (no error, nothing stored)",
+    refIgnored.body?.success === true && refIgnoredDetail.body?.data?.order?.paymentReference == null,
+    JSON.stringify(refIgnoredDetail.body?.data?.order ?? null).slice(0, 140),
+  );
+
   // ---------- 8. rate limiting (order path) ----------
   console.log("— تحديد المعدل");
   let got429 = false;

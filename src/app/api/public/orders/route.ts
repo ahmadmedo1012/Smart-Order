@@ -18,6 +18,8 @@ import { buildOrderMessage } from "@/lib/whatsapp";
 import { tripoliDayStart, tripoliDateParts, tripoliMonthStart } from "@/lib/arabic";
 import { isUniqueViolationOn } from "@/lib/prisma-errors";
 import { notifyBusinessOrderEvent } from "@/lib/push";
+import { computeCouponDiscount, couponUseError, normalizeCouponCode, couponCodeEquals, type CouponShape } from "@/lib/coupon";
+import { collectsPaymentReference, normalizePaymentReference, paymentReferenceError } from "@/lib/payment-reference";
 import { Prisma } from "@prisma/client";
 
 export const runtime = "nodejs";
@@ -72,6 +74,10 @@ const createSchema = z.object({
   customerNote: z.string().trim().max(300).optional().default(""),
   deliveryZoneId: z.string().nullable().optional(),
   paymentMethodId: z.string().nullable().optional(),
+  /* P43 SO-2: كود الخصم الاختياري (يُتحقق منه داخل معاملة الطلب — لا
+   * يُثق بأي مال من العميل) ومرجع التحويل الاختياري لطرق التحويل. */
+  couponCode: z.string().trim().max(40).optional().default(""),
+  paymentReference: z.string().trim().max(60).optional().default(""),
   items: z.array(itemSchema).min(1, "سلة الطلب فارغة").max(MAX_ORDER_ITEMS),
 });
 
@@ -118,6 +124,12 @@ function idemReplayResponse(idem: IdemOrder, business: { whatsappNumber: string 
     addressLine: idem.addressLine,
     subtotal: idem.subtotal,
     deliveryFee: idem.deliveryFee,
+    /* P43 SO-2: الـreplay يحمل نفس شكل المسار الأول — الخصم والكود
+     * ومرجع التحويل كلها من الصفوف المُلتزَمة (لا إعادة احتساب ولا
+     * إعادة زيادة لعدّاد الكوبون — الطلب موجود أصلاً). */
+    discount: idem.discount,
+    couponCode: idem.couponCode,
+    paymentReference: idem.paymentReference,
     total: idem.total,
     paymentName: idem.paymentMethodName,
     paymentType: idem.paymentType,
@@ -131,6 +143,8 @@ function idemReplayResponse(idem: IdemOrder, business: { whatsappNumber: string 
         publicToken: idem.publicToken,
         subtotal: idem.subtotal,
         deliveryFee: idem.deliveryFee,
+        discount: idem.discount,
+        couponCode: idem.couponCode,
         total: idem.total,
         replay: true,
       },
@@ -307,7 +321,21 @@ export async function POST(req: NextRequest) {
       paymentMethod = { id: pm.id, name: pm.name, type: pm.type };
     }
 
-    const total = subtotal + deliveryFee;
+    /* ---- P43 SO-2: مرجع التحويل (اختياري) ----
+     * يُقبل فقط لطرق التحويل (MANUAL/MADAR/LIBYANA) — لغيرها يُتجاهل
+     * بصمت (لا خطأ لعميل اختار الدفع عند التسليم وترك الحقل معلّقاً).
+     * صيغة 4–50 حرفاً/رقماً/شرطة/قاطع فقط — نفس النص العربي في الواجهة
+     * والخادم (payment-reference.ts مصدر واحد). المرجع إشارة مصالحة
+     * للتاجر، لا إثبات دفع: paymentStatus تبقى UNPAID حتى يقرر التاجر. */
+    let paymentReference: string | null = null;
+    if (collectsPaymentReference(paymentMethod?.type)) {
+      const ref = normalizePaymentReference(input.paymentReference);
+      if (ref) {
+        const refErr = paymentReferenceError(ref);
+        if (refErr) return fail(refErr, 422, "VALIDATION");
+        paymentReference = ref;
+      }
+    }
 
     // ---- Persist (transaction + sequence retry) ----
     const publicToken = randomUUID();
@@ -355,6 +383,49 @@ export async function POST(req: NextRequest) {
             );
           }
 
+          /* ── P43 SO-2: كود الخصم — التحقق والاحتساب والزيادة الذرّية
+           * داخل المعاملة نفسها (قرار المهمة الموثق). المجموع الفرعي
+           * هنا هو المُسعّر من الخادم (لا مال من العميل)، والزيادة
+           * الشرطية updateMany WHERE usedCount < maxUses تحرس ضد
+           * الاستخدام المتزامن الزائد؛ أي فشل يُجهض المعاملة كلها
+           * (لا صفوف ولا خصم ولا خصم من المخزون) — وإعادة تشغيل
+           * الـidempotency لا تصل إلى هنا أصلاً (الطلب موجود فيُعاد
+           * تشغيله من الصفوف المُلتزَمة، فلا تزييد مضاعف). */
+          let discount = 0;
+          let couponCode: string | null = null;
+          if (input.couponCode) {
+            const normalized = normalizeCouponCode(input.couponCode);
+            /* مقارنة غير حساسة لحالة الأحرف (SQLite لا يدعم insensitive)
+             * — أكواد التاجر قليلة، والجلب ثم المطابقة في الذاكرة */
+            const rows = await tx.coupon.findMany({
+              where: { businessId: business.id },
+              select: { id: true, code: true, type: true, value: true, minOrder: true, maxUses: true, usedCount: true, startsAt: true, expiresAt: true, isActive: true },
+            });
+            const row = rows.find((c) => couponCodeEquals(c.code, normalized)) ?? null;
+            const useErr = couponUseError(row as CouponShape | null, { now: new Date(), subtotal });
+            if (useErr) throw new ApiFailError(useErr, 422, "COUPON");
+            const coupon = row as CouponShape & { id: string };
+            /* توصيل مجاني على طلب استلام = استخدام محروق بلا فائدة —
+             * الرفض قبل الزيادة (لا يُستهلك سقف الكود) */
+            if (coupon.type === "FREE_DELIVERY" && input.fulfillmentType !== "DELIVERY") {
+              throw new ApiFailError("هذا الكود لطلبات التوصيل — احوّل طلبك إلى توصيل للاستفادة منه", 422, "COUPON");
+            }
+            const inc = await tx.coupon.updateMany({
+              where: {
+                id: coupon.id,
+                isActive: true,
+                ...(coupon.maxUses != null ? { usedCount: { lt: coupon.maxUses } } : {}),
+              },
+              data: { usedCount: { increment: 1 } },
+            });
+            if (inc.count !== 1) {
+              throw new ApiFailError("نفدت استخدامات هذا الكود", 422, "COUPON");
+            }
+            discount = computeCouponDiscount(coupon, subtotal, deliveryFee);
+            couponCode = coupon.code;
+          }
+          const total = subtotal + deliveryFee - discount;
+
           let created: { id: string; orderNumber: string; publicToken: string } | null = null;
           let lastErr: unknown = null;
           for (let attempt = 0; attempt < 3; attempt++) {
@@ -368,6 +439,7 @@ export async function POST(req: NextRequest) {
                   status: "NEW",
                   fulfillmentType: input.fulfillmentType,
                   subtotal,
+                  discount,
                   deliveryFee,
                   total,
                   paymentMethodId: paymentMethod?.id ?? null,
@@ -381,6 +453,8 @@ export async function POST(req: NextRequest) {
                   addressLine: input.addressLine || null,
                   customerNote: input.customerNote || null,
                   idempotencyKey: input.idempotencyKey,
+                  couponCode,
+                  paymentReference,
                   source: "STOREFRONT",
                   items: { create: lineItems },
                   history: {
@@ -459,7 +533,7 @@ export async function POST(req: NextRequest) {
             }
           }
 
-          return { ...created, customerId: customer.id };
+          return { ...created, customerId: customer.id, discount, couponCode, paymentReference };
         },
         { isolationLevel: "Serializable" }
       );
@@ -527,7 +601,11 @@ export async function POST(req: NextRequest) {
       addressLine: input.addressLine || null,
       subtotal,
       deliveryFee,
-      total,
+      /* P43 SO-2: الخصم بالكود ومرجع التحويل يركبان سياق التاجر */
+      discount: order.discount,
+      couponCode: order.couponCode,
+      paymentReference: order.paymentReference,
+      total: subtotal + deliveryFee - order.discount,
       paymentName: paymentMethod?.name ?? null,
       paymentType: paymentMethod?.type ?? null,
       customerNote: input.customerNote || null,
@@ -542,7 +620,8 @@ export async function POST(req: NextRequest) {
       orderNumber: order.orderNumber,
       businessId: business.id,
       businessName: business.name,
-      total,
+      /* P43 SO-2: الإجمالي الصافي بعد الخصم — نفس رقم الطلب الملزم */
+      total: subtotal + deliveryFee - order.discount,
     });
 
     return ok(
@@ -553,7 +632,9 @@ export async function POST(req: NextRequest) {
           publicToken: order.publicToken,
           subtotal,
           deliveryFee,
-          total,
+          discount: order.discount,
+          couponCode: order.couponCode,
+          total: subtotal + deliveryFee - order.discount,
         },
         whatsapp: business.whatsappNumber
           ? { number: toE164(business.whatsappNumber), message: waMessage }

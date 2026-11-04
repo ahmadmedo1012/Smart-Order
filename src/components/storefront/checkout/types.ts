@@ -31,13 +31,31 @@ export type FieldKey = "name" | "phone" | "zone" | "address" | "payment";
 export type FieldErrors = Partial<Record<FieldKey, string>>;
 
 /** Success-moment state (r133 A1 F9): the durable order identity the
- * in-page confirmation renders while the redirect settles. */
+ * in-page confirmation renders while the redirect settles.
+ * P43 SO-2: the settled discount rides along (0/absent = no coupon —
+ * the savings line renders only when the customer actually saved). */
 export type CheckoutResult = {
   orderNumber: string;
   publicToken: string;
   total: number;
+  discount?: number;
+  couponCode?: string | null;
   whatsapp: { number: string; message: string } | null;
 };
+
+/* P43 SO-2: الكود المطبق — معاينة القراءة الوحيدة للمال الذي سيراه
+ * العميل (المصدر /api/public/coupons/validate؛ الطلب يعيد كل شيء
+ * خادمياً عند الإرسال). */
+export interface CouponPreview {
+  code: string;
+  type: "PERCENT" | "FIXED" | "FREE_DELIVERY";
+  description: string;
+  discount: number;
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  minOrder: number;
+}
 
 /** First-invalid focus targets — inputs focus natively; the two tile
  * groups (zone/payment) get tabIndex={-1} containers so focus()+scroll

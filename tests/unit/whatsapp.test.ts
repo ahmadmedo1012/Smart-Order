@@ -133,3 +133,40 @@ test("waLink: digits-only target, percent-encoded message", () => {
   assert.equal(withMsg.includes("مرحبا"), false); // encoded, never raw
   assert.ok(decodeURIComponent(withMsg.split("text=")[1]!).includes("مرحبا"));
 });
+
+/* ── P43 SO-2: the discount + transfer-reference lines ─────────────── */
+
+test("buildOrderMessage: the discount line rides the code and subtracts into the total", () => {
+  const msg = buildOrderMessage({
+    ...ORDER,
+    discount: 3_300,
+    couponCode: "SAVE10",
+    total: 33_700, // 33000 + 4000 − 3300
+  });
+  assert.ok(msg.includes("الخصم (SAVE10): 3.300 د.ل"));
+  assert.ok(msg.includes("*الإجمالي: 33.700 د.ل*"));
+});
+
+test("buildOrderMessage: zero/absent discount draws no line (old orders keep their shape)", () => {
+  assert.equal(buildOrderMessage(ORDER).includes("الخصم"), false);
+  assert.equal(buildOrderMessage({ ...ORDER, discount: 0 }).includes("الخصم"), false);
+  assert.equal(buildOrderMessage({ ...ORDER, discount: 0, couponCode: "X" }).includes("الخصم"), false);
+});
+
+test("buildOrderMessage: FREE_DELIVERY ledger — التوصيل ثم الخصم بالإعفاء والإجمالي صافي", () => {
+  const msg = buildOrderMessage({
+    ...ORDER,
+    discount: 4_000,
+    couponCode: "FREESHIP",
+    total: 33_000, // 33000 + 4000 − 4000
+  });
+  assert.ok(msg.includes("التوصيل: 4 د.ل"));
+  assert.ok(msg.includes("الخصم (FREESHIP): 4 د.ل"));
+  assert.ok(msg.includes("*الإجمالي: 33 د.ل*"));
+});
+
+test("buildOrderMessage: the transfer reference rides the merchant context (when present)", () => {
+  const msg = buildOrderMessage({ ...ORDER, paymentReference: "TRX-9F3A2C" });
+  assert.ok(msg.includes("مرجع التحويل: TRX-9F3A2C"));
+  assert.equal(buildOrderMessage(ORDER).includes("مرجع التحويل"), false); // absent → no line
+});

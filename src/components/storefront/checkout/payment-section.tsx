@@ -1,12 +1,14 @@
 import type { Dispatch, SetStateAction } from "react";
 import * as React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { FieldError } from "@/components/dashboard/form-field";
 import { toast } from "sonner";
 import { AnimatedCopy } from "@/components/ui/animated-icons";
 import { libyanaUssdCode, madarUssdCode, WALLET_CAP_LYD } from "@/lib/payment-constants";
 import { formatPhoneDisplay } from "@/lib/phone";
-import { Check, Coins } from "lucide-react";
+import { collectsPaymentReference, normalizePaymentReference, paymentReferenceError } from "@/lib/payment-reference";
+import { Check, Coins, FileText } from "lucide-react";
 import { paymentIcon } from "./payment-icon";
 import type { FieldErrors, StoreData } from "./types";
 
@@ -16,7 +18,10 @@ type PaymentConfig = { number?: string } | null;
 /** 17-DEBT-SO: payment section extracted verbatim from checkout-client.tsx
  * — ProviderPicker tile geometry, transfer-number row, r134 USSD
  * quick-code with the wallet-cap gate, and the COD/transfer footnote.
- * The copy buttons keep their exact handlers. */
+ * The copy buttons keep their exact handlers.
+ * P43 SO-2: طرق التحويل (تحويل يدوي/مدار/ليبيانا) تسأل الآن عن مرجع
+ * التحويل الاختياري — رقم الإشعار الذي يقبل به التاجر تحويله عند
+ * المصالحة (لا إثبات دفع: الحالة تبقى «غير مدفوع» حتى يقرر التاجر). */
 export function PaymentSection({
   data,
   loadError,
@@ -29,6 +34,8 @@ export function PaymentSection({
   overWalletCap,
   total,
   storeWhatsapp,
+  paymentReference,
+  setPaymentReference,
 }: {
   data: StoreData | null;
   loadError: boolean;
@@ -43,7 +50,13 @@ export function PaymentSection({
   /* P42-2 (E-1): the store's WhatsApp (business.whatsappNumber) — the
      contact lifeline shown when zero payment methods are active. */
   storeWhatsapp?: string | null;
+  /* P43 SO-2: مرجع التحويل — يظهر فقط لطرق التحويل. */
+  paymentReference: string;
+  setPaymentReference: Dispatch<SetStateAction<string>>;
 }) {
+  /* P43 SO-2: خطأ مرجع التحويل المحلي — يُمسح عند التعديل (نمط مسح
+     أخطاء الحقول العائلي) ويُعاد التحقق عند الإرسال في الجذر. */
+  const [payRefError, setPayRefError] = React.useState<string | null>(null);
   /* P18-W2-d (W1-d #8 — USSD copy feedback state): the copy action
      answers INLINE, not only via toast — the button flips to a franked
      ✓ «تم النسخ» state for ~2s (the same transient grammar the family
@@ -125,6 +138,12 @@ export function PaymentSection({
               onClick={() => {
                 setPaymentMethodId(p.id);
                 if (errors.payment) setErrors((x) => ({ ...x, payment: undefined }));
+                /* P43 SO-2: مغادرة عائلة التحويل تُخلي مرجع التحويل — لا
+                   يُرسل رقم إشعار مع طلب نقدي عند التسليم */
+                if (!collectsPaymentReference(p.type)) {
+                  setPaymentReference("");
+                  setPayRefError(null);
+                }
               }}
               aria-pressed={selected}
               /* P6-2-f3 (GROUP 1): stamp grammar — squared provider
@@ -146,6 +165,42 @@ export function PaymentSection({
       {errors.payment && <FieldError id="c-pay-error">{errors.payment}</FieldError>}
       {paymentMethod?.instructions && (
         <p className="text-[11px] leading-relaxed text-muted-foreground">{paymentMethod.instructions}</p>
+      )}
+      {/* P43 SO-2: مرجع التحويل — حقل اختياري يظهر لطرق التحويل فقط
+          (تحويل يدوي/مدار/ليبيانا). الصيغة 4–50 حرفاً/رقماً/شرطة/قاطع —
+          نفس نص الخادم حرفياً (payment-reference.ts مصدر واحد). */}
+      {collectsPaymentReference(paymentMethod?.type) && (
+        <div className="space-y-1.5">
+          <label htmlFor="c-payref" className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+            <FileText className="size-3" aria-hidden="true" />
+            رقم الحوالة / مرجع التحويل (اختياري)
+          </label>
+          <Input
+            id="c-payref"
+            value={paymentReference}
+            onChange={(e) => {
+              setPaymentReference(e.target.value);
+              setPayRefError(null);
+            }}
+            onBlur={() => {
+              /* تحقق لطيف عند المغادرة — نفس قواعد الخادم (المصدر واحد)،
+                 والحقل اختياري فالفراغ ليس خطأ */
+              const ref = normalizePaymentReference(paymentReference);
+              setPayRefError(ref ? paymentReferenceError(ref) : null);
+            }}
+            placeholder="مثال: TRX-9F3A2C"
+            maxLength={50}
+            dir="ltr"
+            className="font-mono text-start uppercase"
+            aria-invalid={!!payRefError}
+            aria-describedby={payRefError ? "c-payref-error" : undefined}
+          />
+          {payRefError && <FieldError id="c-payref-error">{payRefError}</FieldError>}
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            إن أردت، أدخل رقم إشعار التحويل من رسالة المحفظة أو البنك — يصل
+            للمتجر مع طلبك لتسهيل مطابقة تحويلك.
+          </p>
+        </div>
       )}
       {paymentMethod && paymentConfig?.number && (
         <>

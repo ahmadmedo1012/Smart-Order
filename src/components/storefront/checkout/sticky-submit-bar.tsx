@@ -15,22 +15,31 @@ export function StickySubmitBar({
   data,
   subtotal,
   deliveryFee,
+  discount,
   total,
   submitting,
   minOrderUnmet,
   minOrderAmount,
+  couponCode,
 }: {
   data: StoreData | null;
   subtotal: number;
   deliveryFee: number;
+  /** P43 SO-2: الخصم المطبق (مليم) — 0 = لا كود؛ يُطرح من الإجمالي
+   *  التقديري بنفس معادلة الخادم. */
+  discount?: number;
   total: number;
   submitting: boolean;
   minOrderUnmet: boolean;
   /** the active zone's real minimum (millimes) — drives the honest
    * disabled reason; absent on pickup. */
   minOrderAmount?: number;
+  /** the applied coupon's code — rides the discount line (honest
+   *  attribution, same as the receipt). */
+  couponCode?: string | null;
 }) {
   const disabled = submitting || minOrderUnmet || !data;
+  const appliedDiscount = discount ?? 0;
   return (
     <div className="fixed bottom-0 inset-x-0 z-(--z-dropdown) border-t border-border bg-background/95 backdrop-blur-md safe-bottom">
       <div className="mx-auto max-w-2xl px-4 py-3 flex items-center gap-3">
@@ -38,9 +47,14 @@ export function StickySubmitBar({
           {/* r140 (P3-11): صدق مالي — هذا تقدير عميل (الخادم يعيد
               التسعير عند الإرسال)؛ السلة نفسها تقول «المجموع التقديري»
               (cart-drawer) فالشريط يطابقها بدل «الإجمالي» المطلق.
-              P6-2-f3 (GROUP 1): كل أرقام المال هنا Mono. */}
+              P6-2-f3 (GROUP 1): كل أرقام المال هنا Mono.
+              P43 SO-2: الخصم المطبق يظهر سطراً صادقاً فوق الإجمالي —
+              نفس معادلة الخادم (المجموع + التوصيل − الخصم). */}
           <div className="text-[11px] text-muted-foreground font-mono tabular-nums truncate">
             الإجمالي التقديري{deliveryFee > 0 ? ` — المنتجات ${formatLyd(subtotal)} + توصيل ${formatLyd(deliveryFee)}` : ""}
+            {appliedDiscount > 0
+              ? `${couponCode ? ` — كود ${couponCode}` : ""} − خصم ${formatLyd(appliedDiscount)}`
+              : ""}
           </div>
           <div className="font-mono font-bold text-lg tabular-nums">{formatLyd(total)}</div>
           {/* P18-W2-d: disabled-explain — the real blocker, in the family

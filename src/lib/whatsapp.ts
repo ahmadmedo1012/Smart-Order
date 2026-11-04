@@ -26,6 +26,11 @@ interface OrderMessageData {
   subtotal: number;
   deliveryFee: number;
   total: number;
+  /* P43 SO-2: الخصم المطبق (الكود يركب السطر) ومرجع التحويل — كلاهما
+   * اختياري ولا يُرسم إلا عند وجوده (بقية الأسطح تحافظ على شكلها). */
+  discount?: number;
+  couponCode?: string | null;
+  paymentReference?: string | null;
   paymentName?: string | null;
   paymentType?: string | null;
   customerNote?: string | null;
@@ -46,6 +51,11 @@ export function buildOrderMessage(o: OrderMessageData, opts?: { trackUrl?: strin
   lines.push("");
   lines.push(`المجموع الفرعي: ${formatLyd(o.subtotal)}`);
   if (o.deliveryFee > 0) lines.push(`التوصيل: ${formatLyd(o.deliveryFee)}`);
+  /* P43 SO-2: سطر الخصم — المبلغ المسجل في Order.discount مع الكود
+   * بين قوسين؛ الإجمالي بعده هو الصافي فيقرأ السطران كدفتر واحد. */
+  if (o.discount && o.discount > 0) {
+    lines.push(`الخصم${o.couponCode ? ` (${o.couponCode})` : ""}: ${formatLyd(o.discount)}`);
+  }
   lines.push(`*الإجمالي: ${formatLyd(o.total)}*`);
   lines.push("");
   if (o.fulfillmentType === "DELIVERY") {
@@ -57,6 +67,11 @@ export function buildOrderMessage(o: OrderMessageData, opts?: { trackUrl?: strin
   }
   if (o.paymentType) {
     lines.push(`💳 ${PAYMENT_TYPE_AR[o.paymentType as keyof typeof PAYMENT_TYPE_AR] ?? o.paymentName ?? o.paymentType}`);
+  }
+  /* P43 SO-2: مرجع التحويل الذي أدخله العميل — سياق المصالحة للتاجر
+   * (يقبض التحويل من كشف محفظته بهذا المرجع ثم يؤكد الدفع بيده). */
+  if (o.paymentReference) {
+    lines.push(`🧾 مرجع التحويل: ${o.paymentReference}`);
   }
   if (o.customerNote) lines.push(`📝 ملاحظة: ${o.customerNote}`);
   if (opts?.trackUrl) lines.push(`\n🔗 تتبع الطلب: ${opts.trackUrl}`);

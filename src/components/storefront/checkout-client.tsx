@@ -7,6 +7,11 @@ import { api } from "@/lib/client";
 import { useCheckoutState } from "@/components/storefront/checkout/use-checkout-state";
 import { formatLyd } from "@/lib/money";
 import { normalizeLibyanPhone } from "@/lib/phone";
+import {
+  collectsPaymentReference,
+  normalizePaymentReference,
+  paymentReferenceError,
+} from "@/lib/payment-reference";
 import { Button } from "@/components/ui/button";
 import { SkipLink } from "@/components/shared/skip-link";
 import { toast } from "sonner";
@@ -24,6 +29,7 @@ import { PaymentSection } from "@/components/storefront/checkout/payment-section
 import { NoteSection } from "@/components/storefront/checkout/note-section";
 import { CartSummarySection } from "@/components/storefront/checkout/cart-summary-section";
 import { StickySubmitBar } from "@/components/storefront/checkout/sticky-submit-bar";
+import { CouponSection } from "@/components/storefront/checkout/coupon-section";
 
 /**
  * 17-DEBT-SO split map — checkout-client.tsx stays the composition root
@@ -94,6 +100,17 @@ export function CheckoutClient({
     setZoneId,
     paymentMethodId,
     setPaymentMethodId,
+    /* P43 SO-2: الكود المدخل/المطبق + مرجع التحويل (use-checkout-state) */
+    couponInput,
+    setCouponInput,
+    coupon,
+    couponBusy,
+    couponError,
+    setCouponError,
+    applyCoupon,
+    removeCoupon,
+    paymentReference,
+    setPaymentReference,
     errors,
     setErrors,
     subtotal,
@@ -101,6 +118,8 @@ export function CheckoutClient({
     evaluation,
     zone,
     deliveryFee,
+    /* P43 SO-2: الخصم المطبق (المعاينة الحيّة) والإجمالي بعده */
+    discount,
     total,
     overWalletCap,
     paymentMethod,
@@ -144,6 +163,19 @@ export function CheckoutClient({
     if (fulfillment === "DELIVERY" && !addressLine.trim()) found.address = "أدخل عنوانك بالتفصيل";
     if (!paymentMethodId) found.payment = "اختر طريقة الدفع";
 
+    /* P43 SO-2: مرجع التحويل — نفس قواعد الخادم حرفياً (المصدر واحد
+     * lib/payment-reference.ts)؛ الحقل اختياري فالفراغ ليس خطأ، ولا
+     * يُتحقق منه إلا لطرق التحويل (نقدي عند التسليم لا يحمل مرجعاً). */
+    if (collectsPaymentReference(paymentMethod?.type)) {
+      const ref = normalizePaymentReference(paymentReference);
+      const refErr = ref ? paymentReferenceError(ref) : null;
+      if (refErr) {
+        toast.error(refErr);
+        document.getElementById("c-payref")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+    }
+
     const first = (["name", "phone", "zone", "address", "payment"] as const).find((k) => found[k]);
     setErrors(found);
     if (first) {
@@ -162,7 +194,17 @@ export function CheckoutClient({
       // checkoutKeyRef) — network retries now hit the DB dedup and get
       // the inert replay instead of a second order.
       if (!checkoutKeyRef.current) checkoutKeyRef.current = randomUUID();
-      const r = await api.post<{ order: { orderNumber: string; publicToken: string; total: number; replay?: boolean }; whatsapp: { number: string; message: string } | null }>(
+      const r = await api.post<{
+        order: {
+          orderNumber: string;
+          publicToken: string;
+          total: number;
+          discount?: number;
+          couponCode?: string | null;
+          replay?: boolean;
+        };
+        whatsapp: { number: string; message: string } | null;
+      }>(
         "/api/public/orders",
         {
           slug,
@@ -176,6 +218,13 @@ export function CheckoutClient({
           customerNote: customerNote.trim(),
           deliveryZoneId: fulfillment === "DELIVERY" ? zoneId : null,
           paymentMethodId,
+          /* P43 SO-2: الكود المطبق (الإملاء الكانوني من المعاينة — الخادم
+           * يعيد التحقق والاحتساب داخل معاملته) ومرجع التحويل لطرق
+           * التحويل فقط (يُتجاهل لغيرها — نفس قانون الخادم). */
+          couponCode: coupon?.code ?? "",
+          paymentReference: collectsPaymentReference(paymentMethod?.type)
+            ? normalizePaymentReference(paymentReference)
+            : "",
           items: items.map((i) => ({
             productId: i.productId,
             variantId: i.variantId,
@@ -383,8 +432,23 @@ export function CheckoutClient({
           overWalletCap={overWalletCap}
           total={total}
           storeWhatsapp={business.whatsappNumber}
+          paymentReference={paymentReference}
+          setPaymentReference={setPaymentReference}
         />
         <NoteSection customerNote={customerNote} setCustomerNote={setCustomerNote} />
+        {/* P43 SO-2: كود الخصم — آخر قسم قبل ملخص السلة (المال الحيّ
+            يقرأ من الأسفل: الأصناف ثم الكود ثم الشريط اللاصق) */}
+        <CouponSection
+          couponInput={couponInput}
+          setCouponInput={setCouponInput}
+          coupon={coupon}
+          couponBusy={couponBusy}
+          couponError={couponError}
+          setCouponError={setCouponError}
+          applyCoupon={applyCoupon}
+          removeCoupon={removeCoupon}
+          deliveryFee={deliveryFee}
+        />
         </form>
 
         <CartSummarySection items={items} evaluation={evaluation} />
@@ -394,6 +458,8 @@ export function CheckoutClient({
         data={data}
         subtotal={subtotal}
         deliveryFee={deliveryFee}
+        discount={discount}
+        couponCode={coupon?.code ?? null}
         total={total}
         submitting={submitting}
         minOrderUnmet={minOrderUnmet}

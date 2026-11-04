@@ -35,6 +35,16 @@ export function SuccessScreen({ result, slug }: { result: CheckoutResult; slug: 
         <p className="mt-3 text-sm text-muted-foreground">
           الإجمالي: <span className="font-mono font-bold text-foreground tabular-nums">{formatLyd(result.total)}</span>
         </p>
+        {/* P43 SO-2: الخصم المُلتزم (من رد الخادم، لا المعاينة) — يُرسم
+            فقط حين وفّر العميل فعلاً؛ صيغة التوفير الصادقة نفسها التي
+            يقرأها التاجر في رسالة الواتساب. */}
+        {!!result.discount && result.discount > 0 && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            وفّرت{" "}
+            <span className="font-mono font-bold text-success-ink tabular-nums">{formatLyd(result.discount)}</span>
+            {result.couponCode ? ` بكود ${result.couponCode}` : ""}
+          </p>
+        )}
 
         <div className="mt-6 space-y-2.5">
           <Button asChild size="lg" className="w-full">

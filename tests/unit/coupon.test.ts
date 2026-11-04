@@ -95,6 +95,31 @@ test("unknown type: zero discount (fail-closed, never an invented amount)", () =
   assert.equal(computeCouponDiscount(coupon({ type: "WEIRD" as string }), 10_000, 1_000), 0);
 });
 
+test("P43 SO-2 edge: PERCENT rounds half-up on the PRODUCT and 1% of a tiny order can round to 0", () => {
+  // 10% من 25 millimes = 2.5 → 3 (Math.round، لا floor ولا bank-derived float)
+  assert.equal(computeCouponDiscount(coupon({ type: "PERCENT", value: 10 }), 25, 0), 3);
+  // 1% من 50 millimes = 0.5 → 1؟ لا: Math.round(0.5) = 1 — لكن 1% من 40 = 0.4 → 0
+  assert.equal(computeCouponDiscount(coupon({ type: "PERCENT", value: 1 }), 40, 0), 0);
+  assert.equal(computeCouponDiscount(coupon({ type: "PERCENT", value: 1 }), 50, 0), 1);
+  // الخصم الأصغر من الدرهم يبقى صادقاً في الدفتر: total يزيد المجموع بلا كسور
+  const subtotal = 33_333, fee = 4_444;
+  const d = computeCouponDiscount(coupon({ type: "PERCENT", value: 7 }), subtotal, fee);
+  assert.equal(d, Math.round((subtotal * 7) / 100)); // 2333.31 → 2333
+  assert.ok(Number.isInteger(subtotal + fee - d));
+});
+
+test("P43 SO-2 edge: FIXED exceeds subtotal+fee → capped at subtotal (never a paid-to-customer order)", () => {
+  const c = coupon({ type: "FIXED", value: 100_000 });
+  const d = computeCouponDiscount(c, 3_000, 4_000);
+  assert.equal(d, 3_000); // min(value, subtotal) — the fee is never waived by a FIXED coupon
+  assert.equal(3_000 + 4_000 - d, 4_000); // the customer still pays delivery
+});
+
+test("P43 SO-2 edge: FREE_DELIVERY on a free-zone/pickup order waives nothing (discount 0)", () => {
+  // المنطقة مجانية (fee=0) — الخصم صفر والدفتر لا يخترع waiver
+  assert.equal(computeCouponDiscount(coupon({ type: "FREE_DELIVERY" }), 10_000, 0), 0);
+});
+
 /* ── couponUseError: the validation table ─────────────────────────── */
 
 test("missing/unknown coupon → the honest Arabic refusal", () => {

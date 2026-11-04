@@ -5,7 +5,8 @@ import { api } from "@/lib/client";
 import { useCart, useCartHydrated, cartEstimatedSubtotal } from "@/hooks/use-cart";
 import { evaluateCartAgainstProducts, type CartEvaluation } from "@/lib/checkout-refresh";
 import { WALLET_CAP_LYD } from "@/lib/payment-constants";
-import type { CheckoutResult, FieldErrors, StoreData, Step } from "./types";
+import { toast } from "sonner";
+import type { CheckoutResult, CouponPreview, FieldErrors, StoreData, Step } from "./types";
 
 /**
  * 17-DEBT-SO: the checkout state machine extracted verbatim from
@@ -40,6 +41,15 @@ export function useCheckoutState(slug: string) {
   const [zoneId, setZoneId] = React.useState<string>("");
   const [paymentMethodId, setPaymentMethodId] = React.useState<string>("");
   const [errors, setErrors] = React.useState<FieldErrors>({});
+
+  /* P43 SO-2: الكود المدخل / الكود المطبق (معاينة من
+   * /api/public/coupons/validate — عرض فقط؛ الطلب يعيد التحقق والاحتساب
+   * خادمياً داخل معاملته) + مرجع التحويل الاختياري لطرق التحويل. */
+  const [couponInput, setCouponInput] = React.useState("");
+  const [coupon, setCoupon] = React.useState<CouponPreview | null>(null);
+  const [couponBusy, setCouponBusy] = React.useState(false);
+  const [couponError, setCouponError] = React.useState<string | null>(null);
+  const [paymentReference, setPaymentReference] = React.useState("");
 
   const load = React.useCallback(() => {
     api
@@ -86,7 +96,10 @@ export function useCheckoutState(slug: string) {
   const subtotal = data ? evaluation.currentSubtotal : cartEstimatedSubtotal(items);
   const zone = data?.deliveryZones.find((z) => z.id === zoneId) ?? null;
   const deliveryFee = fulfillment === "DELIVERY" ? (zone?.fee ?? 0) : 0;
-  const total = subtotal + deliveryFee;
+  /* P43 SO-2: الإجمالي التقديري الصادق يشمل الخصم المطبق — قانون
+   * السجل نفسه الذي يلتزمه الخادم: subtotal + deliveryFee − discount. */
+  const discount = coupon?.discount ?? 0;
+  const total = subtotal + deliveryFee - discount;
   /* r134 (W2 #3): wallet networks (libyana/madar) reject single
      transfers above WALLET_CAP_LYD — subscriptions already enforce the
      cap (payment-dialog.tsx); the checkout quick-code row now matches
@@ -97,6 +110,68 @@ export function useCheckoutState(slug: string) {
 
   const minOrderUnmet: boolean =
     fulfillment === "DELIVERY" && !!zone && zone.minOrder > 0 && subtotal < zone.minOrder;
+
+  /* ── P43 SO-2: تطبيق الكود / إزالته ──
+   *
+   * التطبيق يمرّ بنقطة المعاينة العامة (نفس قواعد الخادم: النافذة، الحد
+   * الأدنى، السقف) ويعيد الوصف والخصم لعرضهما؛ الإرسال نفسه يُعاد
+   * التحقق منه بالكامل داخل معاملة الطلب — المعاينة لا تكتب مالاً. */
+  const applyCoupon = React.useCallback(() => {
+    const code = couponInput.trim();
+    if (!code) {
+      setCouponError("أدخل كود الخصم");
+      return;
+    }
+    setCouponBusy(true);
+    setCouponError(null);
+    api
+      .post<CouponPreview>("/api/public/coupons/validate", {
+        slug,
+        code,
+        fulfillmentType: fulfillment,
+        subtotal,
+        deliveryFee,
+      })
+      .then((r) => {
+        setCoupon(r.data);
+        toast.success(`طُبّق الكود ${r.data.code} — ${r.data.description}`);
+      })
+      .catch((e) => {
+        setCoupon(null);
+        setCouponError(e instanceof Error ? e.message : "تعذّر التحقق من الكود");
+      })
+      .finally(() => setCouponBusy(false));
+  }, [slug, couponInput, fulfillment, subtotal, deliveryFee]);
+
+  const removeCoupon = React.useCallback(() => {
+    setCoupon(null);
+    setCouponInput("");
+    setCouponError(null);
+  }, []);
+
+  /* السلة/المنطقة/النوع تغيّرت بعد التطبيق؟ يُعاد التحقق بصمت (المعادلة
+   * نفسها) — وإن صار الكود غير قابل للتطبيق (مثلاً هبط المجموع تحت الحد
+   * الأدنى) يُسقَط بصدق مع توضيح، فلا يبقى خصم متقادم على الشاشة.
+   * المفتاح في الاعتماديات هو CODE (سلسلة ثابتة) لا كائن المعاينة —
+   * فتحديث المعاينة نفسها لا يعيد إطلاق الأثر. */
+  const appliedCode = coupon?.code ?? null;
+  React.useEffect(() => {
+    if (!appliedCode) return;
+    api
+      .post<CouponPreview>("/api/public/coupons/validate", {
+        slug,
+        code: appliedCode,
+        fulfillmentType: fulfillment,
+        subtotal,
+        deliveryFee,
+      })
+      .then((r) => setCoupon(r.data))
+      .catch(() => {
+        toast.error("لم يعد هذا الكود قابلاً للتطبيق على سلتك — عدّل السلة أو استخدم كوداً آخر");
+        setCoupon(null);
+        setCouponError(null);
+      });
+  }, [slug, appliedCode, fulfillment, subtotal, deliveryFee]);
 
   /* r134 (W2 #15): beforeunload dirty guard — the r133 useDirtyClose
      family pattern adapted to a full-page client form (dialogs guard
@@ -113,6 +188,9 @@ export function useCheckoutState(slug: string) {
       area.trim() !== "" ||
       addressLine.trim() !== "" ||
       customerNote.trim() !== "" ||
+      /* P43 SO-2: كود مطبق أو مرجع تحويل مُدخل — أمور تُفقد بالخروج */
+      couponInput.trim() !== "" ||
+      paymentReference.trim() !== "" ||
       city !== "طرابلس" ||
       zoneId !== (data.deliveryZones[0]?.id ?? "") ||
       paymentMethodId !== (data.paymentMethods[0]?.id ?? "") ||
@@ -163,6 +241,17 @@ export function useCheckoutState(slug: string) {
     setZoneId,
     paymentMethodId,
     setPaymentMethodId,
+    /* P43 SO-2: الكود والمعاينة ومرجع التحويل */
+    couponInput,
+    setCouponInput,
+    coupon,
+    couponBusy,
+    couponError,
+    setCouponError,
+    applyCoupon,
+    removeCoupon,
+    paymentReference,
+    setPaymentReference,
     errors,
     setErrors,
     // derived
@@ -171,6 +260,8 @@ export function useCheckoutState(slug: string) {
     evaluation,
     zone,
     deliveryFee,
+    /* P43 SO-2: الخصم المطبق والإجمالي بعده */
+    discount,
     total,
     overWalletCap,
     paymentMethod,
