@@ -6,6 +6,12 @@
 import { useSyncExternalStore } from "react";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+/* P43 SO-3: أشكال السلة المشتركة — انتقلت إلى بيت مستقل بلا تبعيات
+ * (cart-types.ts) ليستهلكها reorder.ts النقي في اختبارات node --test
+ * دون جرّ مخزن zustand؛ إعادة التصدير تحفظ كل الاستيراد القائم. */
+import type { CartOption, CartItem } from "@/lib/cart-types";
+
+export type { CartOption, CartItem };
 
 /* r140 (P2-2): غلاف آمن للخادم — توأم Smart-Menu cart.ts: على الخادم
    يعيد مخزنًا فارغًا (getItem=null) فلا يُسقط persist خاصيته
@@ -36,25 +42,6 @@ const ssrSafeStorage = () => ({
     }
   },
 });
-
-interface CartOption {
-  id: string;
-  name: string;
-  priceDelta: number; // display only (server re-prices)
-}
-
-interface CartItem {
-  key: string; // signature: product+variant+options+note
-  productId: string;
-  productName: string;
-  productImage: string | null;
-  variantId: string | null;
-  variantName: string | null;
-  options: CartOption[];
-  quantity: number;
-  note: string;
-  unitPrice: number; // display estimate: base + variant + options
-}
 
 interface CartState {
   businessSlug: string | null;

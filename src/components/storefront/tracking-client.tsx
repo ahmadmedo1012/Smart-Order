@@ -13,6 +13,10 @@ import { formatArabicDateTime, formatStationStampAr, timeAgoAr } from "@/lib/ara
 import { countedArabicPhrase } from "@/lib/arabic-plural";
 import { toE164 } from "@/lib/phone";
 import { waLink, buildStatusUpdateMessage } from "@/lib/whatsapp";
+import { useCart } from "@/hooks/use-cart";
+import { buildReorderCartItems, reorderToastAr } from "@/lib/reorder";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   ORDER_STATUS_AR,
   PAYMENT_STATUS_AR,
@@ -42,6 +46,7 @@ import {
   Banknote,
   Timer,
   WifiOff,
+  RotateCcw,
 } from "lucide-react";
 
 interface TrackedOrder {
@@ -51,6 +56,10 @@ interface TrackedOrder {
   total: number;
   subtotal: number;
   deliveryFee: number;
+  /* P43 SO-2/SO-3: الخصم والكود المطبق (نفس دفتر رسالة الواتساب
+   * ولوحة التاجر) — يُرسمان فقط عند وجود خصم فعلي. */
+  discount?: number;
+  couponCode?: string | null;
   paymentStatus: PaymentStatus;
   paymentMethod: string | null;
   customerName: string;
@@ -62,7 +71,20 @@ interface TrackedOrder {
      ONLY source of the per-station timestamps: a station without a
      row never happened yet, and renders no stamp. */
   statusHistory?: Array<{ toStatus: string; createdAt: string }>;
-  items: Array<{ productName: string; variantName: string | null; quantity: number; lineTotal: number; options: string[] }>;
+  /* P43 SO-3 (إعادة الطلب): مفاتيح إعادة بناء السلة — productId/
+   * variantId/optionLines الاختيارية (الطلبات القديمة تجيب null
+   * فتُسقط الأسطر بصدق). */
+  items: Array<{
+    productName: string;
+    variantName: string | null;
+    quantity: number;
+    lineTotal: number;
+    note?: string | null;
+    productId?: string | null;
+    variantId?: string | null;
+    options: string[];
+    optionLines?: Array<{ id: string | null; name: string; priceDelta: number }>;
+  }>;
   business: { name: string; slug: string; phone: string | null; whatsappNumber: string | null; logoUrl: string | null };
 }
 
@@ -225,6 +247,46 @@ export function TrackingClient({
     busy: false,
     error: null,
   });
+
+  /* P43 SO-3 (إعادة الطلب): the router the rebuild navigates with. */
+  const router = useRouter();
+
+  /* P43 SO-3 (اطلب مرة أخرى): rebuild the cart from THIS order's items
+   * through the storefront's own use-cart API (addItem — the
+   * single-business cart law applies: a different store's cart is
+   * replaced, honestly announced), then navigate to the store with the
+   * honest note — prices may have changed; the storefront re-evaluates
+   * every line against the live catalog and the server re-prices the
+   * order in its own transaction. */
+  const reorder = React.useCallback(() => {
+    const result = buildReorderCartItems(
+      order.items.map((i) => ({
+        productId: i.productId ?? null,
+        productName: i.productName,
+        variantId: i.variantId ?? null,
+        variantName: i.variantName,
+        quantity: i.quantity,
+        note: i.note ?? null,
+        lineTotal: i.lineTotal,
+        optionLines: i.optionLines ?? [],
+      })),
+    );
+    if (result.items.length === 0) {
+      toast.error(reorderToastAr(result));
+      return;
+    }
+    const cart = useCart.getState();
+    let replaced = false;
+    for (const item of result.items) {
+      const r = cart.addItem(order.business.slug, order.business.name, item);
+      replaced = replaced || r.replaced;
+    }
+    toast.success(reorderToastAr(result));
+    if (replaced) {
+      toast.info("سلة المتجر السابق استُبدلت بسلة هذا الطلب");
+    }
+    router.push(`/store/${order.business.slug}`);
+  }, [order, router]);
 
   /* P16-4c telemetry: the order-age chip and the P18-W2-d station
      stamps are the clock-derived text of the page — they render after
@@ -894,6 +956,15 @@ export function TrackingClient({
                 <span className="tabular-nums font-mono">{formatLyd(order.deliveryFee)}</span>
               </div>
             )}
+            {/* P43 SO-2/SO-3: سطر الخصم — نفس دفتر رسالة الواتساب ولوحة
+                التاجر (المجموع + التوصيل − الخصم = الإجمالي)؛ لا يُرسم
+                إلا عند خصم فعلي فطلبات ما قبل الكوبونات تحافظ شكلها. */}
+            {!!order.discount && order.discount > 0 && (
+              <div className="flex justify-between text-muted-foreground">
+                <span>الخصم{order.couponCode ? ` (${order.couponCode})` : ""}</span>
+                <span className="tabular-nums font-mono">−{formatLyd(order.discount)}</span>
+              </div>
+            )}
             <div className="flex justify-between font-bold pt-1.5 border-t border-border/60">
               <span>الإجمالي</span>
               <span className="tabular-nums font-mono text-accent-foreground">{formatLyd(order.total)}</span>
@@ -905,6 +976,20 @@ export function TrackingClient({
               </span>
             </div>
           </div>
+        </div>
+
+        {/* P43 SO-3 (اطلب مرة أخرى): rebuild the cart from this order
+            via the storefront's own cart API, then land in the store —
+            the honest note stays visible under the button (prices may
+            have changed; the storefront re-evaluates every line). */}
+        <div className="space-y-1.5">
+          <Button variant="outline" className="w-full" onClick={reorder}>
+            <RotateCcw className="size-4" aria-hidden="true" />
+            اطلب مرة أخرى
+          </Button>
+          <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
+            يُعاد بناء سلتك من هذا الطلب — قد تتغير الأسعار، راجعها قبل الإرسال
+          </p>
         </div>
 
         {/* Contact — W7-G (fix 18): the pair reuses the Button

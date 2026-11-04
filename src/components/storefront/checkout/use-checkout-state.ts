@@ -5,6 +5,10 @@ import { api } from "@/lib/client";
 import { useCart, useCartHydrated, cartEstimatedSubtotal } from "@/hooks/use-cart";
 import { evaluateCartAgainstProducts, type CartEvaluation } from "@/lib/checkout-refresh";
 import { WALLET_CAP_LYD } from "@/lib/payment-constants";
+import {
+  loadCustomerPrefill,
+  type CustomerPrefill,
+} from "@/lib/checkout-prefill";
 import { toast } from "sonner";
 import type { CheckoutResult, CouponPreview, FieldErrors, StoreData, Step } from "./types";
 
@@ -50,6 +54,44 @@ export function useCheckoutState(slug: string) {
   const [couponBusy, setCouponBusy] = React.useState(false);
   const [couponError, setCouponError] = React.useState<string | null>(null);
   const [paymentReference, setPaymentReference] = React.useState("");
+
+  /* ── P43 SO-3: تعبئة العائد — the returning customer's remembered
+   * {name, phone, city, area, addressLine} (saved on their device after
+   * a successful order) seeds the form AFTER the first paint. The read
+   * rides a microtask (the family's P38 B5 law: no synchronous
+   * setState-in-effect — the same shape load()'s promise continuation
+   * uses), so the hydration pass paints exactly what SSR painted and
+   * the prefill lands a beat later. The loaded record also becomes the
+   * dirty-guard BASELINE: a pre-filled form the customer never touched
+   * is NOT dirty — the beforeunload prompt must only guard typing that
+   * can be lost. */
+  const [prefill, setPrefill] = React.useState<CustomerPrefill | null>(null);
+  React.useEffect(() => {
+    let cancelled = false;
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
+      const p = loadCustomerPrefill({
+        getItem: (k) => {
+          try {
+            return window.localStorage.getItem(k);
+          } catch {
+            return null;
+          }
+        },
+        setItem: () => {},
+      });
+      if (!p) return;
+      setPrefill(p);
+      setName(p.name);
+      setPhone(p.phone);
+      setCity(p.city);
+      setArea(p.area);
+      setAddressLine(p.addressLine);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const load = React.useCallback(() => {
     api
@@ -179,19 +221,28 @@ export function useCheckoutState(slug: string) {
      beforeunload fires on real unloads only — refresh/close — not on
      Next.js client-side navigations, and the success path uses
      router.replace so it never trips). Dirty = any field off the value
-     load() seeds; armed only while there are items to lose. */
+     load() seeds — or off the P43 SO-3 prefill baseline (a returning
+     customer's untouched pre-filled form is not dirty); armed only
+     while there are items to lose. */
+  const baseline: CustomerPrefill = prefill ?? {
+    name: "",
+    phone: "",
+    city: "طرابلس",
+    area: "",
+    addressLine: "",
+  };
   const formDirty =
     step === "form" &&
     !!data &&
-    (name.trim() !== "" ||
-      phone.trim() !== "" ||
-      area.trim() !== "" ||
-      addressLine.trim() !== "" ||
+    (name.trim() !== baseline.name ||
+      phone.trim() !== baseline.phone ||
+      area.trim() !== baseline.area ||
+      addressLine.trim() !== baseline.addressLine ||
       customerNote.trim() !== "" ||
       /* P43 SO-2: كود مطبق أو مرجع تحويل مُدخل — أمور تُفقد بالخروج */
       couponInput.trim() !== "" ||
       paymentReference.trim() !== "" ||
-      city !== "طرابلس" ||
+      city !== baseline.city ||
       zoneId !== (data.deliveryZones[0]?.id ?? "") ||
       paymentMethodId !== (data.paymentMethods[0]?.id ?? "") ||
       fulfillment !== (data.deliveryZones.length > 0 ? "DELIVERY" : "PICKUP"));

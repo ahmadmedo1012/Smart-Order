@@ -490,6 +490,26 @@ async function main() {
     JSON.stringify(freeOrder.body).slice(0, 160),
   );
 
+  /* P43 SO-3 (إعادة الطلب): the public track payload carries the coupon
+     ledger AND the cart-rebuild keys — discount/couponCode on the order,
+     productId/variantId/optionLines (with the option id riding the
+     snapshot) on every item. Read-only, additive — the reorder button
+     consumes exactly this shape. */
+  const cpTrack = await anon.call(`/api/public/track/${cOrd?.publicToken}`);
+  const cpOrder = cpTrack.body?.data?.order;
+  const cpItem = cpOrder?.items?.[0];
+  ok(
+    "track payload (P43 SO-3): discount/couponCode + the reorder keys (productId, variantId, option ids in the snapshot)",
+    cpTrack.status === 200 &&
+      cpOrder?.discount === 3550 &&
+      cpOrder?.couponCode === "E2EPCT10" &&
+      cpItem?.productId === prodId &&
+      typeof cpItem?.variantId === "string" && cpItem.variantId === (variant?.id ?? null) &&
+      Array.isArray(cpItem?.optionLines) &&
+      cpItem?.optionLines?.some((o) => o.id === option?.id && o.name === "صوص"),
+    JSON.stringify(cpItem ?? null).slice(0, 160),
+  );
+
   /* ── transfer references (MANUAL/MADAR/LIBYANA) ── */
   const pmManual = await A.call("/api/payment-methods", { method: "POST", body: JSON.stringify({ businessId: bizAId, type: "MANUAL", name: "تحويل بنكي", number: "0912345678" }) });
   const manualId = pmManual.body?.data?.method?.id;

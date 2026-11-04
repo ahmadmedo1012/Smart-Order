@@ -243,7 +243,7 @@ export async function POST(req: NextRequest) {
         variantName = variant.name;
       }
 
-      const chosenOptions: Array<{ name: string; priceDelta: number }> = [];
+      const chosenOptions: Array<{ id?: string; name: string; priceDelta: number }> = [];
       if (item.optionIds && item.optionIds.length > 0) {
         // validate against groups: each option must belong to this product, respect min/max
         const groupSelections = new Map<string, string[]>();
@@ -256,7 +256,10 @@ export async function POST(req: NextRequest) {
               const arr = groupSelections.get(g.id) ?? [];
               arr.push(optId);
               groupSelections.set(g.id, arr);
-              chosenOptions.push({ name: opt.name, priceDelta: opt.priceDelta });
+              /* P43 SO-3 (إعادة الطلب): الـid يركب لقطة الإضافات —
+               * إضافة آمنة (القراء القدامى يقرأون name فقط) تمكّن زر
+               * «اطلب مرة أخرى» من إعادة بناء السلة بخياراتها الدقيقة. */
+              chosenOptions.push({ id: optId, name: opt.name, priceDelta: opt.priceDelta });
               unitPrice += opt.priceDelta;
               break;
             }

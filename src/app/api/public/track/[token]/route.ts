@@ -20,6 +20,10 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ token: str
         total: true,
         subtotal: true,
         deliveryFee: true,
+        /* P43 SO-2/SO-3: الخصم والكود المطبق يركبان إيصال الزبون (نفس
+         * دفتر رسالة الواتساب) — لقطة نصية من الصف المُلتزم. */
+        discount: true,
+        couponCode: true,
         paymentStatus: true,
         paymentMethodName: true,
         /* W6-B7: the customer-confirmation stamp ships to the tracking
@@ -34,6 +38,10 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ token: str
         items: {
           select: {
             productName: true, variantName: true, quantity: true, lineTotal: true,
+            /* P43 SO-3 (إعادة الطلب): the cart-rebuild keys ride the
+               item payload — additive, read-only; a deleted product
+               reads null and the reorder button skips it honestly. */
+            productId: true, variantId: true, note: true,
             optionsJson: true,
           },
         },
@@ -59,6 +67,8 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ token: str
         total: order.total,
         subtotal: order.subtotal,
         deliveryFee: order.deliveryFee,
+        discount: order.discount,
+        couponCode: order.couponCode,
         paymentStatus: order.paymentStatus,
         paymentMethod: order.paymentMethodName,
         customerConfirmedAt: order.customerConfirmedAt ? order.customerConfirmedAt.toISOString() : null,
@@ -66,13 +76,26 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ token: str
         city: order.city,
         area: order.area,
         createdAt: order.createdAt,
-        items: order.items.map((i) => ({
-          productName: i.productName,
-          variantName: i.variantName,
-          quantity: i.quantity,
-          lineTotal: i.lineTotal,
-          options: i.optionsJson ? (JSON.parse(i.optionsJson) as Array<{ name: string }>).map((o) => o.name) : [],
-        })),
+        items: order.items.map((i) => {
+          /* the additive reorder keys: the option snapshot lines carry
+             {id?, name, priceDelta} (id rides P43-SO3+ orders; the old
+             snapshot shape has names only — optionLines then answers
+             id:null and the reorder drops options with its honest note) */
+          const snap = i.optionsJson
+            ? (JSON.parse(i.optionsJson) as Array<{ id?: string; name: string; priceDelta: number }>)
+            : [];
+          return {
+            productName: i.productName,
+            variantName: i.variantName,
+            quantity: i.quantity,
+            lineTotal: i.lineTotal,
+            note: i.note,
+            productId: i.productId,
+            variantId: i.variantId,
+            options: snap.map((o) => o.name),
+            optionLines: snap.map((o) => ({ id: o.id ?? null, name: o.name, priceDelta: o.priceDelta })),
+          };
+        }),
         history: order.history,
         business: order.business,
       },

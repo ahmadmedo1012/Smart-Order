@@ -30,6 +30,7 @@ import { NoteSection } from "@/components/storefront/checkout/note-section";
 import { CartSummarySection } from "@/components/storefront/checkout/cart-summary-section";
 import { StickySubmitBar } from "@/components/storefront/checkout/sticky-submit-bar";
 import { CouponSection } from "@/components/storefront/checkout/coupon-section";
+import { saveCustomerPrefill } from "@/lib/checkout-prefill";
 
 /**
  * 17-DEBT-SO split map — checkout-client.tsx stays the composition root
@@ -252,6 +253,17 @@ export function CheckoutClient({
       // Confirmed success (fresh 201 OR the inert replay) — retire the
       // key so the NEXT order in this session mints a fresh one.
       checkoutKeyRef.current = "";
+      /* P43 SO-3: تعبئة العائد — احتفظ ببيانات الزبون (الاسم/الهاتف
+       * دائماً، والعنوان لطلب التوصيل) على جهازه؛ الطلب القادم من نفس
+       * الجهاز يبدأ معبّأً. الفشل في الكتابة (وضع خاص/حصة ممتلئة) لا
+       * يُفسد لحظة النجاح أبداً — الدالة لا ترمي استثناءً. */
+      saveCustomerPrefill({
+        name: name.trim(),
+        phone,
+        city: fulfillment === "DELIVERY" ? city : undefined,
+        area: fulfillment === "DELIVERY" ? area.trim() : undefined,
+        addressLine: fulfillment === "DELIVERY" ? addressLine.trim() : undefined,
+      });
       setResult({ ...r.data.order, whatsapp: r.data.whatsapp });
       setStep("success");
       clearCart();

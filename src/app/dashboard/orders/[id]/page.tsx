@@ -78,6 +78,10 @@ interface OrderDetail {
   discount: number;
   deliveryFee: number;
   total: number;
+  /* P43 SO-2/SO-3: الكود المطبق ومرجع التحويل — لقطة نصية من الطلب
+   * (الكوبون نفسه قد يُعدّل بعدها)؛ يُرسمان عند وجودهما فقط. */
+  couponCode: string | null;
+  paymentReference: string | null;
   paymentMethodId: string | null;
   paymentMethodName: string | null;
   paymentType: string | null;
@@ -548,6 +552,17 @@ export default function OrderDetailPage() {
                   </span>
                 </div>
               )}
+              {/* P43 SO-2/SO-3: سطر الخصم مع الكود — نفس دفتر رسالة
+                  الواتساب وصفحة التتبع (المجموع + التوصيل − الخصم =
+                  الإجمالي)؛ لا يُرسم إلا عند خصم فعلي. */}
+              {order.discount > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <span>الخصم{order.couponCode ? ` (${order.couponCode})` : ""}</span>
+                  <span className="font-mono tabular-nums">
+                    −{formatLyd(order.discount)}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between font-bold text-base pt-1 border-t">
                 <span>الإجمالي</span>
                 <span className="font-mono tabular-nums text-accent-foreground">
@@ -651,6 +666,17 @@ export default function OrderDetailPage() {
                     : (order.paymentMethodName ?? "—")}
                 </span>
               </div>
+              {/* P43 SO-2/SO-3: مرجع التحويل الذي أدخله العميل لطرق
+                  التحويل — سياق المصالحة (طابِقه مع كشف المحفظة ثم
+                  أكّد الدفع بيدك)؛ ليس إثبات دفع. */}
+              {order.paymentReference && (
+                <div className="flex items-center justify-between gap-2 border-b border-border py-2.5">
+                  <span className="text-muted-foreground">مرجع التحويل</span>
+                  <span className="font-mono font-medium tracking-wide" dir="ltr">
+                    <bdi>{order.paymentReference}</bdi>
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between gap-2 py-2.5">
                 <span className="text-muted-foreground">الحالة</span>
                 <PaymentStatusBadge status={order.paymentStatus} />

@@ -83,9 +83,12 @@ export default async function TrackPage({
     select: {
       orderNumber: true, status: true, fulfillmentType: true, total: true, subtotal: true,
       deliveryFee: true, paymentStatus: true, paymentMethodName: true, paymentType: true,
+      /* P43 SO-2/SO-3: الخصم والكود المطبق + مفاتيح إعادة بناء السلة
+         (productId/variantId/note على كل صنف) — إضافية قراءة فقط. */
+      discount: true, couponCode: true,
       customerConfirmedAt: true,
       customerName: true, city: true, area: true, createdAt: true,
-      items: { select: { productName: true, variantName: true, quantity: true, lineTotal: true, optionsJson: true } },
+      items: { select: { productName: true, variantName: true, quantity: true, lineTotal: true, productId: true, variantId: true, note: true, optionsJson: true } },
       /* P18-W2-d (W1-d priority #1 — UC «every leg of the journey»): the
          FULL machine log ships to the client — each completed route node
          renders its REAL timestamp from this history (mono fact voice,
@@ -122,19 +125,33 @@ export default async function TrackPage({
         total: order.total,
         subtotal: order.subtotal,
         deliveryFee: order.deliveryFee,
+        discount: order.discount,
+        couponCode: order.couponCode,
         paymentStatus: order.paymentStatus as PaymentStatus,
         paymentMethod: order.paymentMethodName,
         customerName: order.customerName,
         city: order.city,
         area: order.area,
         createdAt: order.createdAt.toISOString(),
-        items: order.items.map((i) => ({
-          productName: i.productName,
-          variantName: i.variantName,
-          quantity: i.quantity,
-          lineTotal: i.lineTotal,
-          options: i.optionsJson ? (JSON.parse(i.optionsJson) as Array<{ name: string }>).map((o) => o.name) : [],
-        })),
+        items: order.items.map((i) => {
+          /* P43 SO-3: لقطات الإضافات بكاملها (id عند وجوده — طلبات ما بعد
+           * SO-3) تُغذّي «اطلب مرة أخرى»؛ الطلبات الأقدم تُجيب id=null
+           * فتُسقط الإضافات بصدق في نص الزر. */
+          const snap = i.optionsJson
+            ? (JSON.parse(i.optionsJson) as Array<{ id?: string; name: string; priceDelta: number }>)
+            : [];
+          return {
+            productName: i.productName,
+            variantName: i.variantName,
+            quantity: i.quantity,
+            lineTotal: i.lineTotal,
+            note: i.note,
+            productId: i.productId,
+            variantId: i.variantId,
+            options: snap.map((o) => o.name),
+            optionLines: snap.map((o) => ({ id: o.id ?? null, name: o.name, priceDelta: o.priceDelta })),
+          };
+        }),
         statusHistory: order.history.map((h) => ({
           toStatus: h.toStatus,
           createdAt: h.createdAt.toISOString(),
