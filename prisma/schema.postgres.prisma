@@ -46,6 +46,9 @@ model Business {
   orders               Order[]
   media                Media[]
   auditLogs            AuditLog[]
+  /* P43 SO-2: أكواد الخصم — علاقة التاجر بكوبوناته (لا بوابة باقة:
+     ميزة تُضاف بلا قيود تجارية جديدة — قرار موثق). */
+  coupons              Coupon[]
 }
 
 model User {
@@ -307,6 +310,33 @@ model PaymentMethod {
   @@unique([businessId, type])
 }
 
+/* P43 SO-2 — كود الخصم: يحتكره التاجر لكل متجر (@@unique per business)،
+ * ويُطبّق في مسار الطلب المالي (POST /api/public/orders) داخل معاملة
+ * Serializable مع زيادة شرطية ذرّية لـusedCount تحرس ضد الاستخدام
+ * المتزامن الزائد. المال بالدراهم الصحيحة كالعادة: value نسبة 1..100
+ * لـPERCENT أو مليم لـFIXED؛ minOrder بالميليم (0 = بلا حد).
+ * الأنواع String لا enums (قانون SQLite التوءم) — تُتحقق في lib/coupon.ts. */
+model Coupon {
+  id        String    @id @default(cuid())
+  businessId String
+  code      String // normalized (spaces stripped, case-preserved display; compare case-insensitive)
+  type      String // PERCENT | FIXED | FREE_DELIVERY
+  value     Int       @default(0) // percent 1..100 for PERCENT · millimes for FIXED · 0 for FREE_DELIVERY
+  minOrder  Int       @default(0) // millimes; 0 = no minimum
+  maxUses   Int? // null = unlimited
+  usedCount Int       @default(0)
+  startsAt  DateTime?
+  expiresAt DateTime?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, code])
+  @@index([businessId, isActive])
+}
+
 model Customer {
   id         String   @id @default(cuid())
   businessId String
@@ -364,6 +394,11 @@ model Order {
   idempotencyKey    String?
   source            String   @default("STOREFRONT") // STOREFRONT | WHATSAPP | SMARTBOT
   customerConfirmedAt DateTime? // W6-B7 (COD loop): customer's one-tap "I still want it" stamp — NOT a payment state, never a status transition
+  /* P43 SO-2: الكود المطبّق (لقطة نصية وقت الإنشاء — الكوبون نفسه قد
+   * يُعدّل بعدها) ومرجع التحويل الذي أدخله العميل لطرق التحويل
+   * (MANUAL/MADAR/LIBYANA) — عمودان اختياريان، إضافة آمنة للنشر. */
+  couponCode        String?
+  paymentReference  String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
