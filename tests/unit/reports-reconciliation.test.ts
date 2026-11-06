@@ -8,8 +8,10 @@ import assert from "node:assert/strict";
 import {
   buildCouponUsageRows,
   buildPaymentMethodBreakdown,
+  buildRefundDueRows,
   type CouponUsageGroupRow,
   type PaymentMethodGroupRow,
+  type RefundDueQueryRow,
 } from "../../src/lib/reports-reconciliation.ts";
 import { COUPON_TYPE_AR } from "../../src/lib/coupon.ts";
 
@@ -137,4 +139,98 @@ test("coupon usage: null/blank snapshot codes are skipped defensively; sorted by
 test("coupon usage: bigint discount sums (PG prod shape) coerce to Number", () => {
   const out = buildCouponUsageRows([couponRow("B", 2, BigInt(3_000))], []);
   assert.equal(out[0]!.discount, 3_000);
+});
+
+/* ── P45-W1 (المبادرة D): استرجاعات مستحقة — بنّاء الصفوف الذي يغلق
+ * النقطة العمياء (طلبات مدفوعة ثم ملغاة/مرفوضة كانت تسقط من كل
+ * أسطح التسوية). نفس أسلوب البُناة أعلاه: دوال أنقى تُغذّى صفوف
+ * Prisma وتُستهلك من الشاشة والملف معاً. */
+
+function refundRow(over: Partial<RefundDueQueryRow> = {}): RefundDueQueryRow {
+  return {
+    orderNumber: "SO-20260130-0042",
+    customerName: "زبون اختبار",
+    total: 12_000,
+    paymentMethodName: "تحويل بنكي",
+    paymentType: "MANUAL",
+    status: "CANCELLED",
+    paymentStatus: "PAID",
+    history: [{ createdAt: new Date("2026-01-30T10:00:00Z"), toStatus: "CANCELLED" }],
+    ...over,
+  };
+}
+
+test("refund-due: the paid-then-cancelled row appears — order number, customer, total, method snapshot, the audit-stamped Tripoli day", () => {
+  const out = buildRefundDueRows([refundRow()]);
+  assert.equal(out.length, 1);
+  assert.equal(out[0]!.orderNumber, "SO-20260130-0042");
+  assert.equal(out[0]!.customerName, "زبون اختبار");
+  assert.equal(out[0]!.total, 12_000);
+  assert.equal(out[0]!.methodName, "تحويل بنكي");
+  assert.equal(out[0]!.paymentType, "MANUAL");
+  // 10:00Z = ظهر طرابلس (+02:00) → نفس اليوم الطرابلسي 2026-01-30
+  assert.equal(out[0]!.cancelledDay, "2026-01-30");
+});
+
+test("refund-due: the Tripoli midnight boundary — 23:30Z is NEXT Tripoli day (01:30 ليبيا)", () => {
+  const out = buildRefundDueRows([
+    refundRow({ history: [{ createdAt: new Date("2026-01-30T23:30:00Z"), toStatus: "CANCELLED" }] }),
+  ]);
+  assert.equal(out[0]!.cancelledDay, "2026-01-31");
+});
+
+test("refund-due: rejected orders are refund obligations too — REJECTED+PAID rides the table", () => {
+  const out = buildRefundDueRows([refundRow({ status: "REJECTED", history: [{ createdAt: new Date("2026-01-29T08:00:00Z"), toStatus: "REJECTED" }] })]);
+  assert.equal(out.length, 1);
+  assert.equal(out[0]!.cancelledDay, "2026-01-29");
+});
+
+test("refund-due: the filter is exact — UNPAID+cancelled, PAID+delivered, PAID+in-flight never appear (no invented obligations)", () => {
+  const out = buildRefundDueRows([
+    refundRow({ paymentStatus: "UNPAID" }), // ملغي لكن غير مدفوع — لا استرجاع
+    refundRow({ status: "DELIVERED", paymentStatus: "PAID", history: [] }), // مسلّم — ليس هنا
+    refundRow({ status: "PREPARING", paymentStatus: "PAID", history: [] }), // جارٍ — ليس هنا
+    refundRow(), // المستحق الوحيد
+  ]);
+  assert.equal(out.length, 1);
+  assert.equal(out[0]!.orderNumber, "SO-20260130-0042");
+});
+
+test("refund-due: null method name reads «غير محدد»; a missing history stamp renders day «—» (never fabricated)", () => {
+  const out = buildRefundDueRows([
+    refundRow({ paymentMethodName: null, paymentType: null, history: [] }),
+  ]);
+  assert.equal(out[0]!.methodName, "غير محدد");
+  assert.equal(out[0]!.cancelledDay, null);
+});
+
+test("refund-due: newest destruction day first, then heaviest total — the owner's heaviest obligations on top", () => {
+  const out = buildRefundDueRows([
+    refundRow({ orderNumber: "SO-OLD", total: 20_000, history: [{ createdAt: new Date("2026-01-28T10:00:00Z"), toStatus: "CANCELLED" }] }),
+    refundRow({ orderNumber: "SO-NEW-BIG", total: 15_000, history: [{ createdAt: new Date("2026-01-30T10:00:00Z"), toStatus: "CANCELLED" }] }),
+    refundRow({ orderNumber: "SO-NEW-SMALL", total: 9_000, history: [{ createdAt: new Date("2026-01-30T10:00:00Z"), toStatus: "CANCELLED" }] }),
+  ]);
+  assert.deepEqual(
+    out.map((r) => r.orderNumber),
+    ["SO-NEW-BIG", "SO-NEW-SMALL", "SO-OLD"],
+  );
+});
+
+test("refund-due: empty window answers an empty table (no ghost rows)", () => {
+  assert.deepEqual(buildRefundDueRows([]), []);
+});
+
+test("refund-due: the LEDGER LAW stays untouched for the non-cancelled aggregate (the builders never double-count)", () => {
+  /* النقطة الحرجة: البنّاء الجديد لا يلمس قاعدة الدفتر — مجاميع الطرق
+   * والكوبونات تبقى من غير الملغى حصراً (قاعدة الحساب)، والاسترجاع
+   * المستحق سطح مستقل يُظهر ما تستثنيه القاعدة. الصف المدفوع+الملغي
+   * لا يظهر في buildPaymentMethodBreakdown لأن المتصل لا يمرره أصلاً. */
+  const methods = buildPaymentMethodBreakdown([
+    pmRow({ paymentStatus: "PAID", _sum: { subtotal: 10_000, deliveryFee: 0, discount: 0, total: 10_000 } }),
+  ]);
+  const refund = buildRefundDueRows([refundRow()]);
+  assert.equal(methods.length, 1);
+  assert.equal(methods[0]!.gross - methods[0]!.discount, methods[0]!.net);
+  assert.equal(refund.length, 1);
+  // سطحان منفصلان لنفس الحقيقة المالية — لا تداخل ولا ازدواج عد
 });

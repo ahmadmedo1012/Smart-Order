@@ -917,6 +917,29 @@ async function main() {
   const proApprove = await adm1.call(`/api/subscriptions/${proPaymentId}/review`, { method: "POST", body: JSON.stringify({ action: "APPROVE" }) });
   ok("single review approves the Pro upgrade (no race this time — one request)", proApprove.status === 200 && proApprove.body?.data?.status === "APPROVED", JSON.stringify(proApprove.body).slice(0, 100));
 
+  /* ── P45-W1 (المبادرة D): الاسترجاعات المستحقة — النقطة العمياء نفسها.
+     طلب مدفوع (MANUAL «تحويل بنكي») ثم أُلغي: قاعدة الحساب تستثنيه من
+     كل مجاميع التسوية (لا جدول طرق، لا سجل مطابقة)، فيغيب التزام
+     الاسترجاع عن مالك المتجر. الآن يظهر في refundDue (الشاشة) وفي
+     قسم «استرجاعات مستحقة» (الملف) — من البنّاء نفسه. الطلب ينتهي
+     CANCELLED على هاتف مخصص فلا يمس إحصاءات §11.6 (notIn الملغى). */
+  const RD = makeCtx();
+  const rdip = { "x-real-ip": "198.18.77.10" };
+  const rdo = (body) => ({ method: "POST", headers: rdip, body: JSON.stringify(body) });
+  const refundOrder = await RD.call("/api/public/orders", rdo({
+    slug, idempotencyKey: rnd("e2e-rd-"), fulfillmentType: "DELIVERY",
+    customerName: "زبون الاسترجاع المستحق", customerPhone: "0913777888",
+    city: "طرابلس", area: "الوسط", addressLine: "شارع الاسترجاع المستحق 2",
+    deliveryZoneId: zoneId, customerNote: "", paymentMethodId: manualId,
+    items: [{ productId: stockProdId, variantId: null, optionIds: [], quantity: 2, note: "" }],
+  }));
+  const rdOrd = refundOrder.body?.data?.order;
+  ok("refund-due fixture: paid-path order created on the MANUAL method (2×5 + 4 = 14 د.ل)", refundOrder.body?.success === true && rdOrd?.total === 14000, JSON.stringify(refundOrder.body).slice(0, 120));
+  const rdMarkPaid = await A.call(`/api/orders/${rdOrd?.id}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, paymentStatus: "PAID" }) });
+  ok("refund-due fixture: the merchant banks the payment (PAID on a NEW order)", rdMarkPaid.body?.data?.order?.paymentStatus === "PAID", JSON.stringify(rdMarkPaid.body).slice(0, 100));
+  const rdCancel = await A.call(`/api/orders/${rdOrd?.id}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, status: "CANCELLED" }) });
+  ok("refund-due fixture: then cancels — the refund obligation is born (PAID stays on the row)", rdCancel.body?.data?.order?.status === "CANCELLED" && rdCancel.body?.data?.order?.paymentStatus === "PAID", JSON.stringify(rdCancel.body).slice(0, 120));
+
   const proExport = await A.call(exportPath(bizAId), { rawText: true });
   ok(
     "export gate: the approved Pro payment opens the real server export (200 text/csv)",
@@ -951,6 +974,23 @@ async function main() {
       proExport.body.includes("TRX-9F3A2C"),
     String(proExport.body).slice(0, 160),
   );
+  /* P45-W1 (المبادرة D): الملف يحمل قسم الاسترجاعات المستحقة — الصف
+     المدفوع-ثم-الملغي يظهر مرة واحدة بالضبط في الملف كله (في هذا
+     القسم حصراً): سجل المطابقة يستثنيه بقاعدة الحساب، فلو ظهر مرتين
+     لكان ازدواج عد، ولو غاب لبقيت النقطة العمياء مفتوحة. */
+  const rdDay = new Date(Date.now() + 2 * 3600 * 1000).toISOString().slice(0, 10);
+  const rdOccurrences = typeof proExport.body === "string"
+    ? proExport.body.split(rdOrd?.orderNumber ?? "SO-NONE").length - 1
+    : 0;
+  ok(
+    "export body (P45-W1): the refund-due worksheet — the paid-then-cancelled obligation appears EXACTLY once, in its own section, with the honest row",
+    typeof proExport.body === "string" &&
+      proExport.body.includes("استرجاعات مستحقة") &&
+      proExport.body.includes("رقم الطلب,الزبون,طريقة الدفع,المبلغ المسترَد (د.ل),تاريخ الإلغاء") &&
+      proExport.body.includes(`${rdOrd?.orderNumber},زبون الاسترجاع المستحق,تحويل بنكي,14.000,${rdDay}`) &&
+      rdOccurrences === 1,
+    `occurrences ${rdOccurrences} · looking for "${rdOrd?.orderNumber},زبون الاسترجاع المستحق,تحويل بنكي,14.000,${rdDay}"`,
+  );
 
   const proReports = await A.call(reportsPath(bizAId, 90));
   ok(
@@ -976,6 +1016,29 @@ async function main() {
       reconMethods.length > 0 &&
       reconMethods.every((m) => m.gross - m.discount === m.net && m.paid + m.unpaid === m.orders),
     JSON.stringify(reconMethods).slice(0, 160),
+  );
+  /* P45-W1 (المبادرة D): الشاشة تحمل الصف نفسه — بنّاء واحد للشاشة
+     والملف (لا يفترقان أبداً)، وقاعدة الحساب لم تُمسّ: صف «تحويل
+     بنكي» في جدول الطرق ما زال طلب §7.5 وحده (الطلب الملغي مستثنى
+     بقاعدة notIn)، بينما يحمله refundDue وحده — السطحان منفصلان
+     لنفس الحقيقة، بلا ازدواج عد وبلا اختفاء. */
+  const refundDueRows = proReports.body?.data?.refundDue || [];
+  const rdRow = refundDueRows.find((r) => r.orderNumber === rdOrd?.orderNumber);
+  ok(
+    "reports response (P45-W1): refundDue carries the paid-then-cancelled order — number, customer, total, method snapshot, the audit-stamped Tripoli day",
+    Array.isArray(refundDueRows) &&
+      !!rdRow &&
+      rdRow.customerName === "زبون الاسترجاع المستحق" &&
+      rdRow.total === 14000 &&
+      rdRow.methodName === "تحويل بنكي" &&
+      rdRow.cancelledDay === rdDay,
+    JSON.stringify(refundDueRows).slice(0, 160),
+  );
+  const manualMethodRow = reconMethods.find((m) => m.name === "تحويل بنكي");
+  ok(
+    "reports response (P45-W1): the accounting rule is untouched — the MANUAL method row still counts §7.5's order ONLY (the cancelled refund obligation never double-counts into the method table)",
+    !!manualMethodRow && manualMethodRow.orders === 1 && manualMethodRow.paid === 0 && manualMethodRow.unpaid === 1,
+    JSON.stringify(manualMethodRow ?? null).slice(0, 120),
   );
 
   // ---------- 11.5 native merchant sessions — the Bearer transport (P36 Phase C) ----------

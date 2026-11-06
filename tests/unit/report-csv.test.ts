@@ -168,6 +168,49 @@ test("P43 SO-2c body: the orders worksheet is absent when the export passes no r
   assert.ok(!empty.includes("سجل المطابقة"));
 });
 
+/* ── P45-W1 (المبادرة D): قسم الاسترجاعات المستحقة في الملف ───────── */
+
+test("P45-W1 body: the refund-due worksheet rides the file — the paid-then-cancelled obligation the method table excludes", () => {
+  const d = fixture();
+  d.refundDue = [
+    {
+      orderNumber: "SO-20260130-0042",
+      customerName: "زبون اختبار",
+      total: 12_000,
+      methodName: "تحويل بنكي",
+      paymentType: "MANUAL",
+      cancelledDay: "2026-01-30",
+    },
+    {
+      orderNumber: "SO-20260129-0007",
+      customerName: "زبون آخر",
+      total: 9_500,
+      methodName: "غير محدد",
+      paymentType: null,
+      cancelledDay: null,
+    },
+  ];
+  const csv = buildReportCsv(d, "متجر");
+  const lines = csv.split("\r\n");
+  assert.ok(lines.includes("استرجاعات مستحقة"));
+  assert.ok(
+    lines.includes("رقم الطلب,الزبون,طريقة الدفع,المبلغ المسترَد (د.ل),تاريخ الإلغاء"),
+  );
+  assert.ok(lines.includes("SO-20260130-0042,زبون اختبار,تحويل بنكي,12.000,2026-01-30"));
+  // طريقة غائبة → «غير محدد»؛ طابع تدقيق غائب → «—» (لا تاريخ مُختلق)
+  assert.ok(lines.includes("SO-20260129-0007,زبون آخر,غير محدد,9.500,—"));
+  // القسم يأتي بعد مطابقة المدفوعات وقبل أكواد الخصم — وجهًا لوجه مع
+  // الجدول الذي يستثني هذه الصفوف بقاعدة الحساب
+  assert.ok(csv.indexOf("استرجاعات مستحقة") > csv.indexOf("مطابقة المدفوعات (حسب طريقة الدفع)"));
+  assert.ok(csv.indexOf("استرجاعات مستحقة") < csv.indexOf("أكواد الخصم"));
+});
+
+test("P45-W1 body: an empty refund window keeps the honest section header (the file never hides the surface — same as the screen)", () => {
+  const csv = buildReportCsv(fixture(), "متجر");
+  assert.ok(csv.includes("استرجاعات مستحقة"));
+  assert.ok(!csv.includes("SO-20260130-0042,زبون"));
+});
+
 /** Minimal two-day fixture matching the API response shape (the same
  *  contract /api/dashboard/reports answers with). */
 function fixture(): ReportsData {
@@ -198,5 +241,8 @@ function fixture(): ReportsData {
       { code: "SAVE10", type: "نسبة مئوية", uses: 2, discount: 2_500 },
       { code: "FREESHIP", type: "توصيل مجاني", uses: 1, discount: 2_000 },
     ],
+    /* P45-W1 (المبادرة D): الاسترجاعات المستحقة — فارغة في الأساس (لا
+     * طلبات مدفوعة ثم ملغاة في هذا الثابت). */
+    refundDue: [],
   };
 }

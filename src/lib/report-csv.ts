@@ -18,6 +18,7 @@ import { PAYMENT_STATUS_AR } from "./constants.ts";
 import type {
   CouponUsageRow,
   PaymentMethodBreakdownRow,
+  RefundDueRow,
 } from "./reports-reconciliation.ts";
 
 /** The reports API response shape — the one contract shared by
@@ -42,6 +43,10 @@ export interface ReportsData {
    * أنقياء من reports-reconciliation.ts. */
   paymentMethods: PaymentMethodBreakdownRow[];
   coupons: CouponUsageRow[];
+  /* P45-W1 (المبادرة D): الاسترجاعات المستحقة — طلبات مدفوعة ثم
+   * ملغاة/مرفوضة؛ بنّاء واحد (buildRefundDueRows) يغذي الشاشة والملف
+   * معاً فلا يعود التزام الاسترجاع غير مرئي على أي سطح. */
+  refundDue: RefundDueRow[];
 }
 
 /** P43 SO-2c — one row of the CSV's reconciliation worksheet (the
@@ -132,6 +137,24 @@ export function buildReportCsv(
         formatLydAmount(m.net),
         m.paid,
         m.unpaid,
+      ].join(","),
+    );
+  }
+  /* ── P45-W1 (المبادرة D): استرجاعات مستحقة — الوجه المقابل لمطابقة
+   * المدفوعات مباشرة: الطلبات المدفوعة ثم الملغاة/المرفوضة مستثناة
+   * من جدول الطرق بقاعدة الحساب نفسها، فالتزام الاسترجاع يظهر هنا —
+   * من نفس البنّاء الذي يرسم الشاشة (الشاشة والملف لا يفترقان أبداً). */
+  rows.push("");
+  rows.push("استرجاعات مستحقة");
+  rows.push("رقم الطلب,الزبون,طريقة الدفع,المبلغ المسترَد (د.ل),تاريخ الإلغاء");
+  for (const r of d.refundDue) {
+    rows.push(
+      [
+        csvCell(r.orderNumber),
+        csvCell(r.customerName),
+        csvCell(r.methodName),
+        formatLydAmount(r.total),
+        r.cancelledDay ?? "—",
       ].join(","),
     );
   }

@@ -34,6 +34,7 @@ import {
   Lock,
   Banknote,
   TicketPercent,
+  Undo2,
 } from "lucide-react";
 
 type WindowDays = 30 | 90;
@@ -222,7 +223,20 @@ export default function ReportsPage() {
      plus today, mono. */
   const labelEvery = Math.max(1, Math.ceil(data.series.length / 8));
 
-  const cards = [
+  /* KPI definitions — P45-W1 (المبادرة D): تسميات تعريف صادقة عند الرقم
+     نفسه: تعريف إيراد التقارير «تشغيلي» (كل غير الملغى/المرفوض — بما
+     فيه قيد التحضير) يُعلن صراحة بدل أن يُقرأ متناقضاً مع «إيراد اليوم»
+     المحصّل على اللوحة (المسلّم فقط). التعريفات نفسها لم تتغير — تسمية
+     copy فقط (قرار مالك مُصان). */
+  const cards: Array<{
+    label: string;
+    value: string;
+    icon: typeof Coins;
+    tone: string;
+    well: string;
+    rim: string;
+    note?: string;
+  }> = [
     {
       label: "إيراد الفترة",
       value: formatLyd(totals.revenue),
@@ -230,6 +244,7 @@ export default function ReportsPage() {
       tone: "text-success-ink",
       well: "bg-(--c-mint-bg)",
       rim: "shadow-[inset_0_0_0_1.5px_color-mix(in_srgb,var(--c-mint-ink)_30%,transparent)]",
+      note: "تشغيلي: كل غير الملغى",
     },
     {
       label: "طلبات الفترة",
@@ -346,7 +361,7 @@ export default function ReportsPage() {
       {/* KPI strip — the overview page's card anatomy (44px pastel well +
           mono tabular values + restrained pop-in). */}
       <div className="grid gap-5 grid-cols-2 lg:grid-cols-4">
-        {cards.map(({ label, value, icon: Icon, tone, well, rim }, i) => (
+        {cards.map(({ label, value, icon: Icon, tone, well, rim, note }, i) => (
           <m.div
             key={label}
             initial={{ opacity: 0, y: 8 }}
@@ -371,6 +386,12 @@ export default function ReportsPage() {
                   >
                     {value}
                   </m.div>
+                  {/* P45-W1: تسمية تعريف الرقم — صادقة وهادئة تحت القيمة */}
+                  {note && (
+                    <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                      {note}
+                    </div>
+                  )}
                 </div>
                 <span
                   className={`flex size-11 shrink-0 items-center justify-center rounded-lg ${tone} ${well} ${rim}`}
@@ -709,6 +730,112 @@ export default function ReportsPage() {
           <p className="border-t border-border/60 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
             «غير مدفوع» يشمل المسترجَع — طابِق الصافي مع كشف محفظتك أو
             حسابك البنكي، ومراجع التحويل في تصدير CSV.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* P45-W1 (المبادرة D) — استرجاعات مستحقة: the refund-obligation
+          surface. Paid-then-cancelled/rejected orders are excluded from
+          every reconciliation aggregate BY THE ACCOUNTING RULE — exactly
+          the rows carrying a refund obligation vanished from the owner's
+          statement matching. This table shows them explicitly, from the
+          SAME builder the CSV export renders (the screen and the file
+          never disagree). The section is ALWAYS present: an empty window
+          renders the honest «لا استرجاعات مستحقة» state — the blind spot
+          stays closed even when there is nothing owed. */}
+      <Card className="border-border/80">
+        <CardHeader className="pb-3">
+          <div className="flex items-baseline justify-between gap-x-3 gap-y-1 flex-wrap">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Undo2 className="size-4 text-muted-foreground" aria-hidden="true" />
+              استرجاعات مستحقة
+            </CardTitle>
+            <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+              مدفوع ثم أُلغي — ما عليك ردّه للزبون
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {data.refundDue.length === 0 ? (
+            /* الحالة الفارغة الصادقة — لا التزام مخفي ولا قسم شبحي */
+            <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+              لا استرجاعات مستحقة في هذه الفترة
+            </p>
+          ) : (
+            <>
+              <table className="hidden md:table w-full text-[13px]">
+                <caption className="sr-only">
+                  الاسترجاعات المستحقة في النافذة — طلبات مدفوعة ثم أُلغيت أو رُفضت
+                </caption>
+                <thead>
+                  <tr className="border-b border-border bg-muted text-muted-foreground text-[11px] font-semibold">
+                    <th scope="col" className="text-start font-semibold px-4 py-3">
+                      رقم الطلب
+                    </th>
+                    <th scope="col" className="text-start font-semibold px-4 py-3">
+                      الزبون
+                    </th>
+                    <th scope="col" className="text-start font-semibold px-4 py-3">
+                      طريقة الدفع
+                    </th>
+                    <th scope="col" className="text-start font-semibold px-4 py-3">
+                      المبلغ المسترَد
+                    </th>
+                    <th scope="col" className="text-start font-semibold px-4 py-3">
+                      تاريخ الإلغاء
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {data.refundDue.map((r) => (
+                    <tr key={r.orderNumber} className="transition-colors hover:bg-muted/40">
+                      <td className="px-4 py-3 font-mono font-semibold tracking-wide" dir="ltr">
+                        {r.orderNumber}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="block truncate max-w-40 font-medium">{r.customerName}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="block truncate max-w-40">{r.methodName}</span>
+                      </td>
+                      <td className="px-4 py-3 font-semibold font-mono tabular-nums">
+                        {formatLyd(r.total)}
+                      </td>
+                      <td className="px-4 py-3 font-mono tabular-nums text-muted-foreground">
+                        {r.cancelledDay ?? "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {/* Mobile card twin */}
+              <ul className="md:hidden divide-y divide-border/60">
+                {data.refundDue.map((r) => (
+                  <li key={r.orderNumber} className="p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="font-mono text-sm font-semibold tracking-wide" dir="ltr">
+                          {r.orderNumber}
+                        </div>
+                        <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                          {r.customerName} · {r.methodName}
+                        </div>
+                        <div className="mt-0.5 text-[11px] text-muted-foreground font-mono tabular-nums">
+                          {r.cancelledDay ?? "—"}
+                        </div>
+                      </div>
+                      <div className="shrink-0 text-end font-mono text-sm font-semibold tabular-nums">
+                        {formatLyd(r.total)}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <p className="border-t border-border/60 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+            هذه الطلبات خارج جدول مطابقة المدفوعات بقاعدة الحساب نفسها —
+            التزام الاسترجاع يظهر هنا، والتفاصيل الكاملة في تصدير CSV.
           </p>
         </CardContent>
       </Card>

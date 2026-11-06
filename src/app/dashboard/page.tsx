@@ -140,11 +140,24 @@ export default function DashboardOverview() {
      an all-zero week renders no «الذروة 0.001 د.ل» nonsense */
   const weekPeak = data.weekSeries.reduce((m, d) => Math.max(m, d.revenue), 0);
 
-  const cards = [
-    /* MetricCard anatomy (Madarek components.css:144-219 + polish v15):
- 44px pastel icon well on the family -bg ground with a 1.5px inset
- family-ink/30% tinted rim; the value rides the 30px display metric
- slot with tnum+lnum and a 700ms pop-in entrance. */
+  /* KPI definitions — MetricCard anatomy (Madarek components.css:144-219
+     + polish v15): 44px pastel icon well on the family -bg ground with a
+     1.5px inset family-ink/30% tinted rim; the value rides the 30px
+     display metric slot with tnum+lnum and a 700ms pop-in entrance.
+     P45-W1 (المبادرة D): تسمية تعريف صادقة عند الرقم نفسه — «إيراد
+     اليوم» على اللوحة محصّل فعلاً (المسلّم فقط — stats route)، مقابل
+     التعريف التشغيلي في التقارير (كل غير الملغى). التعريفان مشروان
+     في وثيقة التقارير؛ التسمية تعلن الفرق بدل أن يُقرأ متناقضاً.
+     التعريفات نفسها لم تتغير — copy فقط. */
+  const cards: Array<{
+    label: string;
+    value: string;
+    icon: typeof Coins;
+    tone: string;
+    well: string;
+    rim: string;
+    note?: string;
+  }> = [
     {
       label: "طلبات اليوم",
       value: String(stats.todayOrders),
@@ -169,6 +182,7 @@ export default function DashboardOverview() {
       tone: "text-success-ink",
       well: "bg-(--c-mint-bg)",
       rim: "shadow-[inset_0_0_0_1.5px_color-mix(in_srgb,var(--c-mint-ink)_30%,transparent)]",
+      note: "مُحصَّل: الطلبات المسلَّمة فقط",
     },
     {
       label: "متوسط الطلب",
@@ -263,7 +277,7 @@ export default function DashboardOverview() {
           border + 132px min) keeps the family stamp grammar — restrained
           light-first daylight, no cinematic effects. */}
       <div className="grid gap-5 grid-cols-2 lg:grid-cols-4">
-        {cards.map(({ label, value, icon: Icon, tone, well, rim }, i) => (
+        {cards.map(({ label, value, icon: Icon, tone, well, rim, note }, i) => (
           <m.div
             key={label}
             initial={{ opacity: 0, y: 8 }}
@@ -288,6 +302,12 @@ export default function DashboardOverview() {
                   >
                     {value}
                   </m.div>
+                  {/* P45-W1: تسمية تعريف الرقم — صادقة وهادئة تحت القيمة */}
+                  {note && (
+                    <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                      {note}
+                    </div>
+                  )}
                 </div>
                 <span
                   className={`flex size-11 shrink-0 items-center justify-center rounded-lg ${tone} ${well} ${rim}`}

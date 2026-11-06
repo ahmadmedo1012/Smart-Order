@@ -15,6 +15,11 @@
 // window totals. The exclusion convention is the caller's (the queries
 // pass CANCELLED/REJECTED-free rows verbatim).
 
+/* tripoliDateParts فقط (درزة الخادم الصرفة — r136) — قانون العرض عند
+ * العميل (r137) لا يمسّ هذا الملف؛ اليوم يُحسب هنا خادمياً مرة واحدة
+ * فتريه الشاشة والملف سلسلة نهائية. */
+import { tripoliDateParts } from "./arabic.ts";
+
 /** The Prisma groupBy row shape over Order (paymentMethodName,
  *  paymentType, paymentStatus) the breakdown consumes. */
 export interface PaymentMethodGroupRow {
@@ -129,4 +134,81 @@ export function buildCouponUsageRows(
     });
   }
   return out.sort((a, b) => b.discount - a.discount || b.uses - a.uses);
+}
+
+/* ── P45-W1 (المبادرة D): استرجاعات مستحقة ─────────────────────────
+ *
+ * النقطة العمياء المكتشفة بالتدقيق (P45-BASELINE §العيوب 2): طلبات
+ * PAID ثم أُلغيت/رُفضت كانت تسقط من التسوية المالية كلها — مرشحات
+ * الاستبعاد (status notIn CANCELLED/REJECTED) في مجاميع الطرق
+ * والكوبونات وسجل المطابقة تستثنيها بحكم القاعدة المحاسبية، فيسقط
+ * بالضبط الصف الذي عليه التزام استرجاع للزبون: التاجر يطابق محفظته
+ * ولا يرى المبالغ التي عليه ردّها.
+ *
+ * البنّاء الأنقي هنا يُظهرها صراحة: نفس النافذة، نفس اللقطات
+ * الملزمة (total/method من صف الطلب)، وتاريخ الانتقال الهادم من
+ * OrderStatusHistory — مصدر التدقيق الوحيد للحدث. الشاشة والملف
+ * يستهلكان هذا البنّاء نفسه (الشاشة والملف لا يفترقان — قانون
+ * المستودع)، فالاسترجاع المستحق لا يعود يختفي عن أي سطح. */
+
+/** الشكل الوارد من استعلام Prisma: صف الطلب + أول سجل انتقال هادم
+ *  في history (الاستعلام يقصّ toStatus في CANCELLED/REJECTED ويأخذ
+ *  الأقدم — لحظة الإلغاء/الرفض الفعلية). */
+export interface RefundDueQueryRow {
+  orderNumber: string;
+  customerName: string;
+  total: number;
+  paymentMethodName: string | null;
+  paymentType: string | null;
+  status: string;
+  paymentStatus: string;
+  history: ReadonlyArray<{ createdAt: Date; toStatus: string }>;
+}
+
+/** صف استرجاع مستحق — ما على التاجر ردّه للزبون (طلبات قُبض ثمنها
+ *  ثم أُلغي الطلب أو رُفض). */
+export interface RefundDueRow {
+  orderNumber: string;
+  customerName: string;
+  /** total الملزم (مليم) — المبلغ الذي قُبض ثم وجب ردّه. */
+  total: number;
+  /** اسم طريقة الدفع كما التُقط وقت الطلب — «غير محدد» إن غابت
+   *  (نفس اصطلاح buildPaymentMethodBreakdown). */
+  methodName: string;
+  paymentType: string | null;
+  /** يوم طرابلس (YYYY-MM-DD) للانتقال الهادم من سجل التدقيق —
+   *  نفس اصطلاح التواريخ في كل أسطح التقارير (لا رياضيات تواريخ
+   *  عند العميل أبداً). */
+  cancelledDay: string | null;
+}
+
+/** بناء صفوف الاسترجاعات المستحقة. دفاعي ضد غير المستحق: البنّاء
+ *  يمرر فقط ما هو PAID على طلب CANCELLED/REJECTED (الاستعلام يقصّ
+ *  كذلك، لكن القاعدة تُختبر عند البنّاء نفسه). الأحدث هدماً أولاً —
+ *  أثقل التزامات الاسترجاع أمام عين التاجر. */
+export function buildRefundDueRows(rows: RefundDueQueryRow[]): RefundDueRow[] {
+  const out: RefundDueRow[] = [];
+  for (const r of rows) {
+    if (r.paymentStatus !== "PAID") continue;
+    if (r.status !== "CANCELLED" && r.status !== "REJECTED") continue;
+    const stamp = r.history[0]?.createdAt ?? null;
+    out.push({
+      orderNumber: r.orderNumber,
+      customerName: r.customerName,
+      total: r.total,
+      methodName: r.paymentMethodName?.trim() || "غير محدد",
+      paymentType: r.paymentType,
+      /* اليوم الطرابلسي يُشتق من طابع التدقيق خادمياً — لا تمرير تواريخ
+         خام للعميل ولا رياضيات تواريخ عنده (r136/r137). */
+      cancelledDay: (() => {
+        if (!stamp) return null;
+        const { y, m, d } = tripoliDateParts(stamp);
+        return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      })(),
+    });
+  }
+  return out.sort(
+    (a, b) => (b.cancelledDay ?? "").localeCompare(a.cancelledDay ?? "") ||
+      b.total - a.total,
+  );
 }

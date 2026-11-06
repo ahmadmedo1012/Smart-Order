@@ -12,6 +12,7 @@ import type { ReportsData, ReconciliationOrderRow } from "@/lib/report-csv";
 import {
   buildCouponUsageRows,
   buildPaymentMethodBreakdown,
+  buildRefundDueRows,
 } from "@/lib/reports-reconciliation";
 
 export type ReportsWindowDays = 30 | 90;
@@ -173,7 +174,7 @@ export async function getReportData(
      REPORT over 30/90 days that dropped every in-flight/preparing order
      would understate the trend the owner is asking about. One rule per
      surface, both documented. */
-  const [dayRows, fulfillment, topRows, paymentMethodRows, couponUsageRows, couponTypeRows] = await Promise.all([
+  const [dayRows, fulfillment, topRows, paymentMethodRows, couponUsageRows, couponTypeRows, refundRows] = await Promise.all([
     /* Day-bucketing is the stats route's dialect-discriminated raw query
        verbatim (r134/r138): Prisma groupBy can't truncate a DateTime to
        a calendar day, so $queryRaw + the dialect's date function —
@@ -282,6 +283,38 @@ export async function getReportData(
       where: { businessId },
       select: { code: true, type: true },
     }),
+    /* ── P45-W1 (المبادرة D): استرجاعات مستحقة — النقطة العمياء نفسها:
+       الطلبات المدفوعة ثم الملغاة/المرفوضة تسقط من كل مجاميع التسوية
+       (قاعدة الاستبعاد المحاسبية)، فيغيب عن التاجر التزام الاسترجاع
+       الذي عليه. نفس النافذة (createdAt ≥ from — التزام العرض مرتبط
+       بالطلب نفسه)، والقيد الوحيد المضاف: status في (CANCELLED,
+       REJECTED) AND paymentStatus = PAID. تاريخ الهدم يُلتقط من أول
+       سجل تدقيق للانتقال الهادم (take: 1 على history المرشّح — مصدر
+       الحدث الموثّق، لا تاريخ إنشاء الطلب). */
+    db.order.findMany({
+      where: {
+        businessId,
+        status: { in: ["CANCELLED", "REJECTED"] },
+        paymentStatus: "PAID",
+        createdAt: { gte: from },
+      },
+      orderBy: { createdAt: "desc" },
+      select: {
+        orderNumber: true,
+        customerName: true,
+        total: true,
+        paymentMethodName: true,
+        paymentType: true,
+        status: true,
+        paymentStatus: true,
+        history: {
+          where: { toStatus: { in: ["CANCELLED", "REJECTED"] } },
+          orderBy: { createdAt: "asc" },
+          take: 1,
+          select: { createdAt: true, toStatus: true },
+        },
+      },
+    }),
   ]);
 
   const dayMap = new Map(
@@ -332,6 +365,9 @@ export async function getReportData(
      * الشاشة وفي الـCSV حكماً). */
     paymentMethods: buildPaymentMethodBreakdown(paymentMethodRows),
     coupons: buildCouponUsageRows(couponUsageRows, couponTypeRows, COUPON_TYPE_AR),
+    /* P45-W1 (المبادرة D): الاسترجاعات المستحقة — بنّاء واحد للشاشة
+     * والملف معاً (الشاشة والملف لا يفترقان). */
+    refundDue: buildRefundDueRows(refundRows),
   };
 }
 
