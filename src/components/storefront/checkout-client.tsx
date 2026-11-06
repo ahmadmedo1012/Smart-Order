@@ -30,6 +30,9 @@ import { NoteSection } from "@/components/storefront/checkout/note-section";
 import { CartSummarySection } from "@/components/storefront/checkout/cart-summary-section";
 import { StickySubmitBar } from "@/components/storefront/checkout/sticky-submit-bar";
 import { CouponSection } from "@/components/storefront/checkout/coupon-section";
+/* P45-W1 (المبادرة A): كتلة الإيصال الموحدة قبل الإرسال — تركيب فقط:
+   تقرأ حالة use-checkout-state كما هي (لا حساب مالّي جديد) */
+import { ReceiptReviewSection } from "@/components/storefront/checkout/receipt-review-section";
 import { saveCustomerPrefill } from "@/lib/checkout-prefill";
 
 /**
@@ -464,6 +467,27 @@ export function CheckoutClient({
         </form>
 
         <CartSummarySection items={items} evaluation={evaluation} />
+
+        {/* P45-W1 (المبادرة A — تمديد): لحظة المراجعة الموحدة فوق شريط
+            الإرسال مباشرة — الأصناف×الكميات والمال وطريقة الدفع والعنوان
+            في كتلة واحدة. تركيب خالص: كل القيم من الحالة الموجودة، وتدفق
+            الإرسال المثبّت بـparity (المسار أعلاه) و<main id="main"> لم
+            يُمسّا. */}
+        <ReceiptReviewSection
+          items={items}
+          evaluation={evaluation}
+          subtotal={subtotal}
+          deliveryFee={deliveryFee}
+          discount={discount}
+          couponCode={coupon?.code ?? null}
+          total={total}
+          paymentMethodName={paymentMethod?.name ?? null}
+          fulfillment={fulfillment}
+          zoneName={zone?.name ?? null}
+          city={city}
+          area={area}
+          addressLine={addressLine}
+        />
       </main>
 
       <StickySubmitBar

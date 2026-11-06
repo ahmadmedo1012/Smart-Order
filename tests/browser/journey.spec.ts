@@ -71,9 +71,47 @@ test.describe("رحلة العميل — المتجر ← السلة ← إتم�
     await page.getByRole("button", { name: "الدفع عند التوصيل", exact: true }).click();
 
     // الشريط اللاصق: الإجمالي 45 + 5 = 50 د.ل (أحادي tabular)
-    const stickyTotal = page.getByText("50 د.ل", { exact: true });
+    /* P45-W1: كتلة الإيصال الجديدة تعرض «50 د.ل» أيضاً داخل الصفحة —
+       المحدد يُقيَّد الآن بحاوية الشريط اللاصق نفسها (العقد الذي كان
+       يفحصه المحدد الفضفاض: إجمالي الشريط أحادي Mono) */
+    const stickyTotal = page
+      .locator("div.fixed.bottom-0")
+      .getByText("50 د.ل", { exact: true });
     await expect(stickyTotal).toBeVisible();
     await expect(stickyTotal).toHaveCSS("font-family", /Plex Mono/);
+
+    // ── 5.5) P45-W1 (المبادرة A): كتلة الإيصال الموحدة قبل الإرسال ──
+    /* لحظة المراجعة الواحدة: الأصناف×الكميات، سطور المال، طريقة الدفع
+       المختارة، والعنوان — كلها داخل كتلة واحدة فوق شريط الإرسال. */
+    const receipt = page.locator(
+      'section[aria-label^="مراجعة الطلب قبل الإرسال"]',
+    );
+    await expect(receipt).toBeVisible();
+    await expect(
+      receipt.getByRole("heading", { name: "مراجعة طلبك قبل الإرسال" }),
+    ).toBeVisible();
+
+    // الصنف × الكمية مع إجمالي السطر (1 × بيتزا مارغريتا = 45 د.ل)
+    // (يُقيَّد بقائمة الأصناف — سطر «المنتجات» في المال يحمل 45 د.ل أيضاً)
+    await expect(receipt.getByText("بيتزا مارغريتا")).toBeVisible();
+    await expect(
+      receipt.locator("ul").getByText("45 د.ل", { exact: true }),
+    ).toBeVisible();
+
+    // سطور المال: المنتجات 45 + توصيل وسط المدينة 5 = الإجمالي التقديري 50
+    await expect(receipt.getByText("المنتجات", { exact: true })).toBeVisible();
+    await expect(receipt.getByText("التوصيل — وسط المدينة")).toBeVisible();
+    await expect(receipt.getByText("5 د.ل", { exact: true })).toBeVisible();
+    await expect(receipt.getByText("الإجمالي التقديري")).toBeVisible();
+    const receiptTotal = receipt.getByText("50 د.ل", { exact: true });
+    await expect(receiptTotal).toBeVisible();
+    await expect(receiptTotal).toHaveCSS("font-family", /Plex Mono/);
+
+    // طريقة الدفع المختارة بالاسم التجاري + العنوان الكامل — في الكتلة نفسها
+    await expect(receipt.getByText("الدفع عند التوصيل")).toBeVisible();
+    await expect(
+      receipt.getByText("طرابلس، الوسط، شارع الجمهورية، مقابل مبنى البريد"),
+    ).toBeVisible();
 
     // ── 6) الإرسال الحقيقي + الشاشة المتينة ──
     const [res] = await Promise.all([
