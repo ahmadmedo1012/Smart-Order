@@ -399,6 +399,11 @@ model Order {
    * (MANUAL/MADAR/LIBYANA) — عمودان اختياريان، إضافة آمنة للنشر. */
   couponCode        String?
   paymentReference  String?
+  /* P45-W1 (المبادرة C): طابع استرجاع المخزون — يُضبط مرة واحدة عند أول
+   * انتقال هادم (CANCELLED/REJECTED) داخل معاملة الانتقال نفسها، ويُستخدم
+   * حارساً ذرّياً (مع CAS الحالة) لضمان أن increment للأصناف المتتبعة
+   * لا يتكرر أبداً مهما تكررت المحاولات. عمود اختياري — إضافة آمنة. */
+  restockedAt       DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

@@ -400,6 +400,105 @@ async function main() {
   }
   else { skipped++; console.log("  - confirm rate limit not reached (shared IP bucket / window rollover) — skipped"); }
 
+  // ---------- 6.6 restock on cancel/reject (P45-W1 — Initiative C) ----------
+  console.log("— استرجاع المخزون عند الإلغاء/الرفض (P45-W1)");
+  /* The audit-verified defect (P45-BASELINE §العيوب 1): transitioning to
+     CANCELLED/REJECTED never restored tracked stock — the only increment
+     uses in src were rate-limit and coupon usedCount, so a cancelled
+     order permanently burned stockQuantity and skewed low-stock alerts.
+     The PATCH transition now increments tracked products INSIDE its
+     transaction, guarded once-only by Order.restockedAt (atomic with the
+     status CAS). Public POSTs ride an ISOLATED client-IP bucket (the
+     §7.5 trick — the shared localhost bucket is §8's subject). Both
+     fixture orders end terminal (CANCELLED/REJECTED) on a dedicated
+     customer phone, so §11.6's revenue/order census (notIn
+     CANCELLED/REJECTED) and the customer stats stay byte-exact. */
+  const RC = makeCtx();
+  const rcip = { "x-real-ip": "198.18.77.9" };
+  const rco = (body) => ({ method: "POST", headers: rcip, body: JSON.stringify(body) });
+
+  const stockProd = await A.call("/api/products", {
+    method: "POST",
+    body: JSON.stringify({
+      businessId: bizAId, categoryId: catId, name: "صنف متتبع للمخزون", description: "لاختبار الاسترجاع",
+      price: "5.000", isAvailable: true, trackInventory: true, stockQuantity: 10,
+    }),
+  });
+  const stockProdId = stockProd.body?.data?.product?.id;
+  ok(
+    "tracked product created (stock 10, tracked)",
+    !!stockProdId && stockProd.body?.data?.product?.trackInventory === true && stockProd.body?.data?.product?.stockQuantity === 10,
+    JSON.stringify(stockProd.body).slice(0, 100),
+  );
+
+  const stockOf = async () => {
+    const r = await A.call(`/api/products/${stockProdId}?businessId=${bizAId}`);
+    return typeof r.body?.data?.product?.stockQuantity === "number" ? r.body.data.product.stockQuantity : "؟";
+  };
+
+  const restockPayload = (qty, key) => ({
+    slug, idempotencyKey: key, fulfillmentType: "DELIVERY",
+    customerName: "عميل الاسترجاع", customerPhone: "0913456789",
+    city: "طرابلس", area: "الوسط", addressLine: "شارع الاسترجاع 1",
+    deliveryZoneId: zoneId, customerNote: "",
+    items: [{ productId: stockProdId, variantId: null, optionIds: [], quantity: qty, note: "" }],
+  });
+
+  // — الإلغاء: طلب 3 وحدات → المخزون 7 → إلغاء → العودة إلى 10 —
+  const rs1 = await RC.call("/api/public/orders", rco(restockPayload(3, rnd("e2e-rs1-"))));
+  const rs1o = rs1.body?.data?.order;
+  ok("tracked order created (3 units, 5×3 + 4 delivery = 19 د.ل)", rs1.body?.success === true && rs1o?.total === 19000, JSON.stringify(rs1.body).slice(0, 120));
+  let s = await stockOf();
+  ok("creation decrements tracked stock (10 → 7)", s === 7, `stock ${s}`);
+
+  const rs1Cancel = await A.call(`/api/orders/${rs1o?.id}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, status: "CANCELLED" }) });
+  ok("cancel transition lands (NEW → CANCELLED)", rs1Cancel.body?.data?.order?.status === "CANCELLED", JSON.stringify(rs1Cancel.body).slice(0, 100));
+  s = await stockOf();
+  ok("cancellation restores tracked stock (7 → 10)", s === 10, `stock ${s}`);
+
+  const rs1Detail = await A.call(`/api/orders/${rs1o?.id}?businessId=${bizAId}`);
+  ok(
+    "restockedAt stamp is set on the cancelled order (the once-guard's receipt)",
+    typeof rs1Detail.body?.data?.order?.restockedAt === "string",
+    JSON.stringify(rs1Detail.body?.data?.order?.restockedAt ?? null),
+  );
+
+  const rs1Again = await A.call(`/api/orders/${rs1o?.id}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, status: "CANCELLED" }) });
+  ok(
+    "second cancel is refused — a no-change 400 (same-status PATCH on the terminal row never re-runs the transition)",
+    rs1Again.status === 400 && rs1Again.body?.success === false,
+    JSON.stringify(rs1Again.body).slice(0, 100),
+  );
+  const rs1Wake = await A.call(`/api/orders/${rs1o?.id}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, status: "CONFIRMED" }) });
+  ok(
+    "any transition out of the terminal state is structurally impossible (409 INVALID_TRANSITION)",
+    rs1Wake.status === 409 && rs1Wake.body?.error?.code === "INVALID_TRANSITION",
+    JSON.stringify(rs1Wake.body).slice(0, 100),
+  );
+  s = await stockOf();
+  ok("stock stays restored after the refused re-cancels (no double increment)", s === 10, `stock ${s}`);
+
+  // — الرفض: طلب وحدتين → المخزون 8 → رفض → العودة إلى 10 —
+  const rs2 = await RC.call("/api/public/orders", rco(restockPayload(2, rnd("e2e-rs2-"))));
+  const rs2o = rs2.body?.data?.order;
+  ok("second tracked order created (2 units)", rs2.body?.success === true, JSON.stringify(rs2.body).slice(0, 120));
+  s = await stockOf();
+  ok("creation decrements again (10 → 8)", s === 8, `stock ${s}`);
+
+  const rs2Reject = await A.call(`/api/orders/${rs2o?.id}`, { method: "PATCH", body: JSON.stringify({ businessId: bizAId, status: "REJECTED" }) });
+  s = await stockOf();
+  ok(
+    "rejection restores tracked stock too (NEW → REJECTED, 8 → 10)",
+    rs2Reject.body?.data?.order?.status === "REJECTED" && s === 10,
+    `status ${rs2Reject.body?.data?.order?.status} stock ${s}`,
+  );
+  const rs2Detail = await A.call(`/api/orders/${rs2o?.id}?businessId=${bizAId}`);
+  ok(
+    "restockedAt stamp set on the rejected order as well",
+    typeof rs2Detail.body?.data?.order?.restockedAt === "string",
+    JSON.stringify(rs2Detail.body?.data?.order?.restockedAt ?? null),
+  );
+
   // ---------- 7. validation ----------
   console.log("— التحقق من المدخلات");
   const badPhone = await anon.call("/api/public/orders", { method: "POST", body: JSON.stringify({ ...orderPayload, idempotencyKey: rnd("e2e-bad-"), customerPhone: "12345" }) });

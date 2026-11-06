@@ -10,6 +10,8 @@ import {
   canMarkPaid,
   getAllowedTransitions,
   isTerminal,
+  shouldRestockOnTransition,
+  buildRestockPlan,
 } from "../../src/lib/order-machine.ts";
 import { ORDER_STATUSES } from "../../src/lib/constants.ts";
 import type { OrderStatus } from "../../src/lib/constants.ts";
@@ -139,4 +141,52 @@ test("canMarkPaid: money is receivable in every non-rejected, non-cancelled stat
   assert.equal(canMarkPaid("DELIVERED"), true); // COD captured after handing the parcel
   assert.equal(canMarkPaid("CANCELLED"), false);
   assert.equal(canMarkPaid("REJECTED"), false);
+});
+
+/* ── P45-W1 (المبادرة C): حارس استرجاع المخزون عند الانتقال الهادم ──
+ * البُناة الأنقياء خلف مسار الـPATCH — القرار (مرة-واحدة) والخطة
+ * (تجميع لكل منتج متتبع) يُدبّسان هنا بلا I/O. */
+
+test("P45-W1 shouldRestockOnTransition: destructive targets restock exactly once — the first transition only", () => {
+  // الانتقال الهادم الأول: restockedAt لم يُضبط — استرجاع مستحق
+  assert.equal(shouldRestockOnTransition("CANCELLED", null), true);
+  assert.equal(shouldRestockOnTransition("REJECTED", null), true);
+  // الطابع المضبوط يمنع التكرار (تاريخ أو سلسلة ISO — الشكلان اللذان
+  // قد يصلان من Prisma) — الإلغاء الثاني بنيوياً مستحيل أصلاً (حالة
+  // منتهية)، وهذا الحارس الطبقة الذرّية الثانية فوق آلة الحالات
+  assert.equal(shouldRestockOnTransition("CANCELLED", new Date("2026-01-01T00:00:00Z")), false);
+  assert.equal(shouldRestockOnTransition("REJECTED", "2026-01-01T00:00:00.000Z"), false);
+  // الانتقالات غير الهادمة لا تسترجع شيئاً أبداً — مهما كان الطابع
+  for (const to of ["CONFIRMED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED"] as const) {
+    assert.equal(shouldRestockOnTransition(to, null), false, `${to} never restocks`);
+    assert.equal(shouldRestockOnTransition(to, new Date()), false, `${to} never restocks (stamped)`);
+  }
+});
+
+test("P45-W1 buildRestockPlan: aggregates quantities per tracked product — same product across lines (variants/options) sums once", () => {
+  const plan = buildRestockPlan(
+    [
+      { productId: "p1", quantity: 2 },
+      { productId: "p1", quantity: 3 }, // نفس المنتج بسطرين — يُجمَع
+      { productId: "p2", quantity: 4 }, // غير متتبع — يُهمل
+      { productId: null, quantity: 9 }, // منتج محذوف نظرياً — يُهمل
+    ],
+    new Set(["p1"]),
+  );
+  assert.deepEqual(plan, [{ productId: "p1", quantity: 5 }]);
+});
+
+test("P45-W1 buildRestockPlan: empty or fully-untracked baskets answer an empty plan (no ghost increments)", () => {
+  assert.deepEqual(buildRestockPlan([], new Set(["p1"])), []);
+  assert.deepEqual(buildRestockPlan([{ productId: "p2", quantity: 1 }], new Set()), []);
+  assert.deepEqual(
+    buildRestockPlan(
+      [
+        { productId: null, quantity: 5 },
+        { productId: "pX", quantity: 5 },
+      ],
+      new Set(["p1"]),
+    ),
+    [],
+  );
 });

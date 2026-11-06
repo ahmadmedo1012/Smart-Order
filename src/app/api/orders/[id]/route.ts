@@ -3,7 +3,13 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAuth, requireBusiness, requirePermission } from "@/lib/auth";
 import { ok, fail, handleError, readJson, ApiFailError } from "@/lib/api";
-import { canTransition, canMarkPaid, isTerminal } from "@/lib/order-machine";
+import {
+  canTransition,
+  canMarkPaid,
+  isTerminal,
+  shouldRestockOnTransition,
+  buildRestockPlan,
+} from "@/lib/order-machine";
 import { ORDER_STATUSES, PAYMENT_STATUSES, type OrderStatus, type PaymentStatus } from "@/lib/constants";
 
 export const runtime = "nodejs";
@@ -49,7 +55,16 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 
     const order = await db.order.findFirst({
       where: { id, businessId: member.businessId },
-      select: { id: true, status: true, paymentStatus: true, fulfillmentType: true, orderNumber: true },
+      /* P45-W1 (المبادرة C): restockedAt يُقرأ لقرار استرجاع المخزون
+         عند الانتقال الهادم (الحارس نفسه يُفرض ذرّياً في CAS أدناه). */
+      select: {
+        id: true,
+        status: true,
+        paymentStatus: true,
+        fulfillmentType: true,
+        orderNumber: true,
+        restockedAt: true,
+      },
     });
     if (!order) return fail("الطلب غير موجود", 404, "NOT_FOUND");
 
@@ -75,6 +90,13 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
         requirePermission(member, "orders.cancel");
       }
       updates.status = to;
+      /* P45-W1 (المبادرة C): أول انتقال هادم يسترجع المخزون المتتبع —
+         الطابع يُكتب في نفس جملة CAS الحالة (الشرط restockedAt: null
+         في الـWHERE أدناه يجعل الحارس مرة-واحدة ذرّياً مع الانتقال
+         نفسه: الإلغاء المزدوج مستحيل بنيوياً حتى لو تسابقت الطلبات). */
+      if (shouldRestockOnTransition(to, order.restockedAt)) {
+        updates.restockedAt = new Date();
+      }
     }
 
     if (input.paymentStatus && input.paymentStatus !== order.paymentStatus) {
@@ -124,6 +146,11 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
           id,
           status: order.status,
           ...(updates.paymentStatus ? { paymentStatus: order.paymentStatus } : {}),
+          /* P45-W1 (المبادرة C): حارس مرة-واحدة — الانتقال الهادم يشترط
+             صفاً لم يُسترجع مخزونه بعد، في نفس جملة CAS الحالة: أي
+             محاولة ثانية (حتى لو اجتازت آلة الحالات يوماً) تجد count=0
+             وتُرفض بتعارض الانتقال ذاته — الاسترجاع لا يتكرر أبداً. */
+          ...(updates.restockedAt ? { restockedAt: null } : {}),
         },
         data: updates,
       });
@@ -132,6 +159,45 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
       }
       const o = await tx.order.findUnique({ where: { id } });
       if (!o) throw new ApiFailError("الطلب غير موجود", 404, "NOT_FOUND");
+      /* ── P45-W1 (المبادرة C): استرجاع المخزون عند الانتقال الهادم ──
+         مرآة decrement الإنشاء المشروط (public/orders): أسطر الطلب
+         تُقرأ داخل المعاملة نفسها، تُجمّع الكميات لكل منتج متتبع
+         (بُناء أنقياء في order-machine.ts — نفس القاعدة تُختبر وحدة)،
+         وincrement يسري فقط على منتجات هذا المستأجر المتتبعة فعلاً.
+         المنتجات غير المتتبعة وأسطر المنتجات المحذوفة تُهمل — لا
+         يُردّ إلا ما خُصم يوماً. */
+      if (updates.restockedAt) {
+        const lines = await tx.orderItem.findMany({
+          where: { orderId: id },
+          select: { productId: true, quantity: true },
+        });
+        const ids = [
+          ...new Set(
+            lines
+              .map((l) => l.productId)
+              .filter((p): p is string => typeof p === "string"),
+          ),
+        ];
+        const tracked =
+          ids.length > 0
+            ? await tx.product.findMany({
+                where: {
+                  id: { in: ids },
+                  businessId: member.businessId, // tenant scoping — IDOR-safe
+                  trackInventory: true,
+                },
+                select: { id: true },
+              })
+            : [];
+        for (const r of buildRestockPlan(lines, new Set(tracked.map((t) => t.id)))) {
+          await tx.product.update({
+            where: { id: r.productId },
+            data: { stockQuantity: { increment: r.quantity } },
+          });
+        }
+        /* قاعدة مالك (P45-W1): حرق الكوبون عند الإلغاء يبقى عمداً —
+           usedCount لا يُسترجع مع المخزون (قرار تجاري موثّق، ليس سهواً). */
+      }
       if (updates.status) {
         await tx.orderStatusHistory.create({
           data: {

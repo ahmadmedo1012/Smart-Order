@@ -72,6 +72,50 @@ export function canCustomerConfirm(status: OrderStatus): boolean {
   return !isTerminal(status);
 }
 
+/* ── P45-W1 (المبادرة C): استرجاع المخزون عند الانتقال الهادم ──
+ *
+ * الانتقال إلى CANCELLED/REJECTED كان يحرق المخزون المتتبع نهائياً
+ * (لا increment في أي مسار) — الطلب الملغي يبقي stockQuantity منقوصاً
+ * ويشوّه تنبيهات نفاد المخزون. الآن يعيد أول انتقال هادم الكميات داخل
+ * معاملة الانتقال نفسها (مرآة decrement الإنشاء المشروط في
+ * public/orders). الحارس مرة-واحدة ذرّي: عمود Order.restockedAt يُضبط
+ * في نفس جملة CAS الحالة (WHERE restockedAt: null) فلا يمكن بنيوياً
+ * تكرار الاسترجاع مهما تكررت المحاولات. هذان البُناة أنقياء (صفر I/O
+ * — قانون whatsapp.ts) ليُختبرا وحدةً ويستهلكهما مسار الـPATCH فقط. */
+
+/** هل يستوجب هذا الانتقال استرجاع المخزون؟ — الانتقال الهادم الأول
+ *  فقط (restockedAt لم يُضبط بعد). التمرير اللاحق للطابع (سلسلة أو
+ *  تاريخ) يمنع التكرار: آلة الحالات ترفض الانتقال من حالة منتهية
+ *  أصلاً، وهذا الحارس الطبقة الذرّية الثانية فوقها. */
+export function shouldRestockOnTransition(
+  to: OrderStatus,
+  restockedAt: Date | string | null,
+): boolean {
+  return (to === "CANCELLED" || to === "REJECTED") && restockedAt === null;
+}
+
+/** سطر خطة استرجاع: منتج + الكمية المُردّة إليه. */
+export interface RestockLine {
+  productId: string;
+  quantity: number;
+}
+
+/** خطة الاسترجاع من أسطر الطلب: تجميع الكميات لكل منتج متتبَّع — المنتج
+ *  نفسه قد يظهر في أسطر متعددة (متغيرات/إضافات مختلفة) فيُجمَع مرة
+ *  واحدة؛ الأسطر بلا productId (منتج محذوف نظرياً) والمنتجات غير
+ *  المتتبعة تُهمل — increment لا يسري إلا على ما decrement يوماً. */
+export function buildRestockPlan(
+  items: ReadonlyArray<{ productId: string | null; quantity: number }>,
+  trackedProductIds: ReadonlySet<string>,
+): RestockLine[] {
+  const qty = new Map<string, number>();
+  for (const it of items) {
+    if (!it.productId || !trackedProductIds.has(it.productId)) continue;
+    qty.set(it.productId, (qty.get(it.productId) ?? 0) + it.quantity);
+  }
+  return [...qty.entries()].map(([productId, quantity]) => ({ productId, quantity }));
+}
+
 /** The owner-facing history/timeline ink for the customer's confirmation
  * tap (the OrderStatusHistory row the confirm endpoint writes — same
  * non-transition row shape the payment confirmations use). */
