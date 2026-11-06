@@ -24,6 +24,10 @@ import {
 import { type ReportsData, reportCsvFileName } from "@/lib/report-csv";
 import { cn } from "@/lib/utils";
 import {
+  formatLegMinutesAr,
+  type OpsTimingMetrics,
+} from "@/lib/reports-reconciliation";
+import {
   ClipboardList,
   Coins,
   TrendingUp,
@@ -35,6 +39,9 @@ import {
   Banknote,
   TicketPercent,
   Undo2,
+  Timer,
+  ClipboardCheck,
+  ChefHat,
 } from "lucide-react";
 
 type WindowDays = 30 | 90;
@@ -55,6 +62,57 @@ interface ReportsResponse extends ReportsData {
    filename contract (product + slug + window + Tripoli stamp) is the
    same one-source helper the route's Content-Disposition uses. */
 const EXPORT_ROUTE = "/api/dashboard/reports/export";
+
+/* P45-W1 (المبادرة B) — سطر مقياس زمن-في-حالة واحد: أيقونة + تسمية
+   وقيمة mono بجدول الأرقام، بنفس قواعد صفوف الاستلام أعلاه. القيمة
+   الصادقة فقط: legs = 0 تُعلن «—» مع تلميح «لا عينات مكتملة» — لا
+   متوسط صفر كاذب أبدًا. */
+function OpsTimingRow({
+  icon: Icon,
+  label,
+  hint,
+  metrics,
+  avgKey,
+  legsKey,
+  last = false,
+}: {
+  icon: React.ComponentType<{
+    className?: string;
+    "aria-hidden"?: boolean | "true" | "false";
+  }>;
+  label: string;
+  hint: string;
+  metrics: OpsTimingMetrics;
+  avgKey: "avgConfirmMinutes" | "avgReadyMinutes";
+  legsKey: "confirmLegs" | "readyLegs";
+  last?: boolean;
+}) {
+  const avg = metrics[avgKey];
+  const legs = metrics[legsKey];
+  return (
+    <div
+      className={cn(
+        "py-2.5 first:pt-0",
+        !last && "border-b border-border/60",
+        last && "pb-0",
+      )}
+    >
+      <div className="flex items-baseline justify-between gap-x-3 gap-y-1">
+        <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
+          <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          {label}
+        </span>
+        <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
+          {legs > 0 ? `${formatLegMinutesAr(avg)} · ${legs} طلب` : "—"}
+        </span>
+      </div>
+      <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+        {hint}
+        {legs === 0 ? " — لا عينات مكتملة في هذه الفترة" : ""}
+      </p>
+    </div>
+  );
+}
 
 export default function ReportsPage() {
   const { businessId, business } = useBusiness();
@@ -536,6 +594,44 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* P45-W1 (المبادرة B) — زمن-في-حالة: نبض العمليات من سجل التدقيق
+          (متوسط التأكيد NEW→CONFIRMED ومتوسط الجاهزية
+          PREPARING→READY). الرجل المكتملة فقط تُحتسب — لا وقت مُختلق
+          لساق لم تكتمل، والقيم null تُعلن بصدق «لا عينات» لا صفراً
+          كاذباً. نفس الأرقام تركب رأس تصدير CSV (لا يفترقان). */}
+      <Card className="border-border/80">
+        <CardHeader className="pb-3">
+          <div className="flex items-baseline justify-between gap-x-3 gap-y-1 flex-wrap">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Timer className="size-4 text-muted-foreground" aria-hidden="true" />
+              زمن العمليات
+            </CardTitle>
+            <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+              من سجل تدقيق الطلبات — الرجل المكتملة فقط
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <OpsTimingRow
+            icon={ClipboardCheck}
+            label="متوسط زمن التأكيد"
+            hint="من استلام الطلب حتى تأكيده"
+            metrics={data.opsTiming}
+            avgKey="avgConfirmMinutes"
+            legsKey="confirmLegs"
+          />
+          <OpsTimingRow
+            icon={ChefHat}
+            label="متوسط زمن التحضير"
+            hint="من بدء التحضير حتى الجاهزية"
+            metrics={data.opsTiming}
+            avgKey="avgReadyMinutes"
+            legsKey="readyLegs"
+            last
+          />
+        </CardContent>
+      </Card>
 
       {/* Top products — the customers page's table grammar (11px muted
           headers on surface-2, mono cells for counts/money, hover wash)

@@ -57,11 +57,15 @@ test("body: daily revenue rows + top-products rows with their index", () => {
   const d = fixture();
   const csv = buildReportCsv(d, "متجر");
   const lines = csv.split("\r\n");
-  assert.equal(lines[8], ""); // section divider
-  assert.equal(lines[9], "الإيراد اليومي");
-  assert.equal(lines[10], "اليوم,عدد الطلبات,الإيراد (د.ل)");
-  assert.equal(lines[11], "2026-01-29,2,30.000");
-  assert.equal(lines[12], "2026-01-30,4,40.000");
+  // P45-W1 (المبادرة B): سطر زمن العمليات يركب بعد سطر الاستلام من
+  // الفرن مباشرة وقبل فاصل القسم التالي — محتواه الكامل مثبّت في
+  // اختبار الزمن المخصص أدناه؛ هنا الموضع فقط.
+  assert.ok(lines[8].startsWith("زمن العمليات,")); // ops-timing line (P45-W1)
+  assert.equal(lines[9], ""); // section divider
+  assert.equal(lines[10], "الإيراد اليومي");
+  assert.equal(lines[11], "اليوم,عدد الطلبات,الإيراد (د.ل)");
+  assert.equal(lines[12], "2026-01-29,2,30.000");
+  assert.equal(lines[13], "2026-01-30,4,40.000");
   assert.ok(lines.includes("أفضل المنتجات"));
   assert.ok(lines.includes("الترتيب,المنتج,الوحدات,عدد الطلبات,الإيراد (د.ل)"));
   assert.ok(lines.includes("1,بيتزا مارغريتا,3,2,30.000"));
@@ -211,6 +215,23 @@ test("P45-W1 body: an empty refund window keeps the honest section header (the f
   assert.ok(!csv.includes("SO-20260130-0042,زبون"));
 });
 
+test("P45-W1 body: the ops-timing line rides the CSV header from the same builder (screen and file never disagree)", () => {
+  const csv = buildReportCsv(fixture(), "متجر");
+  assert.ok(
+    csv.includes(
+      "زمن العمليات,متوسط التأكيد 4 دقائق (2 طلب) · متوسط الجاهزية ساعة و30 دقيقة (1 طلب)",
+    ),
+  );
+});
+
+test("P45-W1 body: null ops timings surface honestly as «—» with zero legs — never a fake zero average", () => {
+  const f = fixture();
+  f.opsTiming = { avgConfirmMinutes: null, confirmLegs: 0, avgReadyMinutes: null, readyLegs: 0 };
+  const csv = buildReportCsv(f, "متجر");
+  assert.ok(csv.includes("متوسط التأكيد — (0 طلب)"));
+  assert.ok(csv.includes("متوسط الجاهزية — (0 طلب)"));
+});
+
 /** Minimal two-day fixture matching the API response shape (the same
  *  contract /api/dashboard/reports answers with). */
 function fixture(): ReportsData {
@@ -244,5 +265,8 @@ function fixture(): ReportsData {
     /* P45-W1 (المبادرة D): الاسترجاعات المستحقة — فارغة في الأساس (لا
      * طلبات مدفوعة ثم ملغاة في هذا الثابت). */
     refundDue: [],
+    /* P45-W1 (المبادرة B): مقاييس زمن-في-حالة — تأكيد 4 دقائق عبر
+     * رجلين مكتملتين، وجاهزية 90 دقيقة عبر رجل واحدة. */
+    opsTiming: { avgConfirmMinutes: 4, confirmLegs: 2, avgReadyMinutes: 90, readyLegs: 1 },
   };
 }

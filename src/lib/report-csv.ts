@@ -15,10 +15,12 @@
 import { formatLydAmount } from "./money.ts";
 import { tripoliDateParts } from "./arabic.ts";
 import { PAYMENT_STATUS_AR } from "./constants.ts";
-import type {
-  CouponUsageRow,
-  PaymentMethodBreakdownRow,
-  RefundDueRow,
+import {
+  formatLegMinutesAr,
+  type CouponUsageRow,
+  type OpsTimingMetrics,
+  type PaymentMethodBreakdownRow,
+  type RefundDueRow,
 } from "./reports-reconciliation.ts";
 
 /** The reports API response shape — the one contract shared by
@@ -47,6 +49,10 @@ export interface ReportsData {
    * ملغاة/مرفوضة؛ بنّاء واحد (buildRefundDueRows) يغذي الشاشة والملف
    * معاً فلا يعود التزام الاسترجاع غير مرئي على أي سطح. */
   refundDue: RefundDueRow[];
+  /* P45-W1 (المبادرة B): مقاييس زمن-في-حالة — متوسط التأكيد
+   * ومتوسط الجاهزية من سجل التدقيق (قراءة فقط، الرجل المكتملة
+   * فقط). نفس السطر يركب رأس الملف — الشاشة والملف لا يفترقان. */
+  opsTiming: OpsTimingMetrics;
 }
 
 /** P43 SO-2c — one row of the CSV's reconciliation worksheet (the
@@ -107,6 +113,11 @@ export function buildReportCsv(
   );
   rows.push(
     `استلام من الفرع,${d.totals.pickup.orders} طلب · ${formatLydAmount(d.totals.pickup.revenue)} د.ل`,
+  );
+  /* P45-W1 (المبادرة B): سطر زمن العمليات في رأس الملف — نفس الأرقام
+   * التي تعرضها البطاقة (null = لا عينات مكتملة، يُعلن لا يُخفى). */
+  rows.push(
+    `زمن العمليات,متوسط التأكيد ${formatLegMinutesAr(d.opsTiming.avgConfirmMinutes)} (${d.opsTiming.confirmLegs} طلب) · متوسط الجاهزية ${formatLegMinutesAr(d.opsTiming.avgReadyMinutes)} (${d.opsTiming.readyLegs} طلب)`,
   );
   rows.push("");
   rows.push("الإيراد اليومي");

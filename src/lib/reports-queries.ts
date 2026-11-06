@@ -13,6 +13,7 @@ import {
   buildCouponUsageRows,
   buildPaymentMethodBreakdown,
   buildRefundDueRows,
+  buildTimeInStatusMetrics,
 } from "@/lib/reports-reconciliation";
 
 export type ReportsWindowDays = 30 | 90;
@@ -174,7 +175,7 @@ export async function getReportData(
      REPORT over 30/90 days that dropped every in-flight/preparing order
      would understate the trend the owner is asking about. One rule per
      surface, both documented. */
-  const [dayRows, fulfillment, topRows, paymentMethodRows, couponUsageRows, couponTypeRows, refundRows] = await Promise.all([
+  const [dayRows, fulfillment, topRows, paymentMethodRows, couponUsageRows, couponTypeRows, refundRows, legRows] = await Promise.all([
     /* Day-bucketing is the stats route's dialect-discriminated raw query
        verbatim (r134/r138): Prisma groupBy can't truncate a DateTime to
        a calendar day, so $queryRaw + the dialect's date function —
@@ -315,6 +316,18 @@ export async function getReportData(
         },
       },
     }),
+    /* ── P45-W1 (المبادرة B — تمديد): مقاييس زمن-في-حالة — سجل تدقيق
+       طلبات النافذة مقيداً بحالات الرجلين (NEW دخولاً، CONFIRMED
+       قدوماً، PREPARING دخولاً، READY قدوماً). الرجل المكتملة فقط
+       تُحتسب في البنّاء الأنقي — لا وقت مُختلق لساق لم تكتمل. */
+    db.orderStatusHistory.findMany({
+      where: {
+        order: { businessId, createdAt: { gte: from } },
+        toStatus: { in: ["NEW", "CONFIRMED", "PREPARING", "READY"] },
+      },
+      orderBy: { createdAt: "asc" },
+      select: { orderId: true, fromStatus: true, toStatus: true, createdAt: true },
+    }),
   ]);
 
   const dayMap = new Map(
@@ -368,6 +381,9 @@ export async function getReportData(
     /* P45-W1 (المبادرة D): الاسترجاعات المستحقة — بنّاء واحد للشاشة
      * والملف معاً (الشاشة والملف لا يفترقان). */
     refundDue: buildRefundDueRows(refundRows),
+    /* P45-W1 (المبادرة B): مقاييس زمن-في-حالة — متوسط التأكيد
+     * ومتوسط الجاهزية من سجل التدقيق، قراءة فقط. */
+    opsTiming: buildTimeInStatusMetrics(legRows),
   };
 }
 

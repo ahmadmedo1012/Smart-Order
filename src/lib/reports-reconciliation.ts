@@ -212,3 +212,84 @@ export function buildRefundDueRows(rows: RefundDueQueryRow[]): RefundDueRow[] {
       b.total - a.total,
   );
 }
+
+/* ── P45-W1 (المبادرة B — تمديد): مقاييس زمن-في-حالة ────────────────
+ *
+ * الطوابع كانت متوفرة في OrderStatusHistory منذ البداية ولا سطح يقرأها:
+ * متوسط زمن التأكيد (NEW→CONFIRMED) ومتوسط زمن التحضير
+ * (PREPARING→READY) هما نبض عمليات المتجر — «كم ينتظر الزبون قبل
+ * التأكيد؟» و«كم يستغرق التحضير؟». تجميع قراءة فقط من سجل التدقيق
+ * (المصدر الموثّق الوحيد للأحداث)، والرجل غير المكتملة لا تُحتسب
+ * أبداً — لا وقت مُختلق لساق لم تكتمل. */
+
+/** سطر من OrderStatusHistory كما يصل من الاستعلام (مقيد بطلبات
+ *  النافذة وإلى حالات الرجلين الأربع). */
+export interface StatusLegRow {
+  orderId: string;
+  fromStatus: string | null;
+  toStatus: string;
+  createdAt: Date;
+}
+
+/** مقياسا زمن-في-حالة عبر النافذة — null حين لا عينة مكتملة (صدق
+ *  «لا بيانات» بدل متوسط صفر كاذب). */
+export interface OpsTimingMetrics {
+  /** متوسط دقائق NEW→CONFIRMED عبر الرجلين المكتملتين. */
+  avgConfirmMinutes: number | null;
+  confirmLegs: number;
+  /** متوسط دقائق PREPARING→READY. */
+  avgReadyMinutes: number | null;
+  readyLegs: number;
+}
+
+/** بناء المقياسين من سجل التدقيق: لكل طلب، أول طابع دخول NEW وأول
+ *  انتقال NEW→CONFIRMED (رجل التأكيد)، وأول دخول PREPARING وأول
+ *  انتقال PREPARING→READY (رجل التحضير). الرجل السالبة (طوابع
+ *  معكوسة دفاعياً) تُهمل. أول حدث فقط لكل حالة — الطوابع اللاحقة
+ *  لنفس الحالة ليست جزءاً من الرجل. */
+export function buildTimeInStatusMetrics(rows: ReadonlyArray<StatusLegRow>): OpsTimingMetrics {
+  type Stamps = { newAt?: Date; confirmedAt?: Date; preparingAt?: Date; readyAt?: Date };
+  const byOrder = new Map<string, Stamps>();
+  for (const r of rows) {
+    const s = byOrder.get(r.orderId) ?? {};
+    if (r.toStatus === "NEW" && !s.newAt) s.newAt = r.createdAt;
+    else if (r.fromStatus === "NEW" && r.toStatus === "CONFIRMED" && !s.confirmedAt) s.confirmedAt = r.createdAt;
+    else if (r.toStatus === "PREPARING" && !s.preparingAt) s.preparingAt = r.createdAt;
+    else if (r.fromStatus === "PREPARING" && r.toStatus === "READY" && !s.readyAt) s.readyAt = r.createdAt;
+    byOrder.set(r.orderId, s);
+  }
+  let confirmMs = 0, confirmN = 0, readyMs = 0, readyN = 0;
+  for (const s of byOrder.values()) {
+    if (s.newAt && s.confirmedAt) {
+      const ms = s.confirmedAt.getTime() - s.newAt.getTime();
+      if (ms >= 0) { confirmMs += ms; confirmN++; }
+    }
+    if (s.preparingAt && s.readyAt) {
+      const ms = s.readyAt.getTime() - s.preparingAt.getTime();
+      if (ms >= 0) { readyMs += ms; readyN++; }
+    }
+  }
+  const MINUTE = 60_000;
+  return {
+    avgConfirmMinutes: confirmN > 0 ? Math.round(confirmMs / confirmN / MINUTE) : null,
+    confirmLegs: confirmN,
+    avgReadyMinutes: readyN > 0 ? Math.round(readyMs / readyN / MINUTE) : null,
+    readyLegs: readyN,
+  };
+}
+
+/** عرض مدة بالعربية من دقائق — «أقل من دقيقة» للكسور القصيرة، ودقيقة
+ *  واحدة وجدلها الصحيح، وساعات+دقائق فوق الساعة. أرقام غربية
+ *  (سياسة المتجر). */
+export function formatLegMinutesAr(minutes: number | null): string {
+  if (minutes === null) return "—";
+  if (minutes < 1) return "أقل من دقيقة";
+  if (minutes === 1) return "دقيقة واحدة";
+  if (minutes === 2) return "دقيقتين";
+  if (minutes < 11) return `${minutes} دقائق`;
+  if (minutes < 60) return `${minutes} دقيقة`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  const hAr = h === 1 ? "ساعة" : h === 2 ? "ساعتين" : h >= 3 && h <= 10 ? `${h} ساعات` : `${h} ساعة`;
+  return m > 0 ? `${hAr} و${formatLegMinutesAr(m)}` : hAr;
+}

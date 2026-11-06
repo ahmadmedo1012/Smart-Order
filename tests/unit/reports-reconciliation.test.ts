@@ -9,6 +9,8 @@ import {
   buildCouponUsageRows,
   buildPaymentMethodBreakdown,
   buildRefundDueRows,
+  buildTimeInStatusMetrics,
+  formatLegMinutesAr,
   type CouponUsageGroupRow,
   type PaymentMethodGroupRow,
   type RefundDueQueryRow,
@@ -233,4 +235,50 @@ test("refund-due: the LEDGER LAW stays untouched for the non-cancelled aggregate
   assert.equal(methods[0]!.gross - methods[0]!.discount, methods[0]!.net);
   assert.equal(refund.length, 1);
   // سطحان منفصلان لنفس الحقيقة المالية — لا تداخل ولا ازدواج عد
+});
+
+/* ── P45-W1 (المبادرة B): مقاييس زمن-في-حالة — البنّاء والعرض ────────── */
+
+test("ops timing: completed legs average in minutes, first-entry-per-state only, negative legs dropped", () => {
+  const t = (s: string) => new Date(`2026-01-30T${s}Z`);
+  const rows = [
+    // order A: NEW 10:00 → CONFIRMED 10:05 (5 min); PREPARING 10:10 → READY 11:10 (60 min)
+    { orderId: "a", fromStatus: null, toStatus: "NEW", createdAt: t("10:00:00") },
+    { orderId: "a", fromStatus: "NEW", toStatus: "CONFIRMED", createdAt: t("10:05:00") },
+    { orderId: "a", fromStatus: "CONFIRMED", toStatus: "PREPARING", createdAt: t("10:10:00") },
+    { orderId: "a", fromStatus: "PREPARING", toStatus: "READY", createdAt: t("11:10:00") },
+    // order B: NEW 12:00 → CONFIRMED 12:03 (3 min) — no preparing leg
+    { orderId: "b", fromStatus: null, toStatus: "NEW", createdAt: t("12:00:00") },
+    { orderId: "b", fromStatus: "NEW", toStatus: "CONFIRMED", createdAt: t("12:03:00") },
+    // order C: NEW only — an incomplete leg is never counted
+    { orderId: "c", fromStatus: null, toStatus: "NEW", createdAt: t("13:00:00") },
+    // order D: reversed stamps (defensive drop — never a negative duration)
+    { orderId: "d", fromStatus: null, toStatus: "NEW", createdAt: t("14:00:00") },
+    { orderId: "d", fromStatus: "NEW", toStatus: "CONFIRMED", createdAt: t("13:59:00") },
+  ];
+  const m = buildTimeInStatusMetrics(rows);
+  assert.equal(m.avgConfirmMinutes, 4); // (5 + 3) / 2 — D dropped
+  assert.equal(m.confirmLegs, 2);
+  assert.equal(m.avgReadyMinutes, 60);
+  assert.equal(m.readyLegs, 1);
+});
+
+test("ops timing: no completed legs → null averages and zero legs (honest «no samples», never a fake zero)", () => {
+  const m = buildTimeInStatusMetrics([]);
+  assert.equal(m.avgConfirmMinutes, null);
+  assert.equal(m.confirmLegs, 0);
+  assert.equal(m.avgReadyMinutes, null);
+  assert.equal(m.readyLegs, 0);
+});
+
+test("ops timing: formatLegMinutesAr Arabic durations (western digits, honest «—» for null)", () => {
+  assert.equal(formatLegMinutesAr(null), "—");
+  assert.equal(formatLegMinutesAr(0), "أقل من دقيقة");
+  assert.equal(formatLegMinutesAr(1), "دقيقة واحدة");
+  assert.equal(formatLegMinutesAr(2), "دقيقتين");
+  assert.equal(formatLegMinutesAr(5), "5 دقائق");
+  assert.equal(formatLegMinutesAr(45), "45 دقيقة");
+  assert.equal(formatLegMinutesAr(90), "ساعة و30 دقيقة");
+  assert.equal(formatLegMinutesAr(120), "ساعتين");
+  assert.equal(formatLegMinutesAr(150), "ساعتين و30 دقيقة");
 });
